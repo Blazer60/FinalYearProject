@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 set(PROJECT_NAME FinalYearProject)
+set(ENGINE PercyEngine)
 
 project(${PROJECT_NAME})
 set(CMAKE_CXX_STANDARD 17)
@@ -12,9 +13,8 @@ set(RESOURCE_PATH   "resources/")
 set(SHADER_PATH     "resources/shaders")
 set(TEXTURE_PATH    "resources/textures")
 
-set(USE_PRE_BUILT_LIBS ON)
+set(USE_PRE_BUILT_LIBS OFF)
 set(USE_PSEUDO_PCH OFF)
-set(ADD_ECS_TO_EXECUTABLE ON)
 
 message(STATUS "Using Cmake:    " ${CMAKE_VERSION})
 message(STATUS "Compiling with: " ${CMAKE_CXX_COMPILER_ID})
@@ -25,16 +25,24 @@ add_subdirectory(vendor/glew/build/cmake)
 add_subdirectory(vendor/glfw)
 add_subdirectory(vendor)
 
+add_library(${ENGINE} STATIC
+        engine/include/DebugLogger.h engine/src/DebugLogger.cpp
+        )
+
 
 add_executable(${PROJECT_NAME}
         src/main.cpp
-        src/DebugLogger.cpp include/DebugLogger.h
 
         include/Pch.h
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
-        include
+        include engine/include
+        vendor/glm/glm vendor/glew/include/GL vendor/glfw/include/GLFW vendor/imgui vendor/stb/include
+        )
+
+target_include_directories(${ENGINE} PUBLIC
+        include engine/include
         vendor/glm/glm vendor/glew/include/GL vendor/glfw/include/GLFW vendor/imgui vendor/stb/include
         )
 
@@ -44,6 +52,11 @@ if (${USE_PSEUDO_PCH})
 else()
     message(STATUS "Using CMake PCH")
     target_precompile_headers(${PROJECT_NAME} PUBLIC
+            <iostream> <vector> <unordered_map>
+            <string> <string_view> <algorithm>
+            <memory> <numeric> <cstdint>
+            <glm.hpp> [["DebugLogger.h"]])
+    target_precompile_headers(${ENGINE} PUBLIC
             <iostream> <vector> <unordered_map>
             <string> <string_view> <algorithm>
             <memory> <numeric> <cstdint>
@@ -75,5 +88,7 @@ else()
     find_library(IMGUI NAMES imgui      PATHS ${CMAKE_SOURCE_DIR}/vendor/lib REQUIRED)
 endif ()
 
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(${ENGINE}
         ${GLEW} ${GLFW} ${IMGUI} OpenGL::GL)
+
+target_link_libraries(${PROJECT_NAME} ${ENGINE})
