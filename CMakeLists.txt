@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
 set(PROJECT_NAME FinalYearProject)
-set(ENGINE PercyEngine)
 
 project(${PROJECT_NAME})
 set(CMAKE_CXX_STANDARD 17)
@@ -25,25 +24,25 @@ add_subdirectory(vendor/glew/build/cmake)
 add_subdirectory(vendor/glfw)
 add_subdirectory(vendor)
 
-add_library(${ENGINE} STATIC
-        engine/include/DebugLogger.h engine/src/DebugLogger.cpp
-        )
-
-
 add_executable(${PROJECT_NAME}
-        src/main.cpp
+        src/Main.cpp
+        src/graphics/Renderer.cpp include/graphics/Renderer.h
+        src/engine/DebugLogger.cpp include/engine/DebugLogger.h
+        src/engine/Core.cpp include/engine/Core.h
+        src/engine/WindowHelpers.cpp src/engine/WindowHelpers.h
+        src/engine/Timers.cpp include/engine/Timers.h
+        src/engine/Scene.cpp include/engine/Scene.h
 
         include/Pch.h
-        )
+        src/game/MyScene.cpp include/game/MyScene.h)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
-        include engine/include
-        vendor/glm/glm vendor/glew/include/GL vendor/glfw/include/GLFW vendor/imgui vendor/stb/include
-        )
+        include include/engine include/graphics include/game
 
-target_include_directories(${ENGINE} PUBLIC
-        include engine/include
-        vendor/glm/glm vendor/glew/include/GL vendor/glfw/include/GLFW vendor/imgui vendor/stb/include
+        # Vendor Files
+        vendor/glm/glm vendor/glew/include/GL
+        vendor/glfw/include/GLFW vendor/imgui
+        vendor/stb/include
         )
 
 if (${USE_PSEUDO_PCH})
@@ -52,11 +51,6 @@ if (${USE_PSEUDO_PCH})
 else()
     message(STATUS "Using CMake PCH")
     target_precompile_headers(${PROJECT_NAME} PUBLIC
-            <iostream> <vector> <unordered_map>
-            <string> <string_view> <algorithm>
-            <memory> <numeric> <cstdint>
-            <glm.hpp> [["DebugLogger.h"]])
-    target_precompile_headers(${ENGINE} PUBLIC
             <iostream> <vector> <unordered_map>
             <string> <string_view> <algorithm>
             <memory> <numeric> <cstdint>
@@ -88,7 +82,6 @@ else()
     find_library(IMGUI NAMES imgui      PATHS ${CMAKE_SOURCE_DIR}/vendor/lib REQUIRED)
 endif ()
 
-target_link_libraries(${ENGINE}
-        ${GLEW} ${GLFW} ${IMGUI} OpenGL::GL)
-
-target_link_libraries(${PROJECT_NAME} ${ENGINE})
+target_link_libraries(${PROJECT_NAME}
+        ${GLEW} ${GLFW} ${IMGUI} OpenGL::GL
+        )
