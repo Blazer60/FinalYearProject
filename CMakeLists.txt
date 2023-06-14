@@ -12,29 +12,30 @@ set(RESOURCE_PATH   "resources/")
 set(SHADER_PATH     "resources/shaders")
 set(TEXTURE_PATH    "resources/textures")
 
-set(USE_PRE_BUILT_LIBS OFF)
+set(USE_PRE_BUILT_LIBS ON)
 set(USE_PSEUDO_PCH OFF)
 
 message(STATUS "Using Cmake:    " ${CMAKE_VERSION})
 message(STATUS "Compiling with: " ${CMAKE_CXX_COMPILER_ID})
 message(STATUS "CXX Standard:   " ${CMAKE_CXX_STANDARD})
 
-add_subdirectory(vendor/glm)
-add_subdirectory(vendor/glew/build/cmake)
-add_subdirectory(vendor/glfw)
-add_subdirectory(vendor)
+#add_subdirectory(vendor/glm)
+#add_subdirectory(vendor/glew/build/cmake)
+#add_subdirectory(vendor/glfw)
+#add_subdirectory(vendor)
 
 add_executable(${PROJECT_NAME}
         src/Main.cpp
         src/graphics/Renderer.cpp include/graphics/Renderer.h
         src/engine/DebugLogger.cpp include/engine/DebugLogger.h
         src/engine/Core.cpp include/engine/Core.h
-        src/engine/WindowHelpers.cpp src/engine/WindowHelpers.h
+        src/graphics/WindowHelpers.cpp include/graphics/WindowHelpers.h
         src/engine/Timers.cpp include/engine/Timers.h
         src/engine/Scene.cpp include/engine/Scene.h
+        src/graphics/Shader.cpp include/graphics/Shader.h
 
         include/Pch.h
-        src/game/MyScene.cpp include/game/MyScene.h)
+        src/game/MyScene.cpp include/game/MyScene.h src/graphics/Primitives.cpp src/graphics/Primitives.h include/graphics/CameraMatrices.h)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
         include include/engine include/graphics include/game

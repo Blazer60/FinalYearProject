@@ -69,6 +69,9 @@ bool engine::Core::initGlfw(int openGlMajorVersion, int openGlMinorVersion)
         }
     });
     
+    const int frameRate = 60;
+    glfwSwapInterval(frameRate);
+    
     return true;
 }
 
@@ -131,7 +134,8 @@ void engine::Core::run()
         
         mScene->onUpdate();
         mScene->onRender();
-        updateImgui();
+        renderer::render();
+        // updateImgui();
         
         glfwSwapBuffers(mWindow);
         timers::update();
