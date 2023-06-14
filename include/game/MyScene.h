@@ -11,6 +11,7 @@
 
 #include "Scene.h"
 #include "Shader.h"
+#include "MainCamera.h"
 
 /**
  * @author Ryan Purse
@@ -29,6 +30,7 @@ public:
     void onImguiMenuUpdate() override;
     
 protected:
+    MainCamera mMainCamera;
     uint32_t mVbo { 0 };
     uint32_t mEbo { 0 };
     int32_t mEboCount { 0 };

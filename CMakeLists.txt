@@ -25,6 +25,8 @@ message(STATUS "CXX Standard:   " ${CMAKE_CXX_STANDARD})
 #add_subdirectory(vendor)
 
 add_executable(${PROJECT_NAME}
+        include/Pch.h
+
         src/Main.cpp
         src/graphics/Renderer.cpp include/graphics/Renderer.h
         src/engine/DebugLogger.cpp include/engine/DebugLogger.h
@@ -34,8 +36,9 @@ add_executable(${PROJECT_NAME}
         src/engine/Scene.cpp include/engine/Scene.h
         src/graphics/Shader.cpp include/graphics/Shader.h
 
-        include/Pch.h
-        src/game/MyScene.cpp include/game/MyScene.h src/graphics/Primitives.cpp src/graphics/Primitives.h include/graphics/CameraMatrices.h)
+        src/game/MyScene.cpp include/game/MyScene.h src/graphics/Primitives.cpp src/graphics/Primitives.h include/graphics/CameraMatrices.h
+        src/engine/MainCamera.cpp include/engine/MainCamera.h
+        )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
         include include/engine include/graphics include/game

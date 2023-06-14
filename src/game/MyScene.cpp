@@ -10,6 +10,7 @@
 #include "Shader.h"
 
 MyScene::MyScene()
+    : mMainCamera(glm::vec3(0.f, 0.f, 2.f))
 {
     std::vector<float> triangleData {
          0.f,   0.5f, 0.f,
@@ -45,12 +46,15 @@ void MyScene::onFixedUpdate()
 
 void MyScene::onUpdate()
 {
+    mMainCamera.update();
 }
 
 void MyScene::onRender()
 {
+    renderer::submit(CameraMatrices(mMainCamera.getProjectionMatrix(), mMainCamera.getViewMatrix()));
     renderer::submit(mVao, mEboCount, mShader, renderer::Triangles, [](Shader &shader, const CameraMatrices &cameraMatrices){
         shader.set("u_colour", glm::vec3(0.f, 1.f, 0.f));
+        shader.set("u_mvp_matrix", cameraMatrices.getVpMatrix());
     });
 }
 
