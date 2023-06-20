@@ -15,17 +15,16 @@
  * @author Ryan Purse
  * @date 14/06/2023
  */
-class CameraMatrices
+class CameraSettings
 {
 public:
-    CameraMatrices(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix)
+    CameraSettings(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix)
         : projectionMatrix(projectionMatrix), viewMatrix(viewMatrix) {}
         
     glm::mat4 projectionMatrix { glm::mat4(1.f) };
     glm::mat4 viewMatrix { glm::mat4(1.f) };
-    
-    void setVpMatrix(const glm::mat4 &matrix) { vpMatrix = matrix; }
-    [[nodiscard]] glm::mat4 getVpMatrix() const { return vpMatrix; }
+    glm::vec4 clearColour { glm::vec4(0.f, 0.f, 0.f, 1.f) };
+    GLbitfield clearMask { GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT };
     
 protected:
     glm::mat4 vpMatrix { glm::mat4(1.f) };

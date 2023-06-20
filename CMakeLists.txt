@@ -36,7 +36,7 @@ add_executable(${PROJECT_NAME}
         src/engine/Scene.cpp include/engine/Scene.h
         src/graphics/Shader.cpp include/graphics/Shader.h
 
-        src/game/MyScene.cpp include/game/MyScene.h src/graphics/Primitives.cpp src/graphics/Primitives.h include/graphics/CameraMatrices.h
+        src/game/MyScene.cpp include/game/MyScene.h src/graphics/Primitives.cpp src/graphics/Primitives.h include/graphics/CameraSettings.h
         src/engine/MainCamera.cpp include/engine/MainCamera.h
         src/graphics/SubMesh.cpp include/graphics/SubMesh.h src/graphics/Vertices.cpp include/graphics/Vertices.h src/graphics/Materials.cpp include/graphics/Materials.h include/graphics/RendererHelpers.h)
 

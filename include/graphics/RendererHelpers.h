@@ -10,11 +10,11 @@
 #include "Pch.h"
 #include <functional>
 #include "Shader.h"
-#include "CameraMatrices.h"
+#include "CameraSettings.h"
 
 namespace renderer
 {
-    using DrawCallback = std::function<void(Shader&, const CameraMatrices&)>;
+    using DrawCallback = std::function<void(Shader&)>;
     
     enum DrawMode
     {
@@ -27,6 +27,7 @@ namespace renderer
         int32_t indicesCount;
         std::weak_ptr<Shader> shader;
         GLenum drawMode;
+        glm::mat4 matrix;
         DrawCallback onDraw;
     };
 }

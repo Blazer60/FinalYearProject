@@ -9,7 +9,7 @@
 
 #include "Pch.h"
 #include "Shader.h"
-#include "CameraMatrices.h"
+#include "CameraSettings.h"
 #include "SubMesh.h"
 #include "Materials.h"
 #include "RendererHelpers.h"
@@ -20,18 +20,13 @@ namespace renderer
     bool init();
     
     void submit(
-        uint32_t vao, int32_t indicesCount,
-        std::weak_ptr<Shader> shader, DrawMode renderMode,
+        uint32_t vao, int32_t indicesCount, std::weak_ptr<Shader> shader, DrawMode renderMode, const glm::mat4 &matrix,
         const DrawCallback &onDraw);
     
-    void submit(
-        const SubMesh &subMesh, std::weak_ptr<Shader> shader,
-        DrawMode renderMode, const DrawCallback &onDraw);
-    
-    void submit(const CameraMatrices &cameraMatrices);
+    void submit(const CameraSettings &cameraMatrices);
     
     template<typename TMaterial>
-    void submit(const SubMesh &subMesh, TMaterial &material, std::weak_ptr<Shader> shader);
+    void submit(const SubMesh &subMesh, TMaterial &material, const glm::mat4 &matrix, std::weak_ptr<Shader> shader);
     
     void render();
     
@@ -45,11 +40,13 @@ namespace renderer
     [[nodiscard]] std::string getVersion();
     
     template<typename TMaterial>
-    void submit(const SubMesh &subMesh, TMaterial &material, std::weak_ptr<Shader> shader)
+    void submit(const SubMesh &subMesh, TMaterial &material, const glm::mat4 &matrix, std::weak_ptr<Shader> shader)
     {
-        submit(subMesh.vao(), subMesh.indicesCount(), shader, material.drawMode(),
-               [&](Shader & shader, const CameraMatrices & cameraMatrices) {
-            material.OnDraw(shader, cameraMatrices);
-        });
+        submit(
+            subMesh.vao(), subMesh.indicesCount(), shader, material.drawMode(), matrix,
+            [&](Shader &shader) {
+                material.OnDraw(shader);
+            }
+        );
     }
 }

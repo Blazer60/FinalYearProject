@@ -19,7 +19,7 @@ public:
     
     [[nodiscard]] renderer::DrawMode drawMode() const { return mDrawMode; }
     
-    virtual void OnDraw(Shader &shader, const CameraMatrices & cameraMatrices) {};
+    virtual void OnDraw(Shader &shader) {};
 protected:
     renderer::DrawMode mDrawMode;
 };
@@ -30,9 +30,8 @@ class SimpleMaterial
 public:
     SimpleMaterial() : Material(renderer::Triangles) { };
     
-    void OnDraw(Shader &shader, const CameraMatrices &cameraMatrices) override
+    void OnDraw(Shader &shader) override
     {
         shader.set("u_colour", glm::vec3(0.f, 0.f, 1.f));
-        shader.set("u_mvp_matrix", cameraMatrices.getVpMatrix());
     }
 };

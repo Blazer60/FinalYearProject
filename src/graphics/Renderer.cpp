@@ -12,7 +12,7 @@
 namespace renderer
 {
     std::vector<RenderQueueObject> renderQueue;
-    std::vector<CameraMatrices> cameraQueue;
+    std::vector<CameraSettings> cameraQueue;
     GLenum drawModeToGLenum[] { GL_TRIANGLES, GL_LINES };
     
     bool init()
@@ -47,26 +47,26 @@ namespace renderer
     }
     
     void submit(
-        uint32_t vao, int32_t indicesCount, std::weak_ptr<Shader> shader, renderer::DrawMode renderMode,
-        const renderer::DrawCallback &onDraw)
+        uint32_t vao, int32_t indicesCount, std::weak_ptr<Shader> shader, DrawMode renderMode, const glm::mat4 &matrix,
+        const DrawCallback &onDraw)
     {
         GLenum mode = drawModeToGLenum[(int)renderMode];
-        renderQueue.emplace_back(RenderQueueObject { vao, indicesCount, std::move(shader), mode, onDraw });
+        renderQueue.emplace_back(RenderQueueObject { vao, indicesCount, std::move(shader), mode, matrix, onDraw });
     }
     
-    void submit(const CameraMatrices &cameraMatrices)
+    void submit(const CameraSettings &cameraMatrices)
     {
         cameraQueue.emplace_back(cameraMatrices);
     }
     
     void render()
     {
-        for (CameraMatrices &camera : cameraQueue)
+        for (CameraSettings &camera : cameraQueue)
         {
-            glClearColor(1.f, 1.f, 1.f, 1.f);  // todo: should these be part of the camera settings?
-            glClear(GL_COLOR_BUFFER_BIT);
+            glClearColor(camera.clearColour.r, camera.clearColour.g, camera.clearColour.b, camera.clearColour.a);
+            glClear(camera.clearMask);
             
-            camera.setVpMatrix(camera.projectionMatrix * camera.viewMatrix);
+            glm::mat4 vpMatrix = camera.projectionMatrix * camera.viewMatrix;
             
             for (const auto &rqo : renderQueue)
             {
@@ -75,7 +75,8 @@ namespace renderer
                 
                 const auto shader = rqo.shader.lock();
                 shader->bind();
-                rqo.onDraw(*shader, camera);
+                shader->set("u_mvp_matrix", vpMatrix * rqo.matrix);
+                rqo.onDraw(*shader);
                 glBindVertexArray(rqo.vao);
                 glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
             }
@@ -85,14 +86,5 @@ namespace renderer
         renderQueue.clear();
         renderQueue.reserve(count);
     }
-    
-    void submit(
-        const SubMesh &subMesh, std::weak_ptr<Shader> shader,
-        DrawMode renderMode, const DrawCallback &onDraw)
-    {
-        submit(subMesh.vao(), subMesh.indicesCount(), std::move(shader), renderMode, onDraw);
-    }
-    
-    
 }
 

@@ -37,8 +37,8 @@ void MyScene::onUpdate()
 
 void MyScene::onRender()
 {
-    renderer::submit(CameraMatrices(mMainCamera.getProjectionMatrix(), mMainCamera.getViewMatrix()));
-    renderer::submit(*mSubMesh, mSimpleMaterial, mShader);
+    renderer::submit(CameraSettings(mMainCamera.getProjectionMatrix(), mMainCamera.getViewMatrix()));
+    renderer::submit(*mSubMesh, mSimpleMaterial, glm::mat4(1.f), mShader);
 }
 
 void MyScene::onImguiUpdate()
