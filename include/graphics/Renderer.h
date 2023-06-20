@@ -10,31 +10,28 @@
 #include "Pch.h"
 #include "Shader.h"
 #include "CameraMatrices.h"
+#include "SubMesh.h"
+#include "Materials.h"
+#include "RendererHelpers.h"
 #include <functional>
 
 namespace renderer
 {
-    using DrawCallback = std::function<void(Shader&, const CameraMatrices&)>;
-    
-    enum DrawMode
-    {
-        Triangles, Lines
-    };
-    
-    struct RenderQueueObject
-    {
-        uint32_t vao;
-        int32_t indicesCount;
-        std::weak_ptr<Shader> shader;
-        GLenum drawMode;
-        DrawCallback onDraw;
-    };
-    
     bool init();
     
-    void submit(uint32_t vao, int32_t indicesCount, std::weak_ptr<Shader> shader, DrawMode renderMode, const DrawCallback &onDraw);
+    void submit(
+        uint32_t vao, int32_t indicesCount,
+        std::weak_ptr<Shader> shader, DrawMode renderMode,
+        const DrawCallback &onDraw);
+    
+    void submit(
+        const SubMesh &subMesh, std::weak_ptr<Shader> shader,
+        DrawMode renderMode, const DrawCallback &onDraw);
     
     void submit(const CameraMatrices &cameraMatrices);
+    
+    template<typename TMaterial>
+    void submit(const SubMesh &subMesh, TMaterial &material, std::weak_ptr<Shader> shader);
     
     void render();
     
@@ -46,4 +43,13 @@ namespace renderer
     bool debugMessageCallback(GLDEBUGPROC callback);
     
     [[nodiscard]] std::string getVersion();
+    
+    template<typename TMaterial>
+    void submit(const SubMesh &subMesh, TMaterial &material, std::weak_ptr<Shader> shader)
+    {
+        submit(subMesh.vao(), subMesh.indicesCount(), shader, material.drawMode(),
+               [&](Shader & shader, const CameraMatrices & cameraMatrices) {
+            material.OnDraw(shader, cameraMatrices);
+        });
+    }
 }

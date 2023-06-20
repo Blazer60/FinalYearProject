@@ -12,6 +12,8 @@
 #include "Scene.h"
 #include "Shader.h"
 #include "MainCamera.h"
+#include "SubMesh.h"
+#include "Materials.h"
 
 /**
  * @author Ryan Purse
@@ -31,9 +33,7 @@ public:
     
 protected:
     MainCamera mMainCamera;
-    uint32_t mVbo { 0 };
-    uint32_t mEbo { 0 };
-    int32_t mEboCount { 0 };
-    uint32_t mVao { 0 };
-    std::shared_ptr<Shader> mShader ;
+    std::shared_ptr<SubMesh> mSubMesh;
+    std::shared_ptr<Shader> mShader;
+    SimpleMaterial mSimpleMaterial;
 };

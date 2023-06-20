@@ -38,7 +38,7 @@ add_executable(${PROJECT_NAME}
 
         src/game/MyScene.cpp include/game/MyScene.h src/graphics/Primitives.cpp src/graphics/Primitives.h include/graphics/CameraMatrices.h
         src/engine/MainCamera.cpp include/engine/MainCamera.h
-        )
+        src/graphics/SubMesh.cpp include/graphics/SubMesh.h src/graphics/Vertices.cpp include/graphics/Vertices.h src/graphics/Materials.cpp include/graphics/Materials.h include/graphics/RendererHelpers.h)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
         include include/engine include/graphics include/game

@@ -86,5 +86,13 @@ namespace renderer
         renderQueue.reserve(count);
     }
     
+    void submit(
+        const SubMesh &subMesh, std::weak_ptr<Shader> shader,
+        DrawMode renderMode, const DrawCallback &onDraw)
+    {
+        submit(subMesh.vao(), subMesh.indicesCount(), std::move(shader), renderMode, onDraw);
+    }
+    
+    
 }
 
