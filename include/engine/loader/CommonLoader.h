@@ -10,8 +10,8 @@
 #include "Pch.h"
 #include "Vertices.h"
 #include "DebugLogger.h"
-#include "MtlMaterialInformation.h"
 #include "Mesh.h"
+#include "Materials.h"
 
 #include <glm.hpp>
 #include <functional>
@@ -20,11 +20,10 @@
 
 namespace load
 {
-    template<typename TVertex, typename TMaterial>
     struct Model
     {
-        Mesh mesh;
-        std::vector<TMaterial> materials;
+        SharedMesh mesh;
+        std::vector<std::shared_ptr<Material>> materials;
     };
     
     /**

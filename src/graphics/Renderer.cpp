@@ -76,7 +76,7 @@ namespace renderer
                 const auto shader = rqo.shader.lock();
                 shader->bind();
                 shader->set("u_mvp_matrix", vpMatrix * rqo.matrix);
-                rqo.onDraw(*shader);
+                rqo.onDraw();
                 glBindVertexArray(rqo.vao);
                 glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
             }
@@ -85,6 +85,31 @@ namespace renderer
         uint64_t count = renderQueue.size();
         renderQueue.clear();
         renderQueue.reserve(count);
+    }
+    
+    void renderer::submit(const SubMesh &subMesh, Material &material, const glm::mat4 &matrix)
+    {
+        submit(subMesh.vao(), subMesh.indicesCount(), material.shader(), material.drawMode(), matrix, [&]() { material.onDraw(); });
+    }
+    
+    void renderer::submit(const SharedMesh &mesh, const SharedMaterials &materials, const glm::mat4 &matrix)
+    {
+        if (materials.size() == 1)
+        {
+            Material& material = *materials[0];
+            
+            for (const auto &subMesh : mesh)
+                submit(*subMesh, material, matrix);
+        }
+        else
+        {
+            for (int i = 0; i < mesh.size(); ++i)
+            {
+                SubMesh& subMesh = *mesh[i];
+                Material& material = *materials[i];
+                submit(subMesh, material, matrix);
+            }
+        }
     }
     
 }

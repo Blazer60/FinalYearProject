@@ -6,7 +6,6 @@
 
 
 #include "MaterialLoader.h"
-#include "MtlMaterialInformation.h"
 
 namespace load
 {

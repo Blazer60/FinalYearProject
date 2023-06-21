@@ -23,13 +23,10 @@ namespace renderer
         uint32_t vao, int32_t indicesCount, std::weak_ptr<Shader> shader, DrawMode renderMode, const glm::mat4 &matrix,
         const DrawCallback &onDraw);
     
+    void submit(const SubMesh &subMesh, Material &material, const glm::mat4 &matrix);
+    void submit(const SharedMesh &mesh, const SharedMaterials &materials, const glm::mat4 &matrix);
+    
     void submit(const CameraSettings &cameraMatrices);
-    
-    template<typename TMaterial>
-    void submit(const SubMesh &subMesh, TMaterial &material, const glm::mat4 &matrix, std::weak_ptr<Shader> shader);
-    
-    template<typename TMaterial>
-    void submit(const Mesh &mesh, TMaterial &material, const glm::mat4 &matrix, std::weak_ptr<Shader> shader);
     
     void render();
     
@@ -41,22 +38,4 @@ namespace renderer
     bool debugMessageCallback(GLDEBUGPROC callback);
     
     [[nodiscard]] std::string getVersion();
-    
-    template<typename TMaterial>
-    void submit(const SubMesh &subMesh, TMaterial &material, const glm::mat4 &matrix, std::weak_ptr<Shader> shader)
-    {
-        submit(
-            subMesh.vao(), subMesh.indicesCount(), shader, material.drawMode(), matrix,
-            [&](Shader &shader) {
-                material.OnDraw(shader);
-            }
-        );
-    }
-    
-    template<typename TMaterial>
-    void renderer::submit(const Mesh &mesh, TMaterial &material, const glm::mat4 &matrix, std::weak_ptr<Shader> shader)
-    {
-        for (const std::shared_ptr<SubMesh> &subMesh : mesh)
-            submit(*subMesh, material, matrix, shader);
-    }
 }

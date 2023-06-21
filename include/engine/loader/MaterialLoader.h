@@ -9,7 +9,6 @@
 
 #include "Pch.h"
 #include "CommonLoader.h"
-#include "MtlMaterialInformation.h"
 
 namespace load
 {
@@ -37,7 +36,9 @@ namespace load
         Materials<TMaterial> out;
     
         parseMaterial(path, [&](const std::string &materialName, const MtlMaterialInformation &mtlMaterial) {
-            out.emplace(materialName, TMaterial(mtlMaterial));
+            TMaterial material;
+            material.onLoadMtlFile(mtlMaterial);
+            out.emplace(materialName, std::move(material));
         });
         
         return std::move(out);

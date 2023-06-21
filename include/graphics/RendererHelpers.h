@@ -14,7 +14,7 @@
 
 namespace renderer
 {
-    using DrawCallback = std::function<void(Shader&)>;
+    using DrawCallback = std::function<void()>;
     
     enum DrawMode
     {

@@ -30,20 +30,24 @@ namespace load
      * @tparam TVertex - The type of vertex that you want to use.
      * @tparam TMaterial - The type of material that you want to use.
      * @param path - The path to the model.
+     * @param shader - The shader that you want to attach to each material.
      * @returns Information that can be used to render the model.
      */
-    template<typename TVertex, typename TMaterial=NoMaterial>
-    Model<TVertex, TMaterial> model(std::string_view path)
+    template<typename TVertex, typename TMaterial=Material>
+    Model model(std::string_view path, const std::shared_ptr<Shader> &shader=nullptr)
     {
         const auto [meshes, materials] = parseObject<TVertex, TMaterial>(path);
         
-        Model<TVertex, TMaterial> model;
+        Model model;
         
         for (const auto &[name, rawMesh] : meshes)
         {
             TMaterial material = materials.count(name) > 0 ? materials.at(name) : TMaterial();
+            std::shared_ptr<Material> sharedMaterial = std::make_shared<TMaterial>(material);
+            sharedMaterial->attachShader(shader);
+            
             model.mesh.emplace_back(rawMesh.toSharedSubMesh());
-            model.materials.emplace_back(std::move(material));
+            model.materials.emplace_back(std::move(sharedMaterial));
         }
         
         return std::move(model);
@@ -65,7 +69,7 @@ namespace load
         };
     
         const auto loadMaterial = [&](std::string_view arg) {
-            if (typeid(TMaterial) == typeid(NoMaterial))
+            if (typeid(TMaterial) == typeid(Material))
                 return;  // We don't want to load a material if no material is set.
             materials = load::material<TMaterial>(convertRelativePath(path, arg));
         };

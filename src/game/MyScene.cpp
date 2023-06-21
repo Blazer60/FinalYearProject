@@ -14,8 +14,14 @@
 MyScene::MyScene()
     : mMainCamera(glm::vec3(0.f, 0.f, 2.f))
 {
-    mMesh = load::model<PositionVertex>("../resources/models/utahTeapot/UtahTeapot.obj").mesh;
-    mShader = std::make_shared<Shader>("../resources/shaders/Triangle.vert", "../resources/shaders/Triangle.frag");
+    const auto [mesh, simpleMaterials] = load::model<PositionVertex, SimpleMaterial>(
+        "../resources/models/utahTeapot/UtahTeapot.obj",
+        std::make_shared<Shader>(
+            "../resources/shaders/Triangle.vert",
+            "../resources/shaders/Triangle.frag"));
+    
+    mMesh = mesh;
+    mMaterials = simpleMaterials;
 }
 
 void MyScene::onFixedUpdate()
@@ -30,7 +36,7 @@ void MyScene::onUpdate()
 void MyScene::onRender()
 {
     renderer::submit(CameraSettings(mMainCamera.getProjectionMatrix(), mMainCamera.getViewMatrix()));
-    renderer::submit(mMesh, mSimpleMaterial, glm::mat4(1.f), mShader);
+    renderer::submit(mMesh, mMaterials, glm::mat4(1.f));
 }
 
 void MyScene::onImguiUpdate()

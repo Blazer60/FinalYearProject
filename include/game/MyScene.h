@@ -33,7 +33,6 @@ public:
     
 protected:
     MainCamera mMainCamera;
-    Mesh mMesh;
-    std::shared_ptr<Shader> mShader;
-    SimpleMaterial mSimpleMaterial;
+    SharedMesh mMesh;
+    SharedMaterials mMaterials;
 };
