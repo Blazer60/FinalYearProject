@@ -11,7 +11,7 @@
 #include "Vertices.h"
 #include "DebugLogger.h"
 #include "MtlMaterialInformation.h"
-#include "SubMesh.h"
+#include "Mesh.h"
 
 #include <glm.hpp>
 #include <functional>
@@ -20,9 +20,6 @@
 
 namespace load
 {
-    typedef std::vector<std::shared_ptr<SubMesh>> Mesh;
-    
-    
     template<typename TVertex, typename TMaterial>
     struct Model
     {

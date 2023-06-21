@@ -10,7 +10,7 @@
 #include "Pch.h"
 #include "Shader.h"
 #include "CameraSettings.h"
-#include "SubMesh.h"
+#include "Mesh.h"
 #include "Materials.h"
 #include "RendererHelpers.h"
 #include <functional>
@@ -27,6 +27,9 @@ namespace renderer
     
     template<typename TMaterial>
     void submit(const SubMesh &subMesh, TMaterial &material, const glm::mat4 &matrix, std::weak_ptr<Shader> shader);
+    
+    template<typename TMaterial>
+    void submit(const Mesh &mesh, TMaterial &material, const glm::mat4 &matrix, std::weak_ptr<Shader> shader);
     
     void render();
     
@@ -48,5 +51,12 @@ namespace renderer
                 material.OnDraw(shader);
             }
         );
+    }
+    
+    template<typename TMaterial>
+    void renderer::submit(const Mesh &mesh, TMaterial &material, const glm::mat4 &matrix, std::weak_ptr<Shader> shader)
+    {
+        for (const std::shared_ptr<SubMesh> &subMesh : mesh)
+            submit(*subMesh, material, matrix, shader);
     }
 }

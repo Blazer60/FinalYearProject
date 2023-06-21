@@ -5,7 +5,7 @@
  */
 
 
-#include "SubMesh.h"
+#include "Mesh.h"
 #include "Vertices.h"
 
 SubMesh::~SubMesh()

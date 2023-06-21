@@ -65,7 +65,7 @@ namespace load
         };
     
         const auto loadMaterial = [&](std::string_view arg) {
-            if (typeid(TMaterial) == typeid(NoMaterial))  // todo: can this be made constexpr?
+            if (typeid(TMaterial) == typeid(NoMaterial))
                 return;  // We don't want to load a material if no material is set.
             materials = load::material<TMaterial>(convertRelativePath(path, arg));
         };

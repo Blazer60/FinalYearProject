@@ -12,7 +12,7 @@
 #include "Scene.h"
 #include "Shader.h"
 #include "MainCamera.h"
-#include "SubMesh.h"
+#include "Mesh.h"
 #include "Materials.h"
 
 /**
@@ -33,7 +33,7 @@ public:
     
 protected:
     MainCamera mMainCamera;
-    std::shared_ptr<SubMesh> mSubMesh;
+    Mesh mMesh;
     std::shared_ptr<Shader> mShader;
     SimpleMaterial mSimpleMaterial;
 };

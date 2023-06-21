@@ -10,6 +10,10 @@
 #include "Pch.h"
 #include "Vertices.h"
 
+class SubMesh;
+
+typedef std::vector<std::shared_ptr<SubMesh>> Mesh;
+
 void setVaoLayout(unsigned int vao, const Instructions &instructions);
 
 /**

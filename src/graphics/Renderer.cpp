@@ -86,5 +86,6 @@ namespace renderer
         renderQueue.clear();
         renderQueue.reserve(count);
     }
+    
 }
 

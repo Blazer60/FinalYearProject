@@ -14,15 +14,7 @@
 MyScene::MyScene()
     : mMainCamera(glm::vec3(0.f, 0.f, 2.f))
 {
-    std::vector<PositionVertex> triangleData {
-        PositionVertex{ glm::vec3( 0.f,   0.5f, 0.f) },
-        PositionVertex{ glm::vec3(-0.5f, -0.5f, 0.f) },
-        PositionVertex{ glm::vec3( 0.5f, -0.5f, 0.f) },
-    };
-    
-    std::vector<uint32_t> triangleIndices { 0, 1, 2 };
-    
-    mSubMesh = load::model<PositionVertex>("../resources/models/utahTeapot/UtahTeapot.obj").mesh[0];
+    mMesh = load::model<PositionVertex>("../resources/models/utahTeapot/UtahTeapot.obj").mesh;
     mShader = std::make_shared<Shader>("../resources/shaders/Triangle.vert", "../resources/shaders/Triangle.frag");
 }
 
@@ -38,7 +30,7 @@ void MyScene::onUpdate()
 void MyScene::onRender()
 {
     renderer::submit(CameraSettings(mMainCamera.getProjectionMatrix(), mMainCamera.getViewMatrix()));
-    renderer::submit(*mSubMesh, mSimpleMaterial, glm::mat4(1.f), mShader);
+    renderer::submit(mMesh, mSimpleMaterial, glm::mat4(1.f), mShader);
 }
 
 void MyScene::onImguiUpdate()

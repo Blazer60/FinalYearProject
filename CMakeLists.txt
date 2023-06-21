@@ -49,7 +49,7 @@ add_executable(${PROJECT_NAME}
         src/graphics/Primitives.cpp src/graphics/Primitives.h
         src/graphics/Renderer.cpp include/graphics/Renderer.h
         src/graphics/Shader.cpp include/graphics/Shader.h
-        src/graphics/SubMesh.cpp include/graphics/SubMesh.h
+        src/graphics/Mesh.cpp include/graphics/Mesh.h
         src/graphics/Vertices.cpp include/graphics/Vertices.h
         src/graphics/WindowHelpers.cpp include/graphics/WindowHelpers.h
         include/engine/loader/MtlMaterialInformation.h)
