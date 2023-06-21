@@ -17,6 +17,6 @@
 #include <memory>
 #include <numeric>
 #include <cstdint>
-// #include <glm.hpp>
+#include <glm.hpp>
 #include "DebugLogger.h"
 #endif  // PCH

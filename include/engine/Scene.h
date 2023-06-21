@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Pch.h"
+#include "TextureBufferObject.h"
 
 namespace engine
 {
@@ -26,6 +27,9 @@ namespace engine
         virtual void onRender();
         virtual void onImguiUpdate();
         virtual void onImguiMenuUpdate();
+        
+    protected:
+        static void showTextureBuffer(const std::string &name, const TextureBufferObject &textureBufferObject, bool *show);
     };
     
 } // engine

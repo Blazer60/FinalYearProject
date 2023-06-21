@@ -13,22 +13,25 @@
 #include "Mesh.h"
 #include "Materials.h"
 #include "RendererHelpers.h"
+#include "TextureBufferObject.h"
 #include <functional>
 
 namespace renderer
 {
     bool init();
     
-    void submit(
+    void drawMesh(
         uint32_t vao, int32_t indicesCount, std::weak_ptr<Shader> shader, DrawMode renderMode, const glm::mat4 &matrix,
         const DrawCallback &onDraw);
     
-    void submit(const SubMesh &subMesh, Material &material, const glm::mat4 &matrix);
-    void submit(const SharedMesh &mesh, const SharedMaterials &materials, const glm::mat4 &matrix);
+    void drawMesh(const SubMesh &subMesh, Material &material, const glm::mat4 &matrix);
+    void drawMesh(const SharedMesh &mesh, const SharedMaterials &materials, const glm::mat4 &matrix);
     
     void submit(const CameraSettings &cameraMatrices);
     
     void render();
+    
+    [[nodiscard]] const TextureBufferObject &getOutputBuffer();
     
     /**
      * @returns false if debug message was failed to be setup. This is most likely due to the openGl version being

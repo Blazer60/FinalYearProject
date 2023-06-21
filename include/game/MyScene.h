@@ -35,4 +35,6 @@ protected:
     MainCamera mMainCamera;
     SharedMesh mMesh;
     SharedMaterials mMaterials;
+    
+    bool mShowOutput { true };
 };

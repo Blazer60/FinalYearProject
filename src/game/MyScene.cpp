@@ -12,10 +12,10 @@
 #include "ModelLoader.h"
 
 MyScene::MyScene()
-    : mMainCamera(glm::vec3(0.f, 0.f, 2.f))
+    : mMainCamera(glm::vec3(0.f, 8.f, 30.f))
 {
     const auto [mesh, simpleMaterials] = load::model<PositionVertex, SimpleMaterial>(
-        "../resources/models/utahTeapot/UtahTeapot.obj",
+        "../resources/models/pillars/Pillars.obj",
         std::make_shared<Shader>(
             "../resources/shaders/Triangle.vert",
             "../resources/shaders/Triangle.frag"));
@@ -36,11 +36,12 @@ void MyScene::onUpdate()
 void MyScene::onRender()
 {
     renderer::submit(CameraSettings(mMainCamera.getProjectionMatrix(), mMainCamera.getViewMatrix()));
-    renderer::submit(mMesh, mMaterials, glm::mat4(1.f));
+    renderer::drawMesh(mMesh, mMaterials, glm::mat4(1.f));
 }
 
 void MyScene::onImguiUpdate()
 {
+    showTextureBuffer("Output", renderer::getOutputBuffer(), &mShowOutput);
 }
 
 void MyScene::onImguiMenuUpdate()

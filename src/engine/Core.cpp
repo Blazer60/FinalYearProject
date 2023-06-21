@@ -16,6 +16,8 @@
 engine::Core::Core(const glm::ivec2 &resolution, bool enableDebugging)
     : mResolution(resolution), mEnableDebugging(enableDebugging)
 {
+    window::setBufferSize(mResolution);
+    
     if (!(initGlfw(4, 6) && renderer::init() && initImGui()))
     {
         mIsRunning = false;
@@ -32,8 +34,6 @@ engine::Core::Core(const glm::ivec2 &resolution, bool enableDebugging)
                        debug::severity::Warning);
         }
     }
-    
-    window::setBufferSize(mResolution);
 }
 
 bool engine::Core::initGlfw(int openGlMajorVersion, int openGlMinorVersion)
@@ -135,7 +135,7 @@ void engine::Core::run()
         mScene->onUpdate();
         mScene->onRender();
         renderer::render();
-        // updateImgui();
+        updateImgui();
         
         glfwSwapBuffers(mWindow);
         timers::update();

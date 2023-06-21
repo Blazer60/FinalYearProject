@@ -52,10 +52,13 @@ add_executable(${PROJECT_NAME}
         src/graphics/Mesh.cpp include/graphics/Mesh.h
         src/graphics/Vertices.cpp include/graphics/Vertices.h
         src/graphics/WindowHelpers.cpp include/graphics/WindowHelpers.h
-        include/engine/loader/MtlMaterialInformation.h)
+        src/graphics/buffers/FramebufferObject.cpp include/graphics/buffers/FramebufferObject.h
+        src/graphics/buffers/RenderBufferObject.cpp include/graphics/buffers/RenderBufferObject.h
+        src/graphics/buffers/TextureBufferObject.cpp include/graphics/buffers/TextureBufferObject.h
+        )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
-        include include/engine include/graphics include/game include/engine/loader
+        include include/engine include/graphics include/game include/engine/loader include/graphics/buffers
 
         # Vendor Files
         vendor/glm/glm vendor/glew/include/GL
