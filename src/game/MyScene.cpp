@@ -9,7 +9,7 @@
 #include "Renderer.h"
 #include "Shader.h"
 #include "Vertices.h"
-#include "SubMesh.h"
+#include "ModelLoader.h"
 
 MyScene::MyScene()
     : mMainCamera(glm::vec3(0.f, 0.f, 2.f))
@@ -22,7 +22,7 @@ MyScene::MyScene()
     
     std::vector<uint32_t> triangleIndices { 0, 1, 2 };
     
-    mSubMesh = std::make_shared<SubMesh>(triangleData, triangleIndices);
+    mSubMesh = load::model<PositionVertex>("../resources/models/utahTeapot/UtahTeapot.obj").mesh[0];
     mShader = std::make_shared<Shader>("../resources/shaders/Triangle.vert", "../resources/shaders/Triangle.frag");
 }
 

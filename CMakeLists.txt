@@ -27,21 +27,35 @@ message(STATUS "CXX Standard:   " ${CMAKE_CXX_STANDARD})
 add_executable(${PROJECT_NAME}
         include/Pch.h
 
-        src/Main.cpp
-        src/graphics/Renderer.cpp include/graphics/Renderer.h
-        src/engine/DebugLogger.cpp include/engine/DebugLogger.h
-        src/engine/Core.cpp include/engine/Core.h
-        src/graphics/WindowHelpers.cpp include/graphics/WindowHelpers.h
-        src/engine/Timers.cpp include/engine/Timers.h
-        src/engine/Scene.cpp include/engine/Scene.h
-        src/graphics/Shader.cpp include/graphics/Shader.h
+        include/graphics/CameraSettings.h
+        include/graphics/RendererHelpers.h
 
-        src/game/MyScene.cpp include/game/MyScene.h src/graphics/Primitives.cpp src/graphics/Primitives.h include/graphics/CameraSettings.h
+        src/Main.cpp
+        src/engine/Core.cpp include/engine/Core.h
+        src/engine/DebugLogger.cpp include/engine/DebugLogger.h
         src/engine/MainCamera.cpp include/engine/MainCamera.h
-        src/graphics/SubMesh.cpp include/graphics/SubMesh.h src/graphics/Vertices.cpp include/graphics/Vertices.h src/graphics/Materials.cpp include/graphics/Materials.h include/graphics/RendererHelpers.h)
+        src/engine/Scene.cpp include/engine/Scene.h
+        src/engine/Timers.cpp include/engine/Timers.h
+        src/engine/loader/CommonLoader.cpp include/engine/loader/CommonLoader.h
+        src/engine/loader/MaterialLoader.cpp include/engine/loader/MaterialLoader.h
+        src/engine/loader/ModelDestroyer.cpp include/engine/loader/ModelDestroyer.h
+        src/engine/loader/ModelLoader.cpp include/engine/loader/ModelLoader.h
+        src/engine/loader/RawMesh.cpp include/engine/loader/RawMesh.h
+        src/engine/loader/TextureLoader.cpp include/engine/loader/TextureLoader.h
+
+        src/game/MyScene.cpp include/game/MyScene.h
+
+        src/graphics/Materials.cpp include/graphics/Materials.h
+        src/graphics/Primitives.cpp src/graphics/Primitives.h
+        src/graphics/Renderer.cpp include/graphics/Renderer.h
+        src/graphics/Shader.cpp include/graphics/Shader.h
+        src/graphics/SubMesh.cpp include/graphics/SubMesh.h
+        src/graphics/Vertices.cpp include/graphics/Vertices.h
+        src/graphics/WindowHelpers.cpp include/graphics/WindowHelpers.h
+        include/engine/loader/MtlMaterialInformation.h)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
-        include include/engine include/graphics include/game
+        include include/engine include/graphics include/game include/engine/loader
 
         # Vendor Files
         vendor/glm/glm vendor/glew/include/GL

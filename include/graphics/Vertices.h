@@ -10,6 +10,17 @@
 #include "Pch.h"
 
 /**
+ * Contains a position, uv coords and normal. Loaded in from .obj files.
+ * Define a conversion constructor to transition from this type.
+ */
+struct ObjVertex
+{
+    glm::vec3 position;
+    glm::vec2 uv;
+    glm::vec3 normal;
+};
+
+/**
  * @brief An instruction that defines how a single element should be setup with the vao.
  */
 struct Instruction
@@ -28,8 +39,11 @@ struct Vertex {};
 struct PositionVertex
     : public Vertex
 {
-    explicit PositionVertex(glm::vec3 position)
+    constexpr explicit PositionVertex(glm::vec3 position)
         : position(position) {}
+        
+    constexpr explicit PositionVertex(const ObjVertex &objVertex)
+        : position(objVertex.position) {}
     
     glm::vec3 position;
     
