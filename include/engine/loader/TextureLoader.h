@@ -9,8 +9,9 @@
 
 #include <string_view>
 #include "Pch.h"
+#include "Texture.h"
 
 namespace load
 {
-    unsigned int texture(std::string_view path);
+    std::shared_ptr<Texture> texture(std::string_view path);
 }

@@ -40,18 +40,20 @@ struct PositionVertex
     : public Vertex
 {
     constexpr explicit PositionVertex(glm::vec3 position)
-        : position(position) {}
+        : position(position), uv(glm::vec2(0.f)) {}
         
     constexpr explicit PositionVertex(const ObjVertex &objVertex)
-        : position(objVertex.position) {}
+        : position(objVertex.position), uv(objVertex.uv) {}
     
     glm::vec3 position;
+    glm::vec2 uv;
     
     static Instructions layout()
     {
         return
         {
-            { GL_FLOAT, 3 }
+            { GL_FLOAT, 3 },
+            { GL_FLOAT, 2 }
         };
     };
 };

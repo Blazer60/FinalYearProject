@@ -6,6 +6,7 @@
 
 
 #include "Materials.h"
+#include "TextureLoader.h"
 
 #include <utility>
 
@@ -17,9 +18,11 @@ void Material::attachShader(std::shared_ptr<Shader> shader)
 void SimpleMaterial::onLoadMtlFile(const MtlMaterialInformation &materialInformation)
 {
     mColour = materialInformation.kD;
+    mTexture = load::texture(materialInformation.mapKd);
 }
 
 void SimpleMaterial::onDraw()
 {
     mShader->set("u_colour", mColour);
+    mShader->set("u_texture", mTexture->id(), 1);
 }

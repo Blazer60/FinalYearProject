@@ -12,6 +12,7 @@
 #include "Pch.h"
 #include "Shader.h"
 #include "RendererHelpers.h"
+#include "Texture.h"
 
 struct MtlMaterialInformation
 {
@@ -58,4 +59,5 @@ public:
     
 protected:
     glm::vec3 mColour { 1.f, 0.f, 1.f };
+    std::shared_ptr<Texture> mTexture;
 };
