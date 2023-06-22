@@ -17,9 +17,14 @@ namespace renderer
     std::vector<CameraSettings> cameraQueue;
     GLenum drawModeToGLenum[] { GL_TRIANGLES, GL_LINES };
     std::unique_ptr<FramebufferObject> geometryFramebuffer;
+    std::unique_ptr<TextureBufferObject> positionTextureBuffer;
+    std::unique_ptr<TextureBufferObject> albedoTextureBuffer;
+    std::unique_ptr<TextureBufferObject> normalTextureBuffer;
+    std::unique_ptr<TextureBufferObject> emissiveTextureBuffer;
     std::unique_ptr<TextureBufferObject> outputTextureBuffer;
     std::unique_ptr<RenderBufferObject> geometryRenderbuffer;
     glm::ivec2 currentRenderBufferSize;
+    
     
     bool init()
     {
@@ -32,12 +37,8 @@ namespace renderer
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         
-        geometryFramebuffer  = std::make_unique<FramebufferObject>(GL_ONE, GL_ZERO, GL_LESS);
-        outputTextureBuffer  = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16, GL_NEAREST, GL_NEAREST, 1, "Output");
-        geometryRenderbuffer = std::make_unique<RenderBufferObject>(window::bufferSize());
-        
-        geometryFramebuffer->attach(outputTextureBuffer.get(), 0);
-        geometryFramebuffer->attach(geometryRenderbuffer.get());
+        initFrameBuffers();
+        initTextureRenderBuffers();
         
         currentRenderBufferSize = window::bufferSize();
         glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
@@ -104,25 +105,13 @@ namespace renderer
         cameraQueue.emplace_back(cameraMatrices);
     }
     
-    void resizeBuffers()
-    {
-        geometryFramebuffer->detach(0);
-        geometryFramebuffer->detachRenderBuffer();
-        
-        outputTextureBuffer  = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16, GL_NEAREST, GL_NEAREST, 1, "Output");
-        geometryRenderbuffer = std::make_unique<RenderBufferObject>(window::bufferSize());
-        
-        geometryFramebuffer->attach(outputTextureBuffer.get(), 0);
-        geometryFramebuffer->attach(geometryRenderbuffer.get());
-        
-        glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
-    }
-    
     void render()
     {
         if (currentRenderBufferSize != window::bufferSize())
         {
-            resizeBuffers();
+            detachTextureRenderBuffersFromFrameBuffers();
+            initTextureRenderBuffers();
+            glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
             currentRenderBufferSize = window::bufferSize();
         }
         
@@ -141,6 +130,7 @@ namespace renderer
                 const auto shader = rqo.shader.lock();
                 shader->bind();
                 shader->set("u_mvp_matrix", vpMatrix * rqo.matrix);
+                shader->set("u_model_matrix", rqo.matrix);
                 rqo.onDraw();
                 glBindVertexArray(rqo.vao);
                 glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
@@ -159,6 +149,60 @@ namespace renderer
     const TextureBufferObject &getOutputBuffer()
     {
         return *outputTextureBuffer;
+    }
+    
+// private:
+    void initFrameBuffers()
+    {
+        geometryFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ZERO, GL_LESS);
+    }
+    
+    void initTextureRenderBuffers()
+    {
+        positionTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,        GL_NEAREST, GL_NEAREST, 1, "Position Buffer");
+        albedoTextureBuffer     = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,        GL_NEAREST, GL_NEAREST, 1, "Albedo Buffer");
+        normalTextureBuffer     = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16_SNORM,   GL_NEAREST, GL_NEAREST, 1, "Normal Buffer");
+        emissiveTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,        GL_NEAREST, GL_NEAREST, 1, "Emissive Buffer");
+        outputTextureBuffer     = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,        GL_NEAREST, GL_NEAREST, 1, "Output Buffer");
+        
+        geometryRenderbuffer    = std::make_unique<RenderBufferObject>(window::bufferSize());
+        
+        // Make sure that the framebuffers have been set up before calling this function.
+        geometryFramebuffer->attach(positionTextureBuffer.get(),    0);
+        geometryFramebuffer->attach(normalTextureBuffer.get(),      1);
+        geometryFramebuffer->attach(albedoTextureBuffer.get(),      2);
+        geometryFramebuffer->attach(emissiveTextureBuffer.get(),    3);
+        
+        geometryFramebuffer->attach(geometryRenderbuffer.get());
+    }
+    
+    void detachTextureRenderBuffersFromFrameBuffers()
+    {
+        geometryFramebuffer->detach(0);
+        geometryFramebuffer->detach(1);
+        geometryFramebuffer->detach(2);
+        geometryFramebuffer->detach(3);
+        geometryFramebuffer->detachRenderBuffer();
+    }
+    
+    const TextureBufferObject &getAlbedoBuffer()
+    {
+        return *albedoTextureBuffer;
+    }
+    
+    const TextureBufferObject &getNormalBuffer()
+    {
+        return *normalTextureBuffer;
+    }
+    
+    const TextureBufferObject &getPositionBuffer()
+    {
+        return *positionTextureBuffer;
+    }
+    
+    const TextureBufferObject &getEmissiveBuffer()
+    {
+        return *emissiveTextureBuffer;
     }
 }
 

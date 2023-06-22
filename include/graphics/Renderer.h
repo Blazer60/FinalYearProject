@@ -32,6 +32,10 @@ namespace renderer
     void render();
     
     [[nodiscard]] const TextureBufferObject &getOutputBuffer();
+    [[nodiscard]] const TextureBufferObject &getAlbedoBuffer();
+    [[nodiscard]] const TextureBufferObject &getNormalBuffer();
+    [[nodiscard]] const TextureBufferObject &getPositionBuffer();
+    [[nodiscard]] const TextureBufferObject &getEmissiveBuffer();
     
     /**
      * @returns false if debug message was failed to be setup. This is most likely due to the openGl version being
@@ -41,4 +45,9 @@ namespace renderer
     bool debugMessageCallback(GLDEBUGPROC callback);
     
     [[nodiscard]] std::string getVersion();
+    
+// Private:
+    void initFrameBuffers();
+    void initTextureRenderBuffers();
+    void detachTextureRenderBuffersFromFrameBuffers();
 }

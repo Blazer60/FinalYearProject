@@ -57,3 +57,27 @@ struct PositionVertex
         };
     };
 };
+
+struct StandardVertex
+    : public Vertex
+{
+    constexpr explicit StandardVertex(const ObjVertex &objVertex)
+        : position(objVertex.position), uv(objVertex.uv), normal(objVertex.normal)
+    {
+    
+    }
+    
+    glm::vec3 position;
+    glm::vec2 uv;
+    glm::vec3 normal;
+    
+    static Instructions layout()
+    {
+        return
+            {
+                { GL_FLOAT, 3 },
+                { GL_FLOAT, 2 },
+                { GL_FLOAT, 3 },
+            };
+    };
+};

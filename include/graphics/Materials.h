@@ -61,3 +61,18 @@ protected:
     glm::vec3 mColour { 1.f, 0.f, 1.f };
     std::shared_ptr<Texture> mTexture;
 };
+
+/**
+ * @brief For use with Standard.vert and Standard.frag shaders.
+ */
+class StandardMaterial
+    : public Material
+{
+public:
+    void onDraw() override;
+    void onLoadMtlFile(const MtlMaterialInformation &materialInformation) override;
+
+protected:
+    glm::vec3 mAmbientColour { 0.f };
+    std::shared_ptr<Texture> mDiffuse;
+};

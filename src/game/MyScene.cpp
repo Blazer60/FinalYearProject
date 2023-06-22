@@ -14,11 +14,11 @@
 MyScene::MyScene()
     : mMainCamera(glm::vec3(0.f, 8.f, 30.f))
 {
-    const auto [mesh, simpleMaterials] = load::model<PositionVertex, SimpleMaterial>(
+    const auto [mesh, simpleMaterials] = load::model<StandardVertex, StandardMaterial>(
         "../resources/models/pillars/Pillars.obj",
         std::make_shared<Shader>(
-            "../resources/shaders/Triangle.vert",
-            "../resources/shaders/Triangle.frag"));
+            "../resources/shaders/geometry/standard/Standard.vert",
+            "../resources/shaders/geometry/standard/Standard.frag"));
     
     mMesh = mesh;
     mMaterials = simpleMaterials;
@@ -41,7 +41,6 @@ void MyScene::onRender()
 
 void MyScene::onImguiUpdate()
 {
-    showTextureBuffer("Output", renderer::getOutputBuffer(), &mShowOutput, true);
     mMainCamera.imguiUpdate();
 }
 

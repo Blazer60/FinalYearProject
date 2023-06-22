@@ -155,6 +155,7 @@ void engine::Core::updateImgui()
     if (ImGui::BeginMainMenuBar())
     {
         mScene->onImguiMenuUpdate();
+        updateImguiMenuViewports();
         const std::string text = "TPS: %.0f | Frame Rate: %.3f s/frame (%.1f FPS)";
         ImGui::SetCursorPosX(
             ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - ImGui::CalcTextSize(text.c_str()).x
@@ -166,6 +167,7 @@ void engine::Core::updateImgui()
     ImGui::Begin("Scene Settings");
     mScene->onImguiUpdate();
     ImGui::End();
+    updateViewports();
     
     ImGui::Render();
     int display_w, display_h;
@@ -186,5 +188,55 @@ void engine::Core::setScene(std::unique_ptr<Scene> scene)
 {
     mScene.reset();
     mScene = std::move(scene);
+}
+
+void engine::Core::updateImguiMenuViewports()
+{
+    if (ImGui::BeginMenu("Viewports"))
+    {
+        if (ImGui::MenuItem("Show Position Buffer"))
+            mViewport.showPositionBuffer = true;
+        if (ImGui::MenuItem("Show Normal Buffer"))
+            mViewport.showNormalBuffer = true;
+        if (ImGui::MenuItem("Show Albedo Buffer"))
+            mViewport.showAlbedoBuffer = true;
+        if (ImGui::MenuItem("Show Emissive Buffer"))
+            mViewport.showEmissiveBuffer = true;
+        if (ImGui::MenuItem("Show Output Buffer"))
+            mViewport.showOutputBuffer = true;
+        ImGui::EndMenu();
+    }
+}
+
+void engine::Core::updateViewports()
+{
+    showTextureBuffer("Albedo",     renderer::getAlbedoBuffer(),    &mViewport.showAlbedoBuffer,    false);
+    showTextureBuffer("Position",   renderer::getPositionBuffer(),  &mViewport.showPositionBuffer,  false);
+    showTextureBuffer("Normal",     renderer::getNormalBuffer(),    &mViewport.showNormalBuffer,    false);
+    showTextureBuffer("Emissive",   renderer::getEmissiveBuffer(),  &mViewport.showEmissiveBuffer,  false);
+    showTextureBuffer("Output",     renderer::getOutputBuffer(),    &mViewport.showOutputBuffer,    true);
+}
+
+void engine::Core::showTextureBuffer(
+    const std::string &name, const TextureBufferObject &texture, bool *show, bool isMainBuffer)
+{
+    if (show && !*show)
+        return;
+    
+    ImGui::PushID(name.c_str());
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
+    if (ImGui::Begin(name.c_str(), show))
+    {
+        ImVec2 regionSize = ImGui::GetContentRegionAvail();
+        
+        if (isMainBuffer)
+            window::setBufferSize(glm::ivec2(regionSize.x, regionSize.y));
+        
+        ImGui::Image(reinterpret_cast<void *>(texture.getName()), regionSize, ImVec2(0, 1), ImVec2(1, 0));
+    }
+    
+    ImGui::End();
+    ImGui::PopStyleVar();
+    ImGui::PopID();
 }
 
