@@ -7,6 +7,7 @@
 
 #include "Scene.h"
 #include "imgui.h"
+#include "WindowHelpers.h"
 
 void engine::Scene::onFixedUpdate()
 {
@@ -34,7 +35,7 @@ void engine::Scene::onImguiMenuUpdate()
 }
 
 void engine::Scene::showTextureBuffer(
-    const std::string &name, const TextureBufferObject &texture, bool *show)
+    const std::string &name, const TextureBufferObject &texture, bool *show, bool isMainBuffer)
 {
     if (show && !*show)
         return;
@@ -44,6 +45,10 @@ void engine::Scene::showTextureBuffer(
     if (ImGui::Begin(name.c_str(), show))
     {
         ImVec2 regionSize = ImGui::GetContentRegionAvail();
+        
+        if (isMainBuffer)
+            window::setBufferSize(glm::ivec2(regionSize.x, regionSize.y));
+        
         ImGui::Image(reinterpret_cast<void *>(texture.getName()), regionSize, ImVec2(0, 1), ImVec2(1, 0));
     }
     

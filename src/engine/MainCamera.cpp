@@ -28,6 +28,9 @@ MainCamera::MainCamera(const glm::vec3 &position)
 void MainCamera::update()
 {
     move();
+    const glm::vec2 size = window::bufferSize();
+    mProjectionMatrix = glm::perspective(mFovY, size.x / size.y, mNearClip, mFarClip);
+    
     mViewMatrix = glm::translate(glm::mat4(1.f), mPosition)
                 * glm::mat4(mRotation);
     mViewMatrix = glm::inverse(mViewMatrix);
@@ -119,6 +122,9 @@ void MainCamera::imguiUpdate()
             
             ImGui::TreePop();
         }
+        float fovYDegrees = glm::degrees(mFovY);
+        ImGui::SliderFloat("FOV Y", &fovYDegrees, 10, 180);
+        mFovY = glm::radians(fovYDegrees);
     }
 }
 

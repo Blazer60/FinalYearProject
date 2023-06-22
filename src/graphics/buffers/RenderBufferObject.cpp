@@ -29,11 +29,6 @@ void RenderBufferObject::deInit()
     glDeleteRenderbuffers(1, &mId);
 }
 
-void RenderBufferObject::resize(const glm::ivec2 &size) const
-{
-    glNamedRenderbufferStorage(mId, mFormat, mSize.x, mSize.y);
-}
-
 GLenum RenderBufferObject::getAttachment() const
 {
     return mAttachment;

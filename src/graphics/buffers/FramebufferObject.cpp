@@ -81,3 +81,8 @@ void FramebufferObject::attach(const RenderBufferObject *const renderBufferObjec
     glNamedFramebufferRenderbuffer(mFboId, renderBufferObject->getAttachment(), GL_RENDERBUFFER,
                                    renderBufferObject->getName());
 }
+
+void FramebufferObject::detachRenderBuffer() const
+{
+    glNamedFramebufferRenderbuffer(mFboId, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+}

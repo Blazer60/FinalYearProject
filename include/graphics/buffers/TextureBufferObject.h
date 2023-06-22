@@ -32,14 +32,6 @@ public:
     
     virtual ~TextureBufferObject();
     
-    /**
-     * @brief Resets the size of the buffer without changing the ID. Useful is the Texture is already bound to
-     * a framebuffer.
-     * @param width - The width of the new buffer.
-     * @param height - The height of the new buffer.
-     */
-    void reinitialise(uint32_t width, uint32_t height) const;
-    
     [[nodiscard]] unsigned int getName() const;
     [[nodiscard]] const glm::ivec2 &getSize() const;
 protected:

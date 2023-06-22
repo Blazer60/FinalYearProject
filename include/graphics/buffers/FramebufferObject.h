@@ -38,6 +38,7 @@ public:
     void attach(const RenderBufferObject *renderBufferObject) const;
     
     void detach(int bindPoint);
+    void detachRenderBuffer() const;
     void clear(const glm::vec4 &clearColour);
     void bind() const;
     

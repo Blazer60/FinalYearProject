@@ -41,7 +41,8 @@ void MyScene::onRender()
 
 void MyScene::onImguiUpdate()
 {
-    showTextureBuffer("Output", renderer::getOutputBuffer(), &mShowOutput);
+    showTextureBuffer("Output", renderer::getOutputBuffer(), &mShowOutput, true);
+    mMainCamera.imguiUpdate();
 }
 
 void MyScene::onImguiMenuUpdate()

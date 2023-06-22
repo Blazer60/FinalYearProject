@@ -20,8 +20,6 @@ public:
     explicit RenderBufferObject(const glm::ivec2 &size);
     ~RenderBufferObject();
     
-    void resize(const glm::ivec2 &size) const;
-    
     [[nodiscard]] unsigned int getName() const;
     [[nodiscard]] GLenum getAttachment() const;
 protected:

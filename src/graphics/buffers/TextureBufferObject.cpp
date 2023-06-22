@@ -37,11 +37,6 @@ void TextureBufferObject::init(const GLenum minFilter, const GLenum magFilter)
     glTextureStorage2D(mId, static_cast<int>(mMipMapLevels), mFormat, mSize.x, mSize.y);
 }
 
-void TextureBufferObject::reinitialise(uint32_t width, uint32_t height) const
-{
-    glTextureStorage2D(mId, static_cast<int>(mMipMapLevels), mFormat, mSize.x, mSize.y);
-}
-
 void TextureBufferObject::deInit()
 {
     glDeleteTextures(1, &mId);

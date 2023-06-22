@@ -19,6 +19,7 @@ namespace renderer
     std::unique_ptr<FramebufferObject> geometryFramebuffer;
     std::unique_ptr<TextureBufferObject> outputTextureBuffer;
     std::unique_ptr<RenderBufferObject> geometryRenderbuffer;
+    glm::ivec2 currentRenderBufferSize;
     
     bool init()
     {
@@ -26,8 +27,8 @@ namespace renderer
             return false;
         
         // Blending texture data / enabling lerping.
-        // glEnable(GL_BLEND);
-        // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         
@@ -37,6 +38,9 @@ namespace renderer
         
         geometryFramebuffer->attach(outputTextureBuffer.get(), 0);
         geometryFramebuffer->attach(geometryRenderbuffer.get());
+        
+        currentRenderBufferSize = window::bufferSize();
+        glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
         
         return true;
     }
@@ -100,8 +104,28 @@ namespace renderer
         cameraQueue.emplace_back(cameraMatrices);
     }
     
+    void resizeBuffers()
+    {
+        geometryFramebuffer->detach(0);
+        geometryFramebuffer->detachRenderBuffer();
+        
+        outputTextureBuffer  = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16, GL_NEAREST, GL_NEAREST, 1, "Output");
+        geometryRenderbuffer = std::make_unique<RenderBufferObject>(window::bufferSize());
+        
+        geometryFramebuffer->attach(outputTextureBuffer.get(), 0);
+        geometryFramebuffer->attach(geometryRenderbuffer.get());
+        
+        glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
+    }
+    
     void render()
     {
+        if (currentRenderBufferSize != window::bufferSize())
+        {
+            resizeBuffers();
+            currentRenderBufferSize = window::bufferSize();
+        }
+        
         for (CameraSettings &camera : cameraQueue)
         {
             geometryFramebuffer->bind();
