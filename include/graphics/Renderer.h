@@ -40,6 +40,7 @@ namespace renderer
     [[nodiscard]] const TextureBufferObject &getEmissiveBuffer();
     [[nodiscard]] const TextureBufferObject &getDiffuseBuffer();
     [[nodiscard]] const TextureBufferObject &getSpecularBuffer();
+    [[nodiscard]] const TextureBufferObject &getDepthBuffer();
     
     
     /**

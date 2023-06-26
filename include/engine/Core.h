@@ -25,6 +25,7 @@ namespace engine
         bool showOutputBuffer   { true };
         bool showDiffuseBuffer  { true };
         bool showSpecularBuffer { true };
+        bool showDepthBuffer    { true };
     };
 
 /**

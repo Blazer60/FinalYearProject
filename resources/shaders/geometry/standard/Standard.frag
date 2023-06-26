@@ -11,6 +11,7 @@ layout(location = 0) out vec3 o_position;
 layout(location = 1) out vec3 o_normal;
 layout(location = 2) out vec3 o_albedo;
 layout(location = 3) out vec3 o_emissive;
+layout(location = 4) out float o_depth;
 
 void main()
 {
@@ -21,4 +22,5 @@ void main()
     o_albedo = u_ambient_colour * texture_colour;
     o_position = v_position_ws;
     o_normal = v_normal_ws;
+    o_depth = gl_FragCoord.z;
 }

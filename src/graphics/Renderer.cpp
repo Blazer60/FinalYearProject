@@ -26,6 +26,7 @@ namespace renderer
     std::unique_ptr<TextureBufferObject> emissiveTextureBuffer;
     std::unique_ptr<TextureBufferObject> diffuseTextureBuffer;
     std::unique_ptr<TextureBufferObject> specularTextureBuffer;
+    std::unique_ptr<TextureBufferObject> depthTextureBuffer;
     std::unique_ptr<TextureBufferObject> outputTextureBuffer;
     std::unique_ptr<RenderBufferObject> geometryRenderbuffer;
     glm::ivec2 currentRenderBufferSize;
@@ -56,7 +57,6 @@ namespace renderer
         
         directionalLightShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/lighting/DirectionalLight.frag");
         deferredLightShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/lighting/CombineOutput.frag");
-        skyboxShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/Skybox.frag");
         fullscreenTriangle = primitives::fullscreenTriangle();
         skybox = std::make_unique<Cubemap>(std::vector<std::string> {
             "../resources/textures/skybox/right.jpg",
@@ -198,23 +198,19 @@ namespace renderer
             deferredLightFramebuffer->bind();
             deferredLightFramebuffer->clear(glm::vec4(glm::vec3(0.f), 0.f));
             
-            skyboxShader->bind();
-            skyboxShader->set("u_skybox_texture", skybox->getId(), 0);
+            deferredLightShader->bind();
+            
             const glm::mat4 v = glm::mat4(glm::mat3(camera.viewMatrix));
             const glm::mat4 vp = camera.projectionMatrix * v;
             const glm::mat4 ivp = glm::inverse(vp);
-            
-            skyboxShader->set("u_inverse_vp_matrix", ivp);
-            
-            glBindVertexArray(fullscreenTriangle->vao());  // I know it's still bound but just it's just to avoid future errors.
-            glDrawElements(GL_TRIANGLES, fullscreenTriangle->indicesCount(), GL_UNSIGNED_INT, nullptr);
-            
-            deferredLightShader->bind();
             
             deferredLightShader->set("u_diffuse_texture", diffuseTextureBuffer->getId(), 0);
             deferredLightShader->set("u_specular_texture", specularTextureBuffer->getId(), 1);
             deferredLightShader->set("u_albedo_texture", albedoTextureBuffer->getId(), 2);
             deferredLightShader->set("u_emissive_texture", emissiveTextureBuffer->getId(), 3);
+            deferredLightShader->set("u_depth_texture", depthTextureBuffer->getId(), 4);
+            deferredLightShader->set("u_skybox_texture", skybox->getId(), 5);
+            deferredLightShader->set("u_inverse_vp_matrix", ivp);
             
             glBindVertexArray(fullscreenTriangle->vao());  // I know it's still bound but just it's just to avoid future errors.
             glDrawElements(GL_TRIANGLES, fullscreenTriangle->indicesCount(), GL_UNSIGNED_INT, nullptr);
@@ -260,6 +256,7 @@ namespace renderer
         diffuseTextureBuffer    = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,        GL_NEAREST, GL_NEAREST, 1, "Diffuse Buffer");
         specularTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,        GL_NEAREST, GL_NEAREST, 1, "Specular Buffer");
         outputTextureBuffer     = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,        GL_NEAREST, GL_NEAREST, 1, "Output Buffer");
+        depthTextureBuffer      = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_R32F,          GL_NEAREST, GL_NEAREST, 1, "Depth Buffer");
         
         geometryRenderbuffer        = std::make_unique<RenderBufferObject>(window::bufferSize());
         lightRenderBuffer           = std::make_unique<RenderBufferObject>(window::bufferSize());
@@ -270,6 +267,7 @@ namespace renderer
         geometryFramebuffer->attach(normalTextureBuffer.get(),      1);
         geometryFramebuffer->attach(albedoTextureBuffer.get(),      2);
         geometryFramebuffer->attach(emissiveTextureBuffer.get(),    3);
+        geometryFramebuffer->attach(depthTextureBuffer.get(),       4);
         
         geometryFramebuffer->attach(geometryRenderbuffer.get());
         
@@ -291,6 +289,7 @@ namespace renderer
         geometryFramebuffer->detach(1);
         geometryFramebuffer->detach(2);
         geometryFramebuffer->detach(3);
+        geometryFramebuffer->detach(4);
         geometryFramebuffer->detachRenderBuffer();
         
         lightFramebuffer->detach(0);
@@ -329,6 +328,11 @@ namespace renderer
     const TextureBufferObject &getSpecularBuffer()
     {
         return *specularTextureBuffer;
+    }
+    
+    const TextureBufferObject &getDepthBuffer()
+    {
+        return *depthTextureBuffer;
     }
 }
 
