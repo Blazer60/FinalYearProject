@@ -19,10 +19,12 @@ namespace engine
     struct ViewportToggles
     {
         bool showPositionBuffer { true };
-        bool showAlbedoBuffer { true };
-        bool showNormalBuffer { true };
+        bool showAlbedoBuffer   { true };
+        bool showNormalBuffer   { true };
         bool showEmissiveBuffer { true };
-        bool showOutputBuffer { true };
+        bool showOutputBuffer   { true };
+        bool showDiffuseBuffer  { true };
+        bool showSpecularBuffer { true };
     };
 
 /**

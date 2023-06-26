@@ -23,6 +23,8 @@ namespace renderer
     std::unique_ptr<TextureBufferObject> albedoTextureBuffer;
     std::unique_ptr<TextureBufferObject> normalTextureBuffer;
     std::unique_ptr<TextureBufferObject> emissiveTextureBuffer;
+    std::unique_ptr<TextureBufferObject> diffuseTextureBuffer;
+    std::unique_ptr<TextureBufferObject> specularTextureBuffer;
     std::unique_ptr<TextureBufferObject> outputTextureBuffer;
     std::unique_ptr<RenderBufferObject> geometryRenderbuffer;
     glm::ivec2 currentRenderBufferSize;
@@ -154,13 +156,21 @@ namespace renderer
             lightFramebuffer->clear(glm::vec4(glm::vec3(0.f), 1.f));
             
             directionalLightShader->bind();
+            
+            directionalLightShader->set("u_albedo_texture", albedoTextureBuffer->getId(), 0);
+            directionalLightShader->set("u_position_texture", positionTextureBuffer->getId(), 1);
+            directionalLightShader->set("u_normal_texture", normalTextureBuffer->getId(), 2);
+            
+            const glm::vec3 cameraPosition = glm::inverse(camera.viewMatrix) * glm::vec4(glm::vec3(0.f), 1.f);
+            directionalLightShader->set("u_camera_position_ws", cameraPosition);
+            
+            glBindVertexArray(fullscreenTriangle->vao());
+            
             for (const DirectionalLight &directionalLight : directionalLightQueue)
             {
-                // Setup the uniforms in the shader.
-                // Draw a fullscreen triangle
-                directionalLightShader->set("u_texture", albedoTextureBuffer->getId(), 0);
+                directionalLightShader->set("u_light_direction", directionalLight.direction);
+                directionalLightShader->set("u_light_intensity", directionalLight.intensity);
                 
-                glBindVertexArray(fullscreenTriangle->vao());
                 glDrawElements(GL_TRIANGLES, fullscreenTriangle->indicesCount(), GL_UNSIGNED_INT, nullptr);
             }
         }
@@ -199,6 +209,8 @@ namespace renderer
         albedoTextureBuffer     = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,        GL_NEAREST, GL_NEAREST, 1, "Albedo Buffer");
         normalTextureBuffer     = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16_SNORM,   GL_NEAREST, GL_NEAREST, 1, "Normal Buffer");
         emissiveTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,        GL_NEAREST, GL_NEAREST, 1, "Emissive Buffer");
+        diffuseTextureBuffer    = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,        GL_NEAREST, GL_NEAREST, 1, "Diffuse Buffer");
+        specularTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,        GL_NEAREST, GL_NEAREST, 1, "Specular Buffer");
         outputTextureBuffer     = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,        GL_NEAREST, GL_NEAREST, 1, "Output Buffer");
         
         geometryRenderbuffer    = std::make_unique<RenderBufferObject>(window::bufferSize());
@@ -213,7 +225,8 @@ namespace renderer
         geometryFramebuffer->attach(geometryRenderbuffer.get());
         
         // Lighting.
-        lightFramebuffer->attach(outputTextureBuffer.get(), 0);
+        lightFramebuffer->attach(diffuseTextureBuffer.get(), 0);
+        lightFramebuffer->attach(specularTextureBuffer.get(), 1);
         
         lightFramebuffer->attach(lightRenderBuffer.get());
     }
@@ -227,6 +240,7 @@ namespace renderer
         geometryFramebuffer->detachRenderBuffer();
         
         lightFramebuffer->detach(0);
+        lightFramebuffer->detach(1);
         lightFramebuffer->detachRenderBuffer();
     }
     
@@ -248,6 +262,16 @@ namespace renderer
     const TextureBufferObject &getEmissiveBuffer()
     {
         return *emissiveTextureBuffer;
+    }
+    
+    const TextureBufferObject &getDiffuseBuffer()
+    {
+        return *diffuseTextureBuffer;
+    }
+    
+    const TextureBufferObject &getSpecularBuffer()
+    {
+        return *specularTextureBuffer;
     }
 }
 

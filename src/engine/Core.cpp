@@ -202,6 +202,10 @@ void engine::Core::updateImguiMenuViewports()
             mViewport.showAlbedoBuffer = true;
         if (ImGui::MenuItem("Show Emissive Buffer"))
             mViewport.showEmissiveBuffer = true;
+        if (ImGui::MenuItem("Show Diffuse Buffer"))
+            mViewport.showDiffuseBuffer = true;
+        if (ImGui::MenuItem("Show Specular Buffer"))
+            mViewport.showSpecularBuffer = true;
         if (ImGui::MenuItem("Show Output Buffer"))
             mViewport.showOutputBuffer = true;
         ImGui::EndMenu();
@@ -214,6 +218,8 @@ void engine::Core::updateViewports()
     showTextureBuffer("Position",   renderer::getPositionBuffer(),  &mViewport.showPositionBuffer,  false);
     showTextureBuffer("Normal",     renderer::getNormalBuffer(),    &mViewport.showNormalBuffer,    false);
     showTextureBuffer("Emissive",   renderer::getEmissiveBuffer(),  &mViewport.showEmissiveBuffer,  false);
+    showTextureBuffer("Diffuse",    renderer::getDiffuseBuffer(),   &mViewport.showDiffuseBuffer,   false);
+    showTextureBuffer("Specular",   renderer::getSpecularBuffer(),  &mViewport.showSpecularBuffer,  false);
     showTextureBuffer("Output",     renderer::getOutputBuffer(),    &mViewport.showOutputBuffer,    true);
 }
 
