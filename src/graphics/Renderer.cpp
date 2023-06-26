@@ -30,9 +30,13 @@ namespace renderer
     glm::ivec2 currentRenderBufferSize;
     
     std::unique_ptr<Shader> directionalLightShader;
+    std::unique_ptr<Shader> deferredLightShader;
     std::unique_ptr<SubMesh> fullscreenTriangle;
     std::unique_ptr<FramebufferObject> lightFramebuffer;
     std::unique_ptr<RenderBufferObject> lightRenderBuffer;
+    
+    std::unique_ptr<FramebufferObject> deferredLightFramebuffer;
+    std::unique_ptr<RenderBufferObject> deferredLightRenderbuffer;
     
     bool init()
     {
@@ -46,6 +50,7 @@ namespace renderer
         glEnable(GL_CULL_FACE);
         
         directionalLightShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/lighting/DirectionalLight.frag");
+        deferredLightShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/lighting/CombineOutput.frag");
         fullscreenTriangle = primitives::fullscreenTriangle();
         
         initFrameBuffers();
@@ -173,6 +178,21 @@ namespace renderer
                 
                 glDrawElements(GL_TRIANGLES, fullscreenTriangle->indicesCount(), GL_UNSIGNED_INT, nullptr);
             }
+            
+            // Deferred Lighting step.
+            
+            deferredLightFramebuffer->bind();
+            deferredLightFramebuffer->clear(glm::vec4(glm::vec3(0.f), 1.f));
+            
+            deferredLightShader->bind();
+            
+            deferredLightShader->set("u_diffuse_texture", diffuseTextureBuffer->getId(), 0);
+            deferredLightShader->set("u_specular_texture", specularTextureBuffer->getId(), 1);
+            deferredLightShader->set("u_albedo_texture", albedoTextureBuffer->getId(), 2);
+            deferredLightShader->set("u_emissive_texture", emissiveTextureBuffer->getId(), 3);
+            
+            glBindVertexArray(fullscreenTriangle->vao());  // I know it's still bound but just it's just to avoid future errors.
+            glDrawElements(GL_TRIANGLES, fullscreenTriangle->indicesCount(), GL_UNSIGNED_INT, nullptr);
         }
         
         uint64_t renderQueueCount = renderQueue.size();
@@ -201,6 +221,9 @@ namespace renderer
         
         // One, One (additive blending for each light that we pass through)
         lightFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ONE, GL_LESS);
+        
+        // We only ever write to this framebuffer once, so it shouldn't matter.
+        deferredLightFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ZERO, GL_LESS);
     }
     
     void initTextureRenderBuffers()
@@ -213,8 +236,9 @@ namespace renderer
         specularTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,        GL_NEAREST, GL_NEAREST, 1, "Specular Buffer");
         outputTextureBuffer     = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,        GL_NEAREST, GL_NEAREST, 1, "Output Buffer");
         
-        geometryRenderbuffer    = std::make_unique<RenderBufferObject>(window::bufferSize());
-        lightRenderBuffer       = std::make_unique<RenderBufferObject>(window::bufferSize());
+        geometryRenderbuffer        = std::make_unique<RenderBufferObject>(window::bufferSize());
+        lightRenderBuffer           = std::make_unique<RenderBufferObject>(window::bufferSize());
+        deferredLightRenderbuffer   = std::make_unique<RenderBufferObject>(window::bufferSize());
         
         // Make sure that the framebuffers have been set up before calling this function.
         geometryFramebuffer->attach(positionTextureBuffer.get(),    0);
@@ -229,6 +253,11 @@ namespace renderer
         lightFramebuffer->attach(specularTextureBuffer.get(), 1);
         
         lightFramebuffer->attach(lightRenderBuffer.get());
+        
+        // Deferred Lighting.
+        deferredLightFramebuffer->attach(outputTextureBuffer.get(), 0);
+        
+        deferredLightFramebuffer->attach(deferredLightRenderbuffer.get());
     }
     
     void detachTextureRenderBuffersFromFrameBuffers()
@@ -242,6 +271,9 @@ namespace renderer
         lightFramebuffer->detach(0);
         lightFramebuffer->detach(1);
         lightFramebuffer->detachRenderBuffer();
+        
+        deferredLightFramebuffer->detach(0);
+        deferredLightFramebuffer->detachRenderBuffer();
     }
     
     const TextureBufferObject &getAlbedoBuffer()

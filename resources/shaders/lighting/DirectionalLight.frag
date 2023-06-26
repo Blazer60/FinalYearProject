@@ -36,5 +36,6 @@ void main()
     const vec3 normal = texture(u_normal_texture, v_uv).rgb;
 
     o_diffuse  = albedo * light_dot(normal, u_light_direction) * u_light_intensity;
+    // 128.f should be placed into a specular texture that is read in.
     o_specular = albedo * pow(light_dot(half_angle(), normal), 128.f) * u_light_intensity;
 }
