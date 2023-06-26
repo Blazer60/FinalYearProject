@@ -9,6 +9,7 @@
 #include "FramebufferObject.h"
 #include "WindowHelpers.h"
 #include "Primitives.h"
+#include "Cubemap.h"
 
 #include <utility>
 
@@ -31,12 +32,15 @@ namespace renderer
     
     std::unique_ptr<Shader> directionalLightShader;
     std::unique_ptr<Shader> deferredLightShader;
+    std::unique_ptr<Shader> skyboxShader;
     std::unique_ptr<SubMesh> fullscreenTriangle;
     std::unique_ptr<FramebufferObject> lightFramebuffer;
     std::unique_ptr<RenderBufferObject> lightRenderBuffer;
     
     std::unique_ptr<FramebufferObject> deferredLightFramebuffer;
     std::unique_ptr<RenderBufferObject> deferredLightRenderbuffer;
+    
+    std::unique_ptr<Cubemap> skybox;
     
     bool init()
     {
@@ -48,10 +52,20 @@ namespace renderer
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
+        glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
         
         directionalLightShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/lighting/DirectionalLight.frag");
         deferredLightShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/lighting/CombineOutput.frag");
+        skyboxShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/Skybox.frag");
         fullscreenTriangle = primitives::fullscreenTriangle();
+        skybox = std::make_unique<Cubemap>(std::vector<std::string> {
+            "../resources/textures/skybox/right.jpg",
+            "../resources/textures/skybox/left.jpg",
+            "../resources/textures/skybox/top.jpg",
+            "../resources/textures/skybox/bottom.jpg",
+            "../resources/textures/skybox/front.jpg",
+            "../resources/textures/skybox/back.jpg",
+        });
         
         initFrameBuffers();
         initTextureRenderBuffers();
@@ -182,7 +196,18 @@ namespace renderer
             // Deferred Lighting step.
             
             deferredLightFramebuffer->bind();
-            deferredLightFramebuffer->clear(glm::vec4(glm::vec3(0.f), 1.f));
+            deferredLightFramebuffer->clear(glm::vec4(glm::vec3(0.f), 0.f));
+            
+            skyboxShader->bind();
+            skyboxShader->set("u_skybox_texture", skybox->getId(), 0);
+            const glm::mat4 v = glm::mat4(glm::mat3(camera.viewMatrix));
+            const glm::mat4 vp = camera.projectionMatrix * v;
+            const glm::mat4 ivp = glm::inverse(vp);
+            
+            skyboxShader->set("u_inverse_vp_matrix", ivp);
+            
+            glBindVertexArray(fullscreenTriangle->vao());  // I know it's still bound but just it's just to avoid future errors.
+            glDrawElements(GL_TRIANGLES, fullscreenTriangle->indicesCount(), GL_UNSIGNED_INT, nullptr);
             
             deferredLightShader->bind();
             
@@ -220,10 +245,10 @@ namespace renderer
         geometryFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ZERO, GL_LESS);
         
         // One, One (additive blending for each light that we pass through)
-        lightFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ONE, GL_LESS);
+        lightFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ONE, GL_ALWAYS);
         
         // We only ever write to this framebuffer once, so it shouldn't matter.
-        deferredLightFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ZERO, GL_LESS);
+        deferredLightFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ONE, GL_ALWAYS);
     }
     
     void initTextureRenderBuffers()

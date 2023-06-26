@@ -15,6 +15,7 @@
 #include "Mesh.h"
 #include "Materials.h"
 #include "Lighting.h"
+#include "Cubemap.h"
 
 /**
  * @author Ryan Purse
