@@ -232,7 +232,7 @@ void engine::Core::showTextureBuffer(
         if (isMainBuffer)
             window::setBufferSize(glm::ivec2(regionSize.x, regionSize.y));
         
-        ImGui::Image(reinterpret_cast<void *>(texture.getName()), regionSize, ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::Image(reinterpret_cast<void *>(texture.getId()), regionSize, ImVec2(0, 1), ImVec2(1, 0));
     }
     
     ImGui::End();

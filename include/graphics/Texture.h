@@ -21,7 +21,7 @@ public:
     explicit Texture(std::string_view path);
     ~Texture();
     
-    [[nodiscard]] int id() const { return static_cast<int>(mId); }
+    [[nodiscard]] uint32_t id() const { return mId; }
     
 protected:
     uint32_t mId { 0 };

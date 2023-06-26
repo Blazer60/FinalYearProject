@@ -42,7 +42,7 @@ void TextureBufferObject::deInit()
     glDeleteTextures(1, &mId);
 }
 
-unsigned int TextureBufferObject::getName() const
+unsigned int TextureBufferObject::getId() const
 {
     return mId;
 }

@@ -127,7 +127,7 @@ void Shader::set(const std::string &uniformName, const glm::vec2 &value)
     glUniform2fv(getLocation(uniformName), 1, glm::value_ptr(value));
 }
 
-void Shader::set(const std::string &uniformName, const int textureId, const int bindPoint)
+void Shader::set(const std::string &uniformName, const uint32_t textureId, const int bindPoint)
 {
     glBindTextureUnit(bindPoint, textureId);
     set(uniformName, bindPoint);

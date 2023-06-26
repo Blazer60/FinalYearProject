@@ -25,6 +25,7 @@ class SubMesh
 public:
     template<typename TVertex>
     SubMesh(const std::vector<TVertex> &vertices, const std::vector<uint32_t> &indices);
+    SubMesh(SubMesh &) = delete;
     
     ~SubMesh();
     
@@ -43,7 +44,7 @@ SubMesh::SubMesh(const std::vector<TVertex> &vertices, const std::vector<uint32_
 {
     glCreateBuffers(1, &mVbo);
     glCreateBuffers(1, &mEbo);
-    glNamedBufferData(mVbo, vertices.size() * sizeof(TVertex), static_cast<const void *>(&vertices[0]), GL_STATIC_DRAW);
+    glNamedBufferData(mVbo, static_cast<int64_t>(vertices.size() * sizeof(TVertex)), static_cast<const void *>(&vertices[0]), GL_STATIC_DRAW);
     glNamedBufferData(mEbo, static_cast<int64_t>(indices.size() * sizeof(uint32_t)), static_cast<const void *>(&indices[0]), GL_STATIC_DRAW);
     mIndicesCount = static_cast<int32_t>(indices.size());
     

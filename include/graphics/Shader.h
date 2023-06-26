@@ -72,7 +72,7 @@ public:
      * @param textureId - The value you want to pass to it.
      * @param bindPoint - The binding point of the texture [0-8].
      */
-    void set(const std::string &uniformName, const int textureId, const int bindPoint);
+    void set(const std::string &uniformName, const uint32_t textureId, const int bindPoint);
 
 protected:
     std::string mDebugName { "" };

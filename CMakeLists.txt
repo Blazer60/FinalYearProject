@@ -55,7 +55,7 @@ add_executable(${PROJECT_NAME}
         src/graphics/buffers/FramebufferObject.cpp include/graphics/buffers/FramebufferObject.h
         src/graphics/buffers/RenderBufferObject.cpp include/graphics/buffers/RenderBufferObject.h
         src/graphics/buffers/TextureBufferObject.cpp include/graphics/buffers/TextureBufferObject.h
-        src/graphics/Texture.cpp include/graphics/Texture.h)
+        src/graphics/Texture.cpp include/graphics/Texture.h include/graphics/Lighting.h)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
         include include/engine include/graphics include/game include/engine/loader include/graphics/buffers

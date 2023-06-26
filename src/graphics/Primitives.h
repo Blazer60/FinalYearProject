@@ -8,8 +8,9 @@
 #pragma once
 
 #include "Pch.h"
+#include "Mesh.h"
 
-namespace Primitives
+namespace primitives
 {
-
+    std::unique_ptr<SubMesh> fullscreenTriangle();
 }

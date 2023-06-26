@@ -36,13 +36,16 @@ typedef std::vector<Instruction> Instructions;
  */
 struct Vertex {};
 
-struct PositionVertex
+/**
+ * @brief A vertex that only contains a position and uv coordinate. Used to render fullscreen triangles to the screen.
+ */
+struct BasicVertex
     : public Vertex
 {
-    constexpr explicit PositionVertex(glm::vec3 position)
-        : position(position), uv(glm::vec2(0.f)) {}
+    constexpr explicit BasicVertex(const glm::vec3 &position, const glm::vec2 &uv)
+        : position(position), uv(uv) {}
         
-    constexpr explicit PositionVertex(const ObjVertex &objVertex)
+    constexpr explicit BasicVertex(const ObjVertex &objVertex)
         : position(objVertex.position), uv(objVertex.uv) {}
     
     glm::vec3 position;

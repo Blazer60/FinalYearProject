@@ -32,7 +32,7 @@ public:
     
     virtual ~TextureBufferObject();
     
-    [[nodiscard]] unsigned int getName() const;
+    [[nodiscard]] unsigned int getId() const;
     [[nodiscard]] const glm::ivec2 &getSize() const;
 protected:
     void init(GLenum minFilter, GLenum magFilter);

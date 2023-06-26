@@ -8,6 +8,7 @@
 #include "Renderer.h"
 #include "FramebufferObject.h"
 #include "WindowHelpers.h"
+#include "Primitives.h"
 
 #include <utility>
 
@@ -15,6 +16,7 @@ namespace renderer
 {
     std::vector<RenderQueueObject> renderQueue;
     std::vector<CameraSettings> cameraQueue;
+    std::vector<DirectionalLight> directionalLightQueue;
     GLenum drawModeToGLenum[] { GL_TRIANGLES, GL_LINES };
     std::unique_ptr<FramebufferObject> geometryFramebuffer;
     std::unique_ptr<TextureBufferObject> positionTextureBuffer;
@@ -25,6 +27,10 @@ namespace renderer
     std::unique_ptr<RenderBufferObject> geometryRenderbuffer;
     glm::ivec2 currentRenderBufferSize;
     
+    std::unique_ptr<Shader> directionalLightShader;
+    std::unique_ptr<SubMesh> fullscreenTriangle;
+    std::unique_ptr<FramebufferObject> lightFramebuffer;
+    std::unique_ptr<RenderBufferObject> lightRenderBuffer;
     
     bool init()
     {
@@ -36,6 +42,9 @@ namespace renderer
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
+        
+        directionalLightShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/lighting/DirectionalLight.frag");
+        fullscreenTriangle = primitives::fullscreenTriangle();
         
         initFrameBuffers();
         initTextureRenderBuffers();
@@ -105,6 +114,11 @@ namespace renderer
         cameraQueue.emplace_back(cameraMatrices);
     }
     
+    void submit(const DirectionalLight &directionalLight)
+    {
+        directionalLightQueue.emplace_back(directionalLight);
+    }
+    
     void render()
     {
         if (currentRenderBufferSize != window::bufferSize())
@@ -135,6 +149,20 @@ namespace renderer
                 glBindVertexArray(rqo.vao);
                 glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
             }
+            
+            lightFramebuffer->bind();
+            lightFramebuffer->clear(glm::vec4(glm::vec3(0.f), 1.f));
+            
+            directionalLightShader->bind();
+            for (const DirectionalLight &directionalLight : directionalLightQueue)
+            {
+                // Setup the uniforms in the shader.
+                // Draw a fullscreen triangle
+                directionalLightShader->set("u_texture", albedoTextureBuffer->getId(), 0);
+                
+                glBindVertexArray(fullscreenTriangle->vao());
+                glDrawElements(GL_TRIANGLES, fullscreenTriangle->indicesCount(), GL_UNSIGNED_INT, nullptr);
+            }
         }
         
         uint64_t renderQueueCount = renderQueue.size();
@@ -144,6 +172,10 @@ namespace renderer
         uint64_t cameraCount = cameraQueue.size();
         cameraQueue.clear();
         cameraQueue.reserve(cameraCount);
+        
+        uint64_t directionalLightCount = directionalLightQueue.size();
+        directionalLightQueue.clear();
+        directionalLightQueue.reserve(directionalLightCount);
     }
     
     const TextureBufferObject &getOutputBuffer()
@@ -154,7 +186,11 @@ namespace renderer
 // private:
     void initFrameBuffers()
     {
+        // One, Zero (override any geometry that is further away from the camera).
         geometryFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ZERO, GL_LESS);
+        
+        // One, One (additive blending for each light that we pass through)
+        lightFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ONE, GL_LESS);
     }
     
     void initTextureRenderBuffers()
@@ -166,6 +202,7 @@ namespace renderer
         outputTextureBuffer     = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,        GL_NEAREST, GL_NEAREST, 1, "Output Buffer");
         
         geometryRenderbuffer    = std::make_unique<RenderBufferObject>(window::bufferSize());
+        lightRenderBuffer       = std::make_unique<RenderBufferObject>(window::bufferSize());
         
         // Make sure that the framebuffers have been set up before calling this function.
         geometryFramebuffer->attach(positionTextureBuffer.get(),    0);
@@ -174,6 +211,11 @@ namespace renderer
         geometryFramebuffer->attach(emissiveTextureBuffer.get(),    3);
         
         geometryFramebuffer->attach(geometryRenderbuffer.get());
+        
+        // Lighting.
+        lightFramebuffer->attach(outputTextureBuffer.get(), 0);
+        
+        lightFramebuffer->attach(lightRenderBuffer.get());
     }
     
     void detachTextureRenderBuffersFromFrameBuffers()
@@ -183,6 +225,9 @@ namespace renderer
         geometryFramebuffer->detach(2);
         geometryFramebuffer->detach(3);
         geometryFramebuffer->detachRenderBuffer();
+        
+        lightFramebuffer->detach(0);
+        lightFramebuffer->detachRenderBuffer();
     }
     
     const TextureBufferObject &getAlbedoBuffer()

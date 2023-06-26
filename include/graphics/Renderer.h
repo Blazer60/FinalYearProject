@@ -14,6 +14,7 @@
 #include "Materials.h"
 #include "RendererHelpers.h"
 #include "TextureBufferObject.h"
+#include "Lighting.h"
 #include <functional>
 
 namespace renderer
@@ -28,6 +29,7 @@ namespace renderer
     void drawMesh(const SharedMesh &mesh, const SharedMaterials &materials, const glm::mat4 &matrix);
     
     void submit(const CameraSettings &cameraMatrices);
+    void submit(const DirectionalLight &directionalLight);
     
     void render();
     
@@ -36,6 +38,7 @@ namespace renderer
     [[nodiscard]] const TextureBufferObject &getNormalBuffer();
     [[nodiscard]] const TextureBufferObject &getPositionBuffer();
     [[nodiscard]] const TextureBufferObject &getEmissiveBuffer();
+    
     
     /**
      * @returns false if debug message was failed to be setup. This is most likely due to the openGl version being

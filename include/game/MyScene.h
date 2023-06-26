@@ -14,6 +14,7 @@
 #include "MainCamera.h"
 #include "Mesh.h"
 #include "Materials.h"
+#include "Lighting.h"
 
 /**
  * @author Ryan Purse
@@ -35,6 +36,7 @@ protected:
     MainCamera mMainCamera;
     SharedMesh mMesh;
     SharedMaterials mMaterials;
+    DirectionalLight mDirectionalLight;
     
     bool mShowOutput { true };
 };
