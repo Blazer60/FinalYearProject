@@ -37,7 +37,7 @@ protected:
     MainCamera mMainCamera;
     SharedMesh mMesh;
     SharedMaterials mMaterials;
-    DirectionalLight mDirectionalLight { glm::normalize(glm::vec3(-1.f, 1.f, -1.f)), glm::vec3(0.93f, 0.93f, 0.95f) };
+    DirectionalLight mDirectionalLight;
     
     bool mShowOutput { true };
 };

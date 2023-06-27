@@ -21,6 +21,19 @@ namespace renderer
         Triangles, Lines
     };
     
+    enum Filter
+    {
+        Nearest, Linear, NearestMipmapNearest, LinearMipmapNearest, NearestMipmapLinear, LinearMipmapLinear
+    };
+    
+    enum Wrap
+    {
+        ClampToEdge, ClampToBorder, MirrorRepeat, Repeat, MirrorClampToEdge
+    };
+    
+    GLint toGLint(Filter f);
+    GLint toGLint(Wrap w);
+    
     struct RenderQueueObject
     {
         uint32_t vao;

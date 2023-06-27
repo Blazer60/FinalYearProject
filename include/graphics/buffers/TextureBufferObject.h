@@ -9,6 +9,7 @@
 
 #include "Pch.h"
 #include <functional>
+#include "RendererHelpers.h"
 
 /**
  * Contains a texture that can be read and written to by openGl.
@@ -27,22 +28,28 @@ public:
      * @param format - The OpenGL format with the syntax GL_(components)(size)[type].
      */
     TextureBufferObject(
-        const glm::ivec2 &size, GLenum format, GLenum minFilter, GLenum magFilter, uint32_t mipmapLevels=1,
-        std::string debugName="");
+        const glm::ivec2 &size, GLenum format, GLint minFilter,
+        GLint magFilter, uint32_t mipmapLevels=1, std::string debugName="");
+    
+    TextureBufferObject(
+        const glm::ivec2 &size, GLenum format,
+        renderer::Filter filterMode, renderer::Wrap wrapMode,
+        uint32_t mipmapLevel=1, std::string debugName="");
     
     virtual ~TextureBufferObject();
     
     [[nodiscard]] unsigned int getId() const;
     [[nodiscard]] const glm::ivec2 &getSize() const;
+    void setBorderColour(const glm::vec4 &colour) const;
 protected:
-    void init(GLenum minFilter, GLenum magFilter);
+    void init(GLint minFilter, GLint magFilter, GLint wrapS, GLint wrapT);
     void deInit();
     
     unsigned int    mId           { 0 };
     GLenum          mFormat         { GL_RGB16 };
     glm::ivec2      mSize           { 1024 };
     uint32_t        mMipMapLevels   { 1 };
-    std::string     mDebugName      { "" };
+    std::string     mDebugName;
 };
 
 

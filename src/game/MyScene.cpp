@@ -12,7 +12,7 @@
 #include "ModelLoader.h"
 
 MyScene::MyScene()
-    : mMainCamera(glm::vec3(0.f, 8.f, 30.f))
+    : mMainCamera(glm::vec3(0.f, 8.f, 30.f)), mDirectionalLight(glm::normalize(glm::vec3(-1.f, 1.f, -1.f)), glm::vec3(0.93f, 0.93f, 0.95f) , glm::ivec2(2048))
 {
     const auto [mesh, simpleMaterials] = load::model<StandardVertex, StandardMaterial>(
         "../resources/models/pillars/Pillars.obj",

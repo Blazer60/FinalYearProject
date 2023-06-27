@@ -10,6 +10,7 @@
 #include "WindowHelpers.h"
 #include "Primitives.h"
 #include "Cubemap.h"
+#include "gtx/quaternion.hpp"
 
 #include <utility>
 
@@ -28,15 +29,16 @@ namespace renderer
     std::unique_ptr<TextureBufferObject> specularTextureBuffer;
     std::unique_ptr<TextureBufferObject> depthTextureBuffer;
     std::unique_ptr<TextureBufferObject> outputTextureBuffer;
-    std::unique_ptr<RenderBufferObject> geometryRenderbuffer;
     glm::ivec2 currentRenderBufferSize;
     
     std::unique_ptr<Shader> directionalLightShader;
     std::unique_ptr<Shader> deferredLightShader;
+    std::unique_ptr<Shader> shadowShader;
     std::unique_ptr<SubMesh> fullscreenTriangle;
     std::unique_ptr<FramebufferObject> lightFramebuffer;
     
     std::unique_ptr<FramebufferObject> deferredLightFramebuffer;
+    std::unique_ptr<FramebufferObject> shadowFramebuffer;
     
     std::unique_ptr<Cubemap> skybox;
     
@@ -54,6 +56,7 @@ namespace renderer
         
         directionalLightShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/lighting/DirectionalLight.frag");
         deferredLightShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/lighting/CombineOutput.frag");
+        shadowShader = std::make_unique<Shader>("../resources/shaders/shadow/Shadow.vert", "../resources/shaders/shadow/Shadow.frag");
         fullscreenTriangle = primitives::fullscreenTriangle();
         skybox = std::make_unique<Cubemap>(std::vector<std::string> {
             "../resources/textures/skybox/right.jpg",
@@ -168,6 +171,36 @@ namespace renderer
                 glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
             }
             
+            // Shadow mapping
+            
+            shadowFramebuffer->bind();
+            shadowShader->bind();
+            
+            for (const DirectionalLight &directionalLight : directionalLightQueue)
+            {
+                shadowFramebuffer->attachDepthBuffer(directionalLight.shadowMap.get());
+                shadowFramebuffer->clear(glm::vec4(glm::vec3(1.f), 1.f));
+                const glm::ivec2 &shadowMapSize = directionalLight.shadowMap->getSize();
+                glViewport(0, 0, shadowMapSize.x, shadowMapSize.y);
+                
+                const glm::mat4 viewMatrix = glm::lookAt(-directionalLight.direction * 20.0f, glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f));
+                const glm::mat4 projectionMatrix = glm::ortho(-30.f, 30.f, -30.f, 30.f, 0.1f, 100.f);
+                
+                for (const auto &rqo : renderQueue)
+                {
+                    const glm::mat4 &modelMatrix = rqo.matrix;
+                    const glm::mat4 mvp = projectionMatrix * viewMatrix * modelMatrix;
+                    shadowShader->set("u_mvp_matrix", mvp);
+                    glBindVertexArray(rqo.vao);
+                    glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
+                }
+                
+                shadowFramebuffer->detachDepthBuffer();
+            }
+            
+            // Reset the viewport back to the normal size once we've finished rendering all the shadows.
+            glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
+            
             lightFramebuffer->bind();
             lightFramebuffer->clear(glm::vec4(glm::vec3(0.f), 1.f));
             
@@ -242,6 +275,8 @@ namespace renderer
         
         // We only ever write to this framebuffer once, so it shouldn't matter.
         deferredLightFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ONE, GL_ALWAYS);
+        
+        shadowFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ZERO, GL_LESS);
     }
     
     void initTextureRenderBuffers()
@@ -254,8 +289,6 @@ namespace renderer
         specularTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST, 1, "Specular Buffer");
         outputTextureBuffer     = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST, 1, "Output Buffer");
         depthTextureBuffer      = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_DEPTH_COMPONENT32F,    GL_NEAREST, GL_NEAREST, 1, "Depth Buffer");
-        
-        geometryRenderbuffer        = std::make_unique<RenderBufferObject>(window::bufferSize());
         
         // Make sure that the framebuffers have been set up before calling this function.
         geometryFramebuffer->attach(positionTextureBuffer.get(),    0);
