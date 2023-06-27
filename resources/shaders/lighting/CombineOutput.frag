@@ -34,7 +34,7 @@ vec3 sample_skybox_colour()
 void main()
 {
     const float depth = texture(u_depth_texture, v_uv).r;
-    if (depth > 0.f)
+    if (depth < 1.f)
     {
         const vec3 diffuse  = texture(u_diffuse_texture, v_uv).rgb;
         const vec3 specular = texture(u_specular_texture, v_uv).rgb;

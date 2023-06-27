@@ -33,13 +33,10 @@ namespace renderer
     
     std::unique_ptr<Shader> directionalLightShader;
     std::unique_ptr<Shader> deferredLightShader;
-    std::unique_ptr<Shader> skyboxShader;
     std::unique_ptr<SubMesh> fullscreenTriangle;
     std::unique_ptr<FramebufferObject> lightFramebuffer;
-    std::unique_ptr<RenderBufferObject> lightRenderBuffer;
     
     std::unique_ptr<FramebufferObject> deferredLightFramebuffer;
-    std::unique_ptr<RenderBufferObject> deferredLightRenderbuffer;
     
     std::unique_ptr<Cubemap> skybox;
     
@@ -249,38 +246,31 @@ namespace renderer
     
     void initTextureRenderBuffers()
     {
-        positionTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,        GL_NEAREST, GL_NEAREST, 1, "Position Buffer");
-        albedoTextureBuffer     = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,        GL_NEAREST, GL_NEAREST, 1, "Albedo Buffer");
-        normalTextureBuffer     = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16_SNORM,   GL_NEAREST, GL_NEAREST, 1, "Normal Buffer");
-        emissiveTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,        GL_NEAREST, GL_NEAREST, 1, "Emissive Buffer");
-        diffuseTextureBuffer    = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,        GL_NEAREST, GL_NEAREST, 1, "Diffuse Buffer");
-        specularTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,        GL_NEAREST, GL_NEAREST, 1, "Specular Buffer");
-        outputTextureBuffer     = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,        GL_NEAREST, GL_NEAREST, 1, "Output Buffer");
-        depthTextureBuffer      = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_R32F,          GL_NEAREST, GL_NEAREST, 1, "Depth Buffer");
+        positionTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST, 1, "Position Buffer");
+        albedoTextureBuffer     = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST, 1, "Albedo Buffer");
+        normalTextureBuffer     = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16_SNORM,           GL_NEAREST, GL_NEAREST, 1, "Normal Buffer");
+        emissiveTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST, 1, "Emissive Buffer");
+        diffuseTextureBuffer    = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST, 1, "Diffuse Buffer");
+        specularTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST, 1, "Specular Buffer");
+        outputTextureBuffer     = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST, 1, "Output Buffer");
+        depthTextureBuffer      = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_DEPTH_COMPONENT32F,    GL_NEAREST, GL_NEAREST, 1, "Depth Buffer");
         
         geometryRenderbuffer        = std::make_unique<RenderBufferObject>(window::bufferSize());
-        lightRenderBuffer           = std::make_unique<RenderBufferObject>(window::bufferSize());
-        deferredLightRenderbuffer   = std::make_unique<RenderBufferObject>(window::bufferSize());
         
         // Make sure that the framebuffers have been set up before calling this function.
         geometryFramebuffer->attach(positionTextureBuffer.get(),    0);
         geometryFramebuffer->attach(normalTextureBuffer.get(),      1);
         geometryFramebuffer->attach(albedoTextureBuffer.get(),      2);
         geometryFramebuffer->attach(emissiveTextureBuffer.get(),    3);
-        geometryFramebuffer->attach(depthTextureBuffer.get(),       4);
         
-        geometryFramebuffer->attach(geometryRenderbuffer.get());
+        geometryFramebuffer->attachDepthBuffer(depthTextureBuffer.get());
         
         // Lighting.
         lightFramebuffer->attach(diffuseTextureBuffer.get(), 0);
         lightFramebuffer->attach(specularTextureBuffer.get(), 1);
         
-        lightFramebuffer->attach(lightRenderBuffer.get());
-        
         // Deferred Lighting.
         deferredLightFramebuffer->attach(outputTextureBuffer.get(), 0);
-        
-        deferredLightFramebuffer->attach(deferredLightRenderbuffer.get());
     }
     
     void detachTextureRenderBuffersFromFrameBuffers()
@@ -289,15 +279,12 @@ namespace renderer
         geometryFramebuffer->detach(1);
         geometryFramebuffer->detach(2);
         geometryFramebuffer->detach(3);
-        geometryFramebuffer->detach(4);
-        geometryFramebuffer->detachRenderBuffer();
+        geometryFramebuffer->detachDepthBuffer();
         
         lightFramebuffer->detach(0);
         lightFramebuffer->detach(1);
-        lightFramebuffer->detachRenderBuffer();
         
         deferredLightFramebuffer->detach(0);
-        deferredLightFramebuffer->detachRenderBuffer();
     }
     
     const TextureBufferObject &getAlbedoBuffer()

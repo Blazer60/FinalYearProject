@@ -36,9 +36,11 @@ public:
     
     void attach(const TextureBufferObject *textureBufferObject, int bindPoint, int mipLevel = 0);
     void attach(const RenderBufferObject *renderBufferObject) const;
+    void attachDepthBuffer(const TextureBufferObject *textureBufferObject, int mipLevel = 0);
     
     void detach(int bindPoint);
     void detachRenderBuffer() const;
+    void detachDepthBuffer() const;
     void clear(const glm::vec4 &clearColour);
     void bind() const;
     
@@ -48,8 +50,8 @@ protected:
     
     std::vector<GLenum> mAttachments;
     
-    unsigned int    mFboId        { 0 };
-    const float     mDepth        { 1.f };
+    unsigned int    mFboId              { 0 };
+    const float     mDepthClearValue    { 1.f };
     
     GLenum mSourceBlend         { GL_ONE };
     GLenum mDestinationBlend    { GL_ZERO };

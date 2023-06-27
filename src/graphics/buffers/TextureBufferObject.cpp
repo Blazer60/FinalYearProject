@@ -51,4 +51,3 @@ const glm::ivec2 &TextureBufferObject::getSize() const
 {
     return mSize;
 }
-
