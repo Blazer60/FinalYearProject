@@ -38,13 +38,4 @@ protected:
     SharedMesh mMesh;
     SharedMaterials mMaterials;
     DirectionalLight mDirectionalLight;
-    
-    bool mShowOutput { true };
-    
-    float mLeft     { -80.0f };
-    float mRight    {  80.0f };
-    float mTop      {  80.0f };
-    float mBottom   { -80.0f };
-    float mNear     {   0.1f };
-    float mFar      { 200.0f };
 };

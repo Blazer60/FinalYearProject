@@ -32,19 +32,31 @@ float light_dot(vec3 a, vec3 b)
     return max(dot(a, b), 0.f);
 }
 
+float sample_shadow_map(vec2 uv, float depth, float bias)
+{
+    const float shadow_depth = texture(u_shadow_map_texture, uv).r;
+    return depth - bias > shadow_depth ? 1.f : 0.f;
+}
+
 float calculate_shadow_map(vec3 position, vec3 normal)
 {
     const vec4 position_light_space = u_light_vp_matrix * vec4(position, 1.f);
     vec3 projection_coords = position_light_space.xyz / position_light_space.w;
     projection_coords = 0.5f * projection_coords + 0.5f;
-
-    const float shadow_depth = texture(u_shadow_map_texture, projection_coords.xy).r;
     const float current_depth = projection_coords.z;
-    const float bias = mix(0.005f, 0.f, light_dot(normal, -u_light_direction));
-    float shadow = 0.f;
-    if (projection_coords.z < 1.f)
-        shadow = current_depth - bias > shadow_depth ? 1.f : 0.f;
-    return shadow;
+    const float bias = mix(0.001f, 0.f, light_dot(normal, -u_light_direction));
+
+    if (current_depth < 1.f)
+    {
+        vec2 texel_size = 1.f / textureSize(u_shadow_map_texture, 0);
+        float sum = 0.f;
+        sum += sample_shadow_map(projection_coords.xy + (texel_size * vec2(-1.5f, -1.5f)), current_depth, bias);
+        sum += sample_shadow_map(projection_coords.xy + (texel_size * vec2( 1.5f, -1.5f)), current_depth, bias);
+        sum += sample_shadow_map(projection_coords.xy + (texel_size * vec2(-1.5f,  1.5f)), current_depth, bias);
+        sum += sample_shadow_map(projection_coords.xy + (texel_size * vec2( 1.5f,  1.5f)), current_depth, bias);
+        return 0.25f * sum * dot(u_light_intensity, u_light_intensity) / 3.f;
+    }
+    return 0.f;
 }
 
 void main()

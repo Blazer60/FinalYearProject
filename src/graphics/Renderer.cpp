@@ -175,37 +175,7 @@ namespace renderer
             
             // Shadow mapping
             
-            lightVpMatrices.reserve(directionalLightQueue.size());
-            
-            shadowFramebuffer->bind();
-            shadowShader->bind();
-            
-            for (const DirectionalLight &directionalLight : directionalLightQueue)
-            {
-                shadowFramebuffer->attachDepthBuffer(directionalLight.shadowMap.get());
-                shadowFramebuffer->clear(glm::vec4(glm::vec3(0.f), 1.f));
-                const glm::ivec2 &shadowMapSize = directionalLight.shadowMap->getSize();
-                glViewport(0, 0, shadowMapSize.x, shadowMapSize.y);
-                
-                const glm::mat4 viewMatrix = glm::lookAt(directionalLight.direction * 100.0f, glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f));
-                // const glm::mat4 projectionMatrix = glm::ortho(-80.f, 80.f, -80.f, 80.f, 0.1f, 100.f);
-                const glm::mat4 projectionMatrix = directionalLight.projectionMat;
-                lightVpMatrices.emplace_back(projectionMatrix * viewMatrix);
-                
-                for (const auto &rqo : renderQueue)
-                {
-                    const glm::mat4 &modelMatrix = rqo.matrix;
-                    const glm::mat4 mvp = projectionMatrix * viewMatrix * modelMatrix;
-                    shadowShader->set("u_mvp_matrix", mvp);
-                    glBindVertexArray(rqo.vao);
-                    glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
-                }
-                
-                shadowFramebuffer->detachDepthBuffer();
-            }
-            
-            // Reset the viewport back to the normal size once we've finished rendering all the shadows.
-            glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
+            shadowMapping();
             
             lightFramebuffer->bind();
             lightFramebuffer->clear(glm::vec4(glm::vec3(0.f), 1.f));
@@ -273,13 +243,50 @@ namespace renderer
         directionalLightQueue.clear();
         directionalLightQueue.reserve(directionalLightCount);
     }
+
+// private:
+    void shadowMapping()
+    {
+        lightVpMatrices.reserve(directionalLightQueue.size());
+        
+        shadowFramebuffer->bind();
+        shadowShader->bind();
+        
+        for (const DirectionalLight &directionalLight : directionalLightQueue)
+        {
+            shadowFramebuffer->attachDepthBuffer(directionalLight.shadowMap.get());
+            shadowFramebuffer->clear(glm::vec4(glm::vec3(0.f), 1.f));
+            
+            const glm::ivec2 &shadowMapSize = directionalLight.shadowMap->getSize();
+            glViewport(0, 0, shadowMapSize.x, shadowMapSize.y);
+            
+            glm::mat4 lightViewMatrix = glm::lookAt(directionalLight.direction * 100.f, glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f));
+            
+            const glm::mat4 projectionMatrix = glm::ortho(-54.f, 54.f, -31.f, 31.f, 0.1f, 200.f);
+            
+            lightVpMatrices.emplace_back(projectionMatrix * lightViewMatrix);
+            
+            for (const auto &rqo : renderQueue)
+            {
+                const glm::mat4 &modelMatrix = rqo.matrix;
+                const glm::mat4 mvp = projectionMatrix * lightViewMatrix * modelMatrix;
+                shadowShader->set("u_mvp_matrix", mvp);
+                glBindVertexArray(rqo.vao);
+                glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
+            }
+            
+            shadowFramebuffer->detachDepthBuffer();
+        }
+        
+        // Reset the viewport back to the normal size once we've finished rendering all the shadows.
+        glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
+    }
     
     const TextureBufferObject &getOutputBuffer()
     {
         return *outputTextureBuffer;
     }
     
-// private:
     void initFrameBuffers()
     {
         // One, Zero (override any geometry that is further away from the camera).

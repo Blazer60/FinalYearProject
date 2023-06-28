@@ -57,4 +57,5 @@ namespace renderer
     void initFrameBuffers();
     void initTextureRenderBuffers();
     void detachTextureRenderBuffersFromFrameBuffers();
+    void shadowMapping();
 }
