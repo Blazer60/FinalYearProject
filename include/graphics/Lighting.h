@@ -41,4 +41,6 @@ struct DirectionalLight
      * @brief The colour of the light.
      */
     glm::vec3 intensity { 1.f };
+    
+    glm::mat4 projectionMat { 1.f };
 };

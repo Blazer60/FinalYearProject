@@ -19,6 +19,7 @@ namespace renderer
     std::vector<RenderQueueObject> renderQueue;
     std::vector<CameraSettings> cameraQueue;
     std::vector<DirectionalLight> directionalLightQueue;
+    std::vector<glm::mat4> lightVpMatrices;
     GLenum drawModeToGLenum[] { GL_TRIANGLES, GL_LINES };
     std::unique_ptr<FramebufferObject> geometryFramebuffer;
     std::unique_ptr<TextureBufferObject> positionTextureBuffer;
@@ -28,6 +29,7 @@ namespace renderer
     std::unique_ptr<TextureBufferObject> diffuseTextureBuffer;
     std::unique_ptr<TextureBufferObject> specularTextureBuffer;
     std::unique_ptr<TextureBufferObject> depthTextureBuffer;
+    std::unique_ptr<TextureBufferObject> shadowTextureBuffer;
     std::unique_ptr<TextureBufferObject> outputTextureBuffer;
     glm::ivec2 currentRenderBufferSize;
     
@@ -173,18 +175,22 @@ namespace renderer
             
             // Shadow mapping
             
+            lightVpMatrices.reserve(directionalLightQueue.size());
+            
             shadowFramebuffer->bind();
             shadowShader->bind();
             
             for (const DirectionalLight &directionalLight : directionalLightQueue)
             {
                 shadowFramebuffer->attachDepthBuffer(directionalLight.shadowMap.get());
-                shadowFramebuffer->clear(glm::vec4(glm::vec3(1.f), 1.f));
+                shadowFramebuffer->clear(glm::vec4(glm::vec3(0.f), 1.f));
                 const glm::ivec2 &shadowMapSize = directionalLight.shadowMap->getSize();
                 glViewport(0, 0, shadowMapSize.x, shadowMapSize.y);
                 
-                const glm::mat4 viewMatrix = glm::lookAt(-directionalLight.direction * 20.0f, glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f));
-                const glm::mat4 projectionMatrix = glm::ortho(-30.f, 30.f, -30.f, 30.f, 0.1f, 100.f);
+                const glm::mat4 viewMatrix = glm::lookAt(directionalLight.direction * 100.0f, glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f));
+                // const glm::mat4 projectionMatrix = glm::ortho(-80.f, 80.f, -80.f, 80.f, 0.1f, 100.f);
+                const glm::mat4 projectionMatrix = directionalLight.projectionMat;
+                lightVpMatrices.emplace_back(projectionMatrix * viewMatrix);
                 
                 for (const auto &rqo : renderQueue)
                 {
@@ -215,13 +221,20 @@ namespace renderer
             
             glBindVertexArray(fullscreenTriangle->vao());
             
+            int32_t lightIterator = 0;
+            
             for (const DirectionalLight &directionalLight : directionalLightQueue)
             {
+                const glm::mat4 &lightVpMatrix = lightVpMatrices[lightIterator++];
                 directionalLightShader->set("u_light_direction", directionalLight.direction);
                 directionalLightShader->set("u_light_intensity", directionalLight.intensity);
+                directionalLightShader->set("u_light_vp_matrix", lightVpMatrix);
+                directionalLightShader->set("u_shadow_map_texture", directionalLight.shadowMap->getId(), 3);
                 
                 glDrawElements(GL_TRIANGLES, fullscreenTriangle->indicesCount(), GL_UNSIGNED_INT, nullptr);
             }
+            
+            lightVpMatrices.clear();
             
             // Deferred Lighting step.
             
@@ -240,11 +253,13 @@ namespace renderer
             deferredLightShader->set("u_emissive_texture", emissiveTextureBuffer->getId(), 3);
             deferredLightShader->set("u_depth_texture", depthTextureBuffer->getId(), 4);
             deferredLightShader->set("u_skybox_texture", skybox->getId(), 5);
+            deferredLightShader->set("u_shadow_texture", shadowTextureBuffer->getId(), 6);
             deferredLightShader->set("u_inverse_vp_matrix", ivp);
             
             glBindVertexArray(fullscreenTriangle->vao());  // I know it's still bound but just it's just to avoid future errors.
             glDrawElements(GL_TRIANGLES, fullscreenTriangle->indicesCount(), GL_UNSIGNED_INT, nullptr);
         }
+        
         
         uint64_t renderQueueCount = renderQueue.size();
         renderQueue.clear();
@@ -288,6 +303,7 @@ namespace renderer
         diffuseTextureBuffer    = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST, 1, "Diffuse Buffer");
         specularTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST, 1, "Specular Buffer");
         outputTextureBuffer     = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST, 1, "Output Buffer");
+        shadowTextureBuffer     = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_R16F,                  GL_NEAREST, GL_NEAREST, 1, "Shadow Buffer");
         depthTextureBuffer      = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_DEPTH_COMPONENT32F,    GL_NEAREST, GL_NEAREST, 1, "Depth Buffer");
         
         // Make sure that the framebuffers have been set up before calling this function.
@@ -301,6 +317,7 @@ namespace renderer
         // Lighting.
         lightFramebuffer->attach(diffuseTextureBuffer.get(), 0);
         lightFramebuffer->attach(specularTextureBuffer.get(), 1);
+        lightFramebuffer->attach(shadowTextureBuffer.get(), 2);
         
         // Deferred Lighting.
         deferredLightFramebuffer->attach(outputTextureBuffer.get(), 0);
@@ -316,6 +333,7 @@ namespace renderer
         
         lightFramebuffer->detach(0);
         lightFramebuffer->detach(1);
+        lightFramebuffer->detach(2);
         
         deferredLightFramebuffer->detach(0);
     }
@@ -353,6 +371,11 @@ namespace renderer
     const TextureBufferObject &getDepthBuffer()
     {
         return *depthTextureBuffer;
+    }
+    
+    const TextureBufferObject &getShadowBuffer()
+    {
+        return *shadowTextureBuffer;
     }
 }
 

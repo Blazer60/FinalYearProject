@@ -12,6 +12,7 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "Timers.h"
+#include "UiHelpers.h"
 
 engine::Core::Core(const glm::ivec2 &resolution, bool enableDebugging)
     : mResolution(resolution), mEnableDebugging(enableDebugging)
@@ -210,42 +211,21 @@ void engine::Core::updateImguiMenuViewports()
             mViewport.showDepthBuffer = true;
         if (ImGui::MenuItem("Show Output Buffer"))
             mViewport.showOutputBuffer = true;
+        if (ImGui::MenuItem("Show Shadow Buffer"))
+            mViewport.showShadowBuffer = true;
         ImGui::EndMenu();
     }
 }
 
 void engine::Core::updateViewports()
 {
-    showTextureBuffer("Albedo",     renderer::getAlbedoBuffer(),    &mViewport.showAlbedoBuffer,    false);
-    showTextureBuffer("Position",   renderer::getPositionBuffer(),  &mViewport.showPositionBuffer,  false);
-    showTextureBuffer("Normal",     renderer::getNormalBuffer(),    &mViewport.showNormalBuffer,    false);
-    showTextureBuffer("Emissive",   renderer::getEmissiveBuffer(),  &mViewport.showEmissiveBuffer,  false);
-    showTextureBuffer("Diffuse",    renderer::getDiffuseBuffer(),   &mViewport.showDiffuseBuffer,   false);
-    showTextureBuffer("Specular",   renderer::getSpecularBuffer(),  &mViewport.showSpecularBuffer,  false);
-    showTextureBuffer("Depth",      renderer::getDepthBuffer(),     &mViewport.showDepthBuffer,     false);
-    showTextureBuffer("Output",     renderer::getOutputBuffer(),    &mViewport.showOutputBuffer,    true);
+    ui::showTextureBuffer("Albedo",     renderer::getAlbedoBuffer(),    &mViewport.showAlbedoBuffer,    false);
+    ui::showTextureBuffer("Position",   renderer::getPositionBuffer(),  &mViewport.showPositionBuffer,  false);
+    ui::showTextureBuffer("Normal",     renderer::getNormalBuffer(),    &mViewport.showNormalBuffer,    false);
+    ui::showTextureBuffer("Emissive",   renderer::getEmissiveBuffer(),  &mViewport.showEmissiveBuffer,  false);
+    ui::showTextureBuffer("Diffuse",    renderer::getDiffuseBuffer(),   &mViewport.showDiffuseBuffer,   false);
+    ui::showTextureBuffer("Specular",   renderer::getSpecularBuffer(),  &mViewport.showSpecularBuffer,  false);
+    ui::showTextureBuffer("Depth",      renderer::getDepthBuffer(),     &mViewport.showDepthBuffer,     false);
+    ui::showTextureBuffer("Shadow",     renderer::getShadowBuffer(),    &mViewport.showShadowBuffer,    false);
+    ui::showTextureBuffer("Output",     renderer::getOutputBuffer(),    &mViewport.showOutputBuffer,    true);
 }
-
-void engine::Core::showTextureBuffer(
-    const std::string &name, const TextureBufferObject &texture, bool *show, bool isMainBuffer)
-{
-    if (show && !*show)
-        return;
-    
-    ImGui::PushID(name.c_str());
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
-    if (ImGui::Begin(name.c_str(), show))
-    {
-        ImVec2 regionSize = ImGui::GetContentRegionAvail();
-        
-        if (isMainBuffer)
-            window::setBufferSize(glm::ivec2(regionSize.x, regionSize.y));
-        
-        ImGui::Image(reinterpret_cast<void *>(texture.getId()), regionSize, ImVec2(0, 1), ImVec2(1, 0));
-    }
-    
-    ImGui::End();
-    ImGui::PopStyleVar();
-    ImGui::PopID();
-}
-

@@ -26,6 +26,7 @@ namespace engine
         bool showDiffuseBuffer  { true };
         bool showSpecularBuffer { true };
         bool showDepthBuffer    { true };
+        bool showShadowBuffer   { true };
     };
 
 /**
@@ -49,8 +50,6 @@ namespace engine
         void updateImgui();
         void updateImguiMenuViewports();
         void updateViewports();
-        
-        static void showTextureBuffer( const std::string &name, const TextureBufferObject &texture, bool *show, bool isMainBuffer);
         
     protected:
         const glm::ivec2 mResolution { 1920, 1080 };

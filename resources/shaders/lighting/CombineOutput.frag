@@ -8,6 +8,7 @@ uniform sampler2D u_albedo_texture;
 uniform sampler2D u_emissive_texture;
 uniform sampler2D u_depth_texture;
 uniform samplerCube u_skybox_texture;
+uniform sampler2D u_shadow_texture;
 
 uniform mat4 u_inverse_vp_matrix;
 
@@ -40,9 +41,10 @@ void main()
         const vec3 specular = texture(u_specular_texture, v_uv).rgb;
         const vec3 albedo   = texture(u_albedo_texture, v_uv).rgb;
         const vec3 emissive = texture(u_emissive_texture, v_uv).rgb;
+        const float shadow = texture(u_shadow_texture, v_uv).r;
         const vec3 ambient  = 0.2f * albedo;
 
-        o_colour = emissive + ambient + diffuse + specular;
+        o_colour = emissive + ambient + (1.f - shadow) * diffuse + (1.f - shadow) * specular;
     }
     else
     {

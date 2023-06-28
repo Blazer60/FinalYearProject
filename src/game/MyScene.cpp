@@ -10,6 +10,8 @@
 #include "Shader.h"
 #include "Vertices.h"
 #include "ModelLoader.h"
+#include "UiHelpers.h"
+#include "imgui.h"
 
 MyScene::MyScene()
     : mMainCamera(glm::vec3(0.f, 8.f, 30.f)), mDirectionalLight(glm::normalize(glm::vec3(-1.f, 1.f, -1.f)), glm::vec3(0.93f, 0.93f, 0.95f) , glm::ivec2(2048))
@@ -43,6 +45,17 @@ void MyScene::onRender()
 void MyScene::onImguiUpdate()
 {
     mMainCamera.imguiUpdate();
+    bool show = true;
+    ui::showTextureBuffer("Light Shadow Map", *mDirectionalLight.shadowMap, &show, false);
+    
+    ImGui::DragFloat("Left", &mLeft);
+    ImGui::DragFloat("Right", &mRight);
+    ImGui::DragFloat("Top", &mTop);
+    ImGui::DragFloat("Bottom", &mBottom);
+    ImGui::DragFloat("Near", &mNear);
+    ImGui::DragFloat("Far", &mFar);
+    
+    mDirectionalLight.projectionMat = glm::ortho(mLeft, mRight, mBottom, mTop, mNear, mFar);
 }
 
 void MyScene::onImguiMenuUpdate()
