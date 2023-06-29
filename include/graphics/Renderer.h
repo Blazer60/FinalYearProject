@@ -57,5 +57,5 @@ namespace renderer
     void initFrameBuffers();
     void initTextureRenderBuffers();
     void detachTextureRenderBuffersFromFrameBuffers();
-    void shadowMapping();
+    void shadowMapping(const glm::mat4 &cameraVpMatrix);
 }

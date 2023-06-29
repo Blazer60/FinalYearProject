@@ -57,7 +57,7 @@ protected:
     
     float           mFovY               { glm::radians(45.f) };
     float           mNearClip           { 0.001f };
-    float           mFarClip            { 1000.f };
+    float           mFarClip            { 100.f };
     
     GLFWwindow *    mWindow             { };
 };

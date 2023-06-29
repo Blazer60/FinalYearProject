@@ -175,7 +175,7 @@ namespace renderer
             
             // Shadow mapping
             
-            shadowMapping();
+            shadowMapping(vpMatrix);
             
             lightFramebuffer->bind();
             lightFramebuffer->clear(glm::vec4(glm::vec3(0.f), 1.f));
@@ -245,12 +245,36 @@ namespace renderer
     }
 
 // private:
-    void shadowMapping()
+    void shadowMapping(const glm::mat4 &cameraVpMatrix)
     {
+        const auto resize = [](const glm::vec4 &v) { return v / v.w; };
         lightVpMatrices.reserve(directionalLightQueue.size());
         
         shadowFramebuffer->bind();
         shadowShader->bind();
+        
+        // We only want the shadow map to encompass the camera's frustum.
+        const glm::mat4 inverseVpMatrix = glm::inverse(cameraVpMatrix);
+        const std::vector<glm::vec4> worldPoints = {
+            resize(inverseVpMatrix * glm::vec4( 1.f,  1.f, 0.f, 1.f)),
+            resize(inverseVpMatrix * glm::vec4( 1.f, -1.f, 0.f, 1.f)),
+            resize(inverseVpMatrix * glm::vec4(-1.f,  1.f, 0.f, 1.f)),
+            resize(inverseVpMatrix * glm::vec4(-1.f, -1.f, 0.f, 1.f)),
+            
+            resize(inverseVpMatrix * glm::vec4( 1.f,  1.f, 1.f,  1.f)),
+            resize(inverseVpMatrix * glm::vec4( 1.f, -1.f, 1.f,  1.f)),
+            resize(inverseVpMatrix * glm::vec4(-1.f,  1.f, 1.f,  1.f)),
+            resize(inverseVpMatrix * glm::vec4(-1.f, -1.f, 1.f,  1.f)),
+        };
+        
+        glm::vec3 minWorldBound = worldPoints[0];
+        glm::vec3 maxWorldBound = worldPoints[0];
+        for (int i = 1; i < worldPoints.size(); ++i)
+        {
+            minWorldBound = glm::min(minWorldBound, glm::vec3(worldPoints[i]));
+            maxWorldBound = glm::max(maxWorldBound, glm::vec3(worldPoints[i]));
+        }
+        const glm::vec3 centerPoint = minWorldBound + 0.5f * (maxWorldBound - minWorldBound);
         
         for (const DirectionalLight &directionalLight : directionalLightQueue)
         {
@@ -260,16 +284,24 @@ namespace renderer
             const glm::ivec2 &shadowMapSize = directionalLight.shadowMap->getSize();
             glViewport(0, 0, shadowMapSize.x, shadowMapSize.y);
             
-            glm::mat4 lightViewMatrix = glm::lookAt(directionalLight.direction * 100.f, glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f));
+            const glm::mat4 lightViewMatrix = glm::lookAt(centerPoint + directionalLight.direction, centerPoint, glm::vec3(0.f, 1.f, 0.f));
+            glm::vec3 minLightSpacePoint = lightViewMatrix * worldPoints[0];
+            glm::vec3 maxLightSpacePoint = lightViewMatrix * worldPoints[0];
+            for (int i = 1; i < worldPoints.size(); ++i)
+            {
+                const glm::vec3 lightPoint = lightViewMatrix * worldPoints[i];
+                minLightSpacePoint = glm::min(minLightSpacePoint, lightPoint);
+                maxLightSpacePoint = glm::max(maxLightSpacePoint, lightPoint);
+            }
             
-            const glm::mat4 projectionMatrix = glm::ortho(-54.f, 54.f, -31.f, 31.f, 0.1f, 200.f);
+            const glm::mat4 lightProjectionMatrix = glm::ortho(minLightSpacePoint.x, maxLightSpacePoint.x, minLightSpacePoint.y, maxLightSpacePoint.y, minLightSpacePoint.z, maxLightSpacePoint.z);
             
-            lightVpMatrices.emplace_back(projectionMatrix * lightViewMatrix);
+            lightVpMatrices.emplace_back(lightProjectionMatrix * lightViewMatrix);
             
             for (const auto &rqo : renderQueue)
             {
                 const glm::mat4 &modelMatrix = rqo.matrix;
-                const glm::mat4 mvp = projectionMatrix * lightViewMatrix * modelMatrix;
+                const glm::mat4 mvp = lightProjectionMatrix * lightViewMatrix * modelMatrix;
                 shadowShader->set("u_mvp_matrix", mvp);
                 glBindVertexArray(rqo.vao);
                 glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
