@@ -47,7 +47,7 @@ void MyScene::onImguiUpdate()
 {
     mMainCamera.imguiUpdate();
     bool show = true;
-    ui::showTextureBuffer("Light Shadow Map", *mDirectionalLight.shadowMap, &show, false);
+    // ui::showTextureBuffer("Light Shadow Map", *mDirectionalLight.shadowMap, &show, false);
     ImGui::DragFloat3("Intensity", glm::value_ptr(mDirectionalLight.intensity), 0.01f);
 }
 

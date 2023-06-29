@@ -53,6 +53,25 @@ void FramebufferObject::attachDepthBuffer(const TextureBufferObject *textureBuff
     validate();
 }
 
+void FramebufferObject::attachDepthBuffer(const TextureArrayObject &textureArrayObject, int layer, int mipLevel)
+{
+    if (!(textureArrayObject.mFormat  == GL_DEPTH_COMPONENT
+          || textureArrayObject.mFormat == GL_DEPTH_COMPONENT16
+          || textureArrayObject.mFormat == GL_DEPTH_COMPONENT24
+          || textureArrayObject.mFormat == GL_DEPTH_COMPONENT32
+          || textureArrayObject.mFormat == GL_DEPTH_COMPONENT32F)
+        )
+    {
+        debug::log("You are trying to attached a depth texture with an incorrect internal format. "
+                   "The depth texture will not be bound.", debug::severity::Warning);
+        return;
+    }
+    
+    glNamedFramebufferTextureLayer(mFboId, GL_DEPTH_ATTACHMENT, textureArrayObject.mId, mipLevel, layer);
+    
+    validate();
+}
+
 void FramebufferObject::detach(int bindPoint)
 {
     glNamedFramebufferTexture(mFboId, GL_COLOR_ATTACHMENT0 + bindPoint, 0, 0);
@@ -144,4 +163,5 @@ void FramebufferObject::detachDepthBuffer() const
 {
     glNamedFramebufferTexture(mFboId, GL_DEPTH_ATTACHMENT, 0, 0);
 }
+
 

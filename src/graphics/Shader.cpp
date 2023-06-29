@@ -132,3 +132,13 @@ void Shader::set(const std::string &uniformName, const uint32_t textureId, const
     glBindTextureUnit(bindPoint, textureId);
     set(uniformName, bindPoint);
 }
+
+void Shader::set(const std::string &uniformName, const float *values, int count)
+{
+    glUniform1fv(getLocation(uniformName), count, values);
+}
+
+void Shader::set(const std::string &uniformName, const glm::mat4 *values, int count)
+{
+    glUniformMatrix4fv(getLocation(uniformName), count, GL_FALSE, glm::value_ptr(values[0]));
+}

@@ -73,6 +73,16 @@ public:
      * @param bindPoint - The binding point of the texture [0-8].
      */
     void set(const std::string &uniformName, const uint32_t textureId, const int bindPoint);
+    
+    /**
+     * @brief Sets a uniform array of floats.
+     * @param uniformName - The name within the shader.
+     * @param value - The pointer to the first value in the list.
+     * @param count - The number of elements in the array.
+     */
+    void set(const std::string &uniformName, const float* values, int count);
+    
+    void set(const std::string &uniformName, const glm::mat4 *values, int count);
 
 protected:
     std::string mDebugName { "" };

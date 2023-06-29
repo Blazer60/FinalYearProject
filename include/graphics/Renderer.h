@@ -57,5 +57,5 @@ namespace renderer
     void initFrameBuffers();
     void initTextureRenderBuffers();
     void detachTextureRenderBuffersFromFrameBuffers();
-    void shadowMapping(const CameraSettings &cameraSettings);
+    void shadowMapping(const CameraSettings &cameraSettings, const std::vector<float> &cascadeDepths);
 }

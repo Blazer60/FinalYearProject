@@ -10,6 +10,7 @@
 #include "Pch.h"
 #include "TextureBufferObject.h"
 #include "RenderBufferObject.h"
+#include "TextureArrayObject.h"
 
 #include <glm.hpp>
 
@@ -37,6 +38,7 @@ public:
     void attach(const TextureBufferObject *textureBufferObject, int bindPoint, int mipLevel = 0);
     void attach(const RenderBufferObject *renderBufferObject) const;
     void attachDepthBuffer(const TextureBufferObject *textureBufferObject, int mipLevel = 0);
+    void attachDepthBuffer(const TextureArrayObject &textureArrayObject, int layer = 0, int mipLevel = 0);
     
     void detach(int bindPoint);
     void detachRenderBuffer() const;
