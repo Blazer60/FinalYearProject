@@ -28,4 +28,9 @@ namespace window
     {
         return bufferSize_impl;
     }
+    
+    float aspectRatio()
+    {
+        return static_cast<float>(bufferSize_impl.x) / static_cast<float>(bufferSize_impl.y);
+    }
 }

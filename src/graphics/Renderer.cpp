@@ -157,7 +157,8 @@ namespace renderer
             geometryFramebuffer->bind();
             geometryFramebuffer->clear(camera.clearColour);
             
-            glm::mat4 vpMatrix = camera.projectionMatrix * camera.viewMatrix;
+            const glm::mat4 cameraProjectionMatrix = glm::perspective(camera.fovY, window::aspectRatio(), camera.nearClipDistance, camera.farClipDistance);
+            const glm::mat4 vpMatrix = cameraProjectionMatrix * camera.viewMatrix;
             
             for (const auto &rqo : renderQueue)
             {
@@ -175,7 +176,7 @@ namespace renderer
             
             // Shadow mapping
             
-            shadowMapping(vpMatrix);
+            shadowMapping(camera);
             
             lightFramebuffer->bind();
             lightFramebuffer->clear(glm::vec4(glm::vec3(0.f), 1.f));
@@ -214,7 +215,7 @@ namespace renderer
             deferredLightShader->bind();
             
             const glm::mat4 v = glm::mat4(glm::mat3(camera.viewMatrix));
-            const glm::mat4 vp = camera.projectionMatrix * v;
+            const glm::mat4 vp = cameraProjectionMatrix * v;
             const glm::mat4 ivp = glm::inverse(vp);
             
             deferredLightShader->set("u_diffuse_texture", diffuseTextureBuffer->getId(), 0);
@@ -245,7 +246,7 @@ namespace renderer
     }
 
 // private:
-    void shadowMapping(const glm::mat4 &cameraVpMatrix)
+    void shadowMapping(const CameraSettings &cameraSettings)
     {
         const auto resize = [](const glm::vec4 &v) { return v / v.w; };
         lightVpMatrices.reserve(directionalLightQueue.size());
@@ -253,8 +254,11 @@ namespace renderer
         shadowFramebuffer->bind();
         shadowShader->bind();
         
+        const float aspectRatio = window::aspectRatio();
+        const glm::mat4 projectionMatrix = glm::perspective(cameraSettings.fovY, aspectRatio, cameraSettings.nearClipDistance, cameraSettings.farClipDistance * 0.4f);
+        
         // We only want the shadow map to encompass the camera's frustum.
-        const glm::mat4 inverseVpMatrix = glm::inverse(cameraVpMatrix);
+        const glm::mat4 inverseVpMatrix = glm::inverse(projectionMatrix * cameraSettings.viewMatrix);
         const std::vector<glm::vec4> worldPoints = {
             resize(inverseVpMatrix * glm::vec4( 1.f,  1.f, 0.f, 1.f)),
             resize(inverseVpMatrix * glm::vec4( 1.f, -1.f, 0.f, 1.f)),

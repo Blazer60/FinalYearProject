@@ -38,7 +38,7 @@ void MyScene::onUpdate()
 
 void MyScene::onRender()
 {
-    renderer::submit(CameraSettings(mMainCamera.getProjectionMatrix(), mMainCamera.getViewMatrix()));
+    renderer::submit(mMainCamera.toSettings());
     renderer::submit(mDirectionalLight);
     renderer::drawMesh(mMesh, mMaterials, glm::mat4(1.f));
 }

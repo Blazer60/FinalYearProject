@@ -10,6 +10,7 @@
 #include "Pch.h"
 #include "gtc/quaternion.hpp"
 #include "glfw3.h"
+#include "CameraSettings.h"
 
 /**
  * A basic main camera so that we can move around the world.
@@ -37,7 +38,9 @@ public:
     
     [[nodiscard]] const glm::vec3 &getPosition() const;
     
-    glm::mat4 getProjectionMatrix() const;
+    [[nodiscard]] glm::mat4 getProjectionMatrix() const;
+    
+    CameraSettings toSettings() const;
 
 protected:
     glm::mat4       mVpMatrix           { 1.f };

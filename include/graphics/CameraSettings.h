@@ -18,14 +18,17 @@
 class CameraSettings
 {
 public:
-    CameraSettings(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix)
-        : projectionMatrix(projectionMatrix), viewMatrix(viewMatrix) {}
-        
-    glm::mat4 projectionMatrix { glm::mat4(1.f) };
+    CameraSettings(float fovY, float nearClipDistance, float farClipDistance, const glm::mat4 &viewMatrix)
+        : fovY(fovY), nearClipDistance(nearClipDistance), farClipDistance(farClipDistance), viewMatrix(viewMatrix)
+    {
+    
+    }
+    
+    float fovY { 60.f };
+    float nearClipDistance { 0.001f };
+    float farClipDistance  { 100.f };
+    
     glm::mat4 viewMatrix { glm::mat4(1.f) };
     glm::vec4 clearColour { glm::vec4(0.f, 0.f, 0.f, 1.f) };
     GLbitfield clearMask { GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT };
-    
-protected:
-    glm::mat4 vpMatrix { glm::mat4(1.f) };
 };

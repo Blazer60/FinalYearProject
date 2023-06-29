@@ -142,3 +142,8 @@ glm::mat4 MainCamera::getProjectionMatrix() const
 {
     return mProjectionMatrix;
 }
+
+CameraSettings MainCamera::toSettings() const
+{
+    return { mFovY, mNearClip, mFarClip, mViewMatrix };
+}

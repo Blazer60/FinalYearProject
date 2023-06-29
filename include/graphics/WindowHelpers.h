@@ -17,4 +17,6 @@ namespace window
     
     void setBufferSize(const glm::ivec2 &size);
     glm::ivec2 bufferSize();
+    
+    float aspectRatio();
 }
