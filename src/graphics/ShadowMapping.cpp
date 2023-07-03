@@ -47,10 +47,10 @@ namespace renderer
                 // We only want the shadow map to encompass the camera's frustum.
                 const glm::mat4 inverseVpMatrix = glm::inverse(projectionMatrix * cameraSettings.viewMatrix);
                 const std::vector<glm::vec4> worldPoints = {
-                    resize(inverseVpMatrix * glm::vec4(1.f, 1.f, 0.f, 1.f)),
-                    resize(inverseVpMatrix * glm::vec4(1.f, -1.f, 0.f, 1.f)),
-                    resize(inverseVpMatrix * glm::vec4(-1.f, 1.f, 0.f, 1.f)),
-                    resize(inverseVpMatrix * glm::vec4(-1.f, -1.f, 0.f, 1.f)),
+                    resize(inverseVpMatrix * glm::vec4(1.f, 1.f, -1.f, 1.f)),
+                    resize(inverseVpMatrix * glm::vec4(1.f, -1.f, -1.f, 1.f)),
+                    resize(inverseVpMatrix * glm::vec4(-1.f, 1.f, -1.f, 1.f)),
+                    resize(inverseVpMatrix * glm::vec4(-1.f, -1.f, -1.f, 1.f)),
                     
                     resize(inverseVpMatrix * glm::vec4(1.f, 1.f, 1.f, 1.f)),
                     resize(inverseVpMatrix * glm::vec4(1.f, -1.f, 1.f, 1.f)),
