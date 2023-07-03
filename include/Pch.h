@@ -18,5 +18,6 @@
 #include <numeric>
 #include <cstdint>
 #include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
 #include "DebugLogger.h"
 #endif  // PCH

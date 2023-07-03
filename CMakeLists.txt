@@ -26,39 +26,45 @@ message(STATUS "CXX Standard:   " ${CMAKE_CXX_STANDARD})
 
 add_executable(${PROJECT_NAME}
         include/Pch.h
-
         include/graphics/CameraSettings.h
+        include/graphics/Lighting.h
         include/graphics/RendererHelpers.h
-
         src/Main.cpp
         src/engine/Core.cpp include/engine/Core.h
         src/engine/DebugLogger.cpp include/engine/DebugLogger.h
         src/engine/MainCamera.cpp include/engine/MainCamera.h
+        src/engine/ui/RendererImGui.cpp include/engine/ui/RendererImGui.h
         src/engine/Scene.cpp include/engine/Scene.h
         src/engine/Timers.cpp include/engine/Timers.h
+        src/engine/ui/Ui.cpp include/engine/ui/Ui.h
         src/engine/loader/CommonLoader.cpp include/engine/loader/CommonLoader.h
         src/engine/loader/MaterialLoader.cpp include/engine/loader/MaterialLoader.h
         src/engine/loader/ModelDestroyer.cpp include/engine/loader/ModelDestroyer.h
         src/engine/loader/ModelLoader.cpp include/engine/loader/ModelLoader.h
         src/engine/loader/RawMesh.cpp include/engine/loader/RawMesh.h
         src/engine/loader/TextureLoader.cpp include/engine/loader/TextureLoader.h
-
         src/game/MyScene.cpp include/game/MyScene.h
-
+        src/graphics/Cubemap.cpp include/graphics/Cubemap.h
         src/graphics/Materials.cpp include/graphics/Materials.h
+        src/graphics/Mesh.cpp include/graphics/Mesh.h
         src/graphics/Primitives.cpp src/graphics/Primitives.h
         src/graphics/Renderer.cpp include/graphics/Renderer.h
+        src/graphics/RendererData.cpp include/graphics/RendererData.h
+        src/graphics/RendererHelpers.cpp
         src/graphics/Shader.cpp include/graphics/Shader.h
-        src/graphics/Mesh.cpp include/graphics/Mesh.h
+        src/graphics/ShadowMapping.cpp include/graphics/ShadowMapping.h
+        src/graphics/Texture.cpp include/graphics/Texture.h
         src/graphics/Vertices.cpp include/graphics/Vertices.h
         src/graphics/WindowHelpers.cpp include/graphics/WindowHelpers.h
         src/graphics/buffers/FramebufferObject.cpp include/graphics/buffers/FramebufferObject.h
         src/graphics/buffers/RenderBufferObject.cpp include/graphics/buffers/RenderBufferObject.h
+        src/graphics/buffers/TextureArrayObject.cpp include/graphics/buffers/TextureArrayObject.h
         src/graphics/buffers/TextureBufferObject.cpp include/graphics/buffers/TextureBufferObject.h
-        src/graphics/Texture.cpp include/graphics/Texture.h include/graphics/Lighting.h src/graphics/Cubemap.cpp include/graphics/Cubemap.h src/graphics/RendererHelpers.cpp src/engine/UiHelpers.cpp include/engine/UiHelpers.h src/graphics/buffers/TextureArrayObject.cpp include/graphics/buffers/TextureArrayObject.h)
+        )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
         include include/engine include/graphics include/game include/engine/loader include/graphics/buffers
+        include/engine/ui
 
         # Vendor Files
         vendor/glm/glm vendor/glew/include/GL
@@ -75,7 +81,7 @@ else()
             <iostream> <vector> <unordered_map>
             <string> <string_view> <algorithm>
             <memory> <numeric> <cstdint>
-            <glm.hpp> [["DebugLogger.h"]])
+            <glm.hpp> <gtc/matrix_transform.hpp> [["DebugLogger.h"]])
 endif ()
 
 # STB_IMAGE_IMPLEMENTATION is set within a source file (Texture Loader).

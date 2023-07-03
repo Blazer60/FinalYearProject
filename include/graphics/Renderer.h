@@ -33,6 +33,11 @@ namespace renderer
     
     void render();
     
+    /**
+     * @brief Resets the data for the next round of rendering. This is split so that ImGui can display information before being reset.
+     */
+    void clear();
+    
     [[nodiscard]] const TextureBufferObject &getOutputBuffer();
     [[nodiscard]] const TextureBufferObject &getAlbedoBuffer();
     [[nodiscard]] const TextureBufferObject &getNormalBuffer();
@@ -57,5 +62,4 @@ namespace renderer
     void initFrameBuffers();
     void initTextureRenderBuffers();
     void detachTextureRenderBuffersFromFrameBuffers();
-    void shadowMapping(const CameraSettings &cameraSettings, const std::vector<float> &cascadeDepths);
 }

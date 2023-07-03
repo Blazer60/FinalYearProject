@@ -12,7 +12,8 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "Timers.h"
-#include "UiHelpers.h"
+#include "Ui.h"
+#include "RendererImGui.h"
 
 engine::Core::Core(const glm::ivec2 &resolution, bool enableDebugging)
     : mResolution(resolution), mEnableDebugging(enableDebugging)
@@ -137,6 +138,7 @@ void engine::Core::run()
         mScene->onRender();
         renderer::render();
         updateImgui();
+        renderer::clear();
         
         glfwSwapBuffers(mWindow);
         timers::update();
@@ -168,6 +170,11 @@ void engine::Core::updateImgui()
     ImGui::Begin("Scene Settings");
     mScene->onImguiUpdate();
     ImGui::End();
+    
+    ImGui::Begin("Renderer Settings");
+    renderer::displayShadowSettings();
+    ImGui::End();
+    
     updateViewports();
     
     ImGui::Render();

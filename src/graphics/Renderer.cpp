@@ -10,39 +10,13 @@
 #include "WindowHelpers.h"
 #include "Primitives.h"
 #include "Cubemap.h"
-#include "gtx/quaternion.hpp"
+#include "RendererData.h"
+#include "ShadowMapping.h"
 
 #include <utility>
 
 namespace renderer
 {
-    std::vector<RenderQueueObject> renderQueue;
-    std::vector<CameraSettings> cameraQueue;
-    std::vector<DirectionalLight> directionalLightQueue;
-    GLenum drawModeToGLenum[] { GL_TRIANGLES, GL_LINES };
-    std::unique_ptr<FramebufferObject> geometryFramebuffer;
-    std::unique_ptr<TextureBufferObject> positionTextureBuffer;
-    std::unique_ptr<TextureBufferObject> albedoTextureBuffer;
-    std::unique_ptr<TextureBufferObject> normalTextureBuffer;
-    std::unique_ptr<TextureBufferObject> emissiveTextureBuffer;
-    std::unique_ptr<TextureBufferObject> diffuseTextureBuffer;
-    std::unique_ptr<TextureBufferObject> specularTextureBuffer;
-    std::unique_ptr<TextureBufferObject> depthTextureBuffer;
-    std::unique_ptr<TextureBufferObject> shadowTextureBuffer;
-    std::unique_ptr<TextureBufferObject> outputTextureBuffer;
-    glm::ivec2 currentRenderBufferSize;
-    
-    std::unique_ptr<Shader> directionalLightShader;
-    std::unique_ptr<Shader> deferredLightShader;
-    std::unique_ptr<Shader> shadowShader;
-    std::unique_ptr<SubMesh> fullscreenTriangle;
-    std::unique_ptr<FramebufferObject> lightFramebuffer;
-    
-    std::unique_ptr<FramebufferObject> deferredLightFramebuffer;
-    std::unique_ptr<FramebufferObject> shadowFramebuffer;
-    
-    std::unique_ptr<Cubemap> skybox;
-    
     bool init()
     {
         if (glewInit() != GLEW_OK)
@@ -98,6 +72,7 @@ namespace renderer
         uint32_t vao, int32_t indicesCount, std::weak_ptr<Shader> shader, DrawMode renderMode, const glm::mat4 &matrix,
         const DrawCallback &onDraw)
     {
+        static GLenum drawModeToGLenum[] { GL_TRIANGLES, GL_LINES };
         GLenum mode = drawModeToGLenum[(int)renderMode];
         renderQueue.emplace_back(RenderQueueObject { vao, indicesCount, std::move(shader), mode, matrix, onDraw });
     }
@@ -175,7 +150,7 @@ namespace renderer
             
             // Shadow mapping
             
-            const std::vector<float> cascadeDepths { camera.farClipDistance * 0.125f, camera.farClipDistance * 0.25f };
+            const std::vector<float> cascadeDepths { camera.farClipDistance * shadow::cascadeMultipliers[0], camera.farClipDistance * shadow::cascadeMultipliers[1] };
             
             shadowMapping(camera, cascadeDepths);
             
@@ -232,112 +207,8 @@ namespace renderer
         }
         
         
-        uint64_t renderQueueCount = renderQueue.size();
-        renderQueue.clear();
-        renderQueue.reserve(renderQueueCount);
-        
-        uint64_t cameraCount = cameraQueue.size();
-        cameraQueue.clear();
-        cameraQueue.reserve(cameraCount);
-        
-        uint64_t directionalLightCount = directionalLightQueue.size();
-        directionalLightQueue.clear();
-        directionalLightQueue.reserve(directionalLightCount);
     }
 
-// private:
-    void shadowMapping(const CameraSettings &cameraSettings, const std::vector<float> &cascadeDepths)
-    {
-        const auto resize = [](const glm::vec4 &v) { return v / v.w; };
-        
-        shadowFramebuffer->bind();
-        shadowShader->bind();
-        
-        for (DirectionalLight &directionalLight : directionalLightQueue)
-        {
-            const glm::ivec2 &shadowMapSize = directionalLight.shadowMap->getSize();
-            glViewport(0, 0, shadowMapSize.x, shadowMapSize.y);
-            
-            std::vector<float> depths { cameraSettings.nearClipDistance };
-            for (const float &depth : cascadeDepths)
-                depths.emplace_back(depth);
-            depths.emplace_back(cameraSettings.farClipDistance);
-            
-            for (int j = 0; j < directionalLight.shadowMap->getLayerCount(); ++j)
-            {
-                shadowFramebuffer->attachDepthBuffer(*directionalLight.shadowMap, j);
-                shadowFramebuffer->clear(glm::vec4(glm::vec3(0.f), 1.f));
-                
-                const float aspectRatio = window::aspectRatio();
-                const glm::mat4 projectionMatrix = glm::perspective(cameraSettings.fovY, aspectRatio, depths[j], depths[j + 1]);
-                
-                // We only want the shadow map to encompass the camera's frustum.
-                const glm::mat4 inverseVpMatrix = glm::inverse(projectionMatrix * cameraSettings.viewMatrix);
-                const std::vector<glm::vec4> worldPoints = {
-                    resize(inverseVpMatrix * glm::vec4(1.f, 1.f, 0.f, 1.f)),
-                    resize(inverseVpMatrix * glm::vec4(1.f, -1.f, 0.f, 1.f)),
-                    resize(inverseVpMatrix * glm::vec4(-1.f, 1.f, 0.f, 1.f)),
-                    resize(inverseVpMatrix * glm::vec4(-1.f, -1.f, 0.f, 1.f)),
-                    
-                    resize(inverseVpMatrix * glm::vec4(1.f, 1.f, 1.f, 1.f)),
-                    resize(inverseVpMatrix * glm::vec4(1.f, -1.f, 1.f, 1.f)),
-                    resize(inverseVpMatrix * glm::vec4(-1.f, 1.f, 1.f, 1.f)),
-                    resize(inverseVpMatrix * glm::vec4(-1.f, -1.f, 1.f, 1.f)),
-                };
-                
-                glm::vec3 minWorldBound = worldPoints[0];
-                glm::vec3 maxWorldBound = worldPoints[0];
-                for (int i = 1; i < worldPoints.size(); ++i)
-                {
-                    minWorldBound = glm::min(minWorldBound, glm::vec3(worldPoints[i]));
-                    maxWorldBound = glm::max(maxWorldBound, glm::vec3(worldPoints[i]));
-                }
-                const glm::vec3 centerPoint = minWorldBound + 0.5f * (maxWorldBound - minWorldBound);
-                
-                const glm::mat4 lightViewMatrix = glm::lookAt(
-                    centerPoint + directionalLight.direction, centerPoint, glm::vec3(0.f, 1.f, 0.f));
-                glm::vec3 minLightSpacePoint = lightViewMatrix * worldPoints[0];
-                glm::vec3 maxLightSpacePoint = lightViewMatrix * worldPoints[0];
-                for (int i = 1; i < worldPoints.size(); ++i)
-                {
-                    const glm::vec3 lightPoint = lightViewMatrix * worldPoints[i];
-                    minLightSpacePoint = glm::min(minLightSpacePoint, lightPoint);
-                    maxLightSpacePoint = glm::max(maxLightSpacePoint, lightPoint);
-                }
-                
-                // const float zMultiplier = 2.f;
-                // if (minLightSpacePoint.z < 0)
-                //     minLightSpacePoint.z *= zMultiplier;
-                // else
-                //     minLightSpacePoint.z /= zMultiplier;
-                // if (maxLightSpacePoint.z < 0)
-                //     maxLightSpacePoint.z /= zMultiplier;
-                // else
-                //     maxLightSpacePoint.z *= zMultiplier;
-                
-                const glm::mat4 lightProjectionMatrix = glm::ortho(
-                    minLightSpacePoint.x, maxLightSpacePoint.x, minLightSpacePoint.y, maxLightSpacePoint.y,
-                    minLightSpacePoint.z, maxLightSpacePoint.z
-                );
-                
-                directionalLight.vpMatrices.emplace_back(lightProjectionMatrix * lightViewMatrix);
-                
-                for (const auto &rqo : renderQueue)
-                {
-                    const glm::mat4 &modelMatrix = rqo.matrix;
-                    const glm::mat4 mvp = lightProjectionMatrix * lightViewMatrix * modelMatrix;
-                    shadowShader->set("u_mvp_matrix", mvp);
-                    glBindVertexArray(rqo.vao);
-                    glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
-                }
-                
-                shadowFramebuffer->detachDepthBuffer();
-            }
-        }
-        
-        // Reset the viewport back to the normal size once we've finished rendering all the shadows.
-        glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
-    }
     
     const TextureBufferObject &getOutputBuffer()
     {
@@ -440,6 +311,21 @@ namespace renderer
     const TextureBufferObject &getShadowBuffer()
     {
         return *shadowTextureBuffer;
+    }
+    
+    void clear()
+    {
+        uint64_t renderQueueCount = renderQueue.size();
+        renderQueue.clear();
+        renderQueue.reserve(renderQueueCount);
+        
+        uint64_t cameraCount = cameraQueue.size();
+        cameraQueue.clear();
+        cameraQueue.reserve(cameraCount);
+        
+        uint64_t directionalLightCount = directionalLightQueue.size();
+        directionalLightQueue.clear();
+        directionalLightQueue.reserve(directionalLightCount);
     }
 }
 

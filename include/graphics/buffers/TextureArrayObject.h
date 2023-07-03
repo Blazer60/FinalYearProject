@@ -9,6 +9,7 @@
 
 #include "Pch.h"
 #include "RendererHelpers.h"
+#include "TextureBufferObject.h"
 
 
 /**
@@ -31,6 +32,7 @@ public:
     [[nodiscard]] uint32_t getId() const;
     [[nodiscard]] glm::ivec2 getSize() const;
     [[nodiscard]] int32_t getLayerCount() const;
+    [[nodiscard]] GLenum getFormat() const;
     
 protected:
     uint32_t mId { 0 };
@@ -38,3 +40,8 @@ protected:
     glm::ivec2 mSize { 1024 };
     int32_t mLayers { 1 };
 };
+
+namespace renderer
+{
+    std::unique_ptr<TextureBufferObject> cloneTextureLayer(const TextureArrayObject &from, int layer);
+}

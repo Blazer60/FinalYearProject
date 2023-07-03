@@ -49,3 +49,22 @@ int32_t TextureArrayObject::getLayerCount() const
 {
     return mLayers;
 }
+
+GLenum TextureArrayObject::getFormat() const
+{
+    return mFormat;
+}
+
+namespace renderer
+{
+    std::unique_ptr<TextureBufferObject> cloneTextureLayer(const TextureArrayObject &from, int layer)
+    {
+        auto result = std::make_unique<TextureBufferObject>(from.getSize(), from.getFormat(), Filter::Linear, Wrap::Repeat);
+        const int x = 0;
+        const int y = 0;
+        const int z = 0;
+        const int mipLevel = 0;
+        glCopyImageSubData(from.getId(), GL_TEXTURE_2D_ARRAY, mipLevel, x, y, layer, result->getId(), GL_TEXTURE_2D, mipLevel, x, y, z, result->getSize().x, result->getSize().y, 1);
+        return result;
+    }
+}

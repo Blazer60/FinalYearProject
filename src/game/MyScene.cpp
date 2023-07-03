@@ -10,7 +10,7 @@
 #include "Shader.h"
 #include "Vertices.h"
 #include "ModelLoader.h"
-#include "UiHelpers.h"
+#include "Ui.h"
 #include "imgui.h"
 #include "gtc/type_ptr.hpp"
 
