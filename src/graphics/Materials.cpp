@@ -31,10 +31,12 @@ void StandardMaterial::onDraw()
 {
     mShader->set("u_ambient_colour", mAmbientColour);
     mShader->set("u_diffuse_texture", mDiffuse->id(), 1);
+    mShader->set("u_normal_texture", mNormal->id(), 2);
 }
 
 void StandardMaterial::onLoadMtlFile(const MtlMaterialInformation &materialInformation)
 {
     mAmbientColour = materialInformation.kD;
     mDiffuse = load::texture(materialInformation.mapKd);
+    mNormal = load::texture(materialInformation.mapBump);
 }

@@ -36,7 +36,6 @@ namespace load
     {
     public:
         void createVertices(std::string_view args, const createObjectSignature &createObjectVertex);
-        void createVertex(const std::string &id, const createObjectSignature &createObjectVertex);
         void createIndices(const std::vector<uint32_t> &uniqueIndices);
         
         [[nodiscard]] std::shared_ptr<SubMesh> toSharedSubMesh() const;
@@ -50,8 +49,41 @@ namespace load
     protected:
         std::vector<uint32_t>                       mIndices;
         std::vector<TVertex>                        mVertices;
-        std::unordered_map<std::string, uint32_t>   mVertexLocations;
+        
+        void calculateTangents(std::vector<ObjVertex> &intermediateVertices);
     };
+    
+    template<typename TVertex>
+    void RawMesh<TVertex>::calculateTangents(std::vector<ObjVertex> &intermediateVertices)
+    {
+        if (intermediateVertices.size() < 3)
+        {
+            debug::log("The face does not contain at least three vertices. Tangent information cannot be generated. "
+                       "Normal maps may not correct for this model.", debug::severity::Warning);
+            return;
+        }
+        // If a face has more than three vertices, we assume that the whole face is flat.
+        
+        const glm::vec3 &v0 = intermediateVertices[0].position;
+        const glm::vec3 &v1 = intermediateVertices[1].position;
+        const glm::vec3 &v2 = intermediateVertices[2].position;
+        
+        const glm::vec2 &uv0 = intermediateVertices[0].uv;
+        const glm::vec2 &uv1 = intermediateVertices[1].uv;
+        const glm::vec2 &uv2 = intermediateVertices[2].uv;
+        
+        const glm::vec3 deltaPos1 = v1 - v0;
+        const glm::vec3 deltaPos2 = v2 - v0;
+        
+        const glm::vec2 deltaUv1 = uv1 - uv0;
+        const glm::vec2 deltaUv2 = uv2 - uv0;
+        
+        const float r = 1.f / (deltaUv1.x * deltaUv2.y - deltaUv1.y * deltaUv2.x);
+        const glm::vec3 tangent = (deltaPos1 * deltaUv2.y - deltaPos2 * deltaUv1.y) * r;
+        
+        for (auto &vertex : intermediateVertices)
+            vertex.tangent = tangent;
+    }
     
     template<typename TVertex>
     std::shared_ptr<SubMesh> RawMesh<TVertex>::toSharedSubMesh() const
@@ -64,23 +96,21 @@ namespace load
     {
         std::vector<uint32_t> uniqueIndices;
         const std::vector<std::string> vertexIds = split(args);
-       
-        for (const std::string &id : vertexIds)
-        {
-            if (mVertexLocations.count(id) < 1)
-                createVertex(id, createObjectVertex);
-            
-            uniqueIndices.emplace_back(mVertexLocations.at(id));
-        }
         
+        std::vector<ObjVertex> intermediateVertices;
+        intermediateVertices.reserve(vertexIds.size());
+        for (const std::string &id : vertexIds)
+            intermediateVertices.emplace_back(createObjectVertex(id));
+        
+        calculateTangents(intermediateVertices);
+        
+        for (const ObjVertex &vertex : intermediateVertices)
+        {
+            mVertices.emplace_back(vertex);  // implicit conversion to user defined type.
+            uniqueIndices.emplace_back(mVertices.size() - 1);
+        }
+       
         createIndices(uniqueIndices);
-    }
-    
-    template<typename TVertex>
-    void RawMesh<TVertex>::createVertex(const std::string &id, const createObjectSignature &createObjectVertex)
-    {
-        mVertices.emplace_back(createObjectVertex(id));
-        mVertexLocations.emplace(id, static_cast<uint32_t>(mVertices.size()) - 1);
     }
     
     template<typename TVertex>

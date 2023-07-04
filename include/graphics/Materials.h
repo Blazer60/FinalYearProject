@@ -25,6 +25,7 @@ struct MtlMaterialInformation
     std::string     mapKd   { "" };
     std::string     mapKe   { "" };
     std::string     mapNs   { "" };
+    std::string     mapBump { "" };
 };
 
 class Material;
@@ -75,4 +76,5 @@ public:
 protected:
     glm::vec3 mAmbientColour { 0.f };
     std::shared_ptr<Texture> mDiffuse;
+    std::shared_ptr<Texture> mNormal;
 };

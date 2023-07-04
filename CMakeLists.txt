@@ -41,7 +41,7 @@ add_executable(${PROJECT_NAME}
         src/engine/loader/MaterialLoader.cpp include/engine/loader/MaterialLoader.h
         src/engine/loader/ModelDestroyer.cpp include/engine/loader/ModelDestroyer.h
         src/engine/loader/ModelLoader.cpp include/engine/loader/ModelLoader.h
-        src/engine/loader/RawMesh.cpp include/engine/loader/RawMesh.h
+        include/engine/loader/RawMesh.h
         src/engine/loader/TextureLoader.cpp include/engine/loader/TextureLoader.h
         src/game/MyScene.cpp include/game/MyScene.h
         src/graphics/Cubemap.cpp include/graphics/Cubemap.h

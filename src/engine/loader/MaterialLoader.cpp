@@ -31,19 +31,20 @@ namespace load
         };
         
         const ArgumentList argumentList {
-            {"#",      doNothing },
-            {"d",      doNothing },
-            {"Ke",     doNothing },
-            {"Ni",     doNothing },
-            {"map_Kd", [&](std::string_view arg) { currentMaterial.mapKd = convertRelativePath(path, arg); } },
-            {"map_Ke", [&](std::string_view arg) { currentMaterial.mapKe = convertRelativePath(path, arg); } },
-            {"map_Ns", [&](std::string_view arg) { currentMaterial.mapNs = convertRelativePath(path, arg); } },
-            {"illum",  doNothing },
-            {"newmtl", newMaterial },
-            {"Ns",     [&currentMaterial](std::string_view arg)  { currentMaterial.nS = std::stoi(std::string(arg)); } },
-            {"Ka",     [&currentMaterial](std::string_view args) { currentMaterial.kA = createVec<3>(args); } },
-            {"Kd",     [&currentMaterial](std::string_view args) { currentMaterial.kD = createVec<3>(args); } },
-            {"Ks",     [&currentMaterial](std::string_view args) { currentMaterial.kS = createVec<3>(args); } },
+            {"#",        doNothing },
+            {"d",        doNothing },
+            {"Ke",       doNothing },
+            {"Ni",       doNothing },
+            {"map_Kd",   [&](std::string_view arg) { currentMaterial.mapKd = convertRelativePath(path, arg); } },
+            {"map_Ke",   [&](std::string_view arg) { currentMaterial.mapKe = convertRelativePath(path, arg); } },
+            {"map_Ns",   [&](std::string_view arg) { currentMaterial.mapNs = convertRelativePath(path, arg); } },
+            {"map_Bump", [&](std::string_view arg) { currentMaterial.mapBump = convertRelativePath(path, arg); } },
+            {"illum",    doNothing },
+            {"newmtl",   newMaterial },
+            {"Ns",       [&currentMaterial](std::string_view arg)  { currentMaterial.nS = std::stoi(std::string(arg)); } },
+            {"Ka",       [&currentMaterial](std::string_view args) { currentMaterial.kA = createVec<3>(args); } },
+            {"Kd",       [&currentMaterial](std::string_view args) { currentMaterial.kD = createVec<3>(args); } },
+            {"Ks",       [&currentMaterial](std::string_view args) { currentMaterial.kS = createVec<3>(args); } },
         };
         
         parseFile(path, argumentList);

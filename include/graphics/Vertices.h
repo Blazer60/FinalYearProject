@@ -18,6 +18,7 @@ struct ObjVertex
     glm::vec3 position;
     glm::vec2 uv;
     glm::vec3 normal;
+    glm::vec3 tangent;
 };
 
 /**
@@ -65,7 +66,7 @@ struct StandardVertex
     : public Vertex
 {
     constexpr explicit StandardVertex(const ObjVertex &objVertex)
-        : position(objVertex.position), uv(objVertex.uv), normal(objVertex.normal)
+        : position(objVertex.position), uv(objVertex.uv), normal(objVertex.normal), tangent(objVertex.tangent)
     {
     
     }
@@ -73,6 +74,7 @@ struct StandardVertex
     glm::vec3 position;
     glm::vec2 uv;
     glm::vec3 normal;
+    glm::vec3 tangent;
     
     static Instructions layout()
     {
@@ -80,6 +82,7 @@ struct StandardVertex
             {
                 { GL_FLOAT, 3 },
                 { GL_FLOAT, 2 },
+                { GL_FLOAT, 3 },
                 { GL_FLOAT, 3 },
             };
     };
