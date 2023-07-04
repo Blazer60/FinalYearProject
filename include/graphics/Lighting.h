@@ -11,6 +11,7 @@
 #include "vec3.hpp"
 #include "geometric.hpp"
 #include "TextureArrayObject.h"
+#include "ShadowMapping.h"
 
 struct Light
 {
@@ -24,11 +25,21 @@ struct DirectionalLight
     DirectionalLight(const glm::vec3 &direction, const glm::vec3 &intensity, const glm::ivec2 &shadowMapSize)
         : direction(direction),
         intensity(intensity),
-        shadowMap(std::make_shared<TextureArrayObject>(shadowMapSize, 3, GL_DEPTH_COMPONENT32, renderer::Nearest, renderer::ClampToBorder)),
+        shadowMap(std::make_shared<TextureArrayObject>(shadowMapSize, renderer::shadow::cascadeZones, GL_DEPTH_COMPONENT32, renderer::Linear, renderer::ClampToBorder)),
         Light()
     {
         shadowMap->setBorderColour(glm::vec4(1.f));
-        vpMatrices.reserve(3);
+        vpMatrices.reserve(renderer::shadow::cascadeZones);
+    }
+    
+    void updateLayerCount()
+    {
+        if (shadowMap->getLayerCount() != renderer::shadow::cascadeZones)
+        {
+            const glm::ivec2 size = shadowMap->getSize();
+            shadowMap = std::make_unique<TextureArrayObject>(size, renderer::shadow::cascadeZones, GL_DEPTH_COMPONENT32, renderer::Linear, renderer::ClampToBorder);
+            vpMatrices.reserve(renderer::shadow::cascadeZones);
+        }
     }
     
     glm::vec3 direction { glm::normalize(glm::vec3(1.f, 1.f, 1.f)) };

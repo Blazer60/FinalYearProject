@@ -150,7 +150,10 @@ namespace renderer
             
             // Shadow mapping
             
-            const std::vector<float> cascadeDepths { camera.farClipDistance * shadow::cascadeMultipliers[0], camera.farClipDistance * shadow::cascadeMultipliers[1] };
+            std::vector<float> cascadeDepths;
+            cascadeDepths.reserve(shadow::cascadeMultipliers.size());
+            for (const auto &multiplier : shadow::cascadeMultipliers)
+                cascadeDepths.emplace_back(camera.farClipDistance * multiplier);
             
             shadowMapping(camera, cascadeDepths);
             
@@ -169,6 +172,8 @@ namespace renderer
             
             directionalLightShader->set("u_cascade_distances", &(cascadeDepths[0]), static_cast<int>(cascadeDepths.size()));
             directionalLightShader->set("u_cascade_count", static_cast<int>(cascadeDepths.size()));
+            
+            directionalLightShader->set("u_bias", shadow::bias);
             
             glBindVertexArray(fullscreenTriangle->vao());
             

@@ -16,6 +16,8 @@ namespace renderer
     {
         extern float zMultiplier;
         extern std::vector<float> cascadeMultipliers;
+        extern uint32_t cascadeZones;
+        extern glm::vec2 bias;
     }
     
     void shadowMapping(const CameraSettings &cameraSettings, const std::vector<float> &cascadeDepths);

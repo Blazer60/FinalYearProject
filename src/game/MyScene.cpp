@@ -34,6 +34,7 @@ void MyScene::onFixedUpdate()
 void MyScene::onUpdate()
 {
     mMainCamera.update();
+    mDirectionalLight.updateLayerCount();
 }
 
 void MyScene::onRender()

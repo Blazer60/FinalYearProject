@@ -14,8 +14,14 @@ namespace renderer
 {
     namespace shadow
     {
-        float zMultiplier { 2.f };
-        std::vector<float> cascadeMultipliers { 0.125f, 0.25f };
+        /**
+         * @brief The more parallel the camera is with the light rays, the more likely that the shadows pop out of
+         * existence. This helps capture those meshes.
+         */
+        float zMultiplier { 5.f };
+        std::vector<float> cascadeMultipliers { 0.04f, 0.16f, 0.36f, 0.64f };
+        uint32_t cascadeZones { 5 };
+        glm::vec2 bias { 0.001f, 0.f };
     }
     
     using namespace shadow;

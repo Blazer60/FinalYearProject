@@ -17,6 +17,8 @@ uniform mat4 u_view_matrix;
 uniform float u_cascade_distances[16];
 uniform int u_cascade_count;
 
+uniform vec2 u_bias;
+
 layout(location=0) out vec3 o_diffuse;
 layout(location=1) out vec3 o_specular;
 layout(location=2) out float o_shadow;
@@ -59,7 +61,7 @@ float calculate_shadow_map(vec3 position, vec3 normal)
     vec3 projection_coords = position_light_space.xyz / position_light_space.w;
     projection_coords = 0.5f * projection_coords + 0.5f;
     const float current_depth = projection_coords.z;
-    const float bias = mix(0.001f, 0.f, light_dot(normal, -u_light_direction));
+    const float bias = mix(u_bias.x, u_bias.y, light_dot(normal, -u_light_direction));
 
     if (current_depth < 1.f)
     {

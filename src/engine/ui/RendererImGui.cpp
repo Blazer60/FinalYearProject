@@ -10,6 +10,7 @@
 #include "RendererData.h"
 #include "imgui.h"
 #include "Ui.h"
+#include "gtc/type_ptr.hpp"
 
 namespace renderer
 {
@@ -21,11 +22,26 @@ namespace renderer
     {
         if (ImGui::CollapsingHeader("Shadow Settings"))
         {
-            ImGui::SliderFloat("Cascade Depth 1", &shadow::cascadeMultipliers[0], 0.f, 1.f);
-            ImGui::SliderFloat("Cascade Depth 2", &shadow::cascadeMultipliers[1], 0.f, 1.f);
+            if (ImGui::TreeNode("Cascade Depths"))
+            {
+                int intCascadeZones = static_cast<int>(shadow::cascadeZones);
+                if (ImGui::SliderInt("Cascade Zones", &intCascadeZones, 1, 16))
+                {
+                    shadow::cascadeMultipliers.resize(intCascadeZones - 1, 1.f);
+                    shadow::cascadeZones = intCascadeZones;
+                }
+                for (int i = 0; i < shadow::cascadeMultipliers.size(); ++i)
+                {
+                    const std::string name = "Cascade Depth " + std::to_string(i);
+                    ImGui::SliderFloat(name.c_str(), &shadow::cascadeMultipliers[i], 0.f, 1.f);
+                }
+                
+                ImGui::TreePop();
+            }
+            
             ImGui::DragFloat("Z Multiplier", &shadow::zMultiplier, 0.1f);
-            if (ImGui::Button("Toggle Shadow maps"))
-                showShadowMaps = !showShadowMaps;
+            ImGui::DragFloat2("Bias", glm::value_ptr(shadow::bias), 0.001f);
+            ImGui::Checkbox("Debug shadow maps", &showShadowMaps);
             
             if (showShadowMaps)
             {
