@@ -12,5 +12,5 @@
 
 namespace primitives
 {
-    std::unique_ptr<SubMesh> fullscreenTriangle();
+    SubMesh fullscreenTriangle();
 }

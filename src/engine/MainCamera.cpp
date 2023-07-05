@@ -10,12 +10,17 @@
 #include "Timers.h"
 #include "imgui.h"
 #include "WindowHelpers.h"
+#include "BloomPass.h"
+#include "ColourGrading.h"
 
 MainCamera::MainCamera()
     : mWindow(glfwGetCurrentContext())
 {
     const glm::vec2 size = glm::ivec2(window::bufferSize());
     mProjectionMatrix = glm::perspective(mFovY, size.x / size.y, mNearClip, mFarClip);
+    
+    mPostProcessStack.emplace_back(std::make_unique<BloomPass>());
+    mPostProcessStack.emplace_back(std::make_unique<ColourGrading>());
 }
 
 MainCamera::MainCamera(const glm::vec3 &position)
@@ -23,6 +28,8 @@ MainCamera::MainCamera(const glm::vec3 &position)
 {
     const glm::vec2 size = glm::ivec2(window::bufferSize());
     mProjectionMatrix = glm::perspective(mFovY, size.x / size.y, mNearClip, mFarClip);
+    mPostProcessStack.emplace_back(std::make_unique<BloomPass>());
+    mPostProcessStack.emplace_back(std::make_unique<ColourGrading>());
 }
 
 void MainCamera::update()
@@ -102,7 +109,7 @@ const glm::mat4 &MainCamera::getViewMatrix() const
     return mViewMatrix;
 }
 
-void MainCamera::imguiUpdate()
+void MainCamera::onDrawUi()
 {
     if (ImGui::CollapsingHeader("Camera Details"))
     {
@@ -125,6 +132,12 @@ void MainCamera::imguiUpdate()
         float fovYDegrees = glm::degrees(mFovY);
         ImGui::SliderFloat("FOV Y", &fovYDegrees, 10, 180);
         mFovY = glm::radians(fovYDegrees);
+        
+        if (ImGui::CollapsingHeader("Post-processing Settings"))
+        {
+            for (std::unique_ptr<PostProcessLayer> &postProcessLayer : mPostProcessStack)
+                ui::draw(*postProcessLayer);
+        }
     }
 }
 
@@ -143,7 +156,8 @@ glm::mat4 MainCamera::getProjectionMatrix() const
     return mProjectionMatrix;
 }
 
-CameraSettings MainCamera::toSettings() const
+CameraSettings MainCamera::toSettings()
 {
-    return { mFovY, mNearClip, mFarClip, mViewMatrix };
+    return { mFovY, mNearClip, mFarClip, mViewMatrix, mPostProcessStack };
 }
+

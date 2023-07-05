@@ -9,7 +9,7 @@
 
 #include "Pch.h"
 
-namespace renderer
+namespace graphics
 {
     void displayShadowSettings();
 }

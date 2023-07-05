@@ -6,13 +6,15 @@
 
 
 #include "RendererImGui.h"
-#include "ShadowMapping.h"
-#include "RendererData.h"
 #include "imgui.h"
 #include "Ui.h"
 #include "gtc/type_ptr.hpp"
+#include "PostProcessLayer.h"
+#include "GraphicsState.h"
+#include "GraphicsFunctions.h"
+#include "Buffers.h"
 
-namespace renderer
+namespace graphics
 {
     bool showShadowMaps { false };
     std::unique_ptr<TextureBufferObject> shadowMapViewer;
@@ -24,32 +26,32 @@ namespace renderer
         {
             if (ImGui::TreeNode("Cascade Depths"))
             {
-                int intCascadeZones = static_cast<int>(shadow::cascadeZones);
+                int intCascadeZones = static_cast<int>(graphics::renderer->shadowCascadeZones);
                 if (ImGui::SliderInt("Cascade Zones", &intCascadeZones, 1, 16))
                 {
-                    shadow::cascadeMultipliers.resize(intCascadeZones - 1, 1.f);
-                    shadow::cascadeZones = intCascadeZones;
+                    graphics::renderer->shadowCascadeMultipliers.resize(intCascadeZones - 1, 1.f);
+                    graphics::renderer->shadowCascadeZones = intCascadeZones;
                 }
-                for (int i = 0; i < shadow::cascadeMultipliers.size(); ++i)
+                for (int i = 0; i < graphics::renderer->shadowCascadeMultipliers.size(); ++i)
                 {
                     const std::string name = "Cascade Depth " + std::to_string(i);
-                    ImGui::SliderFloat(name.c_str(), &shadow::cascadeMultipliers[i], 0.f, 1.f);
+                    ImGui::SliderFloat(name.c_str(), &graphics::renderer->shadowCascadeMultipliers[i], 0.f, 1.f);
                 }
                 
                 ImGui::TreePop();
             }
             
-            ImGui::DragFloat("Z Multiplier", &shadow::zMultiplier, 0.1f);
-            ImGui::DragFloat2("Bias", glm::value_ptr(shadow::bias), 0.001f);
+            ImGui::DragFloat("Z Multiplier", &graphics::renderer->shadowZMultiplier, 0.1f);
+            ImGui::DragFloat2("Bias", glm::value_ptr(graphics::renderer->shadowBias), 0.001f);
             ImGui::Checkbox("Debug shadow maps", &showShadowMaps);
             
             if (showShadowMaps)
             {
-                ImGui::SliderInt("Shadow map layer", &layer, 0, directionalLightQueue[0].shadowMap->getLayerCount() - 1);
-                shadowMapViewer = renderer::cloneTextureLayer(*directionalLightQueue[0].shadowMap, layer);
+                auto& directionalLights = graphics::renderer->getDirectionalLights();
+                ImGui::SliderInt("Shadow map layer", &layer, 0, directionalLights[0].shadowMap->getLayerCount() - 1);
+                shadowMapViewer = graphics::cloneTextureLayer(*directionalLights[0].shadowMap, layer);
                 ui::showTextureBuffer("Shadow Map", *shadowMapViewer, &showShadowMaps, shadowMapViewer->getSize());
             }
         }
     }
-    
 }

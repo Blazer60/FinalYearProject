@@ -7,6 +7,10 @@
 
 #include "FramebufferObject.h"
 #include "gtc/type_ptr.hpp"
+#include "TextureArrayObject.h"
+#include "TextureBufferObject.h"
+#include "Cubemap.h"
+#include "RenderBufferObject.h"
 
 FramebufferObject::FramebufferObject()
 {
@@ -27,7 +31,24 @@ FramebufferObject::~FramebufferObject()
 
 void FramebufferObject::attach(const TextureBufferObject *textureBufferObject, int bindPoint, int mipLevel)
 {
-    glNamedFramebufferTexture(mFboId, GL_COLOR_ATTACHMENT0 + bindPoint, textureBufferObject->mId, mipLevel);
+    glNamedFramebufferTexture(mFboId, GL_COLOR_ATTACHMENT0 + bindPoint, textureBufferObject->getId(), mipLevel);
+    
+    mAttachments.emplace_back(GL_COLOR_ATTACHMENT0 + bindPoint);
+    glNamedFramebufferDrawBuffers(mFboId, static_cast<int>(mAttachments.size()), &mAttachments[0]);
+    validate();
+}
+
+void FramebufferObject::attach(const RenderBufferObject *const renderBufferObject) const
+{
+    glNamedFramebufferRenderbuffer(mFboId, renderBufferObject->getAttachment(), GL_RENDERBUFFER,
+                                   renderBufferObject->getName());
+    
+    validate();
+}
+
+void FramebufferObject::attach(const Cubemap *cubemap, int bindPoint, int layer, int mipLevel)
+{
+    glNamedFramebufferTextureLayer(mFboId, GL_COLOR_ATTACHMENT0 + bindPoint, cubemap->getId(), mipLevel, layer);
     
     mAttachments.emplace_back(GL_COLOR_ATTACHMENT0 + bindPoint);
     glNamedFramebufferDrawBuffers(mFboId, static_cast<int>(mAttachments.size()), &mAttachments[0]);
@@ -36,11 +57,11 @@ void FramebufferObject::attach(const TextureBufferObject *textureBufferObject, i
 
 void FramebufferObject::attachDepthBuffer(const TextureBufferObject *textureBufferObject, int mipLevel)
 {
-    if (!(textureBufferObject->mFormat  == GL_DEPTH_COMPONENT
-        || textureBufferObject->mFormat == GL_DEPTH_COMPONENT16
-        || textureBufferObject->mFormat == GL_DEPTH_COMPONENT24
-        || textureBufferObject->mFormat == GL_DEPTH_COMPONENT32
-        || textureBufferObject->mFormat == GL_DEPTH_COMPONENT32F)
+    if (!(textureBufferObject->getFormat()  == GL_DEPTH_COMPONENT
+        || textureBufferObject->getFormat() == GL_DEPTH_COMPONENT16
+        || textureBufferObject->getFormat() == GL_DEPTH_COMPONENT24
+        || textureBufferObject->getFormat() == GL_DEPTH_COMPONENT32
+        || textureBufferObject->getFormat() == GL_DEPTH_COMPONENT32F)
     )
     {
         debug::log("You are trying to attached a depth texture with an incorrect internal format. "
@@ -55,11 +76,11 @@ void FramebufferObject::attachDepthBuffer(const TextureBufferObject *textureBuff
 
 void FramebufferObject::attachDepthBuffer(const TextureArrayObject &textureArrayObject, int layer, int mipLevel)
 {
-    if (!(textureArrayObject.mFormat  == GL_DEPTH_COMPONENT
-          || textureArrayObject.mFormat == GL_DEPTH_COMPONENT16
-          || textureArrayObject.mFormat == GL_DEPTH_COMPONENT24
-          || textureArrayObject.mFormat == GL_DEPTH_COMPONENT32
-          || textureArrayObject.mFormat == GL_DEPTH_COMPONENT32F)
+    if (!(textureArrayObject.getFormat()  == GL_DEPTH_COMPONENT
+          || textureArrayObject.getFormat() == GL_DEPTH_COMPONENT16
+          || textureArrayObject.getFormat() == GL_DEPTH_COMPONENT24
+          || textureArrayObject.getFormat() == GL_DEPTH_COMPONENT32
+          || textureArrayObject.getFormat() == GL_DEPTH_COMPONENT32F)
         )
     {
         debug::log("You are trying to attached a depth texture with an incorrect internal format. "
@@ -67,7 +88,7 @@ void FramebufferObject::attachDepthBuffer(const TextureArrayObject &textureArray
         return;
     }
     
-    glNamedFramebufferTextureLayer(mFboId, GL_DEPTH_ATTACHMENT, textureArrayObject.mId, mipLevel, layer);
+    glNamedFramebufferTextureLayer(mFboId, GL_DEPTH_ATTACHMENT, textureArrayObject.getId(), mipLevel, layer);
     
     validate();
 }
@@ -101,7 +122,7 @@ void FramebufferObject::validate() const
                 errorName = "framebuffer incomplete missing attachment";
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-                errorName = "framebuffer incomplete draw buffer";
+                errorName = "framebuffer incomplete drawUi buffer";
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
                 errorName = "framebuffer incomplete read buffer";
@@ -146,13 +167,6 @@ void FramebufferObject::bind() const
     glBindFramebuffer(GL_FRAMEBUFFER, mFboId);
 }
 
-void FramebufferObject::attach(const RenderBufferObject *const renderBufferObject) const
-{
-    glNamedFramebufferRenderbuffer(mFboId, renderBufferObject->getAttachment(), GL_RENDERBUFFER,
-                                   renderBufferObject->getName());
-    
-    validate();
-}
 
 void FramebufferObject::detachRenderBuffer() const
 {
@@ -163,5 +177,6 @@ void FramebufferObject::detachDepthBuffer() const
 {
     glNamedFramebufferTexture(mFboId, GL_DEPTH_ATTACHMENT, 0, 0);
 }
+
 
 

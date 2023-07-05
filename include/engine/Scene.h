@@ -9,6 +9,7 @@
 
 #include "Pch.h"
 #include "TextureBufferObject.h"
+#include "Renderer.h"
 
 namespace engine
 {

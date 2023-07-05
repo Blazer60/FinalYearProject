@@ -11,6 +11,8 @@
 #include "gtc/quaternion.hpp"
 #include "glfw3.h"
 #include "CameraSettings.h"
+#include "PostProcessLayer.h"
+#include "Drawable.h"
 
 /**
  * A basic main camera so that we can move around the world.
@@ -18,6 +20,7 @@
  * @date 13/02/2022
  */
 class MainCamera
+    : public ui::Drawable
 {
 public:
     explicit MainCamera(const glm::vec3 &position);
@@ -25,8 +28,6 @@ public:
     MainCamera();
     
     void update();
-    
-    void imguiUpdate();
     
     void move();
     
@@ -40,7 +41,7 @@ public:
     
     [[nodiscard]] glm::mat4 getProjectionMatrix() const;
     
-    CameraSettings toSettings() const;
+    [[nodiscard]] CameraSettings toSettings();
 
 protected:
     glm::mat4       mVpMatrix           { 1.f };
@@ -49,6 +50,9 @@ protected:
     
     glm::vec3       mPosition           { 0.f, 0.f, 3.f };
     glm::quat       mRotation           { glm::vec3(0.f) };
+    
+    void onDrawUi() override;
+
 public:
     [[nodiscard]] const glm::quat &getRotation() const;
 
@@ -63,6 +67,8 @@ protected:
     float           mFarClip            { 100.f };
     
     GLFWwindow *    mWindow             { };
+    
+    std::vector<std::unique_ptr<PostProcessLayer>> mPostProcessStack;
 };
 
 

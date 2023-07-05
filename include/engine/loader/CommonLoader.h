@@ -20,10 +20,11 @@
 
 namespace load
 {
+    template<typename TMaterial>
     struct Model
     {
         SharedMesh mesh;
-        std::vector<std::shared_ptr<Material>> materials;
+        std::vector<std::shared_ptr<TMaterial>> materials;
     };
     
     /**

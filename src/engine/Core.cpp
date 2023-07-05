@@ -7,34 +7,59 @@
 
 #include "Core.h"
 #include "Scene.h"
-#include "Renderer.h"
 #include "WindowHelpers.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "Timers.h"
 #include "Ui.h"
 #include "RendererImGui.h"
+#include "GraphicsState.h"
 
 engine::Core::Core(const glm::ivec2 &resolution, bool enableDebugging)
     : mResolution(resolution), mEnableDebugging(enableDebugging)
 {
     window::setBufferSize(mResolution);
     
-    if (!(initGlfw(4, 6) && renderer::init() && initImGui()))
+    if (!initGlfw(4, 6))
     {
         mIsRunning = false;
         debug::log("Unable to initialise everything.", debug::severity::Warning);
         return;
     }
     
+    if (glewInit() != GLEW_OK)
+    {
+        mIsRunning = false;
+        debug::log("Unable to initialise glew.", debug::severity::Major);
+        return;
+    }
+    
+    mRenderer = std::make_unique<Renderer>();
+    if (!mRenderer->isOk)
+    {
+        mIsRunning = false;
+        debug::log("Could not load the renderer.", debug::severity::Major);
+        return;
+    }
+    
+    graphics::renderer = mRenderer.get();
+    
     if (mEnableDebugging)
     {
-        bool success = renderer::debugMessageCallback(debug::openglCallBack);
+        bool success = Renderer::debugMessageCallback(debug::openglCallBack);
         if (!success)
         {
             debug::log("Unable to enable debugging. Check if the openGl version is greater than 4.3.",
                        debug::severity::Warning);
         }
+        debug::log(Renderer::getVersion());
+    }
+    
+    if (!initImGui())
+    {
+        mIsRunning = false;
+        debug::log("Could not load imgui for an opengl context.", debug::severity::Major);
+        return;
     }
 }
 
@@ -136,9 +161,9 @@ void engine::Core::run()
         
         mScene->onUpdate();
         mScene->onRender();
-        renderer::render();
+        mRenderer->render();
         updateImgui();
-        renderer::clear();
+        mRenderer->clear();
         
         glfwSwapBuffers(mWindow);
         timers::update();
@@ -172,7 +197,7 @@ void engine::Core::updateImgui()
     ImGui::End();
     
     ImGui::Begin("Renderer Settings");
-    renderer::displayShadowSettings();
+    graphics::displayShadowSettings();
     ImGui::End();
     
     updateViewports();
@@ -212,27 +237,33 @@ void engine::Core::updateImguiMenuViewports()
             mViewport.showEmissiveBuffer = true;
         if (ImGui::MenuItem("Show Diffuse Buffer"))
             mViewport.showDiffuseBuffer = true;
-        if (ImGui::MenuItem("Show Specular Buffer"))
-            mViewport.showSpecularBuffer = true;
         if (ImGui::MenuItem("Show Depth Buffer"))
             mViewport.showDepthBuffer = true;
         if (ImGui::MenuItem("Show Output Buffer"))
-            mViewport.showOutputBuffer = true;
+            mViewport.showDeferredLightingBuffer = true;
         if (ImGui::MenuItem("Show Shadow Buffer"))
             mViewport.showShadowBuffer = true;
+        if (ImGui::MenuItem("Show Roughness Buffer"))
+            mViewport.showRoughnessBuffer = true;
+        if (ImGui::MenuItem("Show Metallic Buffer"))
+            mViewport.showMetallicBuffer = true;
+        if (ImGui::MenuItem("Show Primary Buffer"))
+            mViewport.showPrimaryBuffer = true;
         ImGui::EndMenu();
     }
 }
 
 void engine::Core::updateViewports()
 {
-    ui::showTextureBuffer("Albedo",     renderer::getAlbedoBuffer(),    &mViewport.showAlbedoBuffer,    false);
-    ui::showTextureBuffer("Position",   renderer::getPositionBuffer(),  &mViewport.showPositionBuffer,  false);
-    ui::showTextureBuffer("Normal",     renderer::getNormalBuffer(),    &mViewport.showNormalBuffer,    false);
-    ui::showTextureBuffer("Emissive",   renderer::getEmissiveBuffer(),  &mViewport.showEmissiveBuffer,  false);
-    ui::showTextureBuffer("Diffuse",    renderer::getDiffuseBuffer(),   &mViewport.showDiffuseBuffer,   false);
-    ui::showTextureBuffer("Specular",   renderer::getSpecularBuffer(),  &mViewport.showSpecularBuffer,  false);
-    ui::showTextureBuffer("Depth",      renderer::getDepthBuffer(),     &mViewport.showDepthBuffer,     false);
-    ui::showTextureBuffer("Shadow",     renderer::getShadowBuffer(),    &mViewport.showShadowBuffer,    false);
-    ui::showTextureBuffer("Output",     renderer::getOutputBuffer(),    &mViewport.showOutputBuffer,    true);
+    ui::showTextureBuffer("Albedo", mRenderer->getAlbedoBuffer(), &mViewport.showAlbedoBuffer, false);
+    ui::showTextureBuffer("Position", mRenderer->getPositionBuffer(), &mViewport.showPositionBuffer, false);
+    ui::showTextureBuffer("Normal", mRenderer->getNormalBuffer(), &mViewport.showNormalBuffer, false);
+    ui::showTextureBuffer("Emissive", mRenderer->getEmissiveBuffer(), &mViewport.showEmissiveBuffer, false);
+    ui::showTextureBuffer("Diffuse", mRenderer->getDiffuseBuffer(), &mViewport.showDiffuseBuffer, false);
+    ui::showTextureBuffer("Depth", mRenderer->getDepthBuffer(), &mViewport.showDepthBuffer, false);
+    ui::showTextureBuffer("Shadow", mRenderer->getShadowBuffer(), &mViewport.showShadowBuffer, false);
+    ui::showTextureBuffer("Roughness", mRenderer->getRoughnessBuffer(), &mViewport.showRoughnessBuffer, false);
+    ui::showTextureBuffer("Metallic", mRenderer->getMetallicBuffer(), &mViewport.showMetallicBuffer, false);
+    ui::showTextureBuffer("DeferredLighting", mRenderer->getDeferredLightingBuffer(), &mViewport.showDeferredLightingBuffer, false);
+    ui::showTextureBuffer("Primary", mRenderer->getPrimaryBuffer(), &mViewport.showPrimaryBuffer, true);
 }

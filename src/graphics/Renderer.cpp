@@ -1,336 +1,607 @@
 /**
  * @file Renderer.cpp
  * @author Ryan Purse
- * @date 13/06/2023
+ * @date 14/07/2023
  */
 
 
 #include "Renderer.h"
-#include "FramebufferObject.h"
 #include "WindowHelpers.h"
 #include "Primitives.h"
-#include "Cubemap.h"
-#include "RendererData.h"
-#include "ShadowMapping.h"
+#include "BloomPass.h"
+#include "ColourGrading.h"
+#include "GraphicsFunctions.h"
+#include "Buffers.h"
+#include "Shader.h"
 
-#include <utility>
-
-namespace renderer
+Renderer::Renderer() :
+    isOk(true),
+    mCurrentRenderBufferSize(window::bufferSize()),
+    mFullscreenTriangle(primitives::fullscreenTriangle())
 {
-    bool init()
+    // Blending texture data / enabling lerping.
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+    
+    mDirectionalLightShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/lighting/DirectionalLight.frag");
+    mDeferredLightShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/lighting/CombineOutput.frag");
+    mShadowShader = std::make_unique<Shader>("../resources/shaders/shadow/Shadow.vert", "../resources/shaders/shadow/Shadow.frag");
+    mHdrToCubemapShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/cubemap/ToCubemap.frag");
+    mCubemapToIrradianceShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/cubemap/IrradianceMap.frag");
+    mPreFilterShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/cubemap/PreFilter.frag");
+    mIntegrateBrdfShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/brdf/IntegrateBrdf.frag");
+    
+    mSkybox = std::make_unique<Cubemap>(std::vector<std::string> {
+        "../resources/textures/skybox/right.jpg",
+        "../resources/textures/skybox/left.jpg",
+        "../resources/textures/skybox/top.jpg",
+        "../resources/textures/skybox/bottom.jpg",
+        "../resources/textures/skybox/front.jpg",
+        "../resources/textures/skybox/back.jpg",
+    });
+    
+    mHdrImage = std::make_unique<HdrTexture>("../resources/textures/hdr/newport/NewportLoft.hdr");
+    mHdrSkybox = createCubemapFromHdrTexture(mHdrImage.get(), glm::ivec2(512));
+    mIrradianceMap = generateIrradianceMap(mHdrSkybox.get(), glm::ivec2(64));
+    mPreFilterMap = generatePreFilterMap(mHdrSkybox.get(), glm::ivec2(128));
+    mBrdfLutTextureBuffer = generateBrdfLut(glm::ivec2(512));
+    
+    initFrameBuffers();
+    initTextureRenderBuffers();
+    
+    glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
+}
+
+bool Renderer::debugMessageCallback(GLDEBUGPROC callback)
+{
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(callback, nullptr);
+    
+    int flags { 0 };  // Check to see if OpenGL debug context was set up correctly.
+    glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+    
+    return (flags & GL_CONTEXT_FLAG_DEBUG_BIT);
+}
+
+std::string Renderer::getVersion()
+{
+    return (reinterpret_cast<const char*>(glGetString(GL_VERSION)));
+}
+
+void Renderer::drawMesh(
+    uint32_t vao, int32_t indicesCount, std::weak_ptr<Shader> shader,
+    graphics::drawMode renderMode, const glm::mat4 &matrix,
+    const graphics::DrawCallback &onDraw)
+{
+    static GLenum drawModeToGLenum[] { GL_TRIANGLES, GL_LINES };
+    GLenum mode = drawModeToGLenum[(int)renderMode];
+    mRenderQueue.emplace_back(graphics::RenderQueueObject { vao, indicesCount, std::move(shader), mode, matrix, onDraw });
+}
+
+void Renderer::drawMesh(const SubMesh &subMesh, Material &material, const glm::mat4 &matrix)
+{
+    drawMesh(
+        subMesh.vao(), subMesh.indicesCount(), material.shader(), material.drawMode(), matrix,
+        [&]() { material.onDraw(); }
+    );
+}
+
+void Renderer::drawMesh(const SharedMesh &mesh, const SharedMaterials &materials, const glm::mat4 &matrix)
+{
+    if (materials.size() == 1)
     {
-        if (glewInit() != GLEW_OK)
-            return false;
+        Material& material = *materials[0];
         
-        // Blending texture data / enabling lerping.
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
-        glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-        
-        directionalLightShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/lighting/DirectionalLight.frag");
-        deferredLightShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/lighting/CombineOutput.frag");
-        shadowShader = std::make_unique<Shader>("../resources/shaders/shadow/Shadow.vert", "../resources/shaders/shadow/Shadow.frag");
-        fullscreenTriangle = primitives::fullscreenTriangle();
-        skybox = std::make_unique<Cubemap>(std::vector<std::string> {
-            "../resources/textures/skybox/right.jpg",
-            "../resources/textures/skybox/left.jpg",
-            "../resources/textures/skybox/top.jpg",
-            "../resources/textures/skybox/bottom.jpg",
-            "../resources/textures/skybox/front.jpg",
-            "../resources/textures/skybox/back.jpg",
-        });
-        
-        initFrameBuffers();
+        for (const auto &subMesh : mesh)
+            drawMesh(*subMesh, material, matrix);
+    }
+    else
+    {
+        for (int i = 0; i < mesh.size(); ++i)
+        {
+            SubMesh& subMesh = *mesh[i];
+            Material& material = *materials[i];
+            drawMesh(subMesh, material, matrix);
+        }
+    }
+}
+
+void Renderer::submit(const CameraSettings &cameraSettings)
+{
+    mCameraQueue.emplace_back(cameraSettings);
+}
+
+void Renderer::submit(const DirectionalLight &directionalLight)
+{
+    mDirectionalLightQueue.emplace_back(directionalLight);
+}
+
+void Renderer::render()
+{
+    if (mCurrentRenderBufferSize != window::bufferSize())
+    {
+        detachTextureRenderBuffersFromFrameBuffers();
         initTextureRenderBuffers();
+        mCurrentRenderBufferSize = window::bufferSize();
+    }
+    
+    glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
+    
+    for (CameraSettings &camera : mCameraQueue)
+    {
+        mGeometryFramebuffer->bind();
+        mGeometryFramebuffer->clear(camera.clearColour);
         
-        currentRenderBufferSize = window::bufferSize();
-        glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
+        const glm::mat4 cameraProjectionMatrix = glm::perspective(camera.fovY, window::aspectRatio(), camera.nearClipDistance, camera.farClipDistance);
+        const glm::mat4 vpMatrix = cameraProjectionMatrix * camera.viewMatrix;
         
-        return true;
-    }
-    
-    bool debugMessageCallback(GLDEBUGPROC callback)
-    {
-        glEnable(GL_DEBUG_OUTPUT);
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback(callback, nullptr);
-        
-        int flags { 0 };  // Check to see if OpenGL debug context was set up correctly.
-        glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-        
-        return (flags & GL_CONTEXT_FLAG_DEBUG_BIT);
-    }
-    
-    std::string getVersion()
-    {
-        return (reinterpret_cast<const char*>(glGetString(GL_VERSION)));
-    }
-    
-    void drawMesh(
-        uint32_t vao, int32_t indicesCount, std::weak_ptr<Shader> shader, DrawMode renderMode, const glm::mat4 &matrix,
-        const DrawCallback &onDraw)
-    {
-        static GLenum drawModeToGLenum[] { GL_TRIANGLES, GL_LINES };
-        GLenum mode = drawModeToGLenum[(int)renderMode];
-        renderQueue.emplace_back(RenderQueueObject { vao, indicesCount, std::move(shader), mode, matrix, onDraw });
-    }
-    
-    
-    void drawMesh(const SubMesh &subMesh, Material &material, const glm::mat4 &matrix)
-    {
-        drawMesh(
-            subMesh.vao(), subMesh.indicesCount(), material.shader(), material.drawMode(), matrix,
-            [&]() { material.onDraw(); }
-        );
-    }
-    
-    void drawMesh(const SharedMesh &mesh, const SharedMaterials &materials, const glm::mat4 &matrix)
-    {
-        if (materials.size() == 1)
+        for (const auto &rqo : mRenderQueue)
         {
-            Material& material = *materials[0];
+            if (rqo.shader.expired())
+                continue;
             
-            for (const auto &subMesh : mesh)
-                drawMesh(*subMesh, material, matrix);
-        }
-        else
-        {
-            for (int i = 0; i < mesh.size(); ++i)
-            {
-                SubMesh& subMesh = *mesh[i];
-                Material& material = *materials[i];
-                drawMesh(subMesh, material, matrix);
-            }
-        }
-    }
-    
-    void submit(const CameraSettings &cameraMatrices)
-    {
-        cameraQueue.emplace_back(cameraMatrices);
-    }
-    
-    void submit(const DirectionalLight &directionalLight)
-    {
-        directionalLightQueue.emplace_back(directionalLight);
-    }
-    
-    void render()
-    {
-        if (currentRenderBufferSize != window::bufferSize())
-        {
-            detachTextureRenderBuffersFromFrameBuffers();
-            initTextureRenderBuffers();
-            glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
-            currentRenderBufferSize = window::bufferSize();
+            const auto shader = rqo.shader.lock();
+            shader->bind();
+            shader->set("u_mvp_matrix", vpMatrix * rqo.matrix);
+            shader->set("u_model_matrix", rqo.matrix);
+            shader->set("u_camera_position_ws", glm::vec3(glm::inverse(camera.viewMatrix) * glm::vec4(glm::vec3(0.f), 1.f)));
+            rqo.onDraw();
+            glBindVertexArray(rqo.vao);
+            glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
         }
         
-        for (CameraSettings &camera : cameraQueue)
+        // Shadow mapping
+        
+        std::vector<float> cascadeDepths;
+        cascadeDepths.reserve(shadowCascadeMultipliers.size());
+        for (const auto &multiplier : shadowCascadeMultipliers)
+            cascadeDepths.emplace_back(camera.farClipDistance * multiplier);
+        
+        shadowMapping(camera, cascadeDepths);
+        
+        mLightFramebuffer->bind();
+        mLightFramebuffer->clear(glm::vec4(glm::vec3(0.f), 1.f));
+        
+        mDirectionalLightShader->bind();
+        
+        mDirectionalLightShader->set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 0);
+        mDirectionalLightShader->set("u_position_texture", mPositionTextureBuffer->getId(), 1);
+        mDirectionalLightShader->set("u_normal_texture", mNormalTextureBuffer->getId(), 2);
+        mDirectionalLightShader->set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 3);
+        mDirectionalLightShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
+        
+        const glm::vec3 cameraPosition = glm::inverse(camera.viewMatrix) * glm::vec4(glm::vec3(0.f), 1.f);
+        mDirectionalLightShader->set("u_camera_position_ws", cameraPosition);
+        mDirectionalLightShader->set("u_view_matrix", camera.viewMatrix);
+        
+        mDirectionalLightShader->set("u_cascade_distances", &(cascadeDepths[0]), static_cast<int>(cascadeDepths.size()));
+        mDirectionalLightShader->set("u_cascade_count", static_cast<int>(cascadeDepths.size()));
+        
+        mDirectionalLightShader->set("u_bias", shadowBias);
+        
+        glBindVertexArray(mFullscreenTriangle.vao());
+        
+        for (const DirectionalLight &directionalLight : mDirectionalLightQueue)
         {
-            geometryFramebuffer->bind();
-            geometryFramebuffer->clear(camera.clearColour);
+            mDirectionalLightShader->set("u_light_direction", directionalLight.direction);
+            mDirectionalLightShader->set("u_light_intensity", directionalLight.intensity);
+            mDirectionalLightShader->set("u_light_vp_matrix", &(directionalLight.vpMatrices[0]), static_cast<int>(directionalLight.vpMatrices.size()));
+            mDirectionalLightShader->set("u_shadow_map_texture", directionalLight.shadowMap->getId(), 3);
             
-            const glm::mat4 cameraProjectionMatrix = glm::perspective(camera.fovY, window::aspectRatio(), camera.nearClipDistance, camera.farClipDistance);
-            const glm::mat4 vpMatrix = cameraProjectionMatrix * camera.viewMatrix;
+            glDrawElements(GL_TRIANGLES, mFullscreenTriangle.indicesCount(), GL_UNSIGNED_INT, nullptr);
+        }
+        
+        // Deferred Lighting step.
+        
+        mDeferredLightFramebuffer->bind();
+        mDeferredLightFramebuffer->clear(glm::vec4(glm::vec3(0.f), 0.f));
+        
+        mDeferredLightShader->bind();
+        
+        const glm::mat4 v = glm::mat4(glm::mat3(camera.viewMatrix));
+        const glm::mat4 vp = cameraProjectionMatrix * v;
+        const glm::mat4 ivp = glm::inverse(vp);
+        
+        mDeferredLightShader->set("u_diffuse_texture", mLightTextureBuffer->getId(), 0);
+        mDeferredLightShader->set("u_position_texture", mPositionTextureBuffer->getId(), 1);
+        mDeferredLightShader->set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 2);
+        mDeferredLightShader->set("u_normal_texture", mNormalTextureBuffer->getId(), 3);
+        mDeferredLightShader->set("u_emissive_texture", mEmissiveTextureBuffer->getId(), 4);
+        mDeferredLightShader->set("u_depth_texture", mDepthTextureBuffer->getId(), 5);
+        mDeferredLightShader->set("u_skybox_texture", mHdrSkybox->getId(), 6);
+        mDeferredLightShader->set("u_irradiance_texture", mIrradianceMap->getId(), 7);
+        mDeferredLightShader->set("u_shadow_texture", mShadowTextureBuffer->getId(), 8);
+        mDeferredLightShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 9);
+        mDeferredLightShader->set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 10);
+        mDeferredLightShader->set("u_pre_filter_texture", mPreFilterMap->getId(), 11);
+        mDeferredLightShader->set("u_brdf_lut_texture", mBrdfLutTextureBuffer->getId(), 12);
+        
+        mDeferredLightShader->set("u_inverse_vp_matrix", ivp);
+        mDeferredLightShader->set("u_camera_position_ws", cameraPosition);
+        
+        drawFullscreenTriangleNow();
+        
+        graphics::copyTexture2D(*mDeferredLightingTextureBuffer, *mPrimaryImageBuffer);
+        for (std::unique_ptr<PostProcessLayer> &postProcessLayer : camera.postProcessStack)
+        {
+            postProcessLayer->draw(mPrimaryImageBuffer.get(), mAuxiliaryImageBuffer.get());
+            graphics::copyTexture2D(*mAuxiliaryImageBuffer, *mPrimaryImageBuffer); // Yes this is bad. I'm lazy.
+        }
+    }
+}
+
+void Renderer::clear()
+{
+    uint64_t renderQueueCount = mRenderQueue.size();
+    mRenderQueue.clear();
+    mRenderQueue.reserve(renderQueueCount);
+    
+    uint64_t cameraCount = mCameraQueue.size();
+    mCameraQueue.clear();
+    mCameraQueue.reserve(cameraCount);
+    
+    uint64_t directionalLightCount = mDirectionalLightQueue.size();
+    mDirectionalLightQueue.clear();
+    mDirectionalLightQueue.reserve(directionalLightCount);
+}
+
+void Renderer::initFrameBuffers()
+{
+    // One, Zero (override any geometry that is further away from the camera).
+    mGeometryFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ZERO, GL_LESS);
+    
+    // One, One (additive blending for each light that we pass through)
+    mLightFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ONE, GL_ALWAYS);
+    
+    // We only ever write to this framebuffer once, so it shouldn't matter.
+    mDeferredLightFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ONE, GL_ALWAYS);
+    
+    mShadowFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ZERO, GL_LESS);
+}
+
+void Renderer::initTextureRenderBuffers()
+{
+    mPositionTextureBuffer           = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
+    mAlbedoTextureBuffer             = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
+    mNormalTextureBuffer             = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16_SNORM,           GL_NEAREST, GL_NEAREST);
+    mEmissiveTextureBuffer           = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
+    mRoughnessTextureBuffer          = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_R16,                   GL_NEAREST, GL_NEAREST);
+    mMetallicTextureBuffer           = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_R16,                   GL_NEAREST, GL_NEAREST);
+    mLightTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
+    mDeferredLightingTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
+    mShadowTextureBuffer             = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_R16F,                  GL_NEAREST, GL_NEAREST);
+    mDepthTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_DEPTH_COMPONENT32F,    GL_NEAREST, GL_NEAREST);
+    mPrimaryImageBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
+    mAuxiliaryImageBuffer            = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
+    
+    // Make sure that the framebuffers have been set up before calling this function.
+    mGeometryFramebuffer->attach(mPositionTextureBuffer.get(),    0);
+    mGeometryFramebuffer->attach(mNormalTextureBuffer.get(),      1);
+    mGeometryFramebuffer->attach(mAlbedoTextureBuffer.get(),      2);
+    mGeometryFramebuffer->attach(mEmissiveTextureBuffer.get(),    3);
+    mGeometryFramebuffer->attach(mRoughnessTextureBuffer.get(),   4);
+    mGeometryFramebuffer->attach(mMetallicTextureBuffer.get(),    5);
+    
+    mGeometryFramebuffer->attachDepthBuffer(mDepthTextureBuffer.get());
+    
+    // Lighting.
+    mLightFramebuffer->attach(mLightTextureBuffer.get(), 0);
+    mLightFramebuffer->attach(mShadowTextureBuffer.get(), 1);
+    
+    // Deferred Lighting.
+    mDeferredLightFramebuffer->attach(mDeferredLightingTextureBuffer.get(), 0);
+}
+
+void Renderer::detachTextureRenderBuffersFromFrameBuffers()
+{
+    mGeometryFramebuffer->detach(0);
+    mGeometryFramebuffer->detach(1);
+    mGeometryFramebuffer->detach(2);
+    mGeometryFramebuffer->detach(3);
+    mGeometryFramebuffer->detach(4);
+    mGeometryFramebuffer->detach(5);
+    mGeometryFramebuffer->detachDepthBuffer();
+    
+    mLightFramebuffer->detach(0);
+    mLightFramebuffer->detach(1);
+    
+    mDeferredLightFramebuffer->detach(0);
+}
+
+std::unique_ptr<Cubemap> Renderer::createCubemapFromHdrTexture(HdrTexture *hdrTexture, const glm::ivec2 &size)
+{
+    auto cubemap = std::make_unique<Cubemap>(size, GL_RGB16F);
+    
+    FramebufferObject auxiliaryFrameBuffer(GL_ONE, GL_ONE, GL_ALWAYS);
+    
+    const glm::mat4 views[] = {
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
+    };
+    
+    auxiliaryFrameBuffer.bind();
+    mHdrToCubemapShader->bind();
+    mHdrToCubemapShader->set("u_texture", hdrTexture->getId(), 0);
+    
+    glViewport(0, 0, size.x, size.y);
+    
+    glBindVertexArray(mFullscreenTriangle.vao());
+    
+    for (int i = 0; i < 6; ++i)
+    {
+        mHdrToCubemapShader->set("u_view_matrix", views[i]);
+        auxiliaryFrameBuffer.attach(cubemap.get(), 0, i);
+        auxiliaryFrameBuffer.clear(glm::vec4(glm::vec3(0.f), 1.f));
+        
+        glDrawElements(GL_TRIANGLES, mFullscreenTriangle.indicesCount(), GL_UNSIGNED_INT, nullptr);
+        
+        auxiliaryFrameBuffer.detach(0);
+    }
+    
+    return cubemap;
+}
+
+std::unique_ptr<Cubemap> Renderer::generateIrradianceMap(Cubemap *cubemap, const glm::ivec2 &size)
+{
+    auto irradiance = std::make_unique<Cubemap>(size, GL_RGB16F);
+    
+    FramebufferObject auxiliaryFrameBuffer(GL_ONE, GL_ONE, GL_ALWAYS);
+    
+    const glm::mat4 views[] = {
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
+    };
+    
+    auxiliaryFrameBuffer.bind();
+    mCubemapToIrradianceShader->bind();
+    mCubemapToIrradianceShader->set("u_environment_texture", cubemap->getId(), 0);
+    
+    glViewport(0, 0, size.x, size.y);
+    
+    glBindVertexArray(mFullscreenTriangle.vao());
+    
+    for (int i = 0; i < 6; ++i)
+    {
+        mCubemapToIrradianceShader->set("u_view_matrix", views[i]);
+        auxiliaryFrameBuffer.attach(irradiance.get(), 0, i);
+        auxiliaryFrameBuffer.clear(glm::vec4(glm::vec3(0.f), 1.f));
+        
+        glDrawElements(GL_TRIANGLES, mFullscreenTriangle.indicesCount(), GL_UNSIGNED_INT, nullptr);
+        
+        auxiliaryFrameBuffer.detach(0);
+    }
+    
+    return irradiance;
+}
+
+std::unique_ptr<Cubemap> Renderer::generatePreFilterMap(Cubemap *cubemap, const glm::ivec2 &size)
+{
+    const int maxMipLevels = 5;
+    auto filter = std::make_unique<Cubemap>(size, GL_RGB16F, maxMipLevels);
+    
+    FramebufferObject auxiliaryFrameBuffer(GL_ONE, GL_ONE, GL_ALWAYS);
+    
+    const glm::mat4 views[] = {
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
+    };
+    
+    auxiliaryFrameBuffer.bind();
+    mPreFilterShader->bind();
+    mPreFilterShader->set("u_environment_texture", cubemap->getId(), 0);
+    
+    glBindVertexArray(mFullscreenTriangle.vao());
+    
+    for (int mip = 0; mip < maxMipLevels; ++mip)
+    {
+        const glm::ivec2 mipSize = size >> mip;
+        glViewport(0, 0, mipSize.x, mipSize.y);
+        
+        const float roughness = static_cast<float>(mip) / (static_cast<float>(maxMipLevels) - 1.f);
+        mPreFilterShader->set("u_roughness", roughness);
+        
+        for (int i = 0; i < 6; ++i)
+        {
+            mPreFilterShader->set("u_view_matrix", views[i]);
+            auxiliaryFrameBuffer.attach(filter.get(), 0, i, mip);
+            auxiliaryFrameBuffer.clear(glm::vec4(glm::vec3(0.f), 1.f));
             
-            for (const auto &rqo : renderQueue)
-            {
-                if (rqo.shader.expired())
-                    continue;
+            glDrawElements(GL_TRIANGLES, mFullscreenTriangle.indicesCount(), GL_UNSIGNED_INT, nullptr);
+            
+            auxiliaryFrameBuffer.detach(0);
+        }
+    }
+    
+    return filter;
+}
+
+std::unique_ptr<TextureBufferObject> Renderer::generateBrdfLut(const glm::ivec2 &size)
+{
+    auto lut = std::make_unique<TextureBufferObject>(size, GL_RGB16F, graphics::filter::Linear, graphics::wrap::ClampToEdge);
+    
+    FramebufferObject auxiliaryFrameBuffer(GL_ONE, GL_ONE, GL_ALWAYS);
+    
+    auxiliaryFrameBuffer.bind();
+    mIntegrateBrdfShader->bind();
+    auxiliaryFrameBuffer.attach(lut.get(), 0);
+    glViewport(0, 0, size.x, size.y);
+    auxiliaryFrameBuffer.clear(glm::vec4(glm::vec3(0.f), 1.f));
+    drawFullscreenTriangleNow();
+    auxiliaryFrameBuffer.detach(0);
+    
+    return lut;
+}
+
+void Renderer::shadowMapping(const CameraSettings &cameraSettings, const std::vector<float> &cascadeDepths)
+{
+    const auto resize = [](const glm::vec4 &v) { return v / v.w; };
+    
+    mShadowFramebuffer->bind();
+    mShadowShader->bind();
+    
+    for (DirectionalLight &directionalLight : mDirectionalLightQueue)
+    {
+        const glm::ivec2 &shadowMapSize = directionalLight.shadowMap->getSize();
+        glViewport(0, 0, shadowMapSize.x, shadowMapSize.y);
+        
+        std::vector<float> depths { cameraSettings.nearClipDistance };
+        for (const float &depth : cascadeDepths)
+            depths.emplace_back(depth);
+        depths.emplace_back(cameraSettings.farClipDistance);
+        
+        for (int j = 0; j < directionalLight.shadowMap->getLayerCount(); ++j)
+        {
+            mShadowFramebuffer->attachDepthBuffer(*directionalLight.shadowMap, j);
+            mShadowFramebuffer->clear(glm::vec4(glm::vec3(0.f), 1.f));
+            
+            const float aspectRatio = window::aspectRatio();
+            const glm::mat4 projectionMatrix = glm::perspective(cameraSettings.fovY, aspectRatio, depths[j], depths[j + 1]);
+            
+            // We only want the shadow map to encompass the camera's frustum.
+            const glm::mat4 inverseVpMatrix = glm::inverse(projectionMatrix * cameraSettings.viewMatrix);
+            const std::vector<glm::vec4> worldPoints = {
+                resize(inverseVpMatrix * glm::vec4(1.f, 1.f, -1.f, 1.f)),
+                resize(inverseVpMatrix * glm::vec4(1.f, -1.f, -1.f, 1.f)),
+                resize(inverseVpMatrix * glm::vec4(-1.f, 1.f, -1.f, 1.f)),
+                resize(inverseVpMatrix * glm::vec4(-1.f, -1.f, -1.f, 1.f)),
                 
-                const auto shader = rqo.shader.lock();
-                shader->bind();
-                shader->set("u_mvp_matrix", vpMatrix * rqo.matrix);
-                shader->set("u_model_matrix", rqo.matrix);
-                rqo.onDraw();
+                resize(inverseVpMatrix * glm::vec4(1.f, 1.f, 1.f, 1.f)),
+                resize(inverseVpMatrix * glm::vec4(1.f, -1.f, 1.f, 1.f)),
+                resize(inverseVpMatrix * glm::vec4(-1.f, 1.f, 1.f, 1.f)),
+                resize(inverseVpMatrix * glm::vec4(-1.f, -1.f, 1.f, 1.f)),
+            };
+            
+            glm::vec3 minWorldBound = worldPoints[0];
+            glm::vec3 maxWorldBound = worldPoints[0];
+            for (int i = 1; i < worldPoints.size(); ++i)
+            {
+                minWorldBound = glm::min(minWorldBound, glm::vec3(worldPoints[i]));
+                maxWorldBound = glm::max(maxWorldBound, glm::vec3(worldPoints[i]));
+            }
+            const glm::vec3 centerPoint = minWorldBound + 0.5f * (maxWorldBound - minWorldBound);
+            
+            const glm::mat4 lightViewMatrix = glm::lookAt(
+                centerPoint + directionalLight.direction, centerPoint, glm::vec3(0.f, 1.f, 0.f));
+            glm::vec3 minLightSpacePoint = lightViewMatrix * worldPoints[0];
+            glm::vec3 maxLightSpacePoint = lightViewMatrix * worldPoints[0];
+            for (int i = 1; i < worldPoints.size(); ++i)
+            {
+                const glm::vec3 lightPoint = lightViewMatrix * worldPoints[i];
+                minLightSpacePoint = glm::min(minLightSpacePoint, lightPoint);
+                maxLightSpacePoint = glm::max(maxLightSpacePoint, lightPoint);
+            }
+            
+            if (minLightSpacePoint.z < 0)
+                minLightSpacePoint.z *= shadowZMultiplier;
+            else
+                minLightSpacePoint.z /= shadowZMultiplier;
+            if (maxLightSpacePoint.z < 0)
+                maxLightSpacePoint.z /= shadowZMultiplier;
+            else
+                maxLightSpacePoint.z *= shadowZMultiplier;
+            
+            const glm::mat4 lightProjectionMatrix = glm::ortho(
+                minLightSpacePoint.x, maxLightSpacePoint.x, minLightSpacePoint.y, maxLightSpacePoint.y,
+                minLightSpacePoint.z, maxLightSpacePoint.z
+            );
+            
+            directionalLight.vpMatrices.emplace_back(lightProjectionMatrix * lightViewMatrix);
+            
+            for (const auto &rqo : mRenderQueue)
+            {
+                const glm::mat4 &modelMatrix = rqo.matrix;
+                const glm::mat4 mvp = lightProjectionMatrix * lightViewMatrix * modelMatrix;
+                mShadowShader->set("u_mvp_matrix", mvp);
                 glBindVertexArray(rqo.vao);
                 glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
             }
             
-            // Shadow mapping
-            
-            std::vector<float> cascadeDepths;
-            cascadeDepths.reserve(shadow::cascadeMultipliers.size());
-            for (const auto &multiplier : shadow::cascadeMultipliers)
-                cascadeDepths.emplace_back(camera.farClipDistance * multiplier);
-            
-            shadowMapping(camera, cascadeDepths);
-            
-            lightFramebuffer->bind();
-            lightFramebuffer->clear(glm::vec4(glm::vec3(0.f), 1.f));
-            
-            directionalLightShader->bind();
-            
-            directionalLightShader->set("u_albedo_texture", albedoTextureBuffer->getId(), 0);
-            directionalLightShader->set("u_position_texture", positionTextureBuffer->getId(), 1);
-            directionalLightShader->set("u_normal_texture", normalTextureBuffer->getId(), 2);
-            
-            const glm::vec3 cameraPosition = glm::inverse(camera.viewMatrix) * glm::vec4(glm::vec3(0.f), 1.f);
-            directionalLightShader->set("u_camera_position_ws", cameraPosition);
-            directionalLightShader->set("u_view_matrix", camera.viewMatrix);
-            
-            directionalLightShader->set("u_cascade_distances", &(cascadeDepths[0]), static_cast<int>(cascadeDepths.size()));
-            directionalLightShader->set("u_cascade_count", static_cast<int>(cascadeDepths.size()));
-            
-            directionalLightShader->set("u_bias", shadow::bias);
-            
-            glBindVertexArray(fullscreenTriangle->vao());
-            
-            for (const DirectionalLight &directionalLight : directionalLightQueue)
-            {
-                directionalLightShader->set("u_light_direction", directionalLight.direction);
-                directionalLightShader->set("u_light_intensity", directionalLight.intensity);
-                directionalLightShader->set("u_light_vp_matrix", &(directionalLight.vpMatrices[0]), static_cast<int>(directionalLight.vpMatrices.size()));
-                directionalLightShader->set("u_shadow_map_texture", directionalLight.shadowMap->getId(), 3);
-                
-                glDrawElements(GL_TRIANGLES, fullscreenTriangle->indicesCount(), GL_UNSIGNED_INT, nullptr);
-            }
-            
-            // Deferred Lighting step.
-            
-            deferredLightFramebuffer->bind();
-            deferredLightFramebuffer->clear(glm::vec4(glm::vec3(0.f), 0.f));
-            
-            deferredLightShader->bind();
-            
-            const glm::mat4 v = glm::mat4(glm::mat3(camera.viewMatrix));
-            const glm::mat4 vp = cameraProjectionMatrix * v;
-            const glm::mat4 ivp = glm::inverse(vp);
-            
-            deferredLightShader->set("u_diffuse_texture", diffuseTextureBuffer->getId(), 0);
-            deferredLightShader->set("u_specular_texture", specularTextureBuffer->getId(), 1);
-            deferredLightShader->set("u_albedo_texture", albedoTextureBuffer->getId(), 2);
-            deferredLightShader->set("u_emissive_texture", emissiveTextureBuffer->getId(), 3);
-            deferredLightShader->set("u_depth_texture", depthTextureBuffer->getId(), 4);
-            deferredLightShader->set("u_skybox_texture", skybox->getId(), 5);
-            deferredLightShader->set("u_shadow_texture", shadowTextureBuffer->getId(), 6);
-            deferredLightShader->set("u_inverse_vp_matrix", ivp);
-            
-            glBindVertexArray(fullscreenTriangle->vao());  // I know it's still bound but just it's just to avoid future errors.
-            glDrawElements(GL_TRIANGLES, fullscreenTriangle->indicesCount(), GL_UNSIGNED_INT, nullptr);
+            mShadowFramebuffer->detachDepthBuffer();
         }
-        
-        
-    }
-
-    
-    const TextureBufferObject &getOutputBuffer()
-    {
-        return *outputTextureBuffer;
     }
     
-    void initFrameBuffers()
-    {
-        // One, Zero (override any geometry that is further away from the camera).
-        geometryFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ZERO, GL_LESS);
-        
-        // One, One (additive blending for each light that we pass through)
-        lightFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ONE, GL_ALWAYS);
-        
-        // We only ever write to this framebuffer once, so it shouldn't matter.
-        deferredLightFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ONE, GL_ALWAYS);
-        
-        shadowFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ZERO, GL_LESS);
-    }
-    
-    void initTextureRenderBuffers()
-    {
-        positionTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST, 1, "Position Buffer");
-        albedoTextureBuffer     = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST, 1, "Albedo Buffer");
-        normalTextureBuffer     = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16_SNORM,           GL_NEAREST, GL_NEAREST, 1, "Normal Buffer");
-        emissiveTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST, 1, "Emissive Buffer");
-        diffuseTextureBuffer    = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST, 1, "Diffuse Buffer");
-        specularTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST, 1, "Specular Buffer");
-        outputTextureBuffer     = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST, 1, "Output Buffer");
-        shadowTextureBuffer     = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_R16F,                  GL_NEAREST, GL_NEAREST, 1, "Shadow Buffer");
-        depthTextureBuffer      = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_DEPTH_COMPONENT32F,    GL_NEAREST, GL_NEAREST, 1, "Depth Buffer");
-        
-        // Make sure that the framebuffers have been set up before calling this function.
-        geometryFramebuffer->attach(positionTextureBuffer.get(),    0);
-        geometryFramebuffer->attach(normalTextureBuffer.get(),      1);
-        geometryFramebuffer->attach(albedoTextureBuffer.get(),      2);
-        geometryFramebuffer->attach(emissiveTextureBuffer.get(),    3);
-        
-        geometryFramebuffer->attachDepthBuffer(depthTextureBuffer.get());
-        
-        // Lighting.
-        lightFramebuffer->attach(diffuseTextureBuffer.get(), 0);
-        lightFramebuffer->attach(specularTextureBuffer.get(), 1);
-        lightFramebuffer->attach(shadowTextureBuffer.get(), 2);
-        
-        // Deferred Lighting.
-        deferredLightFramebuffer->attach(outputTextureBuffer.get(), 0);
-    }
-    
-    void detachTextureRenderBuffersFromFrameBuffers()
-    {
-        geometryFramebuffer->detach(0);
-        geometryFramebuffer->detach(1);
-        geometryFramebuffer->detach(2);
-        geometryFramebuffer->detach(3);
-        geometryFramebuffer->detachDepthBuffer();
-        
-        lightFramebuffer->detach(0);
-        lightFramebuffer->detach(1);
-        lightFramebuffer->detach(2);
-        
-        deferredLightFramebuffer->detach(0);
-    }
-    
-    const TextureBufferObject &getAlbedoBuffer()
-    {
-        return *albedoTextureBuffer;
-    }
-    
-    const TextureBufferObject &getNormalBuffer()
-    {
-        return *normalTextureBuffer;
-    }
-    
-    const TextureBufferObject &getPositionBuffer()
-    {
-        return *positionTextureBuffer;
-    }
-    
-    const TextureBufferObject &getEmissiveBuffer()
-    {
-        return *emissiveTextureBuffer;
-    }
-    
-    const TextureBufferObject &getDiffuseBuffer()
-    {
-        return *diffuseTextureBuffer;
-    }
-    
-    const TextureBufferObject &getSpecularBuffer()
-    {
-        return *specularTextureBuffer;
-    }
-    
-    const TextureBufferObject &getDepthBuffer()
-    {
-        return *depthTextureBuffer;
-    }
-    
-    const TextureBufferObject &getShadowBuffer()
-    {
-        return *shadowTextureBuffer;
-    }
-    
-    void clear()
-    {
-        uint64_t renderQueueCount = renderQueue.size();
-        renderQueue.clear();
-        renderQueue.reserve(renderQueueCount);
-        
-        uint64_t cameraCount = cameraQueue.size();
-        cameraQueue.clear();
-        cameraQueue.reserve(cameraCount);
-        
-        uint64_t directionalLightCount = directionalLightQueue.size();
-        directionalLightQueue.clear();
-        directionalLightQueue.reserve(directionalLightCount);
-    }
+    // Reset the viewport back to the normal size once we've finished rendering all the shadows.
+    glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
 }
 
+void Renderer::drawFullscreenTriangleNow()
+{
+    glBindVertexArray(mFullscreenTriangle.vao());
+    glDrawElements(GL_TRIANGLES, mFullscreenTriangle.indicesCount(), GL_UNSIGNED_INT, nullptr);
+}
+
+const TextureBufferObject &Renderer::getPrimaryBuffer()
+{
+    return *mPrimaryImageBuffer;
+}
+
+const TextureBufferObject &Renderer::getAlbedoBuffer()
+{
+    return *mAlbedoTextureBuffer;
+}
+
+const TextureBufferObject &Renderer::getNormalBuffer()
+{
+    return *mNormalTextureBuffer;
+}
+
+const TextureBufferObject &Renderer::getPositionBuffer()
+{
+    return *mPositionTextureBuffer;
+}
+
+const TextureBufferObject &Renderer::getEmissiveBuffer()
+{
+    return *mEmissiveTextureBuffer;
+}
+
+const TextureBufferObject &Renderer::getDiffuseBuffer()
+{
+    return *mLightTextureBuffer;
+}
+
+const TextureBufferObject &Renderer::getDepthBuffer()
+{
+    return *mDepthTextureBuffer;
+}
+
+const TextureBufferObject &Renderer::getShadowBuffer()
+{
+    return *mShadowTextureBuffer;
+}
+
+const TextureBufferObject &Renderer::getRoughnessBuffer()
+{
+    return *mRoughnessTextureBuffer;
+}
+
+const TextureBufferObject &Renderer::getMetallicBuffer()
+{
+    return *mMetallicTextureBuffer;
+}
+
+const TextureBufferObject &Renderer::getDeferredLightingBuffer()
+{
+    return *mDeferredLightingTextureBuffer;
+}
+
+std::vector<DirectionalLight> &Renderer::getDirectionalLights()
+{
+    return mDirectionalLightQueue;
+}

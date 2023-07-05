@@ -11,7 +11,7 @@
 
 #include "Pch.h"
 #include "Shader.h"
-#include "RendererHelpers.h"
+#include "GraphicsDefinitions.h"
 #include "Texture.h"
 
 struct MtlMaterialInformation
@@ -35,10 +35,10 @@ typedef std::vector<std::shared_ptr<Material>> SharedMaterials;
 class Material
 {
 public:
-    explicit Material(renderer::DrawMode drawMode=renderer::Triangles)
+    explicit Material(graphics::drawMode drawMode=graphics::drawMode::Triangles)
         : mDrawMode(drawMode) {};
     
-    [[nodiscard]] renderer::DrawMode drawMode() const { return mDrawMode; }
+    [[nodiscard]] graphics::drawMode drawMode() const { return mDrawMode; }
     [[nodiscard]] std::weak_ptr<Shader> shader() const { return mShader; }
     
     void attachShader(std::shared_ptr<Shader> shader);
@@ -48,20 +48,9 @@ public:
     
 protected:
     std::shared_ptr<Shader> mShader = nullptr;
-    renderer::DrawMode mDrawMode;
+    graphics::drawMode mDrawMode;
 };
 
-class SimpleMaterial
-    : public Material
-{
-public:
-    void onLoadMtlFile(const MtlMaterialInformation &materialInformation) override;
-    void onDraw() override;
-    
-protected:
-    glm::vec3 mColour { 1.f, 0.f, 1.f };
-    std::shared_ptr<Texture> mTexture;
-};
 
 /**
  * @brief For use with Standard.vert and Standard.frag shaders.
@@ -70,11 +59,39 @@ class StandardMaterial
     : public Material
 {
 public:
+    StandardMaterial();
     void onDraw() override;
     void onLoadMtlFile(const MtlMaterialInformation &materialInformation) override;
+    
+    void setHeightMap(std::shared_ptr<Texture> heightMap);
+    void setRoughnessMap(std::shared_ptr<Texture> roughnessMap);
 
+    float heightScale { 0.1f };
+    int32_t maxHeightSamples { 64 };
+    int32_t minHeightSamples { 8 };
+    float roughness { 0 };
+    float metallic { 0 };
+    glm::vec3 ambientColour { 0.f };
+    
 protected:
-    glm::vec3 mAmbientColour { 0.f };
     std::shared_ptr<Texture> mDiffuse;
     std::shared_ptr<Texture> mNormal;
+    std::shared_ptr<Texture> mHeight;
+    std::shared_ptr<Texture> mRoughnessMap;
 };
+
+/**
+ * @brief Performs a downcast to the base class material for an entire list.
+ * @tparam TMaterial - The child class material that the list is made of.
+ * @param materials - The vector containing all of the materials.
+ * @returns A list shared materials that can be used by the renderer.
+ */
+template<typename TMaterial>
+SharedMaterials toSharedMaterials(std::vector<std::shared_ptr<TMaterial>> materials)
+{
+    SharedMaterials sharedMaterials;
+    for (const auto &material : materials)
+        sharedMaterials.emplace_back(material);
+    
+    return sharedMaterials;
+}

@@ -15,19 +15,18 @@ TextureBufferObject::TextureBufferObject(const glm::ivec2 &size)
 }
 
 TextureBufferObject::TextureBufferObject(
-    const glm::ivec2 &size, GLenum format, GLint minFilter, GLint magFilter, const uint32_t mipmapLevels,
-    std::string debugName)
+    const glm::ivec2 &size, GLenum format, GLint minFilter, GLint magFilter, uint32_t mipmapLevels)
     :
-    mSize(size), mFormat(format), mDebugName(std::move(debugName)), mMipMapLevels(mipmapLevels)
+    mSize(size), mFormat(format), mMipMapLevels(mipmapLevels)
 {
     init(minFilter, magFilter, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 }
 
 TextureBufferObject::TextureBufferObject(
-    const glm::ivec2 &size, const GLenum format, renderer::Filter filterMode,
-    renderer::Wrap wrapMode, uint32_t mipmapLevel, std::string debugName)
+    const glm::ivec2 &size, GLenum format, graphics::filter filterMode, graphics::wrap wrapMode,
+    uint32_t mipmapLevel)
     :
-    mSize(size), mFormat(format), mDebugName(std::move(debugName)), mMipMapLevels(mipmapLevel)
+    mSize(size), mFormat(format), mMipMapLevels(mipmapLevel)
 {
     const auto filter = toGLint(filterMode);
     const auto wrap = toGLint(wrapMode);
@@ -69,4 +68,7 @@ void TextureBufferObject::setBorderColour(const glm::vec4 &colour) const
     glTextureParameterfv(mId, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(colour));
 }
 
-
+GLenum TextureBufferObject::getFormat() const
+{
+    return mFormat;
+}

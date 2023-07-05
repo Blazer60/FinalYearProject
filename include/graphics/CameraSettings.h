@@ -9,7 +9,7 @@
 
 #include "Pch.h"
 #include "glm.hpp"
-
+#include "PostProcessLayer.h"
 
 /**
  * @author Ryan Purse
@@ -18,8 +18,8 @@
 class CameraSettings
 {
 public:
-    CameraSettings(float fovY, float nearClipDistance, float farClipDistance, const glm::mat4 &viewMatrix)
-        : fovY(fovY), nearClipDistance(nearClipDistance), farClipDistance(farClipDistance), viewMatrix(viewMatrix)
+    CameraSettings(float fovY, float nearClipDistance, float farClipDistance, const glm::mat4 &viewMatrix, std::vector<std::unique_ptr<PostProcessLayer>> &postProcessStack)
+        : fovY(fovY), nearClipDistance(nearClipDistance), farClipDistance(farClipDistance), viewMatrix(viewMatrix), postProcessStack(postProcessStack)
     {
     
     }
@@ -31,4 +31,6 @@ public:
     glm::mat4 viewMatrix { glm::mat4(1.f) };
     glm::vec4 clearColour { glm::vec4(0.f, 0.f, 0.f, 1.f) };
     GLbitfield clearMask { GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT };
+    
+    std::vector<std::unique_ptr<PostProcessLayer>> &postProcessStack;
 };

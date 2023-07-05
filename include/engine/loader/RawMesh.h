@@ -107,7 +107,7 @@ namespace load
         for (const ObjVertex &vertex : intermediateVertices)
         {
             mVertices.emplace_back(vertex);  // implicit conversion to user defined type.
-            uniqueIndices.emplace_back(mVertices.size() - 1);
+            uniqueIndices.emplace_back(static_cast<uint32_t>((mVertices.size() - 1)));
         }
        
         createIndices(uniqueIndices);

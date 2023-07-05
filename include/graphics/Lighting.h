@@ -10,8 +10,7 @@
 #include "Pch.h"
 #include "vec3.hpp"
 #include "geometric.hpp"
-#include "TextureArrayObject.h"
-#include "ShadowMapping.h"
+#include "Buffers.h"
 
 struct Light
 {
@@ -22,23 +21,25 @@ struct Light
 struct DirectionalLight
     : public Light
 {
-    DirectionalLight(const glm::vec3 &direction, const glm::vec3 &intensity, const glm::ivec2 &shadowMapSize)
+    DirectionalLight(
+        const glm::vec3 &direction, const glm::vec3 &intensity, const glm::ivec2 &shadowMapSize,
+        uint32_t cascadeZoneCount)
         : direction(direction),
         intensity(intensity),
-        shadowMap(std::make_shared<TextureArrayObject>(shadowMapSize, renderer::shadow::cascadeZones, GL_DEPTH_COMPONENT32, renderer::Linear, renderer::ClampToBorder)),
+        shadowMap(std::make_shared<TextureArrayObject>(shadowMapSize, cascadeZoneCount, GL_DEPTH_COMPONENT32, graphics::filter::Linear, graphics::wrap::ClampToBorder)),
         Light()
     {
         shadowMap->setBorderColour(glm::vec4(1.f));
-        vpMatrices.reserve(renderer::shadow::cascadeZones);
+        vpMatrices.reserve(cascadeZoneCount);
     }
     
-    void updateLayerCount()
+    void updateLayerCount(uint32_t cascadeCount)
     {
-        if (shadowMap->getLayerCount() != renderer::shadow::cascadeZones)
+        if (shadowMap->getLayerCount() != cascadeCount)
         {
             const glm::ivec2 size = shadowMap->getSize();
-            shadowMap = std::make_unique<TextureArrayObject>(size, renderer::shadow::cascadeZones, GL_DEPTH_COMPONENT32, renderer::Linear, renderer::ClampToBorder);
-            vpMatrices.reserve(renderer::shadow::cascadeZones);
+            shadowMap = std::make_unique<TextureArrayObject>(size, cascadeCount, GL_DEPTH_COMPONENT32, graphics::filter::Linear, graphics::wrap::ClampToBorder);
+            vpMatrices.reserve(cascadeCount);
         }
     }
     

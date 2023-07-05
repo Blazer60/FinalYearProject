@@ -7,11 +7,15 @@ layout(location=3) in vec3 a_tangent;
 
 uniform mat4 u_mvp_matrix;
 uniform mat4 u_model_matrix;
+uniform vec3 u_camera_position_ws;
 
 out vec2 v_uv;
 out vec3 v_position_ws;
 out vec3 v_normal_ws;
-out mat3 v_tbn_matrix;
+out flat mat3 v_tbn_matrix;
+out vec3 v_camera_position_ts;
+out vec3 v_position_ts;
+
 
 void main()
 {
@@ -20,8 +24,13 @@ void main()
     v_normal_ws = vec3(u_model_matrix * vec4(a_normal, 0.f));
     v_position_ws = vec3(u_model_matrix * vec4(a_position.xyz, 1.f));
 
-    vec3 tangent_ws = normalize(vec3(u_model_matrix * vec4(a_tangent, 0.f)));
-    vec3 normal_ws = normalize(vec3(u_model_matrix * vec4(a_normal, 0.f)));
-    vec3 bi_tangent_ws = cross(tangent_ws, normal_ws);
-    v_tbn_matrix = transpose(mat3(tangent_ws, bi_tangent_ws, normal_ws));
+    const vec3 tangent_ws = normalize(vec3(u_model_matrix * vec4(a_tangent, 0.f)));
+    const vec3 normal_ws = normalize(vec3(u_model_matrix * vec4(a_normal, 0.f)));
+    const vec3 bi_tangent_ws = cross(normal_ws, tangent_ws);
+
+    v_tbn_matrix = (mat3(tangent_ws, bi_tangent_ws, normal_ws));
+
+    const mat3 transposed_tbn_matrix = transpose(v_tbn_matrix);
+    v_camera_position_ts = transposed_tbn_matrix * u_camera_position_ws;
+    v_position_ts = transposed_tbn_matrix * v_position_ws;
 }

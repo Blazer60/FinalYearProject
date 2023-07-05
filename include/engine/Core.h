@@ -11,6 +11,7 @@
 #include "glfw3.h"
 #include "imgui.h"
 #include "TextureBufferObject.h"
+#include "Renderer.h"
 
 namespace engine
 {
@@ -18,15 +19,17 @@ namespace engine
     
     struct ViewportToggles
     {
-        bool showPositionBuffer { true };
-        bool showAlbedoBuffer   { true };
-        bool showNormalBuffer   { true };
-        bool showEmissiveBuffer { true };
-        bool showOutputBuffer   { true };
-        bool showDiffuseBuffer  { true };
-        bool showSpecularBuffer { true };
-        bool showDepthBuffer    { true };
-        bool showShadowBuffer   { true };
+        bool showPositionBuffer  { true };
+        bool showAlbedoBuffer    { true };
+        bool showNormalBuffer    { true };
+        bool showEmissiveBuffer  { true };
+        bool showDeferredLightingBuffer    { true };
+        bool showDiffuseBuffer   { true };
+        bool showDepthBuffer     { true };
+        bool showShadowBuffer    { true };
+        bool showRoughnessBuffer { true };
+        bool showMetallicBuffer  { true };
+        bool showPrimaryBuffer { true };
     };
 
 /**
@@ -58,6 +61,8 @@ namespace engine
         GLFWwindow *mWindow { nullptr };
         
         std::unique_ptr<Scene> mScene;
+        std::unique_ptr<Renderer> mRenderer;
+        
         ImGuiIO *mGuiIo { nullptr };
         bool mIsRunning { true };
         const unsigned int mMaxLoopCount { 10 };

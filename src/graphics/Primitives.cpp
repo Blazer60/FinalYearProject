@@ -7,7 +7,7 @@
 
 #include "Primitives.h"
 
-std::unique_ptr<SubMesh> primitives::fullscreenTriangle()
+SubMesh primitives::fullscreenTriangle()
 {
     std::vector<BasicVertex> triangleData {
         BasicVertex(glm::vec3(-1.f, -1.f, 0.f), glm::vec2(0.f, 0.f)),
@@ -17,5 +17,5 @@ std::unique_ptr<SubMesh> primitives::fullscreenTriangle()
     
     std::vector<uint32_t> indices { 0, 1, 2 };
     
-    return std::make_unique<SubMesh>(triangleData, indices);
+    return { triangleData, indices };
 }

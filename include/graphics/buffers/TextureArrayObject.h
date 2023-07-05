@@ -8,8 +8,7 @@
 #pragma once
 
 #include "Pch.h"
-#include "RendererHelpers.h"
-#include "TextureBufferObject.h"
+#include "GraphicsDefinitions.h"
 
 
 /**
@@ -19,12 +18,11 @@
  */
 class TextureArrayObject
 {
-    friend class FramebufferObject;
 public:
     /**
      * @param layers - The number of textures in the array.
      */
-    TextureArrayObject(const glm::ivec2 &size, int32_t layers, GLenum format, renderer::Filter filterMode, renderer::Wrap wrapMode);
+    TextureArrayObject(const glm::ivec2 &size, int32_t layers, GLenum format, graphics::filter filterMode, graphics::wrap wrapMode);
     ~TextureArrayObject();
     
     void setBorderColour(const glm::vec4 &colour) const;
@@ -40,8 +38,3 @@ protected:
     glm::ivec2 mSize { 1024 };
     int32_t mLayers { 1 };
 };
-
-namespace renderer
-{
-    std::unique_ptr<TextureBufferObject> cloneTextureLayer(const TextureArrayObject &from, int layer);
-}

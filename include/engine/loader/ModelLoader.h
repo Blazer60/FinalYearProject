@@ -34,16 +34,16 @@ namespace load
      * @returns Information that can be used to render the model.
      */
     template<typename TVertex, typename TMaterial=Material>
-    Model model(std::string_view path, const std::shared_ptr<Shader> &shader=nullptr)
+    Model<TMaterial> model(std::string_view path, const std::shared_ptr<Shader> &shader=nullptr)
     {
         const auto [meshes, materials] = parseObject<TVertex, TMaterial>(path);
         
-        Model model;
+        Model<TMaterial> model;
         
         for (const auto &[name, rawMesh] : meshes)
         {
             TMaterial material = materials.count(name) > 0 ? materials.at(name) : TMaterial();
-            std::shared_ptr<Material> sharedMaterial = std::make_shared<TMaterial>(material);
+            std::shared_ptr<TMaterial> sharedMaterial = std::make_shared<TMaterial>(material);
             sharedMaterial->attachShader(shader);
             
             model.mesh.emplace_back(rawMesh.toSharedSubMesh());
