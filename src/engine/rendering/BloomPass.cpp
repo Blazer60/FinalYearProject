@@ -24,6 +24,7 @@ void BloomPass::onDraw(TextureBufferObject *imageInput, TextureBufferObject *ima
     mPreFilter.bind();
     mPreFilter.set("u_texture", imageInput->getId(), 0);
     mPreFilter.set("u_light_key_threshold", mLightKeyThreshold * mLightKeyIntensity);
+    mPreFilter.set("u_light_max_threshold", mLightMaxThreshold * mLightMaxIntensity);
     graphics::renderer->drawFullscreenTriangleNow();
     mFramebuffer->detach(0);
     
@@ -91,6 +92,11 @@ void BloomPass::onDrawUi()
     {
         ImGui::ColorPicker3("Light key threshold", glm::value_ptr(mLightKeyThreshold), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_PickerHueWheel);
         ImGui::DragFloat("Intensity threshold", &mLightKeyIntensity, 0.001f);
+        
+        ImGui::ColorPicker3("Light Max threshold", glm::value_ptr(mLightMaxThreshold), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_PickerHueWheel);
+        ImGui::DragFloat("Intensity Max", &mLightMaxIntensity, 0.001f);
+        
+        ImGui::DragFloat("Bloom Scale", &mBloomScale, 0.01f);
         ImGui::TreePop();
     }
 }

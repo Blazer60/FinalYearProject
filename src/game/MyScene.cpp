@@ -89,7 +89,7 @@ void MyScene::onImguiUpdate()
 {
     ui::draw(mMainCamera);
     
-    ImGui::DragFloat3("Intensity", glm::value_ptr(mDirectionalLight.intensity), 0.01f);
+    ImGui::ColorPicker3("Intensity", glm::value_ptr(mDirectionalLight.intensity), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float);
 }
 
 void MyScene::onImguiMenuUpdate()

@@ -43,6 +43,8 @@ protected:
     glm::ivec2 mCurrentSize { 0 };
     
     glm::vec3 mLightKeyThreshold { 1.f };
-    float mLightKeyIntensity { 1.f };
+    glm::vec3 mLightMaxThreshold { 1.f };
+    float mLightKeyIntensity { 5.f };
+    float mLightMaxIntensity { 20.f };
     float mBloomScale { 1.f };
 };
