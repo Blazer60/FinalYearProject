@@ -27,5 +27,4 @@ protected:
     Shader mShader { "../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/postProcessing/colourGrading/ColourGrading.frag" };
     
     float mExposure { 1.f };
-    float mSlope { 0.88f };
 };

@@ -8,7 +8,6 @@
 #include "ColourGrading.h"
 #include "imgui.h"
 #include "GraphicsState.h"
-#include "FramebufferObject.h"
 
 void ColourGrading::onDraw(TextureBufferObject *imageInput, TextureBufferObject *imageOutput)
 {
@@ -21,7 +20,6 @@ void ColourGrading::onDraw(TextureBufferObject *imageInput, TextureBufferObject 
     mShader.set("u_texture", imageInput->getId(), 0);
     mShader.set("u_inv_gamma_correction", 1.f / 2.2f);
     mShader.set("u_exposure", mExposure);
-    mShader.set("u_slope", mSlope);
     
     graphics::renderer->drawFullscreenTriangleNow();
     
@@ -33,7 +31,6 @@ void ColourGrading::onDrawUi()
     if (ImGui::TreeNode("Colour Grading"))
     {
         ImGui::DragFloat("Exposure", &mExposure, 0.001f);
-        ImGui::SliderFloat("Slope", &mSlope, 0.f, 1.f);
         ImGui::TreePop();
     }
 }
