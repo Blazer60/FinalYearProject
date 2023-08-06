@@ -14,8 +14,7 @@ Cubemap::Cubemap(const std::vector<std::string> &paths)
     stbi_set_flip_vertically_on_load(false);
     if (paths.size() != 6)
     {
-        debug::log("You're trying to create a cubemap with an incorrect amount of faces. No cubemap will be generated.",
-                   debug::severity::Warning);
+        WARN("You're trying to create a cubemap with an incorrect amount of faces. No cubemap will be generated.");
         return;
     }
     
@@ -24,8 +23,7 @@ Cubemap::Cubemap(const std::vector<std::string> &paths)
         std::filesystem::path systemPath(path);
         if (!std::filesystem::exists(systemPath))
         {
-            debug::log("File " + systemPath.string() + " does not exist.\nNo cubemap will be generated.",
-                       debug::severity::Warning);
+            WARN("File " + systemPath.string() + " does not exist.\nNo cubemap will be generated.");
             return;
         }
     }
@@ -63,8 +61,10 @@ Cubemap::Cubemap(const std::vector<std::string> &paths)
         }
         else if (width != initialWidth || initialHeight != height)
         {
-            debug::log("File " + systemPath.string() + " does not match the size of the first texture. Cubemaps textures "
-                                                       "must be all the same size.", debug::severity::Warning);
+            WARN(
+                "File " + systemPath.string() +
+                " does not match the size of the first texture. Cubemaps textures must be all the same size.");
+            
             stbi_image_free(bytes);
             glDeleteTextures(1, &mId);
             mId = 0;
@@ -73,9 +73,10 @@ Cubemap::Cubemap(const std::vector<std::string> &paths)
         
         if (colourChannels > 4)
         {
-            debug::log("File " + systemPath.string()
-                       + " does not contain the correct amount of channels. Cannot generate textures",
-                       debug::severity::Warning);
+            WARN(
+                "File " + systemPath.string() +
+                " does not contain the correct amount of channels. Cannot generate textures" );
+            
             stbi_image_free(bytes);
             glDeleteTextures(1, &mId);
             mId = 0;
@@ -83,7 +84,6 @@ Cubemap::Cubemap(const std::vector<std::string> &paths)
         }
         
         glTextureSubImage3D(mId, lod, xOffSet, yOffSet, zOffSet, width, height, depth, GL_RGBA, GL_UNSIGNED_BYTE, bytes);
-        // glTextureSubImage2D(mId, lod, xOffSet, yOffSet, width, height, GL_RGBA, GL_UNSIGNED_BYTE, bytes);
         
         stbi_image_free(bytes);
     }

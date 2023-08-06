@@ -16,7 +16,7 @@ namespace load
         
         if (fileStream.bad() || fileStream.fail())
         {
-            debug::log("Path to file could not be found. Aborting: " + std::string(path), debug::severity::Warning);
+            WARN("Path to file could not be found. Aborting: " + std::string(path));
             return;
         }
         
@@ -35,8 +35,7 @@ namespace load
             if (argumentList.count(keyword) > 0)
                 argumentList.at(keyword)(expression);
             else
-                debug::log("Keyword '" + std::string(keyword) + "' does not exist. Ignoring line",
-                           debug::severity::Warning);
+                WARN("Keyword '" + std::string(keyword) + "' does not exist. Ignoring line");
         }
     }
     

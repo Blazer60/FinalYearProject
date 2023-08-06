@@ -64,8 +64,8 @@ void FramebufferObject::attachDepthBuffer(const TextureBufferObject *textureBuff
         || textureBufferObject->getFormat() == GL_DEPTH_COMPONENT32F)
     )
     {
-        debug::log("You are trying to attached a depth texture with an incorrect internal format. "
-                   "The depth texture will not be bound.", debug::severity::Warning);
+        WARN("You are trying to attached a depth texture with an incorrect internal format. "
+             "The depth texture will not be bound.");
         return;
     }
     
@@ -83,8 +83,8 @@ void FramebufferObject::attachDepthBuffer(const TextureArrayObject &textureArray
           || textureArrayObject.getFormat() == GL_DEPTH_COMPONENT32F)
         )
     {
-        debug::log("You are trying to attached a depth texture with an incorrect internal format. "
-                   "The depth texture will not be bound.", debug::severity::Warning);
+        WARN("You are trying to attached a depth texture with an incorrect internal format. "
+             "The depth texture will not be bound.");
         return;
     }
     
@@ -140,7 +140,7 @@ void FramebufferObject::validate() const
                 errorName = "Unknown";
                 break;
         }
-        debug::log("Framebuffer error of: " + errorName + " (" + std::to_string(fboStatus) + ")", debug::severity::Major);
+        LOG_MAJOR("Framebuffer error of: " + errorName + " (" + std::to_string(fboStatus) + ")");
     }
 }
 

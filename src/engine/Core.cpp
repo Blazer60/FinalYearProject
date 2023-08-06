@@ -14,23 +14,28 @@
 #include "Ui.h"
 #include "RendererImGui.h"
 #include "GraphicsState.h"
+#include "EngineState.h"
+#include "LoggerMacros.h"
 
 engine::Core::Core(const glm::ivec2 &resolution, bool enableDebugging)
     : mResolution(resolution), mEnableDebugging(enableDebugging)
 {
+    mLogger = std::make_unique<Logger>();
+    logger = mLogger.get();
+    
     window::setBufferSize(mResolution);
     
     if (!initGlfw(4, 6))
     {
         mIsRunning = false;
-        debug::log("Unable to initialise everything.", debug::severity::Warning);
+        LOG_MAJOR("Unable to initialise everything.");
         return;
     }
     
     if (glewInit() != GLEW_OK)
     {
         mIsRunning = false;
-        debug::log("Unable to initialise glew.", debug::severity::Major);
+        LOG_MAJOR("Unable to initialise glew.");
         return;
     }
     
@@ -38,7 +43,7 @@ engine::Core::Core(const glm::ivec2 &resolution, bool enableDebugging)
     if (!mRenderer->isOk)
     {
         mIsRunning = false;
-        debug::log("Could not load the renderer.", debug::severity::Major);
+        LOG_MAJOR("Could not load the renderer.");
         return;
     }
     
@@ -46,19 +51,16 @@ engine::Core::Core(const glm::ivec2 &resolution, bool enableDebugging)
     
     if (mEnableDebugging)
     {
-        bool success = Renderer::debugMessageCallback(debug::openglCallBack);
+        bool success = Renderer::debugMessageCallback(forwardOpenGlCallback);
         if (!success)
-        {
-            debug::log("Unable to enable debugging. Check if the openGl version is greater than 4.3.",
-                       debug::severity::Warning);
-        }
-        debug::log(Renderer::getVersion());
+            WARN("Unable to enable debugging. Check if the openGl version is greater than 4.3.");
+        MESSAGE(Renderer::getVersion());
     }
     
     if (!initImGui())
     {
         mIsRunning = false;
-        debug::log("Could not load imgui for an opengl context.", debug::severity::Major);
+        LOG_MAJOR("Could not load imgui for an opengl context.");
         return;
     }
 }
@@ -69,7 +71,7 @@ bool engine::Core::initGlfw(int openGlMajorVersion, int openGlMinorVersion)
         return false;
     
     glfwSetErrorCallback([](int errorCode, const char *description) {
-        debug::log(description);  // The program will bail out after this.
+        MESSAGE(description); // The program will bail out after this.
     });
     
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, openGlMajorVersion);  // Version of opengl you want to use

@@ -9,7 +9,6 @@
 
 #include "Pch.h"
 #include "Vertices.h"
-#include "DebugLogger.h"
 #include "Mesh.h"
 #include "Materials.h"
 
@@ -80,7 +79,7 @@ namespace load
             // Pointer to the end of the last number, Error code.
             auto [pointer, ec] = std::from_chars(nextNumber, nextNumber + arg.size(), vec[i]);
             if (ec != std::errc())  // An error was produced by the arg list.
-                debug::log("Invalid arg (" + std::string(arg) + ") for vector construction", debug::severity::Major);
+                LOG_MAJOR("Invalid arg (" + std::string(arg) + ") for vector construction");
             
             nextNumber = ++pointer;  // There is always a space between numbers.
         }

@@ -19,5 +19,7 @@
 #include <cstdint>
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
-#include "DebugLogger.h"
+#include "Logger.h"
+#include "EngineState.h"
+#include "LoggerMacros.h"
 #endif  // PCH

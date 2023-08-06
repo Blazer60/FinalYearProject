@@ -89,7 +89,7 @@ void MainCamera::move()
     
     
     if (glfwGetKey(mWindow, GLFW_KEY_E))
-        debug::log(std::to_string(mPosition.x) + ", "
+        MESSAGE(std::to_string(mPosition.x) + ", "
                    + std::to_string(mPosition.y) + ", "
                    + std::to_string(mPosition.z));
 }

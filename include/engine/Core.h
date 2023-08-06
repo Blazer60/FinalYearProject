@@ -12,6 +12,7 @@
 #include "imgui.h"
 #include "TextureBufferObject.h"
 #include "Renderer.h"
+#include "Logger.h"
 
 namespace engine
 {
@@ -62,6 +63,7 @@ namespace engine
         
         std::unique_ptr<Scene> mScene;
         std::unique_ptr<Renderer> mRenderer;
+        std::unique_ptr<Logger> mLogger;
         
         ImGuiIO *mGuiIo { nullptr };
         bool mIsRunning { true };

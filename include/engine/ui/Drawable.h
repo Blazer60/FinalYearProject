@@ -39,7 +39,7 @@ namespace ui
         }
         catch (const std::bad_cast &badCast)
         {
-            debug::log(badCast.what(), debug::severity::Minor);
+            LOG_MINOR(badCast.what());
         }
     }
     

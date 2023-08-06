@@ -35,7 +35,7 @@ unsigned int Shader::compile(unsigned int type, std::string_view path)
 {
     std::ifstream file(path.data());
     if (file.bad() || file.fail())
-        debug::log("Failed to open file at: " + std::string(path), debug::severity::Major);
+        LOG_MAJOR("Failed to open file at: " + std::string(path));
     
     std::stringstream buffer;
     std::string line;
@@ -69,8 +69,7 @@ unsigned int Shader::compile(unsigned int type, std::string_view path)
     glGetShaderInfoLog(id, length, &length, message);
     glDeleteShader(id);
     
-    debug::log("Failed to compile " + shaderTypes.at(type) + " shader:\n" + message,
-               debug::severity::Major);
+    LOG_MAJOR("Failed to compile " + shaderTypes.at(type) + " shader:\n" + message);
     return 0;
 }
 
@@ -91,7 +90,7 @@ int Shader::getLocation(const std::string &name)
     
     int location = glGetUniformLocation(mId, name.data());
     if (location == -1)
-        debug::log("Uniform '" + name + "' does not exist! (" + mDebugName +")", debug::severity::Warning);
+        WARN("Uniform '" + name + "' does not exist! (" + mDebugName +")");
     
     mCache[name] = location;
     return location;

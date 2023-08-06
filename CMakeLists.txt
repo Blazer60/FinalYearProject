@@ -33,7 +33,6 @@ add_executable(${PROJECT_NAME}
 
         src/Main.cpp
         src/engine/Core.cpp include/engine/Core.h
-        src/engine/DebugLogger.cpp include/engine/DebugLogger.h
         src/engine/MainCamera.cpp include/engine/MainCamera.h
         src/engine/Scene.cpp include/engine/Scene.h
         src/engine/Timers.cpp include/engine/Timers.h
@@ -66,11 +65,16 @@ add_executable(${PROJECT_NAME}
         src/engine/rendering/ColourGrading.cpp include/engine/rendering/ColourGrading.h
         src/graphics/postProcessing/PostProcessLayer.cpp include/graphics/postProcessing/PostProcessLayer.h
         src/graphics/GraphicsState.cpp include/graphics/GraphicsState.h
-        src/graphics/GraphicsFunctions.cpp include/graphics/GraphicsFunctions.h include/graphics/buffers/Buffers.h src/engine/ui/Drawable.cpp include/engine/ui/Drawable.h)
+        src/graphics/GraphicsFunctions.cpp include/graphics/GraphicsFunctions.h include/graphics/buffers/Buffers.h src/engine/ui/Drawable.cpp include/engine/ui/Drawable.h
+        src/engine/logger/Logger.cpp
+        include/engine/logger/Logger.h
+        src/engine/EngineState.cpp
+        include/engine/EngineState.h
+        include/engine/logger/LoggerMacros.h)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
         include include/engine include/graphics include/game include/engine/loader include/graphics/buffers
-        include/engine/ui include/graphics/postProcessing include/engine/rendering
+        include/engine/ui include/graphics/postProcessing include/engine/rendering include/engine/logger
 
         # Vendor Files
         vendor/glm/glm vendor/glew/include/GL
@@ -87,7 +91,9 @@ else()
             <iostream> <vector> <unordered_map>
             <string> <string_view> <algorithm>
             <memory> <numeric> <cstdint>
-            <glm.hpp> <gtc/matrix_transform.hpp> [["DebugLogger.h"]])
+            <glm.hpp> <gtc/matrix_transform.hpp>
+            [["Logger.h"]] [["EngineState.h"]] [["LoggerMacros.h"]]
+    )
 endif ()
 
 # STB_IMAGE_IMPLEMENTATION is set within a source file (Texture Loader).

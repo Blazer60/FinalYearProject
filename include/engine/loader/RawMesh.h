@@ -58,8 +58,8 @@ namespace load
     {
         if (intermediateVertices.size() < 3)
         {
-            debug::log("The face does not contain at least three vertices. Tangent information cannot be generated. "
-                       "Normal maps may not correct for this model.", debug::severity::Warning);
+            WARN("The face does not contain at least three vertices. Tangent information cannot be generated. "
+                 "Normal maps may not correct for this model.");
             return;
         }
         // If a face has more than three vertices, we assume that the whole face is flat.
