@@ -34,20 +34,7 @@ Renderer::Renderer() :
     mPreFilterShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/cubemap/PreFilter.frag");
     mIntegrateBrdfShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/brdf/IntegrateBrdf.frag");
     
-    mSkybox = std::make_unique<Cubemap>(std::vector<std::string> {
-        "../resources/textures/skybox/right.jpg",
-        "../resources/textures/skybox/left.jpg",
-        "../resources/textures/skybox/top.jpg",
-        "../resources/textures/skybox/bottom.jpg",
-        "../resources/textures/skybox/front.jpg",
-        "../resources/textures/skybox/back.jpg",
-    });
-    
-    mHdrImage = std::make_unique<HdrTexture>("../resources/textures/hdr/newport/NewportLoft.hdr");
-    mHdrSkybox = createCubemapFromHdrTexture(mHdrImage.get(), glm::ivec2(512));
-    mIrradianceMap = generateIrradianceMap(mHdrSkybox.get(), glm::ivec2(64));
-    mPreFilterMap = generatePreFilterMap(mHdrSkybox.get(), glm::ivec2(128));
-    mBrdfLutTextureBuffer = generateBrdfLut(glm::ivec2(512));
+    generateSkybox("../resources/textures/hdr/newport/NewportLoft.hdr", glm::ivec2(512));
     
     initFrameBuffers();
     initTextureRenderBuffers();
@@ -540,6 +527,15 @@ void Renderer::shadowMapping(const CameraSettings &cameraSettings, const std::ve
     glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
 }
 
+void Renderer::generateSkybox(std::string_view path, const glm::ivec2 desiredSize)
+{
+    mHdrImage = std::make_unique<HdrTexture>(path);
+    mHdrSkybox = createCubemapFromHdrTexture(mHdrImage.get(), desiredSize);
+    mIrradianceMap = generateIrradianceMap(mHdrSkybox.get(), desiredSize / 8);  // 8
+    mPreFilterMap = generatePreFilterMap(mHdrSkybox.get(), desiredSize / 4);  // 4
+    mBrdfLutTextureBuffer = generateBrdfLut(desiredSize);
+}
+
 void Renderer::drawFullscreenTriangleNow()
 {
     glBindVertexArray(mFullscreenTriangle.vao());
@@ -605,3 +601,4 @@ std::vector<DirectionalLight> &Renderer::getDirectionalLights()
 {
     return mDirectionalLightQueue;
 }
+

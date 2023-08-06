@@ -89,7 +89,13 @@ void MyScene::onImguiUpdate()
 {
     ui::draw(mMainCamera);
     
-    ImGui::ColorPicker3("Intensity", glm::value_ptr(mDirectionalLight.intensity), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float);
+    ImGui::ColorEdit3("Intensity", glm::value_ptr(mDirectionalLight.intensity), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float);
+    
+    if (ImGui::Button("Skybox 1"))
+        graphics::renderer->generateSkybox("../resources/textures/hdr/newport/NewportLoft.hdr", glm::ivec2(512));
+    ImGui::SameLine();
+    if (ImGui::Button("Skybox 2"))
+        graphics::renderer->generateSkybox("../resources/textures/hdr/norway/Norway.hdr", glm::ivec2(512));
 }
 
 void MyScene::onImguiMenuUpdate()

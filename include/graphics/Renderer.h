@@ -90,6 +90,8 @@ public:
     
     [[nodiscard]] static std::string getVersion();
     
+    void generateSkybox(std::string_view path, const glm::ivec2 desiredSize);
+    
     /**
      * @brief Draws a triangle to the screen so that fullscreen passes can be performs without
      * having to worry about mesh data. Make sure that a shader and fbo are already bound before
@@ -138,7 +140,6 @@ protected:
     std::vector<CameraSettings>                     mCameraQueue;
     std::vector<DirectionalLight>                   mDirectionalLightQueue;
     
-    std::unique_ptr<Cubemap>     mSkybox;
     std::unique_ptr<HdrTexture>  mHdrImage;
     std::unique_ptr<Cubemap>     mHdrSkybox;
     std::unique_ptr<Cubemap>     mIrradianceMap;
