@@ -7,12 +7,18 @@
 
 #include "Materials.h"
 #include "TextureLoader.h"
+#include "gtc/type_ptr.hpp"
 
 #include <utility>
 
 void Material::attachShader(std::shared_ptr<Shader> shader)
 {
     mShader = std::move(shader);
+}
+
+void Material::onDrawUi()
+{
+
 }
 
 StandardMaterial::StandardMaterial() :
@@ -53,5 +59,17 @@ void StandardMaterial::setHeightMap(std::shared_ptr<Texture> heightMap)
 void StandardMaterial::setRoughnessMap(std::shared_ptr<Texture> roughnessMap)
 {
     mRoughnessMap = std::move(roughnessMap);
+}
+
+void StandardMaterial::onDrawUi()
+{
+    ImGui::PushID("StandardMaterialSettings");
+    if (ImGui::CollapsingHeader("Material", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        ImGui::ColorEdit3("Ambient Colour", glm::value_ptr(ambientColour));
+        ImGui::SliderFloat("Roughness", &roughness, 0.f, 1.f);
+        ImGui::SliderFloat("Metallic", &metallic, 0.f, 1.f);
+    }
+    ImGui::PopID();
 }
 

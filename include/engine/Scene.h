@@ -35,7 +35,7 @@ namespace engine
         virtual void onUpdate();
         virtual void onImguiUpdate();
         
-        std::vector<Actor> mActors;
+        std::vector<std::unique_ptr<Actor>> mActors;
         Actor *mSelectedActor { nullptr };
     };
     

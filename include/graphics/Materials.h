@@ -13,6 +13,7 @@
 #include "Shader.h"
 #include "GraphicsDefinitions.h"
 #include "Texture.h"
+#include "Drawable.h"
 
 struct MtlMaterialInformation
 {
@@ -33,6 +34,7 @@ class Material;
 typedef std::vector<std::shared_ptr<Material>> SharedMaterials;
 
 class Material
+    : public ui::Drawable
 {
 public:
     explicit Material(graphics::drawMode drawMode=graphics::drawMode::Triangles)
@@ -44,7 +46,10 @@ public:
     void attachShader(std::shared_ptr<Shader> shader);
     
     virtual void onDraw() {};
-    virtual void onLoadMtlFile(const MtlMaterialInformation &materialInformation) {};
+    virtual void onLoadMtlFile(const MtlMaterialInformation &materialInformation) {}
+
+protected:
+    void onDrawUi() override;;
     
 protected:
     std::shared_ptr<Shader> mShader = nullptr;
@@ -73,6 +78,9 @@ public:
     float metallic { 0 };
     glm::vec3 ambientColour { 0.f };
     
+protected:
+    void onDrawUi() override;
+
 protected:
     std::shared_ptr<Texture> mDiffuse;
     std::shared_ptr<Texture> mNormal;

@@ -72,7 +72,11 @@ add_executable(${PROJECT_NAME}
         include/engine/EngineState.h
         include/engine/logger/LoggerMacros.h
         src/engine/Actor.cpp
-        include/engine/Actor.h)
+        include/engine/Actor.h
+        src/engine/Component.cpp
+        include/engine/Component.h
+        src/engine/MeshComponent.cpp
+        include/engine/MeshComponent.h)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
         include include/engine include/graphics include/game include/engine/loader include/graphics/buffers

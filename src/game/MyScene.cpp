@@ -15,6 +15,7 @@
 #include "GraphicsState.h"
 #include "BloomPass.h"
 #include "Drawable.h"
+#include "MeshComponent.h"
 
 MyScene::MyScene() :
     mMainCamera(glm::vec3(0.f, 3.f, 21.f)),
@@ -36,9 +37,14 @@ MyScene::MyScene() :
     }
     mStoneFloorMaterial = toSharedMaterials(material0);
     
+    std::unique_ptr<engine::Actor> stoneFloor = std::make_unique<engine::Actor>("Stone Floor");
+    stoneFloor->addComponent(std::make_unique<engine::MeshComponent>(mesh0, toSharedMaterials(material0)));
+    mActors.push_back(std::move(stoneFloor));
+    
     const auto [mesh1, material1] = load::model<StandardVertex>("../resources/models/blueSphere/BlueSphere.obj");
     
     mBall = mesh1[0];
+    SharedMesh ballMesh = { mesh1[0] };
     
     for (int i = 0; i < 10; ++i)
     {
@@ -62,9 +68,21 @@ MyScene::MyScene() :
         mMaterials.push_back(material);
     }
     
-    for (int i = 0; i < 20; ++i)
+    for (int i = 0; i < 10; ++i)
     {
-        mActors.emplace_back();
+        std::unique_ptr<engine::Actor> ball = std::make_unique<engine::Actor>("Ball " + std::to_string(i));
+        ball->position = glm::vec3(-10.f + (i * 2.2f), 1.f, 0.f);
+        SharedMaterials sharedMaterials = { mMaterials[i] };
+        ball->addComponent(std::make_unique<engine::MeshComponent>(ballMesh, sharedMaterials));
+        mActors.push_back(std::move(ball));
+    }
+    for (int i = 0; i < 10; ++i)
+    {
+        std::unique_ptr<engine::Actor> ball = std::make_unique<engine::Actor>("Ball " + std::to_string(i + 10));
+        ball->position = glm::vec3(-10.f + (i * 2.2f), 3.2f, 0.f);
+        SharedMaterials sharedMaterials = { mMaterials[i + 10] };
+        ball->addComponent(std::make_unique<engine::MeshComponent>(ballMesh, sharedMaterials));
+        mActors.push_back(std::move(ball));
     }
 }
 
@@ -82,12 +100,6 @@ void MyScene::onRender()
 {
     graphics::renderer->submit(mMainCamera.toSettings());
     graphics::renderer->submit(mDirectionalLight);
-    graphics::renderer->drawMesh(mStoneFloorMesh, mStoneFloorMaterial, glm::mat4(1.f));
-    
-    for (int i = 0; i < 10; ++i)
-        graphics::renderer->drawMesh(*mBall, *(mMaterials[i]), glm::translate(glm::mat4(1.f), glm::vec3(-10.f + (i * 2.2f), 1.f, 0.f)));
-    for (int i = 0; i < 10; ++i)
-        graphics::renderer->drawMesh(*mBall, *(mMaterials[i + 10]), glm::translate(glm::mat4(1.f), glm::vec3(-10.f + (i * 2.2f), 3.2f, 0.f)));
 }
 
 void MyScene::onImguiUpdate()

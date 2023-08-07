@@ -16,7 +16,11 @@ namespace engine
         onUpdate();
         
         for (auto &actor : mActors)
-            actor.OnUpdate();
+        {
+            actor->OnUpdate();
+            for (auto &component : actor->getComponents())
+                component->update();
+        }
     }
 
     void Scene::onFixedUpdate()
@@ -51,12 +55,12 @@ namespace engine
         {
             for (auto &actor : mActors)
             {
-                const bool isSelected = (&actor == mSelectedActor);
+                const bool isSelected = (actor.get() == mSelectedActor);
                 // All entries must have unique names.
-                const std::string name = std::string(actor.getName()) + "##" + std::to_string(reinterpret_cast<int64_t>(&actor));
+                const std::string name = std::string(actor->getName()) + "##" + std::to_string(reinterpret_cast<int64_t>(&actor));
                 if (ImGui::Selectable(name.c_str(), isSelected))
                 {
-                    mSelectedActor = &actor;
+                    mSelectedActor = actor.get();
                     MESSAGE("Selected Actor: " + name);
                 }
                 
@@ -69,7 +73,15 @@ namespace engine
         
         ImGui::Begin("Details");
         if (mSelectedActor != nullptr)
+        {
             ui::draw(mSelectedActor);
+            if (!mSelectedActor->getComponents().empty())
+            {
+                ImGui::SeparatorText("Components");
+                for (auto &component : mSelectedActor->getComponents())
+                    ui::draw(component.get());
+            }
+        }
         ImGui::End();
         
         onImguiUpdate();
