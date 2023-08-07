@@ -61,6 +61,11 @@ MyScene::MyScene() :
         
         mMaterials.push_back(material);
     }
+    
+    for (int i = 0; i < 20; ++i)
+    {
+        mActors.emplace_back();
+    }
 }
 
 void MyScene::onFixedUpdate()
@@ -96,6 +101,9 @@ void MyScene::onImguiUpdate()
     ImGui::SameLine();
     if (ImGui::Button("Skybox 2"))
         graphics::renderer->generateSkybox("../resources/textures/hdr/norway/Norway.hdr", glm::ivec2(512));
+    
+    // static bool yes = true;
+    // ImGui::ShowDemoWindow(&yes);
 }
 
 void MyScene::onImguiMenuUpdate()

@@ -10,6 +10,7 @@
 #include "Pch.h"
 #include "TextureBufferObject.h"
 #include "Renderer.h"
+#include "Actor.h"
 
 namespace engine
 {
@@ -23,11 +24,19 @@ namespace engine
     public:
         virtual ~Scene() = default;
         
+        void update();
+        void imguiUpdate();
+        
         virtual void onFixedUpdate();
-        virtual void onUpdate();
         virtual void onRender();
-        virtual void onImguiUpdate();
         virtual void onImguiMenuUpdate();
+        
+    protected:
+        virtual void onUpdate();
+        virtual void onImguiUpdate();
+        
+        std::vector<Actor> mActors;
+        Actor *mSelectedActor { nullptr };
     };
     
 } // engine

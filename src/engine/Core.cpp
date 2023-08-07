@@ -161,7 +161,7 @@ void engine::Core::run()
             ++loopAmount;
         }
         
-        mScene->onUpdate();
+        mScene->update();
         mScene->onRender();
         mRenderer->render();
         updateImgui();
@@ -195,7 +195,7 @@ void engine::Core::updateImgui()
     }
     
     ImGui::Begin("Scene Settings");
-    mScene->onImguiUpdate();
+    mScene->imguiUpdate();
     ImGui::End();
     
     ImGui::Begin("Renderer Settings");
