@@ -90,10 +90,10 @@ void BloomPass::onDrawUi()
 {
     if (ImGui::TreeNode("Bloom"))
     {
-        ImGui::ColorPicker3("Light key threshold", glm::value_ptr(mLightKeyThreshold), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_PickerHueWheel);
+        ImGui::ColorEdit3("Light key threshold", glm::value_ptr(mLightKeyThreshold), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_PickerHueWheel);
         ImGui::DragFloat("Intensity threshold", &mLightKeyIntensity, 0.001f);
         
-        ImGui::ColorPicker3("Light Max threshold", glm::value_ptr(mLightMaxThreshold), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_PickerHueWheel);
+        ImGui::ColorEdit3("Light Max threshold", glm::value_ptr(mLightMaxThreshold), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_PickerHueWheel);
         ImGui::DragFloat("Intensity Max", &mLightMaxIntensity, 0.001f);
         
         ImGui::DragFloat("Bloom Scale", &mBloomScale, 0.01f);

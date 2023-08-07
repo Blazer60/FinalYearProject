@@ -63,6 +63,8 @@ engine::Core::Core(const glm::ivec2 &resolution, bool enableDebugging)
         LOG_MAJOR("Could not load imgui for an opengl context.");
         return;
     }
+    
+    mMainCamera = std::make_unique<MainCamera>(glm::vec3(0.f, 3.f, 21.f));
 }
 
 bool engine::Core::initGlfw(int openGlMajorVersion, int openGlMinorVersion)
@@ -162,7 +164,9 @@ void engine::Core::run()
         }
         
         mScene->update();
+        mMainCamera->update();
         mScene->onRender();
+        mRenderer->submit(mMainCamera->toSettings());
         mRenderer->render();
         updateImgui();
         mRenderer->clear();
@@ -199,6 +203,7 @@ void engine::Core::updateImgui()
     ImGui::End();
     
     ImGui::Begin("Renderer Settings");
+    ui::draw(mMainCamera);
     graphics::displayShadowSettings();
     ImGui::End();
     

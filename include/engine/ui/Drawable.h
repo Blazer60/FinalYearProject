@@ -48,4 +48,10 @@ namespace ui
     {
         draw(*property);
     }
+    
+    template<typename T>
+    void draw(std::unique_ptr<T> &property)
+    {
+        draw(property.get());
+    }
 }

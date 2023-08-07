@@ -34,7 +34,6 @@ public:
     void onImguiMenuUpdate() override;
     
 protected:
-    MainCamera mMainCamera;
     std::shared_ptr<Shader> mStandardShader;
     DirectionalLight mDirectionalLight;
     

@@ -18,7 +18,6 @@
 #include "MeshComponent.h"
 
 MyScene::MyScene() :
-    mMainCamera(glm::vec3(0.f, 3.f, 21.f)),
     mDirectionalLight(glm::normalize(glm::vec3(1.f, 1.f, 1.f)), glm::vec3(0.93f, 0.93f, 0.95f), glm::ivec2(4096), 4),
     mStandardShader(std::make_shared<Shader>(
         "../resources/shaders/geometry/standard/Standard.vert",
@@ -96,18 +95,14 @@ void MyScene::onFixedUpdate()
 
 void MyScene::onUpdate()
 {
-    mMainCamera.update();
 }
 
 void MyScene::onRender()
 {
-    graphics::renderer->submit(mMainCamera.toSettings());
 }
 
 void MyScene::onImguiUpdate()
 {
-    ui::draw(mMainCamera);
-    
     if (ImGui::Button("Skybox 1"))
         graphics::renderer->generateSkybox("../resources/textures/hdr/newport/NewportLoft.hdr", glm::ivec2(512));
     ImGui::SameLine();

@@ -132,12 +132,12 @@ void MainCamera::onDrawUi()
         float fovYDegrees = glm::degrees(mFovY);
         ImGui::SliderFloat("FOV Y", &fovYDegrees, 10, 180);
         mFovY = glm::radians(fovYDegrees);
-        
-        if (ImGui::CollapsingHeader("Post-processing Settings"))
-        {
-            for (std::unique_ptr<PostProcessLayer> &postProcessLayer : mPostProcessStack)
-                ui::draw(*postProcessLayer);
-        }
+    }
+    
+    if (ImGui::CollapsingHeader("Post-processing Settings"))
+    {
+        for (std::unique_ptr<PostProcessLayer> &postProcessLayer : mPostProcessStack)
+            ui::draw(postProcessLayer);
     }
 }
 

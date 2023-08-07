@@ -13,6 +13,7 @@
 #include "TextureBufferObject.h"
 #include "Renderer.h"
 #include "Logger.h"
+#include "MainCamera.h"
 
 namespace engine
 {
@@ -70,6 +71,8 @@ namespace engine
         const unsigned int mMaxLoopCount { 10 };
         const bool mEnableDebugging { false };
         ViewportToggles mViewport;
+        
+        std::unique_ptr<MainCamera> mMainCamera;
     };
     
 } // engine
