@@ -43,15 +43,14 @@ namespace graphics
             
             ImGui::DragFloat("Z Multiplier", &graphics::renderer->shadowZMultiplier, 0.1f);
             ImGui::DragFloat2("Bias", glm::value_ptr(graphics::renderer->shadowBias), 0.001f);
-            ImGui::Checkbox("Debug shadow maps", &showShadowMaps);
-            
-            if (showShadowMaps)
-            {
-                auto& directionalLights = graphics::renderer->getDirectionalLights();
-                ImGui::SliderInt("Shadow map layer", &layer, 0, directionalLights[0].shadowMap->getLayerCount() - 1);
-                shadowMapViewer = graphics::cloneTextureLayer(*directionalLights[0].shadowMap, layer);
-                ui::showTextureBuffer("Shadow Map", *shadowMapViewer, &showShadowMaps, shadowMapViewer->getSize());
-            }
         }
+    }
+    
+    void displayShadowMaps(TextureArrayObject *textureArrayObject)
+    {
+        ImGui::SliderInt("Shadow map layer", &layer, 0, textureArrayObject->getLayerCount() - 1);
+        shadowMapViewer = graphics::cloneTextureLayer(*textureArrayObject, layer);
+        bool yes = true;
+        ui::showTextureBuffer("Shadow Map", *shadowMapViewer, &yes, shadowMapViewer->getSize());
     }
 }

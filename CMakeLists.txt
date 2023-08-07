@@ -76,7 +76,8 @@ add_executable(${PROJECT_NAME}
         src/engine/Component.cpp
         include/engine/Component.h
         src/engine/MeshComponent.cpp
-        include/engine/MeshComponent.h)
+        include/engine/MeshComponent.h
+        src/graphics/Lighting.cpp)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
         include include/engine include/graphics include/game include/engine/loader include/graphics/buffers

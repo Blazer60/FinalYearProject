@@ -84,6 +84,10 @@ MyScene::MyScene() :
         ball->addComponent(std::make_unique<engine::MeshComponent>(ballMesh, sharedMaterials));
         mActors.push_back(std::move(ball));
     }
+    
+    std::unique_ptr<engine::Actor> directionalLight = std::make_unique<engine::Actor>("Directional Light");
+    directionalLight->addComponent(std::make_unique<DirectionalLight>(glm::normalize(glm::vec3(1.f, 1.f, 1.f)), glm::vec3(0.93f, 0.93f, 0.95f), glm::ivec2(4096), 4));
+    mActors.push_back(std::move(directionalLight));
 }
 
 void MyScene::onFixedUpdate()
@@ -93,20 +97,16 @@ void MyScene::onFixedUpdate()
 void MyScene::onUpdate()
 {
     mMainCamera.update();
-    mDirectionalLight.updateLayerCount(graphics::renderer->shadowCascadeZones);
 }
 
 void MyScene::onRender()
 {
     graphics::renderer->submit(mMainCamera.toSettings());
-    graphics::renderer->submit(mDirectionalLight);
 }
 
 void MyScene::onImguiUpdate()
 {
     ui::draw(mMainCamera);
-    
-    ImGui::ColorEdit3("Intensity", glm::value_ptr(mDirectionalLight.intensity), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float);
     
     if (ImGui::Button("Skybox 1"))
         graphics::renderer->generateSkybox("../resources/textures/hdr/newport/NewportLoft.hdr", glm::ivec2(512));

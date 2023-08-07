@@ -8,8 +8,10 @@
 #pragma once
 
 #include "Pch.h"
+#include "Lighting.h"
 
 namespace graphics
 {
     void displayShadowSettings();
+    void displayShadowMaps(TextureArrayObject *textureArrayObject);
 }
