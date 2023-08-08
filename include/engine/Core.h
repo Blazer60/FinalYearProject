@@ -14,6 +14,8 @@
 #include "Renderer.h"
 #include "Logger.h"
 #include "MainCamera.h"
+#include "Viewport.h"
+#include "Editor.h"
 
 namespace engine
 {
@@ -48,6 +50,9 @@ namespace engine
         
         void run();
         
+        [[nodiscard]] Scene *getScene();
+        [[nodiscard]] MainCamera *getCamera();
+        
     protected:
         bool initGlfw(int openGlMajorVersion, int openGlMinorVersion);
         bool initImGui();
@@ -70,9 +75,11 @@ namespace engine
         bool mIsRunning { true };
         const unsigned int mMaxLoopCount { 10 };
         const bool mEnableDebugging { false };
-        ViewportToggles mViewport;
+        ViewportToggles mViewportToggles;
         
         std::unique_ptr<MainCamera> mMainCamera;
+        
+        Editor mEditor;
     };
     
 } // engine

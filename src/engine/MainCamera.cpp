@@ -35,8 +35,7 @@ MainCamera::MainCamera(const glm::vec3 &position)
 void MainCamera::update()
 {
     move();
-    const glm::vec2 size = window::bufferSize();
-    mProjectionMatrix = glm::perspective(mFovY, size.x / size.y, mNearClip, mFarClip);
+    mProjectionMatrix = glm::perspective(mFovY, window::aspectRatio(), mNearClip, mFarClip);
     
     mViewMatrix = glm::translate(glm::mat4(1.f), mPosition)
                 * glm::mat4(mRotation);

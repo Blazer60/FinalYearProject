@@ -38,7 +38,8 @@ protected:
     std::unique_ptr<TextureBufferObject> mDownSampleTexture;
     std::unique_ptr<TextureBufferObject> mUpSampleTexture;
     
-    const int mMipLevelCount { 8 };
+    int mMipLevelCount { 8 };
+    const int mMaxMipLevelCount { 8 };
     
     glm::ivec2 mCurrentSize { 0 };
     

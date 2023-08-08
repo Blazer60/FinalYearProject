@@ -26,6 +26,7 @@ namespace engine
         
         void update();
         void imguiUpdate();
+        std::vector<std::unique_ptr<Actor>> &getActors();
         
         virtual void onFixedUpdate();
         virtual void onRender();

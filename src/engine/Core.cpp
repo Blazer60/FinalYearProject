@@ -16,12 +16,15 @@
 #include "GraphicsState.h"
 #include "EngineState.h"
 #include "LoggerMacros.h"
+#include "ImGuizmo.h"
 
 engine::Core::Core(const glm::ivec2 &resolution, bool enableDebugging)
     : mResolution(resolution), mEnableDebugging(enableDebugging)
 {
     mLogger = std::make_unique<Logger>();
     logger = mLogger.get();
+    core = this;
+    editor = &mEditor;
     
     window::setBufferSize(mResolution);
     
@@ -60,7 +63,7 @@ engine::Core::Core(const glm::ivec2 &resolution, bool enableDebugging)
     if (!initImGui())
     {
         mIsRunning = false;
-        LOG_MAJOR("Could not load imgui for an opengl context.");
+        LOG_MAJOR("Could not load drawUi for an opengl context.");
         return;
     }
     
@@ -181,6 +184,7 @@ void engine::Core::updateImgui()
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+    ImGuizmo::BeginFrame();
     
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glBindVertexArray(0);
@@ -207,7 +211,7 @@ void engine::Core::updateImgui()
     graphics::displayShadowSettings();
     ImGui::End();
     
-    updateViewports();
+    ui::draw(mEditor);
     
     ImGui::Render();
     int display_w, display_h;
@@ -235,42 +239,52 @@ void engine::Core::updateImguiMenuViewports()
     if (ImGui::BeginMenu("Viewports"))
     {
         if (ImGui::MenuItem("Show Position Buffer"))
-            mViewport.showPositionBuffer = true;
+            mViewportToggles.showPositionBuffer = true;
         if (ImGui::MenuItem("Show Normal Buffer"))
-            mViewport.showNormalBuffer = true;
+            mViewportToggles.showNormalBuffer = true;
         if (ImGui::MenuItem("Show Albedo Buffer"))
-            mViewport.showAlbedoBuffer = true;
+            mViewportToggles.showAlbedoBuffer = true;
         if (ImGui::MenuItem("Show Emissive Buffer"))
-            mViewport.showEmissiveBuffer = true;
+            mViewportToggles.showEmissiveBuffer = true;
         if (ImGui::MenuItem("Show Diffuse Buffer"))
-            mViewport.showDiffuseBuffer = true;
+            mViewportToggles.showDiffuseBuffer = true;
         if (ImGui::MenuItem("Show Depth Buffer"))
-            mViewport.showDepthBuffer = true;
+            mViewportToggles.showDepthBuffer = true;
         if (ImGui::MenuItem("Show Output Buffer"))
-            mViewport.showDeferredLightingBuffer = true;
+            mViewportToggles.showDeferredLightingBuffer = true;
         if (ImGui::MenuItem("Show Shadow Buffer"))
-            mViewport.showShadowBuffer = true;
+            mViewportToggles.showShadowBuffer = true;
         if (ImGui::MenuItem("Show Roughness Buffer"))
-            mViewport.showRoughnessBuffer = true;
+            mViewportToggles.showRoughnessBuffer = true;
         if (ImGui::MenuItem("Show Metallic Buffer"))
-            mViewport.showMetallicBuffer = true;
+            mViewportToggles.showMetallicBuffer = true;
         if (ImGui::MenuItem("Show Primary Buffer"))
-            mViewport.showPrimaryBuffer = true;
+            mViewportToggles.showPrimaryBuffer = true;
         ImGui::EndMenu();
     }
 }
 
 void engine::Core::updateViewports()
 {
-    ui::showTextureBuffer("Albedo", mRenderer->getAlbedoBuffer(), &mViewport.showAlbedoBuffer, false);
-    ui::showTextureBuffer("Position", mRenderer->getPositionBuffer(), &mViewport.showPositionBuffer, false);
-    ui::showTextureBuffer("Normal", mRenderer->getNormalBuffer(), &mViewport.showNormalBuffer, false);
-    ui::showTextureBuffer("Emissive", mRenderer->getEmissiveBuffer(), &mViewport.showEmissiveBuffer, false);
-    ui::showTextureBuffer("Diffuse", mRenderer->getDiffuseBuffer(), &mViewport.showDiffuseBuffer, false);
-    ui::showTextureBuffer("Depth", mRenderer->getDepthBuffer(), &mViewport.showDepthBuffer, false);
-    ui::showTextureBuffer("Shadow", mRenderer->getShadowBuffer(), &mViewport.showShadowBuffer, false);
-    ui::showTextureBuffer("Roughness", mRenderer->getRoughnessBuffer(), &mViewport.showRoughnessBuffer, false);
-    ui::showTextureBuffer("Metallic", mRenderer->getMetallicBuffer(), &mViewport.showMetallicBuffer, false);
-    ui::showTextureBuffer("DeferredLighting", mRenderer->getDeferredLightingBuffer(), &mViewport.showDeferredLightingBuffer, false);
-    ui::showTextureBuffer("Primary", mRenderer->getPrimaryBuffer(), &mViewport.showPrimaryBuffer, true);
+    ui::showTextureBuffer("Albedo", mRenderer->getAlbedoBuffer(), &mViewportToggles.showAlbedoBuffer, false);
+    ui::showTextureBuffer("Position", mRenderer->getPositionBuffer(), &mViewportToggles.showPositionBuffer, false);
+    ui::showTextureBuffer("Normal", mRenderer->getNormalBuffer(), &mViewportToggles.showNormalBuffer, false);
+    ui::showTextureBuffer("Emissive", mRenderer->getEmissiveBuffer(), &mViewportToggles.showEmissiveBuffer, false);
+    ui::showTextureBuffer("Diffuse", mRenderer->getDiffuseBuffer(), &mViewportToggles.showDiffuseBuffer, false);
+    ui::showTextureBuffer("Depth", mRenderer->getDepthBuffer(), &mViewportToggles.showDepthBuffer, false);
+    ui::showTextureBuffer("Shadow", mRenderer->getShadowBuffer(), &mViewportToggles.showShadowBuffer, false);
+    ui::showTextureBuffer("Roughness", mRenderer->getRoughnessBuffer(), &mViewportToggles.showRoughnessBuffer, false);
+    ui::showTextureBuffer("Metallic", mRenderer->getMetallicBuffer(), &mViewportToggles.showMetallicBuffer, false);
+    ui::showTextureBuffer("DeferredLighting", mRenderer->getDeferredLightingBuffer(), &mViewportToggles.showDeferredLightingBuffer, false);
+    ui::showTextureBuffer("Primary", mRenderer->getPrimaryBuffer(), &mViewportToggles.showPrimaryBuffer, true);
+}
+
+engine::Scene *engine::Core::getScene()
+{
+    return mScene.get();
+}
+
+MainCamera *engine::Core::getCamera()
+{
+    return mMainCamera.get();
 }

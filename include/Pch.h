@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
+#include <gtc/type_ptr.hpp>
 #include "Logger.h"
 #include "EngineState.h"
 #include "LoggerMacros.h"

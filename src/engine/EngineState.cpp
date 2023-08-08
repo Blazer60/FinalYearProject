@@ -10,6 +10,8 @@
 namespace engine
 {
     Logger *logger;
+    Core *core;
+    Editor *editor;
     
     void forwardOpenGlCallback(
         GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,

@@ -13,7 +13,7 @@
 namespace ui
 {
     /**
-     * An interface to tell the ui that this item can be drawn via imgui and expose properties that a user can change.
+     * An interface to tell the ui that this item can be drawn via drawUi and expose properties that a user can change.
      * Use ui::draw(property) to safely draw an element that implements Drawable.
      * @author Ryan Purse
      * @date 15/07/2023

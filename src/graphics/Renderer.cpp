@@ -109,6 +109,9 @@ void Renderer::submit(const DirectionalLight &directionalLight)
 
 void Renderer::render()
 {
+    if (window::bufferSize().x <= 0 || window::bufferSize().y <= 0)
+        return;
+    
     if (mCurrentRenderBufferSize != window::bufferSize())
     {
         detachTextureRenderBuffersFromFrameBuffers();

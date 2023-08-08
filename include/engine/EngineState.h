@@ -13,6 +13,8 @@
 namespace engine
 {
     extern Logger *logger;
+    extern class Core *core;
+    extern class Editor *editor;
     
     void forwardOpenGlCallback(
         GLenum source, GLenum type, GLuint id,
