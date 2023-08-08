@@ -38,7 +38,7 @@ void DirectionalLight::onDrawUi()
     ImGui::PushID("DirectionalLightSettings");
     if (ImGui::CollapsingHeader("Directional Light", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        ImGui::ColorEdit3("Intensity", glm::value_ptr(intensity), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float);
+        ImGui::ColorEdit3("Intensity", glm::value_ptr(intensity), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_PickerHueWheel);
         bool changed = false;
         ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x / 2.f * 0.65f);
         changed |= ImGui::DragFloat("Yaw", &yaw, 0.1f); ImGui::SameLine();

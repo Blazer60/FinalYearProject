@@ -25,6 +25,9 @@ namespace engine
     public:
         MeshComponent(SharedMesh sharedMesh, SharedMaterials sharedMaterials);
         
+        template<typename TMaterial>
+        MeshComponent(SharedMesh sharedMesh, std::shared_ptr<TMaterial> material);
+        
     protected:
         void onUpdate() override;
         void onDrawUi() override;
@@ -33,5 +36,12 @@ namespace engine
         SharedMesh      mSharedMesh;
         SharedMaterials mSharedMaterials;
     };
+    
+    template<typename TMaterial>
+    MeshComponent::MeshComponent(SharedMesh sharedMesh, std::shared_ptr<TMaterial> material)
+        : mSharedMesh(std::move(sharedMesh))
+    {
+        mSharedMaterials.push_back(material);
+    }
     
 } // engine

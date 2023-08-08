@@ -61,6 +61,16 @@ void StandardMaterial::setRoughnessMap(std::shared_ptr<Texture> roughnessMap)
     mRoughnessMap = std::move(roughnessMap);
 }
 
+void StandardMaterial::setDiffuseMap(std::shared_ptr<Texture> diffuseMap)
+{
+    mDiffuse = std::move(diffuseMap);
+}
+
+void StandardMaterial::setNormalMap(std::shared_ptr<Texture> normalMap)
+{
+    mNormal = std::move(normalMap);
+}
+
 void StandardMaterial::onDrawUi()
 {
     ImGui::PushID("StandardMaterialSettings");
@@ -72,4 +82,6 @@ void StandardMaterial::onDrawUi()
     }
     ImGui::PopID();
 }
+
+
 

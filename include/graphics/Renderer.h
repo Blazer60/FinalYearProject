@@ -35,7 +35,7 @@ public:
      * @param indicesCount - The number of indices that make up the geometry.
      * @param shader - The shader used to drawUi the element to the geometry buffer.
      * @param renderMode - What primitive to use when rendering.
-     * @param matrix - The model matrix for this object (used for shadow mapping).
+     * @param matrix - The modelAndMaterial matrix for this object (used for shadow mapping).
      * @param onDraw - An event callback that is called just before rendering.
      */
     void drawMesh(
@@ -47,16 +47,16 @@ public:
      * @brief Draws an element to the geometry buffer.
      * @param subMesh - The mesh that you want to be drawn.
      * @param material - The material (shader) used to drawUi the mesh.
-     * @param matrix - The model's matrix (used for shadow mapping).
+     * @param matrix - The modelAndMaterial's matrix (used for shadow mapping).
      */
     void drawMesh(const SubMesh &subMesh, Material &material, const glm::mat4 &matrix);
     
     /**
-     * @brief Draws a number of meshes to the geometry buffer with the same model matrix.
+     * @brief Draws a number of meshes to the geometry buffer with the same modelAndMaterial matrix.
      * @param mesh - N sub-meshes that you want to be drawn to the geometry buffer.
      * @param materials - N materials used to drawUi each mesh. If the material count is one, then only that material
      * will be used.
-     * @param matrix - the model's matrix (used for shadow mapping).
+     * @param matrix - the modelAndMaterial's matrix (used for shadow mapping).
      */
     void drawMesh(const SharedMesh &mesh, const SharedMaterials &materials, const glm::mat4 &matrix);
     

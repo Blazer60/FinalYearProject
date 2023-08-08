@@ -59,7 +59,7 @@ namespace load
         if (intermediateVertices.size() < 3)
         {
             WARN("The face does not contain at least three vertices. Tangent information cannot be generated. "
-                 "Normal maps may not correct for this model.");
+                 "Normal maps may not correct for this modelAndMaterial.");
             return;
         }
         // If a face has more than three vertices, we assume that the whole face is flat.

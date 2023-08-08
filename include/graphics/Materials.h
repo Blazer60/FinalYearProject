@@ -68,6 +68,8 @@ public:
     void onDraw() override;
     void onLoadMtlFile(const MtlMaterialInformation &materialInformation) override;
     
+    void setDiffuseMap(std::shared_ptr<Texture> diffuseMap);
+    void setNormalMap(std::shared_ptr<Texture> normalMap);
     void setHeightMap(std::shared_ptr<Texture> heightMap);
     void setRoughnessMap(std::shared_ptr<Texture> roughnessMap);
 

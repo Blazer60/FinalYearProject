@@ -35,8 +35,21 @@ namespace engine
         virtual void onUpdate();
         virtual void onImguiUpdate();
         
+        template<typename TActor, typename ...TArgs>
+        TActor *spawnActor(TArgs&&... args);
+        
         std::vector<std::unique_ptr<Actor>> mActors;
         Actor *mSelectedActor { nullptr };
     };
     
+    template<typename TActor, typename... TArgs>
+    TActor *Scene::spawnActor(TArgs &&... args)
+    {
+        std::unique_ptr<TActor> actor = std::make_unique<TActor>(std::forward<TArgs>(args)...);
+        TActor *actorRef = actor.get();
+        
+        mActors.push_back(std::move(actor));
+        
+        return actorRef;
+    }
 } // engine

@@ -18,75 +18,67 @@
 #include "MeshComponent.h"
 
 MyScene::MyScene() :
-    mDirectionalLight(glm::normalize(glm::vec3(1.f, 1.f, 1.f)), glm::vec3(0.93f, 0.93f, 0.95f), glm::ivec2(4096), 4),
     mStandardShader(std::make_shared<Shader>(
         "../resources/shaders/geometry/standard/Standard.vert",
         "../resources/shaders/geometry/standard/Standard.frag"))
 {
-    const auto [mesh0, material0] = load::model<StandardVertex, StandardMaterial>(
-        "../resources/models/stoneFloor/MedievalStoneFloor.obj", mStandardShader);
+    auto floor = spawnActor<engine::Actor>("Floor");
+    auto floorMesh = load::model<StandardVertex>("../resources/models/stoneFloor/MedievalStoneFloor.obj");
+    auto floorMaterial = std::make_shared<StandardMaterial>();
+    floorMaterial->attachShader(mStandardShader);
+    floorMaterial->setDiffuseMap(load::texture("../resources/models/stoneFloor/TexturesCom_TileStones_1K_albedo.png"));
+    floorMaterial->setNormalMap(load::texture("../resources/models/stoneFloor/TexturesCom_TileStones_1K_normal.png"));
+    floorMaterial->setHeightMap(load::texture("../resources/models/stoneFloor/TexturesCom_TileStones_1K_height.png"));
+    floorMaterial->setRoughnessMap(load::texture("../resources/models/stoneFloor/TexturesCom_TileStones_1K_roughness.png"));
+    floorMaterial->metallic = 0.f;
+    floorMaterial->roughness = 0.5f;
+    floorMaterial->ambientColour = glm::vec3(0.8f);
+    floor->addComponent(std::make_unique<engine::MeshComponent>(floorMesh, floorMaterial));
     
-    mStoneFloorMesh = mesh0;
-    for (auto &material : material0)
-    {
-        material->setHeightMap(load::texture("../resources/models/stoneFloor/TexturesCom_TileStones_1K_height.png"));
-        material->setRoughnessMap(load::texture("../resources/models/stoneFloor/TexturesCom_TileStones_1K_roughness.png"));
-        material->metallic = 0.f;
-        material->roughness = 0.5f;
-    }
-    mStoneFloorMaterial = toSharedMaterials(material0);
+    auto ballMesh = load::model<StandardVertex>("../resources/models/blueSphere/BlueSphere.obj");
     
-    std::unique_ptr<engine::Actor> stoneFloor = std::make_unique<engine::Actor>("Stone Floor");
-    stoneFloor->addComponent(std::make_unique<engine::MeshComponent>(mesh0, toSharedMaterials(material0)));
-    mActors.push_back(std::move(stoneFloor));
-    
-    const auto [mesh1, material1] = load::model<StandardVertex>("../resources/models/blueSphere/BlueSphere.obj");
-    
-    mBall = mesh1[0];
-    SharedMesh ballMesh = { mesh1[0] };
-    
+    std::vector<glm::vec3> positions;
+    std::vector<float> roughness;
+    std::vector<float> metallic;
     for (int i = 0; i < 10; ++i)
     {
-        auto material = std::make_shared<StandardMaterial>();
-        material->attachShader(mStandardShader);
-        material->ambientColour = glm::vec3(1.f);
-        material->roughness = static_cast<float>(i) / 10.f;
-        material->metallic = 0.f;
-        
-        mMaterials.push_back(material);
-    }
-    
-    for (int i = 0; i < 10; ++i)
-    {
-        auto material = std::make_shared<StandardMaterial>();
-        material->attachShader(mStandardShader);
-        material->ambientColour = glm::vec3(1.f);
-        material->roughness = static_cast<float>(i) / 10.f;
-        material->metallic = 1.f;
-        
-        mMaterials.push_back(material);
-    }
-    
-    for (int i = 0; i < 10; ++i)
-    {
-        std::unique_ptr<engine::Actor> ball = std::make_unique<engine::Actor>("Ball " + std::to_string(i));
-        ball->position = glm::vec3(-10.f + (i * 2.2f), 1.f, 0.f);
-        SharedMaterials sharedMaterials = { mMaterials[i] };
-        ball->addComponent(std::make_unique<engine::MeshComponent>(ballMesh, sharedMaterials));
-        mActors.push_back(std::move(ball));
+        positions.emplace_back(-10.f + (i * 2.2f), 1.f, 0.f);
+        roughness.emplace_back(i / 10.f);
+        metallic.emplace_back(0.f);
     }
     for (int i = 0; i < 10; ++i)
     {
-        std::unique_ptr<engine::Actor> ball = std::make_unique<engine::Actor>("Ball " + std::to_string(i + 10));
-        ball->position = glm::vec3(-10.f + (i * 2.2f), 3.2f, 0.f);
-        SharedMaterials sharedMaterials = { mMaterials[i + 10] };
-        ball->addComponent(std::make_unique<engine::MeshComponent>(ballMesh, sharedMaterials));
-        mActors.push_back(std::move(ball));
+        positions.emplace_back(-10.f + (i * 2.2f), 3.2f, 0.f);
+        roughness.emplace_back(i / 10.f);
+        metallic.emplace_back(1.f);
     }
     
-    std::unique_ptr<engine::Actor> directionalLight = std::make_unique<engine::Actor>("Directional Light");
-    directionalLight->addComponent(std::make_unique<DirectionalLight>(glm::normalize(glm::vec3(1.f, 1.f, 1.f)), glm::vec3(0.93f, 0.93f, 0.95f), glm::ivec2(4096), 4));
-    mActors.push_back(std::move(directionalLight));
+    for (int i = 0; i < 20; ++i)
+    {
+        auto ball = spawnActor<engine::Actor>(std::string("Ball " + std::to_string(i)));
+        ball->position = positions[i];
+        auto ballMaterial = std::make_shared<StandardMaterial>();
+        ballMaterial->attachShader(mStandardShader);
+        ballMaterial->ambientColour = glm::vec3(1.f);
+        ballMaterial->roughness = roughness[i];
+        ballMaterial->metallic = metallic[i];
+        ball->addComponent(std::make_unique<engine::MeshComponent>(ballMesh, ballMaterial));
+    }
+    
+    auto directionalLight = spawnActor<engine::Actor>("Directional Light");
+    directionalLight->addComponent(std::make_unique<DirectionalLight>(
+        glm::normalize(glm::vec3(1.f, 1.f, 1.f)), glm::vec3(0.93f, 0.93f, 0.95f), glm::ivec2(4096), 4));
+    
+    auto teapot = spawnActor<engine::Actor>("Teapot");
+    teapot->position = glm::vec3(0.f, 0.f, 4.f);
+    teapot->scale = glm::vec3(0.3f);
+    SharedMesh teapotMesh = load::model<StandardVertex>("../resources/models/utahTeapot/UtahTeapot.obj");
+    auto teapotMaterial = std::make_shared<StandardMaterial>();
+    teapotMaterial->attachShader(mStandardShader);
+    teapotMaterial->ambientColour = glm::vec3(0.f, 0.4f, 0.01f);
+    teapotMaterial->roughness = 0.6f;
+    teapotMaterial->metallic = 1.f;
+    teapot->addComponent(std::make_unique<engine::MeshComponent>(teapotMesh, teapotMaterial));
 }
 
 void MyScene::onFixedUpdate()

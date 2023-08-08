@@ -35,11 +35,4 @@ public:
     
 protected:
     std::shared_ptr<Shader> mStandardShader;
-    DirectionalLight mDirectionalLight;
-    
-    SharedMesh mStoneFloorMesh;
-    SharedMaterials mStoneFloorMaterial;
-    
-    std::shared_ptr<SubMesh> mBall;
-    std::vector<std::shared_ptr<StandardMaterial>> mMaterials;
 };
