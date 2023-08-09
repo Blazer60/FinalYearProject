@@ -11,6 +11,7 @@
 #include "Drawable.h"
 #include "Viewport.h"
 #include "Actor.h"
+#include "Callback.h"
 
 namespace engine
 {
@@ -22,6 +23,10 @@ namespace engine
         : public ui::Drawable
     {
     public:
+        Callback<std::vector<ImGuiKey>> onIoKeyboardEvent;
+        
+        void init();
+        void update();
         [[nodiscard]] Actor *getSelectedActor();
     protected:
         void onDrawUi() override;

@@ -18,6 +18,37 @@
 
 namespace engine
 {
+    void Viewport::init()
+    {
+        mKeyToken = editor->onIoKeyboardEvent.subscribe([this](const std::vector<ImGuiKey> &keys) {
+            if (!mIsFocused)
+                return;
+            
+            for (const ImGuiKey &key : keys)
+            {
+                switch (key)
+                {
+                    case ImGuiKey_W:
+                        mOperation = ImGuizmo::OPERATION::TRANSLATE;
+                        break;
+                    case ImGuiKey_E:
+                        mOperation = ImGuizmo::OPERATION::ROTATE;
+                        break;
+                    case ImGuiKey_R:
+                        mOperation = ImGuizmo::OPERATION::SCALE;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
+    }
+    
+    Viewport::~Viewport()
+    {
+        editor->onIoKeyboardEvent.unSubscribe(mKeyToken);
+    }
+    
     glm::vec2 Viewport::getSize() const
     {
         return mSize;
@@ -33,14 +64,25 @@ namespace engine
         window::setBufferSize(glm::ivec2(regionSize.x, regionSize.y));
         
         const TextureBufferObject &texture = graphics::renderer->getPrimaryBuffer();
+        ImVec2 origin = ImGui::GetCursorPos();
         ImGui::Image(reinterpret_cast<void *>(texture.getId()), regionSize, ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::SetCursorPos(origin);
+        if (ImGui::RadioButton("Move", mOperation == ImGuizmo::OPERATION::TRANSLATE))
+            mOperation = ImGuizmo::OPERATION::TRANSLATE;
+        ImGui::SameLine();
+        if (ImGui::RadioButton("Rotate", mOperation == ImGuizmo::OPERATION::ROTATE))
+            mOperation = ImGuizmo::OPERATION::ROTATE;
+        ImGui::SameLine();
+        if (ImGui::RadioButton("Scale", mOperation == ImGuizmo::OPERATION::SCALE))
+            mOperation = ImGuizmo::OPERATION::SCALE;
+        
+        mIsFocused = ImGui::IsWindowFocused();
         
         Actor *selectedActor = editor->getSelectedActor();
         if (selectedActor)
         {
             const float windowWidth = ImGui::GetWindowWidth();
             const float windowHeight = ImGui::GetWindowHeight();
-            ImGui::GetIO();
             ImGuizmo::SetDrawlist();
             ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
             ImGuizmo::SetOrthographic(false);
@@ -53,7 +95,7 @@ namespace engine
             glm::mat4 projection = camera->getProjectionMatrix();
             
             if (ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection),
-                                 ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::MODE::LOCAL, glm::value_ptr(actorTransform)))
+                                 mOperation, ImGuizmo::MODE::LOCAL, glm::value_ptr(actorTransform)))
             {
                 math::decompose(actorTransform, selectedActor->position, selectedActor->rotation, selectedActor->scale);
             }
@@ -62,4 +104,7 @@ namespace engine
         ImGui::PopStyleVar();
         ImGui::PopID();
     }
+    
+    
+    
 }

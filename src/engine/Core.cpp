@@ -25,6 +25,7 @@ engine::Core::Core(const glm::ivec2 &resolution, bool enableDebugging)
     logger = mLogger.get();
     core = this;
     editor = &mEditor;
+    mEditor.init();
     
     window::setBufferSize(mResolution);
     
@@ -168,6 +169,7 @@ void engine::Core::run()
         
         mScene->update();
         mMainCamera->update();
+        mEditor.update();
         mScene->onRender();
         mRenderer->submit(mMainCamera->toSettings());
         mRenderer->render();

@@ -11,6 +11,11 @@
 
 namespace engine
 {
+    void Editor::init()
+    {
+        mViewport.init();
+    }
+    
     void Editor::onDrawUi()
     {
         ui::draw(mViewport);
@@ -62,4 +67,17 @@ namespace engine
     {
         return mSelectedActor;
     }
+    
+    void Editor::update()
+    {
+        std::vector<ImGuiKey> keys;
+        for (ImGuiKey key = (ImGuiKey)0; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1))
+        {
+            if (ImGui::IsKeyDown(key))
+                keys.emplace_back(key);
+        }
+        if (!keys.empty())
+            onIoKeyboardEvent.broadcast(keys);
+    }
+    
 }

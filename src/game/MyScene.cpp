@@ -101,8 +101,8 @@ void MyScene::onImguiUpdate()
     if (ImGui::Button("Skybox 2"))
         graphics::renderer->generateSkybox("../resources/textures/hdr/norway/Norway.hdr", glm::ivec2(512));
     
-    // static bool yes = true;
-    // ImGui::ShowDemoWindow(&yes);
+    static bool yes = true;
+    ImGui::ShowDemoWindow(&yes);
 }
 
 void MyScene::onImguiMenuUpdate()
