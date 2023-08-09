@@ -12,6 +12,7 @@
 #include "WindowHelpers.h"
 #include "BloomPass.h"
 #include "ColourGrading.h"
+#include "Editor.h"
 
 MainCamera::MainCamera()
     : mWindow(glfwGetCurrentContext())
@@ -46,17 +47,17 @@ void MainCamera::update()
 
 void MainCamera::move()
 {
+    if (!engine::editor->isViewportFocused())
+        return;
+    
     if (!glfwGetMouseButton(mWindow, GLFW_MOUSE_BUTTON_RIGHT))
         return;
     
-    // const float timeStep = static_cast<float>(glfwGetTime());
     const auto timeStep = timers::deltaTime<float>();
     
-    glm::dvec2 mouseOffset;
-    glfwGetCursorPos(mWindow, &mouseOffset.x, &mouseOffset.y);
-    glfwSetCursorPos(mWindow, 0.0, 0.0);
+    ImGuiIO &io = ImGui::GetIO();
+    glm::dvec2 mouseOffset { io.MouseDelta.x, io.MouseDelta.y };
     
-    // mRotation = glm::rotate(mRotation, static_cast<float>(glm::radians(mouseOffset.x)), glm::vec3(0.f, 1.f, 0.f));
     mPanAngles -= glm::radians(mouseOffset) * mMouseSpeed;
     
     const glm::vec3 up    = glm::vec3(0.f, 1.f, 0.f);

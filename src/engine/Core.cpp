@@ -92,18 +92,6 @@ bool engine::Core::initGlfw(int openGlMajorVersion, int openGlMinorVersion)
     
     glfwMakeContextCurrent(mWindow);
     
-    glfwSetMouseButtonCallback(mWindow, [](GLFWwindow *window, int button, int action, int mods){
-        if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
-        {
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            glfwSetCursorPos(window, 0.0, 0.0);
-        }
-        else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
-        {
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        }
-    });
-    
     const int frameRate = 60;
     glfwSwapInterval(frameRate);
     

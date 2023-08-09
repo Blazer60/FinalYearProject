@@ -24,10 +24,12 @@ namespace engine
     {
     public:
         Callback<std::vector<ImGuiKey>> onIoKeyboardEvent;
+        Callback<bool> onRightMouseClicked;  // true, if pressed. false, if released.
         
         void init();
         void update();
         [[nodiscard]] Actor *getSelectedActor();
+        bool isViewportFocused();
     protected:
         void onDrawUi() override;
         void drawSceneHierarchyPanel();

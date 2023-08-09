@@ -70,6 +70,11 @@ namespace engine
     
     void Editor::update()
     {
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+            onRightMouseClicked.broadcast(true);
+        if (ImGui::IsMouseReleased(ImGuiMouseButton_Right))
+            onRightMouseClicked.broadcast(false);
+        
         std::vector<ImGuiKey> keys;
         for (ImGuiKey key = (ImGuiKey)0; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1))
         {
@@ -80,4 +85,8 @@ namespace engine
             onIoKeyboardEvent.broadcast(keys);
     }
     
+    bool Editor::isViewportFocused()
+    {
+        return mViewport.isFocused();
+    }
 }

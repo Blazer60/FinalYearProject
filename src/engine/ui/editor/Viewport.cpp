@@ -20,8 +20,11 @@ namespace engine
 {
     void Viewport::init()
     {
-        mKeyToken = editor->onIoKeyboardEvent.subscribe([this](const std::vector<ImGuiKey> &keys) {
+        mKeyboardEventToken = editor->onIoKeyboardEvent.subscribe([this](const std::vector<ImGuiKey> &keys) {
             if (!mIsFocused)
+                return;
+            
+            if (mIsMouseDown)
                 return;
             
             for (const ImGuiKey &key : keys)
@@ -42,11 +45,21 @@ namespace engine
                 }
             }
         });
+        
+        mRightMouseEventToken = editor->onRightMouseClicked.subscribe([this](bool isClicked) {
+            mIsMouseDown = isClicked && mIsFocused;
+            
+            if (!isClicked && mIsFocused)
+                glfwSetCursorPos(glfwGetCurrentContext(), mLastMousePosition.x, mLastMousePosition.y);
+            
+            glfwGetCursorPos(glfwGetCurrentContext(), &mLastMousePosition.x, &mLastMousePosition.y);
+        });
     }
     
     Viewport::~Viewport()
     {
-        editor->onIoKeyboardEvent.unSubscribe(mKeyToken);
+        editor->onIoKeyboardEvent.unSubscribe(mKeyboardEventToken);
+        editor->onRightMouseClicked.unSubscribe(mRightMouseEventToken);
     }
     
     glm::vec2 Viewport::getSize() const
@@ -56,6 +69,9 @@ namespace engine
     
     void Viewport::onDrawUi()
     {
+        if (mIsMouseDown)
+            ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+        
         ImGui::PushID("Viewport");
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
         ImGui::Begin("Window");
@@ -75,6 +91,9 @@ namespace engine
         ImGui::SameLine();
         if (ImGui::RadioButton("Scale", mOperation == ImGuizmo::OPERATION::SCALE))
             mOperation = ImGuizmo::OPERATION::SCALE;
+        
+        if (ImGui::IsWindowHovered())
+            ImGui::SetWindowFocus("Window");
         
         mIsFocused = ImGui::IsWindowFocused();
         
@@ -105,6 +124,10 @@ namespace engine
         ImGui::PopID();
     }
     
+    bool Viewport::isFocused() const
+    {
+        return mIsFocused;
+    }
     
     
 }
