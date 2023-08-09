@@ -24,7 +24,7 @@ namespace engine
     {
     public:
         Callback<std::vector<ImGuiKey>> onIoKeyboardEvent;
-        Callback<bool> onRightMouseClicked;  // true, if pressed. false, if released.
+        Callback<ImGuiMouseButton, bool> onMouseClicked;  // true, if pressed. false, if released.
         
         void init();
         void update();

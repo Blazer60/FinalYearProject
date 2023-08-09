@@ -26,7 +26,7 @@ namespace engine
         ~Viewport() override;
         
         [[nodiscard]] glm::vec2 getSize() const;
-        bool isFocused() const;
+        [[nodiscard]] bool isFocused() const;
         
     protected:
         void onDrawUi() override;

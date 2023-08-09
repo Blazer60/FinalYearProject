@@ -6,7 +6,6 @@
 
 
 #include "MainCamera.h"
-#include "glfw3.h"
 #include "Timers.h"
 #include "imgui.h"
 #include "WindowHelpers.h"
@@ -15,22 +14,62 @@
 #include "Editor.h"
 
 MainCamera::MainCamera()
-    : mWindow(glfwGetCurrentContext())
+{
+    init();
+}
+
+MainCamera::MainCamera(const glm::vec3 &position)
+    : mPosition(position)
+{
+    init();
+}
+
+void MainCamera::init()
 {
     const glm::vec2 size = glm::ivec2(window::bufferSize());
     mProjectionMatrix = glm::perspective(mFovY, size.x / size.y, mNearClip, mFarClip);
     
     mPostProcessStack.emplace_back(std::make_unique<BloomPass>());
     mPostProcessStack.emplace_back(std::make_unique<ColourGrading>());
+    
+    mKeyboardToken = engine::editor->onIoKeyboardEvent.subscribe([this](const std::vector<ImGuiKey> &keys) {
+        for (const ImGuiKey &key : keys)
+        {
+            switch (key)
+            {
+                case ImGuiKey_W:
+                    mInputDirection.z -= 1.f;
+                    break;
+                case ImGuiKey_S:
+                    mInputDirection.z += 1.f;
+                    break;
+                case ImGuiKey_A:
+                    mInputDirection.x -= 1.f;
+                    break;
+                case ImGuiKey_D:
+                    mInputDirection.x += 1.f;
+                    break;
+                case ImGuiKey_Q:
+                    mInputDirection.y -= 1.f;
+                    break;
+                case ImGuiKey_E:
+                    mInputDirection.y += 1.f;
+                    break;
+                default:
+                    break;
+            }
+        }
+    });
+    
+    mMouseToken = engine::editor->onMouseClicked.subscribe([this](ImGuiMouseButton button, bool isClicked) {
+        mEnableFirstPerson = button == ImGuiMouseButton_Right && isClicked;
+    });
 }
 
-MainCamera::MainCamera(const glm::vec3 &position)
-    : mWindow(glfwGetCurrentContext()), mPosition(position)
+MainCamera::~MainCamera()
 {
-    const glm::vec2 size = glm::ivec2(window::bufferSize());
-    mProjectionMatrix = glm::perspective(mFovY, size.x / size.y, mNearClip, mFarClip);
-    mPostProcessStack.emplace_back(std::make_unique<BloomPass>());
-    mPostProcessStack.emplace_back(std::make_unique<ColourGrading>());
+    engine::editor->onIoKeyboardEvent.unSubscribe(mKeyboardToken);
+    engine::editor->onMouseClicked.unSubscribe(mMouseToken);
 }
 
 void MainCamera::update()
@@ -50,7 +89,7 @@ void MainCamera::move()
     if (!engine::editor->isViewportFocused())
         return;
     
-    if (!glfwGetMouseButton(mWindow, GLFW_MOUSE_BUTTON_RIGHT))
+    if (!mEnableFirstPerson)
         return;
     
     const auto timeStep = timers::deltaTime<float>();
@@ -67,31 +106,14 @@ void MainCamera::move()
               * glm::angleAxis(static_cast<float>(mPanAngles.y), right);
 
     
-    glm::vec3 input(0.f);
-    if (glfwGetKey(mWindow, GLFW_KEY_W))
-        input.z -= 1.f;
-    if (glfwGetKey(mWindow, GLFW_KEY_S))
-        input.z += 1.f;
-    if (glfwGetKey(mWindow, GLFW_KEY_A))
-        input.x -= 1.f;
-    if (glfwGetKey(mWindow, GLFW_KEY_D))
-        input.x += 1.f;
+    mPosition.y += mSpeed * timeStep * mInputDirection.y;
+    mInputDirection.y = 0.f;
+    if (glm::length(mInputDirection) > 0.f)
+        mInputDirection = glm::normalize(mInputDirection);
     
-    if (glfwGetKey(mWindow, GLFW_KEY_LEFT_CONTROL))
-        mPosition.y -= mSpeed * timeStep;
-    if (glfwGetKey(mWindow, GLFW_KEY_SPACE))
-        mPosition.y += mSpeed * timeStep;
+    mPosition += mRotation * (mSpeed * timeStep * mInputDirection);
     
-    if (glm::length(input) > 1)
-        input = glm::normalize(input);
-    
-    mPosition += mRotation * (mSpeed * timeStep * input);
-    
-    
-    if (glfwGetKey(mWindow, GLFW_KEY_E))
-        MESSAGE(std::to_string(mPosition.x) + ", "
-                   + std::to_string(mPosition.y) + ", "
-                   + std::to_string(mPosition.z));
+    mInputDirection = glm::vec3(0.f);
 }
 
 const glm::mat4 &MainCamera::getVpMatrix() const
@@ -160,4 +182,6 @@ CameraSettings MainCamera::toSettings()
 {
     return { mFovY, mNearClip, mFarClip, mViewMatrix, mPostProcessStack };
 }
+
+
 

@@ -24,11 +24,11 @@ class MainCamera
 {
 public:
     explicit MainCamera(const glm::vec3 &position);
-    
     MainCamera();
+    ~MainCamera() override;
     
+    void init();
     void update();
-    
     void move();
     
     void setProjectionMatrix(glm::vec2 viewSize);
@@ -66,9 +66,13 @@ protected:
     float           mNearClip           { 0.001f };
     float           mFarClip            { 100.f };
     
-    GLFWwindow *    mWindow             { };
-    
     std::vector<std::unique_ptr<PostProcessLayer>> mPostProcessStack;
+    
+    uint32_t mKeyboardToken { 0 };
+    uint32_t mMouseToken { 0 };
+    
+    glm::vec3 mInputDirection { 0.f };
+    bool mEnableFirstPerson { false };
 };
 
 

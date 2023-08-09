@@ -71,9 +71,9 @@ namespace engine
     void Editor::update()
     {
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
-            onRightMouseClicked.broadcast(true);
+            onMouseClicked.broadcast(ImGuiMouseButton_Right, true);
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Right))
-            onRightMouseClicked.broadcast(false);
+            onMouseClicked.broadcast(ImGuiMouseButton_Right, false);
         
         std::vector<ImGuiKey> keys;
         for (ImGuiKey key = (ImGuiKey)0; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1))

@@ -46,7 +46,10 @@ namespace engine
             }
         });
         
-        mRightMouseEventToken = editor->onRightMouseClicked.subscribe([this](bool isClicked) {
+        mRightMouseEventToken = editor->onMouseClicked.subscribe([this](ImGuiMouseButton button, bool isClicked) {
+            if (button != ImGuiMouseButton_Right)
+                return;
+            
             mIsMouseDown = isClicked && mIsFocused;
             
             if (!isClicked && mIsFocused)
@@ -59,7 +62,7 @@ namespace engine
     Viewport::~Viewport()
     {
         editor->onIoKeyboardEvent.unSubscribe(mKeyboardEventToken);
-        editor->onRightMouseClicked.unSubscribe(mRightMouseEventToken);
+        editor->onMouseClicked.unSubscribe(mRightMouseEventToken);
     }
     
     glm::vec2 Viewport::getSize() const
