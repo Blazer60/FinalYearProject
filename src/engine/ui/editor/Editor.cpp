@@ -75,14 +75,13 @@ namespace engine
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Right))
             onMouseClicked.broadcast(ImGuiMouseButton_Right, false);
         
-        std::vector<ImGuiKey> keys;
         for (ImGuiKey key = (ImGuiKey)0; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1))
         {
-            if (ImGui::IsKeyDown(key))
-                keys.emplace_back(key);
+            if (ImGui::IsKeyPressed(key))
+                onKeyPressed.broadcast(key, true);
+            else if (ImGui::IsKeyReleased(key))
+                onKeyPressed.broadcast(key, false);
         }
-        if (!keys.empty())
-            onIoKeyboardEvent.broadcast(keys);
     }
     
     bool Editor::isViewportFocused()

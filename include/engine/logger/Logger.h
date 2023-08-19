@@ -39,6 +39,7 @@ namespace engine
     {
     public:
         void log(const char file[], int line, std::string_view message, Severity_ severity=Severity_Notification);
+        void log(const char file[], int line, const glm::vec3 &message, Severity_ severity=Severity_Notification);
         
         /** Call back to attach to opengl when in debug mode. */
         void openglCallBack(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam);

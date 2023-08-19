@@ -23,7 +23,7 @@ namespace engine
         : public ui::Drawable
     {
     public:
-        Callback<std::vector<ImGuiKey>> onIoKeyboardEvent;
+        Callback<ImGuiKey, bool> onKeyPressed;
         Callback<ImGuiMouseButton, bool> onMouseClicked;  // true, if pressed. false, if released.
         
         void init();

@@ -32,33 +32,9 @@ void MainCamera::init()
     mPostProcessStack.emplace_back(std::make_unique<BloomPass>());
     mPostProcessStack.emplace_back(std::make_unique<ColourGrading>());
     
-    mKeyboardToken = engine::editor->onIoKeyboardEvent.subscribe([this](const std::vector<ImGuiKey> &keys) {
-        for (const ImGuiKey &key : keys)
-        {
-            switch (key)
-            {
-                case ImGuiKey_W:
-                    mInputDirection.z -= 1.f;
-                    break;
-                case ImGuiKey_S:
-                    mInputDirection.z += 1.f;
-                    break;
-                case ImGuiKey_A:
-                    mInputDirection.x -= 1.f;
-                    break;
-                case ImGuiKey_D:
-                    mInputDirection.x += 1.f;
-                    break;
-                case ImGuiKey_Q:
-                    mInputDirection.y -= 1.f;
-                    break;
-                case ImGuiKey_E:
-                    mInputDirection.y += 1.f;
-                    break;
-                default:
-                    break;
-            }
-        }
+    mKeyboardToken = engine::editor->onKeyPressed.subscribe([this](const ImGuiKey &key, bool isPressed) {
+        if (key == ImGuiKey_LeftAlt)
+            mEnableThirdPerson = isPressed;
     });
     
     mMouseToken = engine::editor->onMouseClicked.subscribe([this](ImGuiMouseButton button, bool isClicked) {
@@ -68,7 +44,7 @@ void MainCamera::init()
 
 MainCamera::~MainCamera()
 {
-    engine::editor->onIoKeyboardEvent.unSubscribe(mKeyboardToken);
+    engine::editor->onKeyPressed.unSubscribe(mKeyboardToken);
     engine::editor->onMouseClicked.unSubscribe(mMouseToken);
 }
 
@@ -89,22 +65,41 @@ void MainCamera::move()
     if (!engine::editor->isViewportFocused())
         return;
     
-    if (!mEnableFirstPerson)
-        return;
+    if (mEnableThirdPerson)
+        rotateThirdPerson();
     
+    else if (mEnableFirstPerson)
+        moveFirstPerson();
+    
+    
+    mInputDirection = glm::vec3(0.f);
+}
+
+void MainCamera::moveFirstPerson()
+{
     const auto timeStep = timers::deltaTime<float>();
+    
+    if (ImGui::IsKeyDown(ImGuiKey_W))
+        mInputDirection.z -= 1.f;
+    if (ImGui::IsKeyDown(ImGuiKey_S))
+        mInputDirection.z += 1.f;
+    if (ImGui::IsKeyDown(ImGuiKey_A))
+        mInputDirection.x -= 1.f;
+    if (ImGui::IsKeyDown(ImGuiKey_D))
+        mInputDirection.x += 1.f;
+    if (ImGui::IsKeyDown(ImGuiKey_Q))
+        mInputDirection.y -= 1.f;
+    if (ImGui::IsKeyDown(ImGuiKey_E))
+        mInputDirection.y += 1.f;
     
     ImGuiIO &io = ImGui::GetIO();
     glm::dvec2 mouseOffset { io.MouseDelta.x, io.MouseDelta.y };
     
     mPanAngles -= glm::radians(mouseOffset) * mMouseSpeed;
     
-    const glm::vec3 up    = glm::vec3(0.f, 1.f, 0.f);
-    const glm::vec3 right = glm::vec3(1.f, 0.f, 0.f);
+    mRotation = glm::angleAxis(static_cast<float>(mPanAngles.x), glm::vec3(0.f, 1.f, 0.f))
+                * glm::angleAxis(static_cast<float>(mPanAngles.y), glm::vec3(1.f, 0.f, 0.f));
     
-    mRotation = glm::angleAxis(static_cast<float>(mPanAngles.x), up)
-              * glm::angleAxis(static_cast<float>(mPanAngles.y), right);
-
     
     mPosition.y += mSpeed * timeStep * mInputDirection.y;
     mInputDirection.y = 0.f;
@@ -112,8 +107,6 @@ void MainCamera::move()
         mInputDirection = glm::normalize(mInputDirection);
     
     mPosition += mRotation * (mSpeed * timeStep * mInputDirection);
-    
-    mInputDirection = glm::vec3(0.f);
 }
 
 const glm::mat4 &MainCamera::getVpMatrix() const
@@ -181,6 +174,22 @@ glm::mat4 MainCamera::getProjectionMatrix() const
 CameraSettings MainCamera::toSettings()
 {
     return { mFovY, mNearClip, mFarClip, mViewMatrix, mPostProcessStack };
+}
+
+void MainCamera::rotateThirdPerson()
+{
+    ImGuiIO &io = ImGui::GetIO();
+    const glm::vec2 mouseOffset { io.MouseDelta.x, io.MouseDelta.y };
+    
+    const glm::vec3 anchorDirection = mRotation * glm::vec3(0.f, 0.f, 1.f);
+    
+    // We never want to roll the camera, so we use the "pan angles" instead.
+    mPanAngles -= glm::radians(mouseOffset) * mRotationSpeed;
+    mRotation = glm::angleAxis(static_cast<float>(mPanAngles.x), glm::vec3(0.f, 1.f, 0.f))
+                * glm::angleAxis(static_cast<float>(mPanAngles.y), glm::vec3(1.f, 0.f, 0.f));
+    
+    const glm::vec3 newAnchorDirection = mRotation * glm::vec3(0.f, 0.f, 1.f);
+    mPosition += mCameraBoomDistance * -(anchorDirection - newAnchorDirection);
 }
 
 

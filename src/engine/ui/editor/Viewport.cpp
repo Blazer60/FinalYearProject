@@ -20,29 +20,29 @@ namespace engine
 {
     void Viewport::init()
     {
-        mKeyboardEventToken = editor->onIoKeyboardEvent.subscribe([this](const std::vector<ImGuiKey> &keys) {
+        mKeyboardEventToken = editor->onKeyPressed.subscribe([this](const ImGuiKey &key, bool isClicked) {
             if (!mIsFocused)
                 return;
             
             if (mIsMouseDown)
                 return;
             
-            for (const ImGuiKey &key : keys)
+            if (!isClicked)
+                return;
+            
+            switch (key)
             {
-                switch (key)
-                {
-                    case ImGuiKey_W:
-                        mOperation = ImGuizmo::OPERATION::TRANSLATE;
-                        break;
-                    case ImGuiKey_E:
-                        mOperation = ImGuizmo::OPERATION::ROTATE;
-                        break;
-                    case ImGuiKey_R:
-                        mOperation = ImGuizmo::OPERATION::SCALE;
-                        break;
-                    default:
-                        break;
-                }
+                case ImGuiKey_W:
+                    mOperation = ImGuizmo::OPERATION::TRANSLATE;
+                    break;
+                case ImGuiKey_E:
+                    mOperation = ImGuizmo::OPERATION::ROTATE;
+                    break;
+                case ImGuiKey_R:
+                    mOperation = ImGuizmo::OPERATION::SCALE;
+                    break;
+                default:
+                    break;
             }
         });
         
@@ -61,7 +61,7 @@ namespace engine
     
     Viewport::~Viewport()
     {
-        editor->onIoKeyboardEvent.unSubscribe(mKeyboardEventToken);
+        editor->onKeyPressed.unSubscribe(mKeyboardEventToken);
         editor->onMouseClicked.unSubscribe(mRightMouseEventToken);
     }
     

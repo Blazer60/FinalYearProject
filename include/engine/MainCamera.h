@@ -59,7 +59,7 @@ public:
 protected:
     glm::dvec2      mPanAngles          { 0.f };
     
-    float           mSpeed              { 10.f };
+    float           mSpeed              { 30.f };
     double          mMouseSpeed         { 0.5f };
     
     float           mFovY               { glm::radians(45.f) };
@@ -73,6 +73,13 @@ protected:
     
     glm::vec3 mInputDirection { 0.f };
     bool mEnableFirstPerson { false };
+    bool mEnableThirdPerson { false };
+    
+    float mRotationSpeed { 0.1f };
+    float mCameraBoomDistance { 30.f };
+    
+    void moveFirstPerson();
+    void rotateThirdPerson();
 };
 
 
