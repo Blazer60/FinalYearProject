@@ -84,6 +84,8 @@ protected:
     
     void moveFirstPerson();
     void rotateThirdPerson();
+    
+    void gotoSelectedActor();
 };
 
 

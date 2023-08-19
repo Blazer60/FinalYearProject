@@ -35,6 +35,9 @@ void MainCamera::init()
     mKeyboardToken = engine::editor->onKeyPressed.subscribe([this](const ImGuiKey &key, bool isPressed) {
         if (key == ImGuiKey_LeftAlt)
             mEnableThirdPerson = isPressed;
+        
+        if (key == ImGuiKey_F)
+            gotoSelectedActor();
     });
     
     mMouseToken = engine::editor->onMouseClicked.subscribe([this](ImGuiMouseButton button, bool isClicked) {
@@ -203,6 +206,20 @@ void MainCamera::rotateThirdPerson()
     
     const glm::vec3 newAnchorDirection = mRotation * glm::vec3(0.f, 0.f, 1.f);
     mPosition += mCameraBoomDistance * -(anchorDirection - newAnchorDirection);
+}
+
+void MainCamera::gotoSelectedActor()
+{
+    if (!engine::editor->isViewportFocused())
+        return;
+    
+    engine::Actor *actor = engine::editor->getSelectedActor();
+    if (!actor)
+        return;
+    
+    const glm::vec3 actorPosition = actor->position;
+    const glm::vec3 forwardDirection = mRotation * glm::vec3(0.f, 0.f, 1.f);
+    mPosition = actorPosition + forwardDirection * mCameraBoomDistance;
 }
 
 
