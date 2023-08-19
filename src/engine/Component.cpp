@@ -36,4 +36,14 @@ namespace engine
     {
         mActor = actor;
     }
+    
+    void Component::preRender()
+    {
+        onPreRender();
+    }
+    
+    void Component::onPreRender()
+    {
+    
+    }
 }

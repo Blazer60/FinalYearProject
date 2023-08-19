@@ -25,6 +25,7 @@ namespace engine
         virtual ~Scene() = default;
         
         void update();
+        void render();
         void imguiUpdate();
         std::vector<std::unique_ptr<Actor>> &getActors();
         

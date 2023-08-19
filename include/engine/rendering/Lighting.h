@@ -41,7 +41,7 @@ struct DirectionalLight
     
 protected:
     void onDrawUi() override;
-    void onUpdate() override;
+    void onPreRender() override;
     
 protected:
     float yaw   { 45.f };

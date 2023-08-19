@@ -14,6 +14,8 @@
 
 namespace engine
 {
+    extern class Logger *logger;
+    
     enum Severity_
     {
         Severity_Notification,

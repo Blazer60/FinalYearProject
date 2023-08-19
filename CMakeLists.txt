@@ -30,7 +30,7 @@ add_executable(${PROJECT_NAME}
         include/Pch.h
 
         include/engine/loader/RawMesh.h
-        include/engine/logger/LoggerMacros.h
+        include/helpers/logger/LoggerMacros.h
 
         include/graphics/CameraSettings.h
         include/graphics/GraphicsDefinitions.h
@@ -50,7 +50,7 @@ add_executable(${PROJECT_NAME}
         src/engine/loader/ModelDestroyer.cpp include/engine/loader/ModelDestroyer.h
         src/engine/loader/ModelLoader.cpp include/engine/loader/ModelLoader.h
         src/engine/loader/TextureLoader.cpp include/engine/loader/TextureLoader.h
-        src/engine/logger/Logger.cpp include/engine/logger/Logger.h
+        src/helpers/logger/Logger.cpp include/helpers/logger/Logger.h
         src/engine/rendering/BloomPass.cpp include/engine/rendering/BloomPass.h
         src/engine/rendering/ColourGrading.cpp include/engine/rendering/ColourGrading.h
         src/engine/ui/Drawable.cpp include/engine/ui/Drawable.h
@@ -62,7 +62,7 @@ add_executable(${PROJECT_NAME}
         src/graphics/GraphicsDefinitions.cpp
         src/graphics/GraphicsFunctions.cpp include/graphics/GraphicsFunctions.h
         src/graphics/GraphicsState.cpp include/graphics/GraphicsState.h
-        src/graphics/Lighting.cpp include/graphics/Lighting.h
+        src/engine/rendering/Lighting.cpp include/engine/rendering/Lighting.h
         src/graphics/Materials.cpp include/graphics/Materials.h
         src/graphics/Mesh.cpp include/graphics/Mesh.h
         src/graphics/Primitives.cpp src/graphics/Primitives.h
@@ -82,14 +82,14 @@ add_executable(${PROJECT_NAME}
         include/engine/ui/editor/Viewport.h
         src/engine/ui/editor/Editor.cpp
         include/engine/ui/editor/Editor.h
-        src/engine/EngineMath.cpp include/engine/EngineMath.h
-        include/engine/Callback.h
+        src/helpers/EngineMath.cpp include/helpers/EngineMath.h
+        include/helpers/Callback.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
         include include/engine include/graphics include/game include/engine/loader include/graphics/buffers
-        include/engine/ui include/graphics/postProcessing include/engine/rendering include/engine/logger
-        include/engine/ui/editor
+        include/engine/ui include/graphics/postProcessing include/engine/rendering include/helpers/logger
+        include/engine/ui/editor include/helpers
 
         # Vendor Files
         vendor/glm/glm vendor/glew/include/GL
@@ -107,7 +107,7 @@ else()
             <string> <string_view> <algorithm>
             <memory> <numeric> <cstdint>
             <glm.hpp> <gtc/matrix_transform.hpp> <gtc/type_ptr.hpp>
-            [["Logger.h"]] [["EngineState.h"]] [["LoggerMacros.h"]]
+            [["Logger.h"]] [["EngineState.h"]] [["LoggerMacros.h"]] [["Callback.h"]]
     )
 endif ()
 

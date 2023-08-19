@@ -62,8 +62,9 @@ void DirectionalLight::calculateDirection()
     direction = glm::yawPitchRoll(yawRadians, pitchRadians, 0.f) * glm::vec4(0.f, 0.f, -1.f, 0.f);
 }
 
-void DirectionalLight::onUpdate()
+void DirectionalLight::onPreRender()
 {
     updateLayerCount(graphics::renderer->shadowCascadeZones);
+    // todo: change directional light to submit a light weight version independent of this class.
     graphics::renderer->submit(*this);
 }

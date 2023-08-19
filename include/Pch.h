@@ -23,4 +23,5 @@
 #include "Logger.h"
 #include "EngineState.h"
 #include "LoggerMacros.h"
+#include "Callback.h"
 #endif  // PCH

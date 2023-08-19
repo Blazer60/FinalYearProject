@@ -9,7 +9,6 @@
 
 namespace engine
 {
-    Logger *logger;
     Core *core;
     Editor *editor;
     

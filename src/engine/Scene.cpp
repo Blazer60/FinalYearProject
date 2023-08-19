@@ -58,4 +58,14 @@ namespace engine
         return mActors;
     }
     
+    void Scene::render()
+    {
+        for (auto &actor : mActors)
+        {
+            for (auto &component : actor->getComponents())
+                component->preRender();
+        }
+        onRender();
+    }
+    
 }

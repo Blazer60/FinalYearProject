@@ -158,7 +158,7 @@ void engine::Core::run()
         mScene->update();
         mMainCamera->update();
         mEditor.update();
-        mScene->onRender();
+        mScene->render();
         mRenderer->submit(mMainCamera->toSettings());
         mRenderer->render();
         updateImgui();

@@ -12,7 +12,6 @@
 
 namespace engine
 {
-
 /**
  * @author Ryan Purse
  * @date 07/08/2023
@@ -23,10 +22,12 @@ namespace engine
     public:
         virtual ~Component() = default;
         void update();
+        void preRender();
         void attachToActor(class Actor *actor);
         
     protected:
         virtual void onUpdate();
+        virtual void onPreRender();
         void onDrawUi() override;
         [[nodiscard]] glm::mat4 getWorldTransform() const;
         

@@ -11,6 +11,8 @@
 
 namespace engine
 {
+    Logger *logger;
+    
     void Logger::log(const char *file, const int line, std::string_view message, Severity_ severity)
     {
         std::stringstream ss;

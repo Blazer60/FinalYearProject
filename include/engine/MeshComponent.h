@@ -29,12 +29,13 @@ namespace engine
         MeshComponent(SharedMesh sharedMesh, std::shared_ptr<TMaterial> material);
         
     protected:
-        void onUpdate() override;
         void onDrawUi() override;
+        void onPreRender() override;
     
     protected:
         SharedMesh      mSharedMesh;
         SharedMaterials mSharedMaterials;
+        bool            mShow { true };
     };
     
     template<typename TMaterial>

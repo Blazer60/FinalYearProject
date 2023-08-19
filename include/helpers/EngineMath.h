@@ -9,7 +9,7 @@
 
 #include "Pch.h"
 
-namespace engine::math
+namespace math
 {
     void decompose(const glm::mat4 &transform, glm::vec3 &position, glm::quat &rotation, glm::vec3 &scale);
 }
