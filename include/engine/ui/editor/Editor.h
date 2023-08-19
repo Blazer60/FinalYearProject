@@ -30,6 +30,7 @@ namespace engine
         void update();
         [[nodiscard]] Actor *getSelectedActor();
         bool isViewportFocused();
+        [[nodiscard]] float getMouseWheel();
     protected:
         void onDrawUi() override;
         void drawSceneHierarchyPanel();
@@ -38,6 +39,7 @@ namespace engine
     protected:
         Viewport mViewport;
         Actor *mSelectedActor { nullptr };
+        float mMouseWheel { 0.f };
     };
     
 } // engine

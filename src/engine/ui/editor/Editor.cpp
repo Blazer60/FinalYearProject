@@ -18,6 +18,10 @@ namespace engine
     
     void Editor::onDrawUi()
     {
+        // We do this here since the mouse wheel isn't registered until we begin drawing elements.
+        ImGuiIO &io = ImGui::GetIO();
+        mMouseWheel = io.MouseWheel;
+        
         ui::draw(mViewport);
         drawSceneHierarchyPanel();
         drawActorDetails();
@@ -87,5 +91,10 @@ namespace engine
     bool Editor::isViewportFocused()
     {
         return mViewport.isFocused();
+    }
+    
+    float Editor::getMouseWheel()
+    {
+        return mMouseWheel;
     }
 }

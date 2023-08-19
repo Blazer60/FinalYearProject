@@ -74,9 +74,13 @@ protected:
     glm::vec3 mInputDirection { 0.f };
     bool mEnableFirstPerson { false };
     bool mEnableThirdPerson { false };
+    bool mEnableThirdPersonRotate { false };
+    bool mIsRightMousePressed { false };
     
     float mRotationSpeed { 0.1f };
     float mCameraBoomDistance { 30.f };
+    float mCameraBoomDelta { 10.f };
+    float mCameraBoomMin { 0.5f };
     
     void moveFirstPerson();
     void rotateThirdPerson();

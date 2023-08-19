@@ -38,7 +38,8 @@ void MainCamera::init()
     });
     
     mMouseToken = engine::editor->onMouseClicked.subscribe([this](ImGuiMouseButton button, bool isClicked) {
-        mEnableFirstPerson = button == ImGuiMouseButton_Right && isClicked;
+        if (button == ImGuiMouseButton_Right)
+            mIsRightMousePressed = isClicked;
     });
 }
 
@@ -65,11 +66,22 @@ void MainCamera::move()
     if (!engine::editor->isViewportFocused())
         return;
     
-    if (mEnableThirdPerson)
-        rotateThirdPerson();
+    const float boomDistance = mCameraBoomDistance;
+    mCameraBoomDistance = glm::max(mCameraBoomMin, mCameraBoomDistance + -engine::editor->getMouseWheel() * mCameraBoomDelta);
+    const float delta = mCameraBoomDistance - boomDistance;
+    const glm::vec3 forward = mRotation * glm::vec3(0.f, 0.f, 1.f);
+    mPosition += forward * delta;
     
-    else if (mEnableFirstPerson)
-        moveFirstPerson();
+    if (mEnableThirdPerson)
+    {
+        if (mIsRightMousePressed)
+            rotateThirdPerson();
+    }
+    else
+    {
+        if (mIsRightMousePressed)
+            moveFirstPerson();
+    }
     
     
     mInputDirection = glm::vec3(0.f);
@@ -154,6 +166,7 @@ void MainCamera::onDrawUi()
         for (std::unique_ptr<PostProcessLayer> &postProcessLayer : mPostProcessStack)
             ui::draw(postProcessLayer);
     }
+    
 }
 
 const glm::vec3 &MainCamera::getPosition() const
