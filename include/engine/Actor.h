@@ -29,10 +29,32 @@ namespace engine
         
         virtual void OnUpdate();
     
+        /**
+         * @returns The name of the actor. This is the name that is shown in the hierarchy.
+         */
         [[nodiscard]] std::string_view getName() const;
+        
+        /**
+         * @returns All of the components that are attached to this actor.
+         */
         [[nodiscard]] std::vector<std::unique_ptr<Component>> &getComponents();
+        
+        /**
+         * @brief Adds the component the the list of components attached to this actor.
+         */
         void addComponent(std::unique_ptr<Component> component);
+        
+        /**
+         * @returns The transform of this actor in world space.
+         */
         [[nodiscard]] glm::mat4 getTransform() const;
+        
+        /**
+         * @tparam T - The type of component.
+         * @returns The first component of type T or a subclass of T, Nullptr otherwise.
+         */
+        template<typename T>
+        T* getComponent();
         
     public:
         glm::vec3 position     { glm::vec3(0.f) };
@@ -49,4 +71,14 @@ namespace engine
         std::vector<std::unique_ptr<Component>> mComponents;
     };
     
+    template<typename T>
+    T* Actor::getComponent()
+    {
+        for (auto &component : mComponents)
+        {
+            if (T* t = dynamic_cast<T*>(component.get()); t != nullptr)
+                return t;
+        }
+        return nullptr;
+    }
 } // engine
