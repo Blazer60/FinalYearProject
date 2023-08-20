@@ -56,7 +56,7 @@ namespace engine
                 if (ImGui::Selectable(name.c_str(), isSelected))
                 {
                     mSelectedActor = actor.get();
-                    MESSAGE("Selected Actor: " + name);
+                    MESSAGE("Selected Actor: %", name);
                 }
                 
                 if (isSelected)

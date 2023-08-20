@@ -90,7 +90,7 @@ int Shader::getLocation(const std::string &name)
     
     int location = glGetUniformLocation(mId, name.data());
     if (location == -1)
-        WARN("Uniform '" + name + "' does not exist! (" + mDebugName +")");
+        WARN("Uniform '%' does not exist! (%)", name, mDebugName);
     
     mCache[name] = location;
     return location;

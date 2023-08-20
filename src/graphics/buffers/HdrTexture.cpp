@@ -18,7 +18,7 @@ HdrTexture::HdrTexture(std::string_view path)
     std::filesystem::path systemPath(path);
     if (!std::filesystem::exists(systemPath))
     {
-        WARN("File " + systemPath.string() + " does not exist.\nAborting texture generation");
+        WARN("File % does not exist.\nAborting texture generation", systemPath);
         return;
     }
     

@@ -10,10 +10,10 @@
 #include "Pch.h"
 #include "EngineState.h"
 
-#define LOG(message, severity)  (engine::logger->log(__FILE__, __LINE__, message, severity))
-#define MESSAGE(message)        (engine::logger->log(__FILE__, __LINE__, message, engine::Severity_Notification))
-#define WARN(message)           (engine::logger->log(__FILE__, __LINE__, message, engine::Severity_Warning))
-#define CRASH(message)          (engine::logger->log(__FILE__, __LINE__, message, engine::Severity_Fatal))
+#define LOG(message, severity)  (engine::logger->log(__FILE__, __LINE__, severity, message))
+#define MESSAGE(message, ...)   (engine::logger->log(__FILE__, __LINE__, engine::Severity_Notification,     message, __VA_ARGS__))
+#define WARN(message, ...)      (engine::logger->log(__FILE__, __LINE__, engine::Severity_Warning,          message, __VA_ARGS__))
+#define CRASH(message, ...)     (engine::logger->log(__FILE__, __LINE__, engine::Severity_Fatal,            message, __VA_ARGS__))
 
 #define LOG_MINOR(message)      LOG(message, engine::Severity_Minor)
 #define LOG_MAJOR(message)      LOG(message, engine::Severity_Major)

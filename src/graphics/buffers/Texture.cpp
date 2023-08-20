@@ -20,7 +20,7 @@ Texture::Texture(std::string_view path)
     std::filesystem::path systemPath(path);
     if (!std::filesystem::exists(systemPath))
     {
-        WARN("File " + systemPath.string() + " does not exist.\nAborting texture generation");
+        WARN("File % does not exist.\nAborting texture generation", systemPath);
         return;
     }
     
@@ -46,9 +46,7 @@ Texture::Texture(std::string_view path)
     
     if (colourChannels > 4)
     {
-        WARN(
-            "File " + systemPath.string() +
-            " does not contain the correct amount of channels. Cannot generate textures");
+        WARN("File % does not contain the correct amount of channels. Cannot generate textures", systemPath);
         
         stbi_image_free(bytes);
         glDeleteTextures(1, &mId);

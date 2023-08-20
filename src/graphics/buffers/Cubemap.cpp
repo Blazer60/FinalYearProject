@@ -23,7 +23,7 @@ Cubemap::Cubemap(const std::vector<std::string> &paths)
         std::filesystem::path systemPath(path);
         if (!std::filesystem::exists(systemPath))
         {
-            WARN("File " + systemPath.string() + " does not exist.\nNo cubemap will be generated.");
+            WARN("File % does not exist.\nNo cubemap will be generated.", systemPath);
             return;
         }
     }
@@ -61,9 +61,8 @@ Cubemap::Cubemap(const std::vector<std::string> &paths)
         }
         else if (width != initialWidth || initialHeight != height)
         {
-            WARN(
-                "File " + systemPath.string() +
-                " does not match the size of the first texture. Cubemaps textures must be all the same size.");
+            WARN("File % does not match the size of the first texture. Cubemaps textures must be all the same size.",
+                 systemPath);
             
             stbi_image_free(bytes);
             glDeleteTextures(1, &mId);
@@ -73,9 +72,7 @@ Cubemap::Cubemap(const std::vector<std::string> &paths)
         
         if (colourChannels > 4)
         {
-            WARN(
-                "File " + systemPath.string() +
-                " does not contain the correct amount of channels. Cannot generate textures" );
+            WARN("File % does not contain the correct amount of channels. Cannot generate textures", systemPath);
             
             stbi_image_free(bytes);
             glDeleteTextures(1, &mId);

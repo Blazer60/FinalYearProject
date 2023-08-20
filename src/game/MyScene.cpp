@@ -79,6 +79,8 @@ MyScene::MyScene() :
     teapotMaterial->roughness = 0.6f;
     teapotMaterial->metallic = 1.f;
     teapot->addComponent(std::make_unique<engine::MeshComponent>(teapotMesh, teapotMaterial));
+    
+    MESSAGE(glm::translate(glm::mat4(1.f), glm::vec3(10.f, 20.f, 30.f)));
 }
 
 void MyScene::onFixedUpdate()

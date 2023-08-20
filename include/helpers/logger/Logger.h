@@ -10,7 +10,9 @@
 #include <string_view>
 #include <unordered_map>
 #include <set>
+#include <filesystem>
 #include "glew.h"
+#include "gtc/matrix_access.hpp"
 
 namespace engine
 {
@@ -40,8 +42,19 @@ namespace engine
     class Logger
     {
     public:
-        void log(const char file[], int line, std::string_view message, Severity_ severity=Severity_Notification);
-        void log(const char file[], int line, const glm::vec3 &message, Severity_ severity=Severity_Notification);
+        void log(const char file[], int line, Severity_ severity, std::string_view message);
+        
+        template<glm::length_t L, typename T, glm::qualifier Q = glm::defaultp>
+        void log(const char file[], int line, Severity_ severity, const glm::vec<L, T, Q> &message);
+
+        template<typename T, glm::qualifier Q = glm::defaultp>
+        void log(const char file[], int line, Severity_ severity, const glm::qua<T, Q> &message);
+        
+        template<glm::length_t C, glm::length_t R, typename T, glm::qualifier Q = glm::defaultp>
+        void log(const char file[], int line, Severity_ severity, const glm::mat<C, R, T, Q> &message);
+        
+        template<typename ...TArgs>
+        void log(const char file[], int line, Severity_ severity, std::string_view format, const TArgs &... args);
         
         /** Call back to attach to opengl when in debug mode. */
         void openglCallBack(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam);
@@ -49,6 +62,25 @@ namespace engine
     protected:
         void logToConsole(std::string_view message) const;
         void logToFile(std::string_view message) const;
+        
+        template<typename T, typename ...TArgs>
+        std::string formatString(std::string_view format, const T &arg, const TArgs & ...args);
+        
+        template<typename T>
+        std::string formatValue(const T &value);
+        
+        template<glm::length_t L, typename T, glm::qualifier Q = glm::defaultp>
+        std::string formatValue(glm::vec<L, T, Q> vector);
+        
+        template<typename T, glm::qualifier Q = glm::defaultp>
+        std::string formatValue(glm::qua<T, Q> quaternion);
+        
+        template<glm::length_t C, glm::length_t R, typename T, glm::qualifier Q = glm::defaultp>
+        std::string formatValue(glm::mat<C, R, T, Q> matrix);
+        
+        template<>
+        std::string formatValue(const std::filesystem::path &value);
+        
         
     protected:
         Severity_ throwLevel { Severity_Major };
@@ -104,5 +136,96 @@ namespace engine
             return "Log message exceed the maximum throw level threshold. Check the logs for more information.";
         }
     };
+    
+    template<glm::length_t L, typename T, glm::qualifier Q>
+    void Logger::log(const char *file, int line, Severity_ severity, const glm::vec<L, T, Q> &message)
+    {
+        log(file, line, severity, formatValue(message));
+    }
+    
+    template<glm::length_t C, glm::length_t R, typename T, glm::qualifier Q>
+    void Logger::log(const char *file, int line, Severity_ severity, const glm::mat<C, R, T, Q> &message)
+    {
+        log(file, line, severity, formatValue(message));
+    }
+    
+    template<typename... TArgs>
+    void Logger::log(const char file[], int line, Severity_ severity, std::string_view format, const TArgs &... args)
+    {
+        log(file, line, severity, formatString(format, args...));
+    }
+    
+    template<typename T, glm::qualifier Q>
+    void Logger::log(const char *file, int line, Severity_ severity, const glm::qua<T, Q> &message)
+    {
+        log(file, line, severity, formatValue(message));
+    }
+    
+    template<typename T, typename... TArgs>
+    std::string Logger::formatString(std::string_view format, const T &arg, const TArgs &... args)
+    {
+        std::string output;
+        for (int i = 0; i < format.length(); ++i)
+        {
+            if (format[i] == '%')
+            {
+                output += formatValue(arg);
+                if constexpr (sizeof...(args) != 0)  // The last argument will be used if there are too many %.
+                    return output + formatString(std::string_view(format.data() + i + 1, format.size() - i), args...);
+            }
+            else
+                output += format[i];
+        }
+        
+        return output;
+    }
+    
+    template<typename T>
+    std::string Logger::formatValue(const T &value)
+    {
+        if constexpr (std::is_arithmetic_v<T>)
+            return std::to_string(value);
+        else
+            return std::string(value);
+    }
+    
+    template<glm::length_t L, typename T, glm::qualifier Q>
+    std::string Logger::formatValue(glm::vec<L, T, Q> vector)
+    {
+        std::string output = "(";
+        
+        for (glm::length_t i = 0; i < L - 1; ++i)
+            output += formatValue(vector[i]) + ", ";
+        
+        return output + formatValue(vector[L - 1]) + ")";
+    }
+    
+    template<typename T, glm::qualifier Q>
+    std::string Logger::formatValue(glm::qua<T, Q> quaternion)
+    {
+        std::string output = "(";
+        
+        for (int i = 0; i < 3; ++i)
+            output += formatValue(quaternion[i]) + ", ";
+        
+        return output + formatValue(quaternion[3]) + ") Euler" + formatValue(glm::eulerAngles(quaternion));
+    }
+    
+    template<glm::length_t C, glm::length_t R, typename T, glm::qualifier Q>
+    std::string Logger::formatValue(glm::mat<C, R, T, Q> matrix)
+    {
+        std::string output = "\n";
+        
+        for (int i = 0; i < C; ++i)
+            output += formatValue(glm::row(matrix, i)) + "\n";
+        
+        return output;
+    }
+    
+    template<>
+    std::string Logger::formatValue(const std::filesystem::path &value)
+    {
+        return value.string();
+    }
 }
 

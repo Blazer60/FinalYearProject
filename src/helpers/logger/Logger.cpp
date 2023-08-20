@@ -13,27 +13,12 @@ namespace engine
 {
     Logger *logger;
     
-    void Logger::log(const char *file, const int line, std::string_view message, Severity_ severity)
+    void Logger::log(const char file[], int line, Severity_ severity, std::string_view message)
     {
         std::stringstream ss;
         ss << "[" << severityStringMap.at(severity) << "] ";
         ss << "(" << file << " at line " << line << ")\n";
         ss << message << "\n";
-        
-        const std::string output = ss.str();
-        logToConsole(output);
-        logToFile(output);
-        
-        if (severity >= throwLevel)
-            throw LogException();
-    }
-    
-    void Logger::log(const char *file, int line, const glm::vec3 &message, Severity_ severity)
-    {
-        std::stringstream ss;
-        ss << "[" << severityStringMap.at(severity) << "] ";
-        ss << "(" << file << " at line " << line << ")\n";
-        ss << "(" << message.x << ", " << message.y << ", " << message.z << ")\n";
         
         const std::string output = ss.str();
         logToConsole(output);
@@ -81,5 +66,4 @@ namespace engine
         if (level >= throwLevel)
             throw LogException();
     }
-    
 }
