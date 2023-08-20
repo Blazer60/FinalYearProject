@@ -23,6 +23,7 @@ namespace engine
         mMouseWheel = io.MouseWheel;
         
         ui::draw(mViewport);
+        ui::draw(mLogWindow);
         drawSceneHierarchyPanel();
         drawActorDetails();
     }

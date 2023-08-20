@@ -12,6 +12,7 @@
 #include "Viewport.h"
 #include "Actor.h"
 #include "Callback.h"
+#include "LogWindow.h"
 
 namespace engine
 {
@@ -38,6 +39,7 @@ namespace engine
     
     protected:
         Viewport mViewport;
+        LogWindow mLogWindow;
         Actor *mSelectedActor { nullptr };
         float mMouseWheel { 0.f };
     };

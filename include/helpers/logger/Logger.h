@@ -35,6 +35,14 @@ namespace engine
         OutputSourceFlag_Queue      = 0b100,
     };
     
+    struct Message
+    {
+        int         line;
+        Severity_   severity;
+        std::string file;
+        std::string message;
+    };
+    
     /**
      * @author Ryan Purse
      * @date 06/08/2023
@@ -92,9 +100,14 @@ namespace engine
         /** Call back to attach to opengl when in debug mode. */
         void openglCallBack(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam);
         
+        [[nodiscard]] const std::vector<Message> &getLogs() const;
+        
+        std::string_view toStringView(Severity_ severity) const;
+        
     protected:
         void logToConsole(std::string_view message) const;
         void logToFile(std::string_view message) const;
+        void logToQueue(std::string_view message, const char file[], int line, Severity_ severity);
         
         template<typename T, typename ...TArgs>
         std::string formatString(std::string_view format, const T &arg, const TArgs & ...args);
@@ -117,8 +130,9 @@ namespace engine
         
     protected:
         Severity_ throwLevel { Severity_Major };
-        int sources { OutputSourceFlag_File | OutputSourceFlag_IoStream };
+        int sources { OutputSourceFlag_File | OutputSourceFlag_IoStream | OutputSourceFlag_Queue };
         std::string_view fileName = "log.txt";
+        std::vector<Message> messages;
         
         std::set<uint64_t> blackList { 131185, 131218 };
         

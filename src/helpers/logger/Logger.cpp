@@ -23,6 +23,7 @@ namespace engine
         const std::string output = ss.str();
         logToConsole(output);
         logToFile(output);
+        logToQueue(message, file, line, severity);
         
         if (severity >= throwLevel)
             throw LogException();
@@ -42,6 +43,12 @@ namespace engine
         std::ofstream file(fileName.data(), std::ios_base::app);
         file << message;
         file.close();
+    }
+    
+    void Logger::logToQueue(std::string_view message, const char *file, int line, Severity_ severity)
+    {
+        if ((sources & OutputSourceFlag_Queue))
+            messages.emplace_back(Message { line, severity, std::string(file), std::string(message) });
     }
     
     void Logger::openglCallBack(
@@ -66,4 +73,15 @@ namespace engine
         if (level >= throwLevel)
             throw LogException();
     }
+    
+    const std::vector<Message> &Logger::getLogs() const
+    {
+        return messages;
+    }
+    
+    std::string_view Logger::toStringView(Severity_ severity) const
+    {
+        return severityStringMap.at(severity);
+    }
+    
 }

@@ -84,6 +84,8 @@ add_executable(${PROJECT_NAME}
         include/engine/ui/editor/Editor.h
         src/helpers/EngineMath.cpp include/helpers/EngineMath.h
         include/helpers/Callback.h
+        src/engine/ui/editor/LogWindow.cpp
+        include/engine/ui/editor/LogWindow.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
