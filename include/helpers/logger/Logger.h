@@ -42,19 +42,52 @@ namespace engine
     class Logger
     {
     public:
+        /**
+         * @brief Logs a message. Use the macro MESSAGE(X, ...), WARN(X, ...) or CRASH(X, ...) to fill in most of the
+         * details.
+         * @see LoggerMacros.h
+         */
         void log(const char file[], int line, Severity_ severity, std::string_view message);
         
+        /**
+         * @brief Logs a vector. Use the macro MESSAGE(X, ...), WARN(X, ...) or CRASH(X, ...) to fill in most of the
+         * details.
+         * @see LoggerMacros.h
+         */
         template<glm::length_t L, typename T, glm::qualifier Q = glm::defaultp>
         void log(const char file[], int line, Severity_ severity, const glm::vec<L, T, Q> &message);
-
+        
+        /**
+         * @brief Logs a quaternion. Use the macro MESSAGE(X, ...), WARN(X, ...) or CRASH(X, ...) to fill in most of the
+         * details.
+         * @see LoggerMacros.h
+         */
         template<typename T, glm::qualifier Q = glm::defaultp>
         void log(const char file[], int line, Severity_ severity, const glm::qua<T, Q> &message);
         
+        /**
+         * @brief Logs a matrix. Use the macro MESSAGE(X, ...), WARN(X, ...) or CRASH(X, ...) to fill in most of the
+         * details.
+         * @see LoggerMacros.h
+         */
         template<glm::length_t C, glm::length_t R, typename T, glm::qualifier Q = glm::defaultp>
         void log(const char file[], int line, Severity_ severity, const glm::mat<C, R, T, Q> &message);
         
+        /**
+         * @brief Logs a formatted message. % are replaced with args... in the order they appear.
+         * Use the macro MESSAGE(X, ...), WARN(X, ...) or CRASH(X, ...) to fill in most of the details.
+         * @see LoggerMacros.h
+         */
         template<typename ...TArgs>
         void log(const char file[], int line, Severity_ severity, std::string_view format, const TArgs &... args);
+        
+        /**
+         * @brief Logs a container that supports iterators.
+         * Use the macro MESSAGE(X, ...), WARN(X, ...) or CRASH(X, ...) to fill in most of the details.
+         * @see LoggerMacros.h
+         */
+        template<typename TIterator>
+        void log(const char file[], int line, Severity_ severity, const TIterator &start, const TIterator &end);
         
         /** Call back to attach to opengl when in debug mode. */
         void openglCallBack(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam);
@@ -159,6 +192,28 @@ namespace engine
     void Logger::log(const char *file, int line, Severity_ severity, const glm::qua<T, Q> &message)
     {
         log(file, line, severity, formatValue(message));
+    }
+    
+    template<typename TIterator>
+    void Logger::log(const char *file, int line, Severity_ severity, const TIterator &start, const TIterator &end)
+    {
+        std::_Adl_verify_range(start, end);
+        
+        std::string output = "[";
+        TIterator element = start;
+        while (true)
+        {
+            output += formatString("%", *element);
+            ++element;
+            if (element != end)
+                output += ", ";
+            else
+                break;
+        }
+        
+        output += "]";
+        
+        log(file, line, severity, output);
     }
     
     template<typename T, typename... TArgs>
