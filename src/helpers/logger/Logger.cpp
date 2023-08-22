@@ -9,9 +9,28 @@
 #include <fstream>
 #include "Logger.h"
 
+#include <assimp/Logger.hpp>
+#include <assimp/LogStream.hpp>
+#include <assimp/DefaultLogger.hpp>
+
 namespace engine
 {
     Logger *logger;
+    
+    Logger::Logger()
+    {
+        Assimp::DefaultLogger::create("", Assimp::Logger::VERBOSE);
+        
+        // Streams are handled by the Default Logger's destructor.
+        Assimp::DefaultLogger::get()->attachStream(new StreamOutput(Severity_Notification), Assimp::Logger::Info | Assimp::Logger::Debugging);
+        Assimp::DefaultLogger::get()->attachStream(new StreamOutput(Severity_Warning), Assimp::Logger::Warn);
+        Assimp::DefaultLogger::get()->attachStream(new StreamOutput(Severity_Major), Assimp::Logger::Err);
+    }
+    
+    Logger::~Logger()
+    {
+        Assimp::DefaultLogger::kill();
+    }
     
     void Logger::log(const char file[], int line, Severity severity, std::string_view message)
     {
@@ -92,5 +111,31 @@ namespace engine
     void Logger::setOutputFlag(OutputSourceFlag flag)
     {
         sources = flag;
+    }
+    
+    
+    StreamOutput::StreamOutput(Severity severity)
+        : mSeverity(severity)
+    {
+    
+    }
+    
+    void StreamOutput::write(const char *message)
+    {
+        switch (mSeverity)
+        {
+            default:
+            case Severity_Notification:
+            case Severity_Unknown:
+                MESSAGE("%", message);
+                break;
+            case Severity_Warning:
+            case Severity_Minor:
+            case Severity_Major:
+                WARN("%", message);
+                break;
+            case Severity_Fatal:
+                CRASH("%", message);
+        }
     }
 }

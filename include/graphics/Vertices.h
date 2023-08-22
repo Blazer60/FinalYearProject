@@ -22,6 +22,18 @@ struct ObjVertex
 };
 
 /**
+ * @brief Loaded objects have these values set. Define a conversion constructor to transition
+ * from this type.
+ */
+struct AssimpVertex
+{
+    glm::vec3 position;
+    glm::vec2 uv;
+    glm::vec3 normal;
+    glm::vec3 tangent;
+};
+
+/**
  * @brief An instruction that defines how a single element should be setup with the vao.
  */
 struct Instruction
@@ -67,6 +79,12 @@ struct StandardVertex
 {
     constexpr explicit StandardVertex(const ObjVertex &objVertex)
         : position(objVertex.position), uv(objVertex.uv), normal(objVertex.normal), tangent(objVertex.tangent)
+    {
+    
+    }
+    
+    constexpr explicit StandardVertex(const AssimpVertex &v)
+        : position(v.position), uv(v.uv), normal(v.normal), tangent(v.tangent)
     {
     
     }

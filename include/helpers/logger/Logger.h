@@ -13,6 +13,7 @@
 #include <filesystem>
 #include "glew.h"
 #include "gtc/matrix_access.hpp"
+#include "assimp/LogStream.hpp"
 
 namespace engine
 {
@@ -43,15 +44,27 @@ namespace engine
     
     inline OutputSourceFlag operator&(OutputSourceFlag a, OutputSourceFlag b)
     {
-        return static_cast<OutputSourceFlag>(static_cast<int>(a) | static_cast<int>(b));
+        return static_cast<OutputSourceFlag>(static_cast<int>(a) & static_cast<int>(b));
     }
     
     struct Message
     {
         int         line;
-        Severity   severity;
+        Severity    severity;
         std::string file;
         std::string message;
+    };
+    
+    class StreamOutput
+        : public Assimp::LogStream
+    {
+    public:
+        explicit StreamOutput(Severity severity);
+        
+        void write(const char *message) override;
+    
+    protected:
+        Severity mSeverity;
     };
     
     /**
@@ -61,6 +74,9 @@ namespace engine
     class Logger
     {
     public:
+        Logger();
+        ~Logger();
+        
         /**
          * @brief Logs a message. Use the macro MESSAGE(X, ...), WARN(X, ...) or CRASH(X, ...) to fill in most of the
          * details.

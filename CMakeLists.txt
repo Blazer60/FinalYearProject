@@ -12,17 +12,18 @@ set(RESOURCE_PATH   "resources/")
 set(SHADER_PATH     "resources/shaders")
 set(TEXTURE_PATH    "resources/textures")
 
-set(USE_PRE_BUILT_LIBS ON)
+set(USE_PRE_BUILT_LIBS OFF)
 set(USE_PSEUDO_PCH OFF)
 
 message(STATUS "Using Cmake:    " ${CMAKE_VERSION})
 message(STATUS "Compiling with: " ${CMAKE_CXX_COMPILER_ID})
 message(STATUS "CXX Standard:   " ${CMAKE_CXX_STANDARD})
 
-#add_subdirectory(vendor/glm)
-#add_subdirectory(vendor/glew/build/cmake)
-#add_subdirectory(vendor/glfw)
-#add_subdirectory(vendor)
+add_subdirectory(vendor/glm)
+add_subdirectory(vendor/glew/build/cmake)
+add_subdirectory(vendor/glfw)
+add_subdirectory(vendor)
+add_subdirectory(vendor/assimp)
 
 add_executable(${PROJECT_NAME}
         vendor/imguizmo/ImGuizmo.cpp vendor/imguizmo/ImGuizmo.h
@@ -86,6 +87,8 @@ add_executable(${PROJECT_NAME}
         include/helpers/Callback.h
         src/engine/ui/editor/LogWindow.cpp
         include/engine/ui/editor/LogWindow.h
+        src/engine/loader/AssimpLoader.cpp
+        include/engine/loader/AssimpLoader.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -97,6 +100,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
         vendor/glm/glm vendor/glew/include/GL
         vendor/glfw/include/GLFW vendor/imgui
         vendor/stb/include vendor/imguizmo
+        vendor/assimp/include ${CMAKE_CURRENT_BINARY_DIR}/vendor/assimp/include  # A config file is generated that is required by assimp code.
         )
 
 if (${USE_PSEUDO_PCH})
@@ -123,21 +127,23 @@ add_compile_definitions(
 
 find_package(OpenGL)  # Glew Requires OpenGL to be added.
 
-if (NOT ${ADD_ECS_TO_EXECUTABLE})
-    find_library(ECS NAMES EntityComponentSystem2022 PATHS ${CMAKE_CURRENT_BINARY_DIR}/entity-component-system REQUIRED)
-    target_link_libraries(${ECS})
+message(STATUS "Using pre-built libraries: " ${USE_PRE_BUILT_LIBS})
+if (${USE_PRE_BUILT_LIBS})
+    find_library(GLEW   NAMES libglew32d            PATHS ${CMAKE_SOURCE_DIR}/vendor/lib                REQUIRED)
+    find_library(GLFW   NAMES glfw3d glfw3          PATHS ${CMAKE_SOURCE_DIR}/vendor/lib                REQUIRED)
+    find_library(IMGUI  NAMES imgui                 PATHS ${CMAKE_SOURCE_DIR}/vendor/lib                REQUIRED)
+    find_library(ASSIMP NAMES assimp-vc142-mtd      PATHS ${CMAKE_SOURCE_DIR}/vendor/lib                REQUIRED)
+    find_library(ZLIB   NAMES zlibstaticd           PATHS ${CMAKE_SOURCE_DIR}/vendor/lib                REQUIRED)
+
+    message(STATUS "  GLEW location: " ${GLEW})
+    message(STATUS "  GLFW location: " ${GLFW})
+    message(STATUS " Imgui location: " ${IMGUI})
+    message(STATUS "ASSIMP location: " ${ASSIMP})
+    message(STATUS "  zLib location: " ${ZLIB})
+
+    target_link_libraries(${PROJECT_NAME} ${GLEW} ${GLFW} ${IMGUI} OpenGL::GL ${ASSIMP} ${ZLIB})
+else ()
+    # The names listed are the names given to add_library(). CMake won't tell you if they're correct...
+    target_link_libraries(${PROJECT_NAME} glew_s glfw imgui OpenGL::GL assimp)
 endif ()
 
-if (${USE_PRE_BUILT_LIBS} EQUAL OFF)
-    find_library(GLEW  NAMES libglew32d PATHS ${CMAKE_CURRENT_BINARY_DIR}/lib             REQUIRED)
-    find_library(GLFW  NAMES glfw3      PATHS ${CMAKE_CURRENT_BINARY_DIR}/vendor/glfw/src REQUIRED)
-    find_library(IMGUI NAMES imgui      PATHS ${CMAKE_CURRENT_BINARY_DIR}/vendor          REQUIRED)
-else()
-    find_library(GLEW  NAMES libglew32d PATHS ${CMAKE_SOURCE_DIR}/vendor/lib REQUIRED)
-    find_library(GLFW  NAMES glfw3      PATHS ${CMAKE_SOURCE_DIR}/vendor/lib REQUIRED)
-    find_library(IMGUI NAMES imgui      PATHS ${CMAKE_SOURCE_DIR}/vendor/lib REQUIRED)
-endif ()
-
-target_link_libraries(${PROJECT_NAME}
-        ${GLEW} ${GLFW} ${IMGUI} OpenGL::GL
-        )

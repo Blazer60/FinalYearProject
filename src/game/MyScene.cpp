@@ -16,6 +16,7 @@
 #include "BloomPass.h"
 #include "Drawable.h"
 #include "MeshComponent.h"
+#include "AssimpLoader.h"
 
 MyScene::MyScene() :
     mStandardShader(std::make_shared<Shader>(

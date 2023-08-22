@@ -26,12 +26,12 @@ namespace load
     std::pair<RawMeshes<TVertex>, Materials<TMaterial>> parseObject(std::string_view path);
 
     /**
-     * @brief Loads a model with the correct Vertex type and material Type specified.
+     * @brief Loads a ObjModel with the correct Vertex type and material Type specified.
      * @tparam TVertex - The type of vertex that you want to use.
      * @tparam TMaterial - The type of material that you want to use.
      * @param path - The path to the modelAndMaterial.
      * @param shader - The shader that you want to attach to each material.
-     * @returns Information that can be used to render the model and a material.
+     * @returns Information that can be used to render the ObjModel and a material.
      */
     template<typename TVertex, typename TMaterial=Material>
     Model<TMaterial> modelAndMaterial(std::string_view path, const std::shared_ptr<Shader> &shader= nullptr)
@@ -54,13 +54,13 @@ namespace load
     }
     
     /**
-     * @brief Loads a model without any materials.
-     * @tparam TVertex - The type of vertex used when loading the model.
-     * @param path - The path to the model.
+     * @brief Loads a ObjModel without any materials.
+     * @tparam TVertex - The type of vertex used when loading the ObjModel.
+     * @param path - The path to the ObjModel.
      * @returns - A shared mesh that can be used by the renderer.
      */
     template<typename TVertex>
-    SharedMesh model(std::string_view path)
+    SharedMesh ObjModel(std::string_view path)
     {
         const auto [meshes, materials] = parseObject<TVertex, Material>(path);
         std::vector<std::shared_ptr<SubMesh>> mesh;
