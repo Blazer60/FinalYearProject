@@ -13,7 +13,7 @@ namespace engine
 {
     Logger *logger;
     
-    void Logger::log(const char file[], int line, Severity_ severity, std::string_view message)
+    void Logger::log(const char file[], int line, Severity severity, std::string_view message)
     {
         std::stringstream ss;
         ss << "[" << severityStringMap.at(severity) << "] ";
@@ -45,7 +45,7 @@ namespace engine
         file.close();
     }
     
-    void Logger::logToQueue(std::string_view message, const char *file, int line, Severity_ severity)
+    void Logger::logToQueue(std::string_view message, const char file[], int line, Severity severity)
     {
         if ((sources & OutputSourceFlag_Queue))
             messages.emplace_back(Message { line, severity, std::string(file), std::string(message) });
@@ -58,7 +58,7 @@ namespace engine
         if (blackList.find(id) != blackList.end())
             return;  // Ignore black listed elements.
         
-        Severity_ level = glSeverityCastMap.at(severity);
+        Severity level = glSeverityCastMap.at(severity);
         
         std::stringstream ss;
         ss << "[OpenGL | " << severityStringMap.at(level) << "]\n";
@@ -79,9 +79,18 @@ namespace engine
         return messages;
     }
     
-    std::string_view Logger::toStringView(Severity_ severity) const
+    std::string_view Logger::toStringView(Severity severity) const
     {
         return severityStringMap.at(severity);
     }
     
+    void Logger::clearQueue()
+    {
+        messages.clear();
+    }
+    
+    void Logger::setOutputFlag(OutputSourceFlag flag)
+    {
+        sources = flag;
+    }
 }

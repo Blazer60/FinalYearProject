@@ -12,7 +12,6 @@
 
 namespace engine
 {
-
 /**
  * @author Ryan Purse
  * @date 20/08/2023
@@ -23,10 +22,10 @@ namespace engine
     protected:
         void onDrawUi() override;
         void drawMessageUi(const Message &message);
-        const ImVec4 &getSeverityColour(Severity_ severity);
+        const ImVec4 &getSeverityColour(Severity severity);
         
     protected:
-        bool mWrapText { true };
+        bool mWrapText          { true };
         bool mShowNotifications { true };
         bool mShowWarnings      { true };
         bool mShowErrors        { true };

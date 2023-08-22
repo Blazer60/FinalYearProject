@@ -15,4 +15,5 @@ namespace ui
 {
     void showTextureBuffer(const std::string &name, const TextureBufferObject &texture, bool *show, bool isMainBuffer=false);
     void showTextureBuffer(const std::string &name, const TextureBufferObject &texture, bool *show, const glm::ivec2 &size, bool fitToRegion=true);
+    void drawToolTip(std::string_view message, float tooltipWidth=20.f);
 }

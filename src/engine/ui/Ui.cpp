@@ -90,4 +90,15 @@ namespace ui
         ImGui::PopStyleVar();
         ImGui::PopID();
     }
+    
+    void drawToolTip(std::string_view message, float tooltipWidth)
+    {
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal) && ImGui::BeginTooltip())
+        {
+            ImGui::PushTextWrapPos(ImGui::GetFontSize() * tooltipWidth);
+            ImGui::Text("%s", message.data());
+            ImGui::PopTextWrapPos();
+            ImGui::EndTooltip();
+        }
+    }
 }

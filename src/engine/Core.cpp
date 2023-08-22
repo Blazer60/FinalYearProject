@@ -23,6 +23,7 @@ engine::Core::Core(const glm::ivec2 &resolution, bool enableDebugging)
 {
     mLogger = std::make_unique<Logger>();
     logger = mLogger.get();
+    mLogger->setOutputFlag(OutputSourceFlag_File | OutputSourceFlag_Queue);
     core = this;
     editor = &mEditor;
     mEditor.init();

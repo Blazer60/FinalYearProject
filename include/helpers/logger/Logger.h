@@ -18,14 +18,15 @@ namespace engine
 {
     extern class Logger *logger;
     
+    typedef int Severity;
     enum Severity_
     {
-        Severity_Notification,
-        Severity_Warning,
-        Severity_Minor,
-        Severity_Major,
-        Severity_Fatal,
-        Severity_Unknown,
+        Severity_Unknown        = 0b000001,
+        Severity_Notification   = 0b000010,
+        Severity_Warning        = 0b000100,
+        Severity_Minor          = 0b001000,
+        Severity_Major          = 0b010000,
+        Severity_Fatal          = 0b100000,
     };
     
     enum OutputSourceFlag_
@@ -34,11 +35,21 @@ namespace engine
         OutputSourceFlag_IoStream   = 0b010,
         OutputSourceFlag_Queue      = 0b100,
     };
+    typedef OutputSourceFlag_ OutputSourceFlag;
+    inline OutputSourceFlag operator|(OutputSourceFlag a, OutputSourceFlag b)
+    {
+        return static_cast<OutputSourceFlag>(static_cast<int>(a) | static_cast<int>(b));
+    }
+    
+    inline OutputSourceFlag operator&(OutputSourceFlag a, OutputSourceFlag b)
+    {
+        return static_cast<OutputSourceFlag>(static_cast<int>(a) | static_cast<int>(b));
+    }
     
     struct Message
     {
         int         line;
-        Severity_   severity;
+        Severity   severity;
         std::string file;
         std::string message;
     };
@@ -55,7 +66,7 @@ namespace engine
          * details.
          * @see LoggerMacros.h
          */
-        void log(const char file[], int line, Severity_ severity, std::string_view message);
+        void log(const char file[], int line, Severity severity, std::string_view message);
         
         /**
          * @brief Logs a vector. Use the macro MESSAGE(X, ...), WARN(X, ...) or CRASH(X, ...) to fill in most of the
@@ -63,7 +74,7 @@ namespace engine
          * @see LoggerMacros.h
          */
         template<glm::length_t L, typename T, glm::qualifier Q = glm::defaultp>
-        void log(const char file[], int line, Severity_ severity, const glm::vec<L, T, Q> &message);
+        void log(const char file[], int line, Severity severity, const glm::vec<L, T, Q> &message);
         
         /**
          * @brief Logs a quaternion. Use the macro MESSAGE(X, ...), WARN(X, ...) or CRASH(X, ...) to fill in most of the
@@ -71,7 +82,7 @@ namespace engine
          * @see LoggerMacros.h
          */
         template<typename T, glm::qualifier Q = glm::defaultp>
-        void log(const char file[], int line, Severity_ severity, const glm::qua<T, Q> &message);
+        void log(const char file[], int line, Severity severity, const glm::qua<T, Q> &message);
         
         /**
          * @brief Logs a matrix. Use the macro MESSAGE(X, ...), WARN(X, ...) or CRASH(X, ...) to fill in most of the
@@ -79,7 +90,7 @@ namespace engine
          * @see LoggerMacros.h
          */
         template<glm::length_t C, glm::length_t R, typename T, glm::qualifier Q = glm::defaultp>
-        void log(const char file[], int line, Severity_ severity, const glm::mat<C, R, T, Q> &message);
+        void log(const char file[], int line, Severity severity, const glm::mat<C, R, T, Q> &message);
         
         /**
          * @brief Logs a formatted message. % are replaced with args... in the order they appear.
@@ -87,7 +98,7 @@ namespace engine
          * @see LoggerMacros.h
          */
         template<typename ...TArgs>
-        void log(const char file[], int line, Severity_ severity, std::string_view format, const TArgs &... args);
+        void log(const char file[], int line, Severity severity, std::string_view format, const TArgs &... args);
         
         /**
          * @brief Logs a container that supports iterators.
@@ -95,19 +106,23 @@ namespace engine
          * @see LoggerMacros.h
          */
         template<typename TIterator>
-        void log(const char file[], int line, Severity_ severity, const TIterator &start, const TIterator &end);
+        void log(const char file[], int line, Severity severity, const TIterator &start, const TIterator &end);
         
         /** Call back to attach to opengl when in debug mode. */
         void openglCallBack(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam);
         
         [[nodiscard]] const std::vector<Message> &getLogs() const;
         
-        std::string_view toStringView(Severity_ severity) const;
+        [[nodiscard]] std::string_view toStringView(Severity severity) const;
+        
+        void clearQueue();
+        
+        void setOutputFlag(OutputSourceFlag flag);
         
     protected:
         void logToConsole(std::string_view message) const;
         void logToFile(std::string_view message) const;
-        void logToQueue(std::string_view message, const char file[], int line, Severity_ severity);
+        void logToQueue(std::string_view message, const char file[], int line, Severity severity);
         
         template<typename T, typename ...TArgs>
         std::string formatString(std::string_view format, const T &arg, const TArgs & ...args);
@@ -129,14 +144,14 @@ namespace engine
         
         
     protected:
-        Severity_ throwLevel { Severity_Major };
-        int sources { OutputSourceFlag_File | OutputSourceFlag_IoStream | OutputSourceFlag_Queue };
+        Severity throwLevel { Severity_Major };
+        OutputSourceFlag sources { OutputSourceFlag_File | OutputSourceFlag_IoStream | OutputSourceFlag_Queue };
         std::string_view fileName = "log.txt";
         std::vector<Message> messages;
         
         std::set<uint64_t> blackList { 131185, 131218 };
         
-        const std::unordered_map<Severity_, std::string_view> severityStringMap {
+        const std::unordered_map<Severity, std::string_view> severityStringMap {
             { Severity_Notification,   "Notification" },
             { Severity_Warning,        "Warning" },
             { Severity_Minor,          "Minor" },
@@ -166,7 +181,7 @@ namespace engine
         };
         
         // GL notification is not aligned with the others.
-        const std::unordered_map<GLenum, Severity_> glSeverityCastMap {
+        const std::unordered_map<GLenum, Severity> glSeverityCastMap {
             { GL_DEBUG_SEVERITY_NOTIFICATION,   Severity_Notification },
             { GL_DEBUG_SEVERITY_LOW,            Severity_Minor },
             { GL_DEBUG_SEVERITY_MEDIUM,         Severity_Major },
@@ -185,31 +200,31 @@ namespace engine
     };
     
     template<glm::length_t L, typename T, glm::qualifier Q>
-    void Logger::log(const char *file, int line, Severity_ severity, const glm::vec<L, T, Q> &message)
+    void Logger::log(const char *file, int line, Severity severity, const glm::vec<L, T, Q> &message)
     {
         log(file, line, severity, formatValue(message));
     }
     
     template<glm::length_t C, glm::length_t R, typename T, glm::qualifier Q>
-    void Logger::log(const char *file, int line, Severity_ severity, const glm::mat<C, R, T, Q> &message)
+    void Logger::log(const char *file, int line, Severity severity, const glm::mat<C, R, T, Q> &message)
     {
         log(file, line, severity, formatValue(message));
     }
     
     template<typename... TArgs>
-    void Logger::log(const char file[], int line, Severity_ severity, std::string_view format, const TArgs &... args)
+    void Logger::log(const char file[], int line, Severity severity, std::string_view format, const TArgs &... args)
     {
         log(file, line, severity, formatString(format, args...));
     }
     
     template<typename T, glm::qualifier Q>
-    void Logger::log(const char *file, int line, Severity_ severity, const glm::qua<T, Q> &message)
+    void Logger::log(const char *file, int line, Severity severity, const glm::qua<T, Q> &message)
     {
         log(file, line, severity, formatValue(message));
     }
     
     template<typename TIterator>
-    void Logger::log(const char *file, int line, Severity_ severity, const TIterator &start, const TIterator &end)
+    void Logger::log(const char *file, int line, Severity severity, const TIterator &start, const TIterator &end)
     {
         std::_Adl_verify_range(start, end);
         

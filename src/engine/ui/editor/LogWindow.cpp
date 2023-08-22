@@ -6,6 +6,7 @@
 
 
 #include "LogWindow.h"
+#include "Ui.h"
 
 namespace engine
 {
@@ -14,6 +15,10 @@ namespace engine
         ImGui::PushID("Logging");
         ImGui::Begin("Log Window");
         
+        if (ImGui::Button("Clear"))
+            engine::logger->clearQueue();
+        ui::drawToolTip("Clears the log queue but does not clear the IO log.");
+        ImGui::SameLine();
         ImGui::Checkbox("Wrap Text", &mWrapText);
         ImGui::SameLine();
         ImGui::Checkbox("Show Notifications", &mShowNotifications);
@@ -23,6 +28,7 @@ namespace engine
         ImGui::Checkbox("Show Errors", &mShowErrors);
         ImGui::SameLine();
         ImGui::Checkbox("Collapse", &mCollapse);
+        ui::drawToolTip("Messages from the same source are collapsed into one message. If ticked, only the most recent message is shown.");
         
         mUniqueMessages.clear();
         
@@ -71,7 +77,7 @@ namespace engine
         }
     }
     
-    const ImVec4 &LogWindow::getSeverityColour(const Severity_ severity)
+    const ImVec4 &LogWindow::getSeverityColour(const Severity severity)
     {
         switch (severity)
         {
