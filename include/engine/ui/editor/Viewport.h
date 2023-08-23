@@ -26,13 +26,13 @@ namespace engine
         ~Viewport() override;
         
         [[nodiscard]] glm::vec2 getSize() const;
-        [[nodiscard]] bool isFocused() const;
+        [[nodiscard]] bool isHovered() const;
         
     protected:
         void onDrawUi() override;
         
         glm::vec2 mSize;
-        bool mIsFocused { false };
+        bool mIsHovered { false };
         bool mIsMouseDown { false };
         glm::dvec2 mLastMousePosition { 0.0, 0.0 };
         ImGuizmo::OPERATION mOperation { ImGuizmo::OPERATION::TRANSLATE };

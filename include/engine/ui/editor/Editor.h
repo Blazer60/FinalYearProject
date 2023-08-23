@@ -30,8 +30,8 @@ namespace engine
         void init();
         void update();
         [[nodiscard]] Actor *getSelectedActor();
-        bool isViewportFocused();
-        [[nodiscard]] float getMouseWheel();
+        bool isViewportHovered();
+        [[nodiscard]] float getMouseWheel() const;
     protected:
         void onDrawUi() override;
         void drawSceneHierarchyPanel();

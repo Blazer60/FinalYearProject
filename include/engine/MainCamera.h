@@ -76,6 +76,7 @@ protected:
     bool mEnableThirdPerson { false };
     bool mEnableThirdPersonRotate { false };
     bool mIsRightMousePressed { false };
+    bool mIsLeftMousePressed { false };
     
     float mRotationSpeed { 0.1f };
     float mCameraBoomDistance { 30.f };

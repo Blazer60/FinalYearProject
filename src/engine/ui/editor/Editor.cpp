@@ -80,6 +80,11 @@ namespace engine
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Right))
             onMouseClicked.broadcast(ImGuiMouseButton_Right, false);
         
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+            onMouseClicked.broadcast(ImGuiMouseButton_Left, true);
+        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+            onMouseClicked.broadcast(ImGuiMouseButton_Left, false);
+        
         for (ImGuiKey key = (ImGuiKey)0; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1))
         {
             if (ImGui::IsKeyPressed(key))
@@ -89,12 +94,12 @@ namespace engine
         }
     }
     
-    bool Editor::isViewportFocused()
+    bool Editor::isViewportHovered()
     {
-        return mViewport.isFocused();
+        return mViewport.isHovered();
     }
     
-    float Editor::getMouseWheel()
+    float Editor::getMouseWheel() const
     {
         return mMouseWheel;
     }

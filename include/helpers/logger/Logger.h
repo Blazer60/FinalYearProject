@@ -158,6 +158,9 @@ namespace engine
         template<>
         std::string formatValue(const std::filesystem::path &value);
         
+        template<>
+        std::string formatValue(const bool &value);  // const& to match the other overrides.
+        
         
     protected:
         Severity throwLevel { Severity_Major };
@@ -326,6 +329,12 @@ namespace engine
     std::string Logger::formatValue(const std::filesystem::path &value)
     {
         return value.string();
+    }
+    
+    template<>
+    std::string Logger::formatValue(const bool &value)
+    {
+        return value ? "true" : "false";
     }
 }
 

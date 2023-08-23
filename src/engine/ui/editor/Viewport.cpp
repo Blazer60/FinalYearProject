@@ -21,7 +21,7 @@ namespace engine
     void Viewport::init()
     {
         mKeyboardEventToken = editor->onKeyPressed.subscribe([this](const ImGuiKey &key, bool isClicked) {
-            if (!mIsFocused)
+            if (!mIsHovered)
                 return;
             
             if (mIsMouseDown)
@@ -50,9 +50,9 @@ namespace engine
             if (button != ImGuiMouseButton_Right)
                 return;
             
-            mIsMouseDown = isClicked && mIsFocused;
+            mIsMouseDown = isClicked && mIsHovered;
             
-            if (!isClicked && mIsFocused)
+            if (!isClicked && mIsHovered)
                 glfwSetCursorPos(glfwGetCurrentContext(), mLastMousePosition.x, mLastMousePosition.y);
             
             glfwGetCursorPos(glfwGetCurrentContext(), &mLastMousePosition.x, &mLastMousePosition.y);
@@ -95,10 +95,7 @@ namespace engine
         if (ImGui::RadioButton("Scale", mOperation == ImGuizmo::OPERATION::SCALE))
             mOperation = ImGuizmo::OPERATION::SCALE;
         
-        if (ImGui::IsWindowHovered())
-            ImGui::SetWindowFocus("Window");
-        
-        mIsFocused = ImGui::IsWindowFocused();
+        mIsHovered = ImGui::IsWindowHovered();
         
         Actor *selectedActor = editor->getSelectedActor();
         if (selectedActor)
@@ -127,9 +124,9 @@ namespace engine
         ImGui::PopID();
     }
     
-    bool Viewport::isFocused() const
+    bool Viewport::isHovered() const
     {
-        return mIsFocused;
+        return mIsHovered;
     }
     
     

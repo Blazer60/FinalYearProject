@@ -43,6 +43,8 @@ void MainCamera::init()
     mMouseToken = engine::editor->onMouseClicked.subscribe([this](ImGuiMouseButton button, bool isClicked) {
         if (button == ImGuiMouseButton_Right)
             mIsRightMousePressed = isClicked;
+        if (button == ImGuiMouseButton_Left)
+            mIsLeftMousePressed = isClicked;
     });
 }
 
@@ -66,7 +68,7 @@ void MainCamera::update()
 
 void MainCamera::move()
 {
-    if (!engine::editor->isViewportFocused())
+    if (!engine::editor->isViewportHovered())
         return;
     
     const float boomDistance = mCameraBoomDistance;
@@ -77,7 +79,7 @@ void MainCamera::move()
     
     if (mEnableThirdPerson)
     {
-        if (mIsRightMousePressed)
+        if (mIsLeftMousePressed)
             rotateThirdPerson();
     }
     else
@@ -210,7 +212,7 @@ void MainCamera::rotateThirdPerson()
 
 void MainCamera::gotoSelectedActor()
 {
-    if (!engine::editor->isViewportFocused())
+    if (!engine::editor->isViewportHovered())
         return;
     
     engine::Actor *actor = engine::editor->getSelectedActor();
