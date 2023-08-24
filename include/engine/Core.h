@@ -10,6 +10,7 @@
 #include "Pch.h"
 #include "glfw3.h"
 #include "imgui.h"
+#include "EventHandler.h"
 #include "TextureBufferObject.h"
 #include "Renderer.h"
 #include "Logger.h"
@@ -80,6 +81,7 @@ namespace engine
         std::unique_ptr<MainCamera> mMainCamera;
         
         Editor mEditor;
+        RootEventHandler mEventHandler;
     };
     
 } // engine

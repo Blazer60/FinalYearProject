@@ -30,14 +30,22 @@ namespace engine
         
     protected:
         void onDrawUi() override;
+        void toggleMouseState(bool newState);
         
         glm::vec2 mSize;
+        bool mHideMouse { false };
         bool mIsHovered { false };
         bool mIsMouseDown { false };
         glm::dvec2 mLastMousePosition { 0.0, 0.0 };
         ImGuizmo::OPERATION mOperation { ImGuizmo::OPERATION::TRANSLATE };
         uint32_t mKeyboardEventToken { 0 };
         uint32_t mRightMouseEventToken { 0 };
+        uint32_t mFirstPersonToken { 0 };
+        uint32_t mThirdPersonToken { 0 };
+        
+        uint32_t mTranslateGizmoToken   { 0 };
+        uint32_t mRotateGizmoToken      { 0 };
+        uint32_t mScaleGizmoToken       { 0 };
     };
     
 } // engine

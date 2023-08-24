@@ -11,6 +11,7 @@ namespace engine
 {
     Core *core;
     Editor *editor;
+    RootEventHandler *eventHandler;
     
     void forwardOpenGlCallback(
         GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,

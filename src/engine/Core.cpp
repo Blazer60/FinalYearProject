@@ -24,6 +24,7 @@ engine::Core::Core(const glm::ivec2 &resolution, bool enableDebugging)
     mLogger = std::make_unique<Logger>();
     logger = mLogger.get();
     mLogger->setOutputFlag(OutputSourceFlag_File | OutputSourceFlag_Queue);
+    eventHandler = &mEventHandler;
     core = this;
     editor = &mEditor;
     mEditor.init();
@@ -96,6 +97,10 @@ bool engine::Core::initGlfw(int openGlMajorVersion, int openGlMinorVersion)
     const int frameRate = 60;
     glfwSwapInterval(frameRate);
     
+    glfwSetCursorPosCallback(mWindow, [](GLFWwindow *window, double xPos, double yPos) {
+        eventHandler->updateMouseDelta(xPos, yPos);
+    });
+    
     return true;
 }
 
@@ -145,12 +150,14 @@ void engine::Core::run()
     {
         unsigned int loopAmount = 0;
         
+        mEventHandler.beginFrame();
+        glfwPollEvents();
+        mIsRunning = !glfwWindowShouldClose(mWindow);
+        
         while (timers::getTicks<double>() > nextUpdateTick && loopAmount < mMaxLoopCount)
         {
             mScene->onFixedUpdate();
             
-            glfwPollEvents();
-            mIsRunning = !glfwWindowShouldClose(mWindow);
             
             nextUpdateTick += timers::fixedTime<double>();
             ++loopAmount;
@@ -180,6 +187,8 @@ void engine::Core::updateImgui()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glBindVertexArray(0);
     ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+    
+    mEventHandler.update();
     
     if (ImGui::BeginMainMenuBar())
     {

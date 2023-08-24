@@ -60,7 +60,7 @@ protected:
     glm::dvec2      mPanAngles          { 0.f };
     
     float           mSpeed              { 30.f };
-    double          mMouseSpeed         { 0.5f };
+    float           mMouseSpeed         { 0.5f };
     
     float           mFovY               { glm::radians(45.f) };
     float           mNearClip           { 0.001f };
@@ -68,25 +68,29 @@ protected:
     
     std::vector<std::unique_ptr<PostProcessLayer>> mPostProcessStack;
     
-    uint32_t mKeyboardToken { 0 };
-    uint32_t mMouseToken { 0 };
+    uint32_t mFocusActorEventToken { 0 };
+    uint32_t mOrbitEventToken { 0 };
+    uint32_t mMoveForwardEventToken { 0 };
+    uint32_t mMoveRightEventToken { 0 };
+    uint32_t mMoveUpEventToken { 0 };
+    uint32_t mDoMoveToken { 0 };
+    uint32_t mZoomViewportToken { 0 };
+    uint32_t mZoomThirdPersonToken { 0 };
     
     glm::vec3 mInputDirection { 0.f };
-    bool mEnableFirstPerson { false };
-    bool mEnableThirdPerson { false };
-    bool mEnableThirdPersonRotate { false };
-    bool mIsRightMousePressed { false };
-    bool mIsLeftMousePressed { false };
+    bool mDoMoveAction { false };
     
     float mRotationSpeed { 0.1f };
     float mCameraBoomDistance { 30.f };
-    float mCameraBoomDelta { 10.f };
+    float mCameraBoomDelta { 2.f };
     float mCameraBoomMin { 0.5f };
     
     void moveFirstPerson();
     void rotateThirdPerson();
     
     void gotoSelectedActor();
+    
+    void zoomCamera(float zoomDistance);
 };
 
 

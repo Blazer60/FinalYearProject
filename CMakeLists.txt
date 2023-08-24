@@ -89,12 +89,16 @@ add_executable(${PROJECT_NAME}
         include/engine/ui/editor/LogWindow.h
         src/engine/loader/AssimpLoader.cpp
         include/engine/loader/AssimpLoader.h
+        src/engine/event/Input.cpp
+        include/engine/event/Input.h
+        src/engine/event/EventHandler.cpp
+        include/engine/event/EventHandler.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
         include include/engine include/graphics include/game include/engine/loader include/graphics/buffers
         include/engine/ui include/graphics/postProcessing include/engine/rendering include/helpers/logger
-        include/engine/ui/editor include/helpers
+        include/engine/ui/editor include/helpers include/engine/event
 
         # Vendor Files
         vendor/glm/glm vendor/glew/include/GL

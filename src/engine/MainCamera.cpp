@@ -12,6 +12,8 @@
 #include "BloomPass.h"
 #include "ColourGrading.h"
 #include "Editor.h"
+#include "EngineState.h"
+#include "EventHandler.h"
 
 MainCamera::MainCamera()
 {
@@ -32,26 +34,26 @@ void MainCamera::init()
     mPostProcessStack.emplace_back(std::make_unique<BloomPass>());
     mPostProcessStack.emplace_back(std::make_unique<ColourGrading>());
     
-    mKeyboardToken = engine::editor->onKeyPressed.subscribe([this](const ImGuiKey &key, bool isPressed) {
-        if (key == ImGuiKey_LeftAlt)
-            mEnableThirdPerson = isPressed;
-        
-        if (key == ImGuiKey_F)
-            gotoSelectedActor();
-    });
-    
-    mMouseToken = engine::editor->onMouseClicked.subscribe([this](ImGuiMouseButton button, bool isClicked) {
-        if (button == ImGuiMouseButton_Right)
-            mIsRightMousePressed = isClicked;
-        if (button == ImGuiMouseButton_Left)
-            mIsLeftMousePressed = isClicked;
-    });
+    mFocusActorEventToken = engine::eventHandler->viewport.onFocusActor.subscribe([this]() { gotoSelectedActor(); });
+    mOrbitEventToken = engine::eventHandler->viewport.thirdPerson.onOrbitCamera.subscribe([this](float value) { rotateThirdPerson(); });
+    mDoMoveToken = engine::eventHandler->viewport.firstPerson.onStateChanged.subscribe([this](bool isActive) { mDoMoveAction = isActive; });
+    mMoveForwardEventToken = engine::eventHandler->viewport.firstPerson.onMoveForward.subscribe([this](float value) { mInputDirection.z = value; });
+    mMoveRightEventToken = engine::eventHandler->viewport.firstPerson.onMoveRight.subscribe([this](float value) { mInputDirection.x = value; });
+    mMoveUpEventToken = engine::eventHandler->viewport.firstPerson.onMoveUp.subscribe([this](float value) { mInputDirection.y = value; });
+    mZoomViewportToken = engine::eventHandler->viewport.onZoom.subscribe([this](float zoomValue){ zoomCamera(-zoomValue * mCameraBoomDelta); });
+    mZoomThirdPersonToken = engine::eventHandler->viewport.thirdPerson.onZoomCamera.subscribe([this](float zoomValue){ zoomCamera(engine::eventHandler->getMouseDelta().y); });
 }
 
 MainCamera::~MainCamera()
 {
-    engine::editor->onKeyPressed.unSubscribe(mKeyboardToken);
-    engine::editor->onMouseClicked.unSubscribe(mMouseToken);
+    engine::eventHandler->viewport.onFocusActor.unSubscribe(mFocusActorEventToken);
+    engine::eventHandler->viewport.thirdPerson.onOrbitCamera.unSubscribe(mOrbitEventToken);
+    engine::eventHandler->viewport.firstPerson.onMoveForward.unSubscribe(mMoveForwardEventToken);
+    engine::eventHandler->viewport.firstPerson.onMoveRight.unSubscribe(mMoveRightEventToken);
+    engine::eventHandler->viewport.firstPerson.onMoveUp.unSubscribe(mMoveUpEventToken);
+    engine::eventHandler->viewport.firstPerson.onStateChanged.unSubscribe(mDoMoveToken);
+    engine::eventHandler->viewport.onZoom.unSubscribe(mZoomViewportToken);
+    engine::eventHandler->viewport.thirdPerson.onZoomCamera.unSubscribe(mZoomThirdPersonToken);
 }
 
 void MainCamera::update()
@@ -68,49 +70,26 @@ void MainCamera::update()
 
 void MainCamera::move()
 {
-    if (!engine::editor->isViewportHovered())
-        return;
+    if (mDoMoveAction)
+        moveFirstPerson();
     
+    mInputDirection = glm::vec3(0.f);
+}
+
+void MainCamera::zoomCamera(float distance)
+{
     const float boomDistance = mCameraBoomDistance;
-    mCameraBoomDistance = glm::max(mCameraBoomMin, mCameraBoomDistance + -engine::editor->getMouseWheel() * mCameraBoomDelta);
+    mCameraBoomDistance = glm::max(mCameraBoomMin, mCameraBoomDistance + distance);
     const float delta = mCameraBoomDistance - boomDistance;
     const glm::vec3 forward = mRotation * glm::vec3(0.f, 0.f, 1.f);
     mPosition += forward * delta;
-    
-    if (mEnableThirdPerson)
-    {
-        if (mIsLeftMousePressed)
-            rotateThirdPerson();
-    }
-    else
-    {
-        if (mIsRightMousePressed)
-            moveFirstPerson();
-    }
-    
-    
-    mInputDirection = glm::vec3(0.f);
 }
 
 void MainCamera::moveFirstPerson()
 {
     const auto timeStep = timers::deltaTime<float>();
     
-    if (ImGui::IsKeyDown(ImGuiKey_W))
-        mInputDirection.z -= 1.f;
-    if (ImGui::IsKeyDown(ImGuiKey_S))
-        mInputDirection.z += 1.f;
-    if (ImGui::IsKeyDown(ImGuiKey_A))
-        mInputDirection.x -= 1.f;
-    if (ImGui::IsKeyDown(ImGuiKey_D))
-        mInputDirection.x += 1.f;
-    if (ImGui::IsKeyDown(ImGuiKey_Q))
-        mInputDirection.y -= 1.f;
-    if (ImGui::IsKeyDown(ImGuiKey_E))
-        mInputDirection.y += 1.f;
-    
-    ImGuiIO &io = ImGui::GetIO();
-    glm::dvec2 mouseOffset { io.MouseDelta.x, io.MouseDelta.y };
+    const glm::vec2 mouseOffset = engine::eventHandler->getMouseDelta();
     
     mPanAngles -= glm::radians(mouseOffset) * mMouseSpeed;
     
@@ -196,8 +175,7 @@ CameraSettings MainCamera::toSettings()
 
 void MainCamera::rotateThirdPerson()
 {
-    ImGuiIO &io = ImGui::GetIO();
-    const glm::vec2 mouseOffset { io.MouseDelta.x, io.MouseDelta.y };
+    const glm::vec2 mouseOffset = engine::eventHandler->getMouseDelta();
     
     const glm::vec3 anchorDirection = mRotation * glm::vec3(0.f, 0.f, 1.f);
     
@@ -212,9 +190,6 @@ void MainCamera::rotateThirdPerson()
 
 void MainCamera::gotoSelectedActor()
 {
-    if (!engine::editor->isViewportHovered())
-        return;
-    
     engine::Actor *actor = engine::editor->getSelectedActor();
     if (!actor)
         return;

@@ -20,49 +20,32 @@ namespace engine
 {
     void Viewport::init()
     {
-        mKeyboardEventToken = editor->onKeyPressed.subscribe([this](const ImGuiKey &key, bool isClicked) {
-            if (!mIsHovered)
-                return;
-            
-            if (mIsMouseDown)
-                return;
-            
-            if (!isClicked)
-                return;
-            
-            switch (key)
-            {
-                case ImGuiKey_W:
-                    mOperation = ImGuizmo::OPERATION::TRANSLATE;
-                    break;
-                case ImGuiKey_E:
-                    mOperation = ImGuizmo::OPERATION::ROTATE;
-                    break;
-                case ImGuiKey_R:
-                    mOperation = ImGuizmo::OPERATION::SCALE;
-                    break;
-                default:
-                    break;
-            }
+        mTranslateGizmoToken = eventHandler->viewport.onGizmoTranslate.subscribe([this]() {
+            mOperation = ImGuizmo::OPERATION::TRANSLATE;
         });
         
-        mRightMouseEventToken = editor->onMouseClicked.subscribe([this](ImGuiMouseButton button, bool isClicked) {
-            if (button != ImGuiMouseButton_Right)
-                return;
-            
-            mIsMouseDown = isClicked && mIsHovered;
-            
-            if (!isClicked && mIsHovered)
-                glfwSetCursorPos(glfwGetCurrentContext(), mLastMousePosition.x, mLastMousePosition.y);
-            
-            glfwGetCursorPos(glfwGetCurrentContext(), &mLastMousePosition.x, &mLastMousePosition.y);
+        mRotateGizmoToken = eventHandler->viewport.onGizmoRotate.subscribe([this]() {
+            mOperation = ImGuizmo::OPERATION::ROTATE;
         });
+        
+        mScaleGizmoToken = eventHandler->viewport.onGizmoScale.subscribe([this]() {
+            mOperation = ImGuizmo::OPERATION::SCALE;
+        });
+        
+        mFirstPersonToken = eventHandler->viewport.firstPerson.onStateChanged.subscribe([this](bool state) { toggleMouseState(state); });
+        mThirdPersonToken = eventHandler->viewport.thirdPerson.onStateChanged.subscribe([this](bool state) { toggleMouseState(state); });
     }
     
     Viewport::~Viewport()
     {
         editor->onKeyPressed.unSubscribe(mKeyboardEventToken);
         editor->onMouseClicked.unSubscribe(mRightMouseEventToken);
+        
+        eventHandler->viewport.onGizmoTranslate.unSubscribe(mTranslateGizmoToken);
+        eventHandler->viewport.onGizmoRotate.unSubscribe(mRotateGizmoToken);
+        eventHandler->viewport.onGizmoScale.unSubscribe(mScaleGizmoToken);
+        eventHandler->viewport.firstPerson.onStateChanged.unSubscribe(mFirstPersonToken);
+        eventHandler->viewport.thirdPerson.onStateChanged.unSubscribe(mThirdPersonToken);
     }
     
     glm::vec2 Viewport::getSize() const
@@ -72,8 +55,15 @@ namespace engine
     
     void Viewport::onDrawUi()
     {
-        if (mIsMouseDown)
+        if (mHideMouse)
+        {
             ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+            //
+            // glm::dvec2 mousePos;
+            // glfwGetCursorPos(glfwGetCurrentContext(), &mousePos.x, &mousePos.y);
+            // glm::dvec2 delta = mousePos - mLastMousePosition;
+            // MESSAGE("Mouse delta: %", delta);
+        }
         
         ImGui::PushID("Viewport");
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
@@ -127,6 +117,16 @@ namespace engine
     bool Viewport::isHovered() const
     {
         return mIsHovered;
+    }
+    
+    void Viewport::toggleMouseState(bool newState)
+    {
+        if (newState)
+            glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        else
+            glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        
+        mHideMouse = newState;
     }
     
     
