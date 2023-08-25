@@ -20,27 +20,16 @@ namespace engine
 {
     void Viewport::init()
     {
-        mTranslateGizmoToken = eventHandler->viewport.onGizmoTranslate.subscribe([this]() {
-            mOperation = ImGuizmo::OPERATION::TRANSLATE;
-        });
-        
-        mRotateGizmoToken = eventHandler->viewport.onGizmoRotate.subscribe([this]() {
-            mOperation = ImGuizmo::OPERATION::ROTATE;
-        });
-        
-        mScaleGizmoToken = eventHandler->viewport.onGizmoScale.subscribe([this]() {
-            mOperation = ImGuizmo::OPERATION::SCALE;
-        });
-        
+        mViewportWindow = glfwGetCurrentContext();
+        mTranslateGizmoToken = eventHandler->viewport.onGizmoTranslate.subscribe([this]() { mOperation = ImGuizmo::OPERATION::TRANSLATE; });
+        mRotateGizmoToken = eventHandler->viewport.onGizmoRotate.subscribe([this]() { mOperation = ImGuizmo::OPERATION::ROTATE; });
+        mScaleGizmoToken = eventHandler->viewport.onGizmoScale.subscribe([this]() { mOperation = ImGuizmo::OPERATION::SCALE; });
         mFirstPersonToken = eventHandler->viewport.firstPerson.onStateChanged.subscribe([this](bool state) { toggleMouseState(state); });
         mThirdPersonToken = eventHandler->viewport.thirdPerson.onStateChanged.subscribe([this](bool state) { toggleMouseState(state); });
     }
     
     Viewport::~Viewport()
     {
-        editor->onKeyPressed.unSubscribe(mKeyboardEventToken);
-        editor->onMouseClicked.unSubscribe(mRightMouseEventToken);
-        
         eventHandler->viewport.onGizmoTranslate.unSubscribe(mTranslateGizmoToken);
         eventHandler->viewport.onGizmoRotate.unSubscribe(mRotateGizmoToken);
         eventHandler->viewport.onGizmoScale.unSubscribe(mScaleGizmoToken);
@@ -55,16 +44,6 @@ namespace engine
     
     void Viewport::onDrawUi()
     {
-        if (mHideMouse)
-        {
-            ImGui::SetMouseCursor(ImGuiMouseCursor_None);
-            //
-            // glm::dvec2 mousePos;
-            // glfwGetCursorPos(glfwGetCurrentContext(), &mousePos.x, &mousePos.y);
-            // glm::dvec2 delta = mousePos - mLastMousePosition;
-            // MESSAGE("Mouse delta: %", delta);
-        }
-        
         ImGui::PushID("Viewport");
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
         ImGui::Begin("Window");
@@ -86,6 +65,9 @@ namespace engine
             mOperation = ImGuizmo::OPERATION::SCALE;
         
         mIsHovered = ImGui::IsWindowHovered();
+        
+        if (auto *x = reinterpret_cast<GLFWwindow*>(ImGui::GetWindowViewport()->PlatformHandle); x != nullptr)
+            mViewportWindow = x;
         
         Actor *selectedActor = editor->getSelectedActor();
         if (selectedActor)
@@ -122,11 +104,14 @@ namespace engine
     void Viewport::toggleMouseState(bool newState)
     {
         if (newState)
-            glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            glfwSetInputMode(mViewportWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         else
-            glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        
-        mHideMouse = newState;
+            glfwSetInputMode(mViewportWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+    
+    GLFWwindow *Viewport::getViewportContext()
+    {
+        return mViewportWindow;
     }
     
     

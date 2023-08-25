@@ -103,4 +103,9 @@ namespace engine
     {
         return mMouseWheel;
     }
+    
+    GLFWwindow *Editor::getViewportContext()
+    {
+        return mViewport.getViewportContext();
+    }
 }

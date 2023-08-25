@@ -37,7 +37,7 @@ namespace engine
         void Viewport::update()
         {
             bool temp = isActive;
-            isActive = engine::editor->isViewportHovered() || glfwGetInputMode(glfwGetCurrentContext(), GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
+            isActive = engine::editor->isViewportHovered() || glfwGetInputMode(engine::editor->getViewportContext(), GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
             if (isActive != temp)
                 onStateChanged.broadcast(isActive);
             

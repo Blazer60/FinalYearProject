@@ -27,7 +27,6 @@ engine::Core::Core(const glm::ivec2 &resolution, bool enableDebugging)
     eventHandler = &mEventHandler;
     core = this;
     editor = &mEditor;
-    mEditor.init();
     
     window::setBufferSize(mResolution);
     
@@ -44,6 +43,8 @@ engine::Core::Core(const glm::ivec2 &resolution, bool enableDebugging)
         LOG_MAJOR("Unable to initialise glew.");
         return;
     }
+    
+    mEditor.init();
     
     mRenderer = std::make_unique<Renderer>();
     if (!mRenderer->isOk)

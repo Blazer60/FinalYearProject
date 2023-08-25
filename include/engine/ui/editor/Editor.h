@@ -31,6 +31,7 @@ namespace engine
         void update();
         [[nodiscard]] Actor *getSelectedActor();
         bool isViewportHovered();
+        GLFWwindow *getViewportContext();
         [[nodiscard]] float getMouseWheel() const;
     protected:
         void onDrawUi() override;
