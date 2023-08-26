@@ -115,6 +115,8 @@ bool engine::Core::initImGui()
     mGuiIo->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     mGuiIo->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     
+    mGuiIo->Fonts->AddFontFromFileTTF("../resources/fonts/robotoMono/static/RobotoMono-Regular.ttf", 15.f);
+    
     ImGui::StyleColorsDark();
     ImGuiStyle &style = ImGui::GetStyle();
     if (mGuiIo->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -130,40 +132,8 @@ bool engine::Core::initImGui()
     style.ChildBorderSize = 0.f;
     style.PopupBorderSize = 0.f;
     
-    style.Colors[ImGuiCol_Text] = ImVec4(0.85f, 0.85f, 0.85f, 1.f);
-    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.16f, 0.16f, 0.17f, 1.f);
-    style.Colors[ImGuiCol_ChildBg] = ImVec4(0.16f, 0.16f, 0.17f, 1.f);
-    style.Colors[ImGuiCol_PopupBg] = ImVec4(0.2f, 0.2f, 0.2f, 1.f);
     
-    style.Colors[ImGuiCol_Header] = ImVec4(0.053f, 0.509f, 0.f, 0.31f);
-    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.053f, 0.509f, 0.f, 0.8f);
-    style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.053f, 0.509f, 0.f, 1.f);
-    
-    style.Colors[ImGuiCol_FrameBg] = ImVec4(0.053f, 0.509f, 0.f, 0.31f);
-    style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.053f, 0.509f, 0.f, 0.8f);
-    style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.053f, 0.509f, 0.f, 1.f);
-    
-    style.Colors[ImGuiCol_TitleBg] = ImVec4(0.2f, 0.2f, 0.2f, 1.f);
-    style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.2f, 0.2f, 0.2f, 1.f);
-    
-    style.Colors[ImGuiCol_CheckMark]            = ImVec4(0.053f, 0.6f, 0.f, 1.f);
-    style.Colors[ImGuiCol_SliderGrab]           = ImVec4(0.053f, 0.6f, 0.f, 0.9f);
-    style.Colors[ImGuiCol_SliderGrabActive]     = ImVec4(0.053f, 0.6f, 0.f, 1.f);
-    style.Colors[ImGuiCol_Button]               = ImVec4(0.053f, 0.6f, 0.f, 0.4f);
-    style.Colors[ImGuiCol_ButtonHovered]        = ImVec4(0.053f, 0.6f, 0.f, 0.9f);
-    style.Colors[ImGuiCol_ButtonActive]         = ImVec4(0.053f, 0.6f, 0.f, 1.f);
-    
-    style.Colors[ImGuiCol_Separator] = ImVec4(0.16f, 0.16f, 0.17f, 0.9f);
-    style.Colors[ImGuiCol_SeparatorHovered] = ImVec4(0.053f, 0.6f, 0.f, 1.f);
-    style.Colors[ImGuiCol_SeparatorActive] = ImVec4(0.053f, 0.6f, 0.f, 1.f);
-    
-    style.Colors[ImGuiCol_Tab]          = ImVec4(0.053f, 0.509f, 0.f, 0.5f);
-    style.Colors[ImGuiCol_TabHovered]   = ImVec4(0.053f, 0.509f, 0.f, 0.8f);
-    style.Colors[ImGuiCol_TabActive]    = ImVec4(0.053f, 0.509f, 0.f, 1.f);
-    style.Colors[ImGuiCol_TabUnfocused] = ImVec4(0.053f, 0.509f, 0.f, 0.5f);
-    style.Colors[ImGuiCol_TabUnfocusedActive]    = ImVec4(0.053f, 0.509f, 0.f, 0.6f);
-    
-    style.Colors[ImGuiCol_DockingPreview] = ImVec4(0.8f, 0.8f, 0.8f, 0.5f);
+    configureUiThemeColours(style);
     
     if (!ImGui_ImplGlfw_InitForOpenGL(mWindow, true))
         return false;
@@ -172,6 +142,54 @@ bool engine::Core::initImGui()
         return false;
     
     return true;
+}
+
+void engine::Core::configureUiThemeColours(ImGuiStyle &style)
+{
+    const ImVec4 background = ImVec4(0.16f, 0.16f, 0.17f, 1.f);
+    
+    const ImVec4 primary        = ImVec4(0.2f, 0.2f, 0.21f, 1.f);
+    const ImVec4 primaryHovered = ImVec4(0.3f, 0.3f, 0.32f, 1.f);
+    const ImVec4 primaryActive  = ImVec4(0.4f, 0.4f, 0.48f, 1.f);
+    
+    const ImVec4 accent         = ImVec4(0.09f, 0.32f, 0.14f, 1.f);
+    const ImVec4 accentHovered  = ImVec4(0.14f, 0.47f, 0.2f, 1.f);
+    const ImVec4 accentActive   = ImVec4(0.18f, 0.62f, 0.27f, 1.f);
+    
+    style.Colors[ImGuiCol_Text]     = ImVec4(0.85f, 0.85f, 0.85f, 1.f);
+    style.Colors[ImGuiCol_WindowBg] = background;
+    style.Colors[ImGuiCol_ChildBg]  = background;
+    style.Colors[ImGuiCol_PopupBg]  = primary;
+    
+    style.Colors[ImGuiCol_Header]           = primary;
+    style.Colors[ImGuiCol_HeaderHovered]    = primaryHovered;
+    style.Colors[ImGuiCol_HeaderActive]     = primaryActive;
+    
+    style.Colors[ImGuiCol_FrameBg]          = primary;
+    style.Colors[ImGuiCol_FrameBgHovered]   = primaryHovered;
+    style.Colors[ImGuiCol_FrameBgActive]    = primaryActive;
+    
+    style.Colors[ImGuiCol_TitleBg] = background;
+    style.Colors[ImGuiCol_TitleBgActive] = background;
+    
+    style.Colors[ImGuiCol_CheckMark]            = accentActive;
+    style.Colors[ImGuiCol_SliderGrab]           = accentHovered;
+    style.Colors[ImGuiCol_SliderGrabActive]     = accentActive;
+    style.Colors[ImGuiCol_Button]               = accent;
+    style.Colors[ImGuiCol_ButtonHovered]        = accentHovered;
+    style.Colors[ImGuiCol_ButtonActive]         = accentActive;
+    
+    style.Colors[ImGuiCol_Separator] = primary;
+    style.Colors[ImGuiCol_SeparatorHovered] = accentHovered;
+    style.Colors[ImGuiCol_SeparatorActive] = accentActive;
+    
+    style.Colors[ImGuiCol_Tab]                  = primary;
+    style.Colors[ImGuiCol_TabHovered]           = primaryHovered;
+    style.Colors[ImGuiCol_TabActive]            = primary;
+    style.Colors[ImGuiCol_TabUnfocused]         = background;
+    style.Colors[ImGuiCol_TabUnfocusedActive]   = background;
+    
+    style.Colors[ImGuiCol_DockingPreview] = accentHovered;
 }
 
 engine::Core::~Core()

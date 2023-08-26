@@ -63,6 +63,8 @@ namespace engine
         void updateViewports();
         
     protected:
+        static void configureUiThemeColours(ImGuiStyle &style) ;
+        
         const glm::ivec2 mResolution { 1920, 1080 };
         const std::string_view mWindowTitle { "Game Engine" };
         
