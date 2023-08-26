@@ -9,6 +9,7 @@
 
 #include <utility>
 #include "gtc/type_ptr.hpp"
+#include "Ui.h"
 
 namespace engine
 {
@@ -31,6 +32,7 @@ namespace engine
     void Actor::onDrawUi()
     {
         ImGui::PushID("ActorSettings");
+        ui::inputText("Name", &mName);
         if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
         {
             bool changedFlag = false;
