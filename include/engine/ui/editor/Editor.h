@@ -24,25 +24,22 @@ namespace engine
         : public ui::Drawable
     {
     public:
-        Callback<ImGuiKey, bool> onKeyPressed;
-        Callback<ImGuiMouseButton, bool> onMouseClicked;  // true, if pressed. false, if released.
-        
         void init();
         void update();
         [[nodiscard]] Actor *getSelectedActor();
         bool isViewportHovered();
         GLFWwindow *getViewportContext();
-        [[nodiscard]] float getMouseWheel() const;
+    
     protected:
         void onDrawUi() override;
         void drawSceneHierarchyPanel();
         void drawActorDetails();
+        void createDefaultShape(const std::string& name, std::string_view path);
     
     protected:
         Viewport mViewport;
         LogWindow mLogWindow;
         Actor *mSelectedActor { nullptr };
-        float mMouseWheel { 0.f };
     };
     
 } // engine

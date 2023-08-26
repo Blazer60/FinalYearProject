@@ -33,12 +33,12 @@ namespace engine
         virtual void onRender();
         virtual void onImguiMenuUpdate();
         
+        template<typename TActor, typename ...TArgs>
+        TActor *spawnActor(TArgs&&... args);
+        
     protected:
         virtual void onUpdate();
         virtual void onImguiUpdate();
-        
-        template<typename TActor, typename ...TArgs>
-        TActor *spawnActor(TArgs&&... args);
         
         std::vector<std::unique_ptr<Actor>> mActors;
         Actor *mSelectedActor { nullptr };

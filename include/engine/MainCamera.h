@@ -42,6 +42,8 @@ public:
     [[nodiscard]] glm::mat4 getProjectionMatrix() const;
     
     [[nodiscard]] CameraSettings toSettings();
+    
+    glm::vec3 getEndOfBoomArmPosition() const;
 
 protected:
     glm::mat4       mVpMatrix           { 1.f };

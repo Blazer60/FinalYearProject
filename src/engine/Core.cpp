@@ -78,6 +78,11 @@ engine::Core::Core(const glm::ivec2 &resolution, bool enableDebugging)
     mWindowIcon = load::windowIcon("../resources/textures/Icon.png");
     if (mWindowIcon.pixels != nullptr)
         glfwSetWindowIcon(mWindow, 1, &mWindowIcon);
+    
+    mStandardShader = std::make_shared<Shader>(
+        "../resources/shaders/geometry/standard/Standard.vert",
+        "../resources/shaders/geometry/standard/Standard.frag");
+    
 }
 
 bool engine::Core::initGlfw(int openGlMajorVersion, int openGlMinorVersion)
@@ -355,4 +360,9 @@ engine::Scene *engine::Core::getScene()
 MainCamera *engine::Core::getCamera()
 {
     return mMainCamera.get();
+}
+
+std::shared_ptr<Shader> &engine::Core::getStandardShader()
+{
+    return mStandardShader;
 }

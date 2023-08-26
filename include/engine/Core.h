@@ -54,6 +54,8 @@ namespace engine
         [[nodiscard]] Scene *getScene();
         [[nodiscard]] MainCamera *getCamera();
         
+        std::shared_ptr<Shader> &getStandardShader();
+        
     protected:
         bool initGlfw(int openGlMajorVersion, int openGlMinorVersion);
         bool initImGui();
@@ -85,6 +87,8 @@ namespace engine
         
         Editor mEditor;
         RootEventHandler mEventHandler;
+        
+        std::shared_ptr<Shader> mStandardShader;
     };
     
 } // engine

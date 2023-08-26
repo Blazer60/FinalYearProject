@@ -199,5 +199,10 @@ void MainCamera::gotoSelectedActor()
     mPosition = actorPosition + forwardDirection * mCameraBoomDistance;
 }
 
+glm::vec3 MainCamera::getEndOfBoomArmPosition() const
+{
+    return mRotation * glm::vec3(0.f, 0.f, 1.f) * -mCameraBoomDistance + mPosition;
+}
+
 
 

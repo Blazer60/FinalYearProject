@@ -76,9 +76,9 @@ public:
     float heightScale { 0.1f };
     int32_t maxHeightSamples { 64 };
     int32_t minHeightSamples { 8 };
-    float roughness { 0 };
+    float roughness { 1.f };
     float metallic { 0 };
-    glm::vec3 ambientColour { 0.f };
+    glm::vec3 ambientColour { 1.f };
     
 protected:
     void onDrawUi() override;

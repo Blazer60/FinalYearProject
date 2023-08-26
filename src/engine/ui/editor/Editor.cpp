@@ -8,6 +8,8 @@
 #include "Editor.h"
 #include "Core.h"
 #include "Scene.h"
+#include "AssimpLoader.h"
+#include "MeshComponent.h"
 
 namespace engine
 {
@@ -18,10 +20,6 @@ namespace engine
     
     void Editor::onDrawUi()
     {
-        // We do this here since the mouse wheel isn't registered until we begin drawing elements.
-        ImGuiIO &io = ImGui::GetIO();
-        mMouseWheel = io.MouseWheel;
-        
         ui::draw(mViewport);
         ui::draw(mLogWindow);
         drawSceneHierarchyPanel();
@@ -46,7 +44,28 @@ namespace engine
     
     void Editor::drawSceneHierarchyPanel()
     {
-        ImGui::Begin("Scene Hierarchy");
+        ImGui::Begin("Scene Hierarchy", nullptr, ImGuiWindowFlags_MenuBar);
+        if (ImGui::BeginMenuBar())
+        {
+            if (ImGui::BeginMenu("Add"))
+            {
+                if (ImGui::MenuItem("Actor"))
+                {
+                    mSelectedActor = core->getScene()->spawnActor<Actor>("Actor");
+                    mSelectedActor->position = core->getCamera()->getEndOfBoomArmPosition();
+                }
+                if (ImGui::MenuItem("Cube"))
+                    createDefaultShape("Cube", "../resources/models/defaultObjects/DefaultCube.glb");
+                if (ImGui::MenuItem("Sphere"))
+                    createDefaultShape("Sphere", "../resources/models/defaultObjects/DefaultSphere.glb");
+                if (ImGui::MenuItem("Torus"))
+                    createDefaultShape("Torus", "../resources/models/defaultObjects/DefaultTorus.glb");
+                ImGui::EndMenu();
+            }
+            ImGui::EndMenuBar();
+        }
+        
+        
         if (ImGui::BeginListBox("##ActorHierarchyListBox", ImVec2(-FLT_MIN, -FLT_MIN)))
         {
             for (auto &actor : core->getScene()->getActors())
@@ -75,23 +94,7 @@ namespace engine
     
     void Editor::update()
     {
-        if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
-            onMouseClicked.broadcast(ImGuiMouseButton_Right, true);
-        if (ImGui::IsMouseReleased(ImGuiMouseButton_Right))
-            onMouseClicked.broadcast(ImGuiMouseButton_Right, false);
-        
-        if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-            onMouseClicked.broadcast(ImGuiMouseButton_Left, true);
-        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left))
-            onMouseClicked.broadcast(ImGuiMouseButton_Left, false);
-        
-        for (ImGuiKey key = (ImGuiKey)0; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1))
-        {
-            if (ImGui::IsKeyPressed(key))
-                onKeyPressed.broadcast(key, true);
-            else if (ImGui::IsKeyReleased(key))
-                onKeyPressed.broadcast(key, false);
-        }
+    
     }
     
     bool Editor::isViewportHovered()
@@ -99,13 +102,19 @@ namespace engine
         return mViewport.isHovered();
     }
     
-    float Editor::getMouseWheel() const
-    {
-        return mMouseWheel;
-    }
-    
     GLFWwindow *Editor::getViewportContext()
     {
         return mViewport.getViewportContext();
+    }
+    
+    void Editor::createDefaultShape(const std::string& name, std::string_view path)
+    {
+        auto *actor = core->getScene()->spawnActor<Actor>(name);
+        actor->position = core->getCamera()->getEndOfBoomArmPosition();
+        auto model = load::model<StandardVertex>(path);
+        auto material = std::make_shared<StandardMaterial>();
+        material->attachShader(core->getStandardShader());
+        actor->addComponent(std::make_unique<MeshComponent>(model, material));
+        mSelectedActor = actor;
     }
 }
