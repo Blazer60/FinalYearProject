@@ -10,8 +10,10 @@
 #include <string_view>
 #include "Pch.h"
 #include "Texture.h"
+#include "glfw3.h"
 
 namespace load
 {
     std::shared_ptr<Texture> texture(std::string_view path);
+    GLFWimage windowIcon(std::string_view path);
 }

@@ -17,6 +17,8 @@
 #include "EngineState.h"
 #include "LoggerMacros.h"
 #include "ImGuizmo.h"
+#include "TextureLoader.h"
+#include "ModelDestroyer.h"
 
 engine::Core::Core(const glm::ivec2 &resolution, bool enableDebugging)
     : mResolution(resolution), mEnableDebugging(enableDebugging)
@@ -72,6 +74,10 @@ engine::Core::Core(const glm::ivec2 &resolution, bool enableDebugging)
     }
     
     mMainCamera = std::make_unique<MainCamera>(glm::vec3(0.f, 3.f, 21.f));
+    
+    mWindowIcon = load::windowIcon("../resources/textures/Icon.png");
+    if (mWindowIcon.pixels != nullptr)
+        glfwSetWindowIcon(mWindow, 1, &mWindowIcon);
 }
 
 bool engine::Core::initGlfw(int openGlMajorVersion, int openGlMinorVersion)
@@ -194,6 +200,7 @@ void engine::Core::configureUiThemeColours(ImGuiStyle &style)
 
 engine::Core::~Core()
 {
+    destroy::windowIcon(mWindowIcon);
     mScene.reset();
     ImGui_ImplGlfw_Shutdown();
     ImGui_ImplOpenGL3_Shutdown();

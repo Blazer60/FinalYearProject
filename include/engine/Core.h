@@ -68,6 +68,7 @@ namespace engine
         const glm::ivec2 mResolution { 1920, 1080 };
         const std::string_view mWindowTitle { "Game Engine" };
         
+        GLFWimage mWindowIcon;
         GLFWwindow *mWindow { nullptr };
         
         std::unique_ptr<Scene> mScene;
