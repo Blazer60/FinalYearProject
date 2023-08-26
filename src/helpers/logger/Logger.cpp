@@ -45,7 +45,10 @@ namespace engine
         logToQueue(message, file, line, severity);
         
         if (severity >= throwLevel)
+        {
+            std::cout << output;
             throw LogException();
+        }
     }
     
     void Logger::logToConsole(std::string_view message) const

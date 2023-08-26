@@ -21,7 +21,7 @@ void main()
 {
     gl_Position = u_mvp_matrix * vec4(a_position, 1.f);
     v_uv = a_uv;
-    v_normal_ws = vec3(u_model_matrix * vec4(a_normal, 0.f));
+    v_normal_ws = normalize(vec3(u_model_matrix * vec4(a_normal, 0.f)));
     v_position_ws = vec3(u_model_matrix * vec4(a_position.xyz, 1.f));
 
     const vec3 tangent_ws = normalize(vec3(u_model_matrix * vec4(a_tangent, 0.f)));
