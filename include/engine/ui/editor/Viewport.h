@@ -10,10 +10,16 @@
 #include "Pch.h"
 #include "Drawable.h"
 #include "ImGuizmo.h"
+#include "TextureBufferObject.h"
 #include <glfw3.h>
 
 namespace engine
 {
+    struct ViewportImage
+    {
+        std::string name;
+        std::function<TextureBufferObject const&()> requestTexture;
+    };
 
 /**
  * @author Ryan Purse
@@ -46,6 +52,9 @@ namespace engine
         uint32_t mScaleGizmoToken       { 0 };
         
         GLFWwindow *mViewportWindow { nullptr };
+        
+        std::vector<ViewportImage> mViewportImages;
+        int32_t mCurrentSelectedImage = 0;
     };
     
 } // engine

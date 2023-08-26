@@ -26,6 +26,19 @@ namespace engine
         mScaleGizmoToken = eventHandler->viewport.onGizmoScale.subscribe([this]() { mOperation = ImGuizmo::OPERATION::SCALE; });
         mFirstPersonToken = eventHandler->viewport.firstPerson.onStateChanged.subscribe([this](bool state) { toggleMouseState(state); });
         mThirdPersonToken = eventHandler->viewport.thirdPerson.onStateChanged.subscribe([this](bool state) { toggleMouseState(state); });
+        
+        mViewportImages = {
+            ViewportImage { "Default",       []() -> const TextureBufferObject& { return graphics::renderer->getPrimaryBuffer(); } },
+            ViewportImage { "Position",     []() -> const TextureBufferObject& { return graphics::renderer->getPositionBuffer(); } },
+            ViewportImage { "Normal",       []() -> const TextureBufferObject& { return graphics::renderer->getNormalBuffer(); } },
+            ViewportImage { "Albedo",       []() -> const TextureBufferObject& { return graphics::renderer->getAlbedoBuffer(); } },
+            ViewportImage { "Emissive",     []() -> const TextureBufferObject& { return graphics::renderer->getEmissiveBuffer(); } },
+            ViewportImage { "Diffuse",      []() -> const TextureBufferObject& { return graphics::renderer->getDiffuseBuffer(); } },
+            ViewportImage { "Depth",        []() -> const TextureBufferObject& { return graphics::renderer->getDepthBuffer(); } },
+            ViewportImage { "Shadow",       []() -> const TextureBufferObject& { return graphics::renderer->getShadowBuffer(); } },
+            ViewportImage { "Roughness",    []() -> const TextureBufferObject& { return graphics::renderer->getRoughnessBuffer(); } },
+            ViewportImage { "Metallic",     []() -> const TextureBufferObject& { return graphics::renderer->getMetallicBuffer(); } },
+        };
     }
     
     Viewport::~Viewport()
@@ -48,13 +61,7 @@ namespace engine
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
         ImGui::Begin("Window");
         
-        ImVec2 regionSize = ImGui::GetContentRegionAvail();
-        window::setBufferSize(glm::ivec2(regionSize.x, regionSize.y));
         
-        const TextureBufferObject &texture = graphics::renderer->getPrimaryBuffer();
-        ImVec2 origin = ImGui::GetCursorPos();
-        ImGui::Image(reinterpret_cast<void *>(texture.getId()), regionSize, ImVec2(0, 1), ImVec2(1, 0));
-        ImGui::SetCursorPos(origin);
         if (ImGui::RadioButton("Move", mOperation == ImGuizmo::OPERATION::TRANSLATE))
             mOperation = ImGuizmo::OPERATION::TRANSLATE;
         ImGui::SameLine();
@@ -63,6 +70,30 @@ namespace engine
         ImGui::SameLine();
         if (ImGui::RadioButton("Scale", mOperation == ImGuizmo::OPERATION::SCALE))
             mOperation = ImGuizmo::OPERATION::SCALE;
+        
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - 100.f);
+        ImGui::SetNextItemWidth(100.f);
+        if (ImGui::BeginCombo("##ViewImage", mViewportImages[mCurrentSelectedImage].name.c_str()))
+        {
+            for (int i = 0; i < mViewportImages.size(); ++i)
+            {
+                const bool isSelected = (mCurrentSelectedImage == i);
+                if (ImGui::Selectable(mViewportImages[i].name.c_str(), isSelected))
+                    mCurrentSelectedImage = i;
+                
+                if (isSelected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+        
+        ImGui::BeginChild("ImageWindow");
+        
+        ImVec2 regionSize = ImGui::GetContentRegionAvail();
+        window::setBufferSize(glm::ivec2(regionSize.x, regionSize.y));
+        const TextureBufferObject &texture = mViewportImages[mCurrentSelectedImage].requestTexture();
+        ImGui::Image(reinterpret_cast<void *>(texture.getId()), regionSize, ImVec2(0, 1), ImVec2(1, 0));
         
         mIsHovered = ImGui::IsWindowHovered();
         
@@ -86,11 +117,13 @@ namespace engine
             glm::mat4 projection = camera->getProjectionMatrix();
             
             if (ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection),
-                                 mOperation, ImGuizmo::MODE::LOCAL, glm::value_ptr(actorTransform)))
+                                     mOperation, ImGuizmo::MODE::LOCAL, glm::value_ptr(actorTransform)))
             {
                 math::decompose(actorTransform, selectedActor->position, selectedActor->rotation, selectedActor->scale);
             }
         }
+        
+        ImGui::EndChild();
         ImGui::End();
         ImGui::PopStyleVar();
         ImGui::PopID();
