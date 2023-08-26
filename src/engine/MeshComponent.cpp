@@ -20,9 +20,18 @@ namespace engine
         ImGui::PushID("MeshComponentSetting");
         if (ImGui::CollapsingHeader("Mesh Settings", ImGuiTreeNodeFlags_DefaultOpen))
         {
-            ImGui::Checkbox("Show", &mShow);
-            for (auto &material : mSharedMaterials)
-                ui::draw(material.get());
+            if (mSharedMesh.empty())
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 1.f, 0.f, 1.f));
+                ImGui::Text("Mesh component does contain any meshes.");
+                ImGui::PopStyleColor();
+            }
+            else
+            {
+                ImGui::Checkbox("Show", &mShow);
+                for (auto &material : mSharedMaterials)
+                    ui::draw(material.get());
+            }
         }
         ImGui::PopID();
     }
