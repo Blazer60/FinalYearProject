@@ -20,7 +20,7 @@ namespace engine
     
     }
     
-    void Actor::OnUpdate()
+    void Actor::onUpdate()
     {
         updateTransform();
     }
@@ -81,6 +81,40 @@ namespace engine
     void Actor::markForDeath()
     {
         mScene->destroy(this);
+    }
+    
+    void Actor::update()
+    {
+        onUpdate();
+        
+        // Removing components that are marked for deletion.
+        for (const uint32_t index : mToDestroy)
+            mComponents.erase(mComponents.begin() + index);
+        
+        mToDestroy.clear();
+    }
+    
+    void Actor::removeComponent(Component *component)
+    {
+        if (component->getActor() != this)
+        {
+            WARN("This actor does not own this component. The component will not be destroyed.");
+            return;
+        }
+        
+        const auto it = std::find_if(mComponents.begin(), mComponents.end(), [&component](const std::unique_ptr<Component> &left) {
+            return left.get() == component;
+        });
+        
+        if (it == mComponents.end())
+        {
+            WARN("Could not find the component attached to this actor.");
+            return;
+        }
+        
+        const uint32_t index = std::distance(mComponents.begin(), it);
+        
+        mToDestroy.emplace(index);
     }
 }
 

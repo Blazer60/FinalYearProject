@@ -17,11 +17,10 @@ namespace engine
         
         for (auto &actor : mActors)
         {
-            actor->OnUpdate();
+            actor->update();
             for (auto &component : actor->getComponents())
                 component->update();
         }
-        
         
         for (const uint32_t index : mToDestroy)
         {

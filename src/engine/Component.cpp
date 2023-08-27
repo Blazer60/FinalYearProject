@@ -46,4 +46,9 @@ namespace engine
     {
     
     }
+    
+    Actor *Component::getActor() const
+    {
+        return mActor;
+    }
 }

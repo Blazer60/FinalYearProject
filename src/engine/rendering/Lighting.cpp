@@ -10,6 +10,8 @@
 #include "GraphicsState.h"
 #include "gtx/euler_angles.hpp"
 #include "RendererImGui.h"
+#include "Ui.h"
+#include "Actor.h"
 
 DirectionalLight::DirectionalLight(
     const glm::vec3 &direction, const glm::vec3 &intensity, const glm::ivec2 &shadowMapSize, uint32_t cascadeZoneCount)
@@ -36,8 +38,11 @@ void DirectionalLight::updateLayerCount(uint32_t cascadeCount)
 void DirectionalLight::onDrawUi()
 {
     ImGui::PushID("DirectionalLightSettings");
-    if (ImGui::CollapsingHeader("Directional Light", ImGuiTreeNodeFlags_DefaultOpen))
+    if (ImGui::TreeNodeEx("Directional Light Settings", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen))
     {
+        if (ImGui::Button("Destroy Component"))
+            mActor->removeComponent(this);
+        
         ImGui::ColorEdit3("Intensity", glm::value_ptr(intensity), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_PickerHueWheel);
         bool changed = false;
         ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x / 2.f * 0.65f);
@@ -50,7 +55,10 @@ void DirectionalLight::onDrawUi()
         
         if (changed)
             calculateDirection();
+        
+        ImGui::TreePop();
     }
+    
     ImGui::PopID();
 }
 

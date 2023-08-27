@@ -24,6 +24,7 @@ namespace engine
         void update();
         void preRender();
         void attachToActor(class Actor *actor);
+        [[nodiscard]] class Actor *getActor() const;
         
     protected:
         virtual void onUpdate();

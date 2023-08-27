@@ -74,11 +74,13 @@ void StandardMaterial::setNormalMap(std::shared_ptr<Texture> normalMap)
 void StandardMaterial::onDrawUi()
 {
     ImGui::PushID("StandardMaterialSettings");
-    if (ImGui::CollapsingHeader("Material", ImGuiTreeNodeFlags_DefaultOpen))
+    if (ImGui::TreeNodeEx("Material", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAvailWidth))
     {
         ImGui::ColorEdit3("Ambient Colour", glm::value_ptr(ambientColour));
         ImGui::SliderFloat("Roughness", &roughness, 0.f, 1.f);
         ImGui::SliderFloat("Metallic", &metallic, 0.f, 1.f);
+        
+        ImGui::TreePop();
     }
     ImGui::PopID();
 }
