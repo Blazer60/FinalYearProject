@@ -63,6 +63,9 @@ namespace engine
         
         template<typename T>
         void addComponentOption(const std::string &name, const std::function<void(Actor&)> &onCreate);
+        
+        void attachSceneCallbacks(Scene *scene);
+        void detachSceneCallbacks() const;
     
     protected:
         void onDrawUi() override;
@@ -76,6 +79,8 @@ namespace engine
         LogWindow mLogWindow;
         Actor *mSelectedActor { nullptr };
         std::vector<std::unique_ptr<ComponentDetails>> mComponentList;
+        
+        uint64_t mDeletionToken { 0 };
     };
     
     

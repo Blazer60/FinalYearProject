@@ -10,6 +10,7 @@
 #include <utility>
 #include "gtc/type_ptr.hpp"
 #include "Ui.h"
+#include "Scene.h"
 
 namespace engine
 {
@@ -32,7 +33,17 @@ namespace engine
     void Actor::onDrawUi()
     {
         ImGui::PushID("ActorSettings");
-        ui::inputText("Name", &mName);
+        ImGui::SetNextItemWidth(glm::min(
+            200.f,
+            ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("Delete Actor").x - ImGui::GetStyle().WindowPadding.x * 2.f));
+        ui::inputText("##Name", &mName);
+        ui::drawToolTip("Actor's Name");
+        ImGui::SameLine(ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("Delete Actor").x);
+        if (ImGui::Button("Delete Actor"))
+        {
+            MESSAGE("Deleting Actor");
+            markForDeath();
+        }
         if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
         {
             bool changedFlag = false;
@@ -65,6 +76,11 @@ namespace engine
     glm::mat4 Actor::getTransform() const
     {
         return mTransform;
+    }
+    
+    void Actor::markForDeath()
+    {
+        mScene->destroy(this);
     }
 }
 

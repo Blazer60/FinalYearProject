@@ -23,6 +23,7 @@ namespace engine
         : public ui::Drawable
     {
     public:
+        friend class Scene;
         Actor() = default;
         explicit Actor(std::string name);
         virtual ~Actor() = default;
@@ -56,8 +57,17 @@ namespace engine
         template<typename T>
         T* getComponent();
         
+        /**
+         * @tparam T - the type of component.
+         * @returns True if it could find a component with type T, False otherwise.
+         */
         template<typename T>
         bool hasComponent();
+        
+        /**
+         * @brief This actor will be destroyed at the end of the update loop.
+         */
+        void markForDeath();
         
     public:
         glm::vec3 position     { glm::vec3(0.f) };
@@ -72,6 +82,7 @@ namespace engine
         glm::mat4 mTransform    { glm::mat4(1.f) };
         
         std::vector<std::unique_ptr<Component>> mComponents;
+        class Scene *mScene;
     };
     
     template<typename T>
@@ -89,7 +100,11 @@ namespace engine
     bool Actor::hasComponent()
     {
         return std::any_of(mComponents.begin(), mComponents.end(), [](auto &component) {
-            return dynamic_cast<T*>(component.get()) != nullptr;
+            T* t = dynamic_cast<T*>(component.get());
+            if (t == nullptr)
+                return false;
+            else  // Make sure that it's the exact type rather than a child type.
+                return typeid(T*).hash_code() == typeid(t).hash_code();
         });
     }
 } // engine

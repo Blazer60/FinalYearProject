@@ -172,7 +172,7 @@ namespace engine
         style.Colors[ImGuiCol_Text]     = ImVec4(0.85f, 0.85f, 0.85f, 1.f);
         style.Colors[ImGuiCol_WindowBg] = background;
         style.Colors[ImGuiCol_ChildBg]  = background;
-        style.Colors[ImGuiCol_PopupBg]  = primary;
+        style.Colors[ImGuiCol_PopupBg]  = primaryHovered;
         
         style.Colors[ImGuiCol_Header]           = primary;
         style.Colors[ImGuiCol_HeaderHovered]    = primaryHovered;
@@ -305,7 +305,10 @@ namespace engine
     void Core::setScene(std::unique_ptr<Scene> scene)
     {
         mScene.reset();
+        
+        mEditor.detachSceneCallbacks();
         mScene = std::move(scene);
+        mEditor.attachSceneCallbacks(mScene.get());
     }
     
     Scene *Core::getScene()

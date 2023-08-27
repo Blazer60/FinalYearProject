@@ -22,12 +22,19 @@ namespace engine
     class Scene
     {
     public:
+        Callback<Actor*> onDeath;
+        
         virtual ~Scene() = default;
         
         void update();
         void render();
         void imguiUpdate();
         std::vector<std::unique_ptr<Actor>> &getActors();
+        
+        /**
+         * @brief Actors are destroyed at the end of the update loop.
+         */
+        void destroy(Actor *actor);
         
         virtual void onFixedUpdate();
         virtual void onRender();
@@ -41,7 +48,7 @@ namespace engine
         virtual void onImguiUpdate();
         
         std::vector<std::unique_ptr<Actor>> mActors;
-        Actor *mSelectedActor { nullptr };
+        std::set<uint32_t> mToDestroy;
     };
     
     template<typename TActor, typename... TArgs>
@@ -50,6 +57,7 @@ namespace engine
         std::unique_ptr<TActor> actor = std::make_unique<TActor>(std::forward<TArgs>(args)...);
         TActor *actorRef = actor.get();
         
+        actor->mScene = this;
         mActors.push_back(std::move(actor));
         
         return actorRef;

@@ -21,6 +21,15 @@ namespace engine
             for (auto &component : actor->getComponents())
                 component->update();
         }
+        
+        
+        for (const uint32_t index : mToDestroy)
+        {
+            onDeath.broadcast(mActors[index].get());
+            mActors.erase(mActors.begin() + index);
+        }
+        
+        mToDestroy.clear();
     }
 
     void Scene::onFixedUpdate()
@@ -66,6 +75,23 @@ namespace engine
                 component->preRender();
         }
         onRender();
+    }
+    
+    void Scene::destroy(Actor *actor)
+    {
+        const auto it = std::find_if(mActors.begin(), mActors.end(), [&actor](const std::unique_ptr<Actor> &left) {
+            return left.get() == actor;
+        });
+        
+        if (it == mActors.end())
+        {
+            WARN("Actor % does not exist in this scene and so it cannot be removed.", actor->getName());
+            return;
+        }
+        
+        const uint32_t index = std::distance(mActors.begin(), it);
+        
+        mToDestroy.emplace(index);
     }
     
 }

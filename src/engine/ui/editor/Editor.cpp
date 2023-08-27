@@ -153,4 +153,19 @@ namespace engine
             ImGui::EndCombo();
         }
     }
+    
+    void Editor::attachSceneCallbacks(Scene *scene)
+    {
+        mDeletionToken = scene->onDeath.subscribe([this](Actor *actor) {
+            // Todo: mSelectedActor should really have custom ref<Actor> to combat this.
+            if (mSelectedActor == actor)
+                mSelectedActor = nullptr;
+        });
+    }
+    
+    void Editor::detachSceneCallbacks() const
+    {
+        if (core->getScene() != nullptr)
+            core->getScene()->onDeath.unSubscribe(mDeletionToken);
+    }
 }
