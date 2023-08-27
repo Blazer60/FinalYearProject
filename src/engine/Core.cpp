@@ -20,349 +20,306 @@
 #include "TextureLoader.h"
 #include "ModelDestroyer.h"
 
-engine::Core::Core(const glm::ivec2 &resolution, bool enableDebugging)
-    : mResolution(resolution), mEnableDebugging(enableDebugging)
+namespace engine
 {
-    mLogger = std::make_unique<Logger>();
-    logger = mLogger.get();
-    mLogger->setOutputFlag(OutputSourceFlag_File | OutputSourceFlag_Queue);
-    eventHandler = &mEventHandler;
-    core = this;
-    editor = &mEditor;
-    
-    window::setBufferSize(mResolution);
-    
-    if (!initGlfw(4, 6))
+    Core::Core(const glm::ivec2 &resolution, bool enableDebugging)
+        : mResolution(resolution), mEnableDebugging(enableDebugging)
     {
-        mIsRunning = false;
-        LOG_MAJOR("Unable to initialise everything.");
-        return;
-    }
-    
-    if (glewInit() != GLEW_OK)
-    {
-        mIsRunning = false;
-        LOG_MAJOR("Unable to initialise glew.");
-        return;
-    }
-    
-    mEditor.init();
-    
-    mRenderer = std::make_unique<Renderer>();
-    if (!mRenderer->isOk)
-    {
-        mIsRunning = false;
-        LOG_MAJOR("Could not load the renderer.");
-        return;
-    }
-    
-    graphics::renderer = mRenderer.get();
-    
-    if (mEnableDebugging)
-    {
-        bool success = Renderer::debugMessageCallback(forwardOpenGlCallback);
-        if (!success)
-            WARN("Unable to enable debugging. Check if the openGl version is greater than 4.3.");
-        MESSAGE(Renderer::getVersion());
-    }
-    
-    if (!initImGui())
-    {
-        mIsRunning = false;
-        LOG_MAJOR("Could not load drawUi for an opengl context.");
-        return;
-    }
-    
-    mMainCamera = std::make_unique<MainCamera>(glm::vec3(0.f, 3.f, 21.f));
-    
-    mWindowIcon = load::windowIcon("../resources/textures/Icon.png");
-    if (mWindowIcon.pixels != nullptr)
-        glfwSetWindowIcon(mWindow, 1, &mWindowIcon);
-    
-    mStandardShader = std::make_shared<Shader>(
-        "../resources/shaders/geometry/standard/Standard.vert",
-        "../resources/shaders/geometry/standard/Standard.frag");
-    
-}
-
-bool engine::Core::initGlfw(int openGlMajorVersion, int openGlMinorVersion)
-{
-    if (!glfwInit())
-        return false;
-    
-    glfwSetErrorCallback([](int errorCode, const char *description) {
-        MESSAGE(description); // The program will bail out after this.
-    });
-    
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, openGlMajorVersion);  // Version of opengl you want to use
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, openGlMinorVersion);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    if (mEnableDebugging)
-        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-    
-    mWindow = glfwCreateWindow(mResolution.x, mResolution.y, mWindowTitle.data(), nullptr, nullptr);
-    if (!mWindow)
-        return false;
-    
-    glfwMakeContextCurrent(mWindow);
-    
-    const int frameRate = 60;
-    glfwSwapInterval(frameRate);
-    
-    glfwSetCursorPosCallback(mWindow, [](GLFWwindow *window, double xPos, double yPos) {
-        eventHandler->updateMouseDelta(xPos, yPos);
-    });
-    
-    return true;
-}
-
-bool engine::Core::initImGui()
-{
-    ImGui::CreateContext();
-    
-    mGuiIo = &ImGui::GetIO();
-    (void)mGuiIo;
-    mGuiIo->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    mGuiIo->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    mGuiIo->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-    
-    mGuiIo->Fonts->AddFontFromFileTTF("../resources/fonts/robotoMono/static/RobotoMono-Regular.ttf", 15.f);
-    
-    ImGui::StyleColorsDark();
-    ImGuiStyle &style = ImGui::GetStyle();
-    if (mGuiIo->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
-        style.WindowRounding = 5.f;
-        style.Colors[ImGuiCol_WindowBg].w = 1.f;
-    }
-    
-    style.FrameRounding = 5.f;
-    style.GrabRounding = 5.f;
-    
-    style.WindowBorderSize = 0.f;
-    style.ChildBorderSize = 0.f;
-    style.PopupBorderSize = 0.f;
-    
-    
-    configureUiThemeColours(style);
-    
-    if (!ImGui_ImplGlfw_InitForOpenGL(mWindow, true))
-        return false;
-    
-    if (!ImGui_ImplOpenGL3_Init())
-        return false;
-    
-    return true;
-}
-
-void engine::Core::configureUiThemeColours(ImGuiStyle &style)
-{
-    const ImVec4 background = ImVec4(0.16f, 0.16f, 0.17f, 1.f);
-    
-    const ImVec4 primary        = ImVec4(0.2f, 0.2f, 0.21f, 1.f);
-    const ImVec4 primaryHovered = ImVec4(0.3f, 0.3f, 0.32f, 1.f);
-    const ImVec4 primaryActive  = ImVec4(0.4f, 0.4f, 0.48f, 1.f);
-    
-    const ImVec4 accent         = ImVec4(0.09f, 0.32f, 0.14f, 1.f);
-    const ImVec4 accentHovered  = ImVec4(0.14f, 0.47f, 0.2f, 1.f);
-    const ImVec4 accentActive   = ImVec4(0.18f, 0.62f, 0.27f, 1.f);
-    
-    style.Colors[ImGuiCol_Text]     = ImVec4(0.85f, 0.85f, 0.85f, 1.f);
-    style.Colors[ImGuiCol_WindowBg] = background;
-    style.Colors[ImGuiCol_ChildBg]  = background;
-    style.Colors[ImGuiCol_PopupBg]  = primary;
-    
-    style.Colors[ImGuiCol_Header]           = primary;
-    style.Colors[ImGuiCol_HeaderHovered]    = primaryHovered;
-    style.Colors[ImGuiCol_HeaderActive]     = primaryActive;
-    
-    style.Colors[ImGuiCol_FrameBg]          = primary;
-    style.Colors[ImGuiCol_FrameBgHovered]   = primaryHovered;
-    style.Colors[ImGuiCol_FrameBgActive]    = primaryActive;
-    
-    style.Colors[ImGuiCol_TitleBg] = background;
-    style.Colors[ImGuiCol_TitleBgActive] = background;
-    
-    style.Colors[ImGuiCol_CheckMark]            = accentActive;
-    style.Colors[ImGuiCol_SliderGrab]           = accentHovered;
-    style.Colors[ImGuiCol_SliderGrabActive]     = accentActive;
-    style.Colors[ImGuiCol_Button]               = accent;
-    style.Colors[ImGuiCol_ButtonHovered]        = accentHovered;
-    style.Colors[ImGuiCol_ButtonActive]         = accentActive;
-    
-    style.Colors[ImGuiCol_Separator] = primary;
-    style.Colors[ImGuiCol_SeparatorHovered] = accentHovered;
-    style.Colors[ImGuiCol_SeparatorActive] = accentActive;
-    
-    style.Colors[ImGuiCol_Tab]                  = primary;
-    style.Colors[ImGuiCol_TabHovered]           = primaryHovered;
-    style.Colors[ImGuiCol_TabActive]            = primary;
-    style.Colors[ImGuiCol_TabUnfocused]         = background;
-    style.Colors[ImGuiCol_TabUnfocusedActive]   = background;
-    
-    style.Colors[ImGuiCol_DockingPreview] = accentHovered;
-}
-
-engine::Core::~Core()
-{
-    destroy::windowIcon(mWindowIcon);
-    mScene.reset();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui_ImplOpenGL3_Shutdown();
-    glfwTerminate();
-}
-
-void engine::Core::run()
-{
-    if (mScene == nullptr)
-        mIsRunning = false;
-    
-    double nextUpdateTick = 0.0;
-    
-    while (mIsRunning)
-    {
-        unsigned int loopAmount = 0;
+        mLogger = std::make_unique<Logger>();
+        logger = mLogger.get();
+        mLogger->setOutputFlag(OutputSourceFlag_File | OutputSourceFlag_Queue);
+        eventHandler = &mEventHandler;
+        core = this;
+        editor = &mEditor;
         
-        mEventHandler.beginFrame();
-        glfwPollEvents();
-        mIsRunning = !glfwWindowShouldClose(mWindow);
+        window::setBufferSize(mResolution);
         
-        while (timers::getTicks<double>() > nextUpdateTick && loopAmount < mMaxLoopCount)
+        if (!initGlfw(4, 6))
         {
-            mScene->onFixedUpdate();
-            
-            
-            nextUpdateTick += timers::fixedTime<double>();
-            ++loopAmount;
+            mIsRunning = false;
+            LOG_MAJOR("Unable to initialise everything.");
+            return;
         }
         
-        mScene->update();
-        mMainCamera->update();
-        mEditor.update();
-        mScene->render();
-        mRenderer->submit(mMainCamera->toSettings());
-        mRenderer->render();
-        updateImgui();
-        mRenderer->clear();
+        if (glewInit() != GLEW_OK)
+        {
+            mIsRunning = false;
+            LOG_MAJOR("Unable to initialise glew.");
+            return;
+        }
         
-        glfwSwapBuffers(mWindow);
-        timers::update();
+        mEditor.init();
+        
+        mRenderer = std::make_unique<Renderer>();
+        if (!mRenderer->isOk)
+        {
+            mIsRunning = false;
+            LOG_MAJOR("Could not load the renderer.");
+            return;
+        }
+        
+        graphics::renderer = mRenderer.get();
+        
+        if (mEnableDebugging)
+        {
+            bool success = Renderer::debugMessageCallback(forwardOpenGlCallback);
+            if (!success)
+                WARN("Unable to enable debugging. Check if the openGl version is greater than 4.3.");
+            MESSAGE(Renderer::getVersion());
+        }
+        
+        if (!initImGui())
+        {
+            mIsRunning = false;
+            LOG_MAJOR("Could not load drawUi for an opengl context.");
+            return;
+        }
+        
+        mMainCamera = std::make_unique<MainCamera>(glm::vec3(0.f, 3.f, 21.f));
+        
+        mWindowIcon = load::windowIcon("../resources/textures/Icon.png");
+        if (mWindowIcon.pixels != nullptr)
+            glfwSetWindowIcon(mWindow, 1, &mWindowIcon);
+        
+        mStandardShader = std::make_shared<Shader>(
+            "../resources/shaders/geometry/standard/Standard.vert",
+            "../resources/shaders/geometry/standard/Standard.frag");
+        
     }
-}
-
-void engine::Core::updateImgui()
-{
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-    ImGuizmo::BeginFrame();
     
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glBindVertexArray(0);
-    ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
-    
-    mEventHandler.update();
-    
-    if (ImGui::BeginMainMenuBar())
+    bool engine::Core::initGlfw(int openGlMajorVersion, int openGlMinorVersion)
     {
-        mScene->onImguiMenuUpdate();
-        updateImguiMenuViewports();
-        const std::string text = "TPS: %.0f | Frame Rate: %.3f s/frame (%.1f FPS)";
-        ImGui::SetCursorPosX(
-            ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - ImGui::CalcTextSize(text.c_str()).x
-            - ImGui::GetScrollX() - 2 * ImGui::GetStyle().ItemSpacing.x);
-        ImGui::Text(text.c_str(), 1.f / timers::fixedTime<float>(), timers::deltaTime<float>(), ImGui::GetIO().Framerate);
-        ImGui::EndMainMenuBar();
+        if (!glfwInit())
+            return false;
+        
+        glfwSetErrorCallback([](int errorCode, const char *description) {
+            MESSAGE(description); // The program will bail out after this.
+        });
+        
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, openGlMajorVersion);  // Version of opengl you want to use
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, openGlMinorVersion);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        if (mEnableDebugging)
+            glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+        
+        mWindow = glfwCreateWindow(mResolution.x, mResolution.y, mWindowTitle.data(), nullptr, nullptr);
+        if (!mWindow)
+            return false;
+        
+        glfwMakeContextCurrent(mWindow);
+        
+        const int frameRate = 60;
+        glfwSwapInterval(frameRate);
+        
+        glfwSetCursorPosCallback(mWindow, [](GLFWwindow *window, double xPos, double yPos) {
+            eventHandler->updateMouseDelta(xPos, yPos);
+        });
+        
+        return true;
     }
     
-    ImGui::Begin("Scene Settings");
-    mScene->imguiUpdate();
-    ImGui::End();
-    
-    ImGui::Begin("Renderer Settings");
-    ui::draw(mMainCamera);
-    graphics::displayShadowSettings();
-    ImGui::End();
-    
-    ui::draw(mEditor);
-    
-    ImGui::Render();
-    int display_w, display_h;
-    glfwGetFramebufferSize(mWindow, &display_w, &display_h);
-    
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    
-    if (mGuiIo->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    bool Core::initImGui()
     {
-        GLFWwindow* backup_current_context = glfwGetCurrentContext();
-        ImGui::UpdatePlatformWindows();
-        ImGui::RenderPlatformWindowsDefault();
-        glfwMakeContextCurrent(backup_current_context);
+        ImGui::CreateContext();
+        
+        mGuiIo = &ImGui::GetIO();
+        (void)mGuiIo;
+        mGuiIo->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+        mGuiIo->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        mGuiIo->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+        
+        mGuiIo->Fonts->AddFontFromFileTTF("../resources/fonts/robotoMono/static/RobotoMono-Regular.ttf", 15.f);
+        
+        ImGui::StyleColorsDark();
+        ImGuiStyle &style = ImGui::GetStyle();
+        if (mGuiIo->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            style.WindowRounding = 5.f;
+            style.Colors[ImGuiCol_WindowBg].w = 1.f;
+        }
+        
+        style.FrameRounding = 5.f;
+        style.GrabRounding = 5.f;
+        
+        style.WindowBorderSize = 0.f;
+        style.ChildBorderSize = 0.f;
+        style.PopupBorderSize = 0.f;
+        
+        
+        configureUiThemeColours(style);
+        
+        if (!ImGui_ImplGlfw_InitForOpenGL(mWindow, true))
+            return false;
+        
+        if (!ImGui_ImplOpenGL3_Init())
+            return false;
+        
+        return true;
     }
-}
-
-void engine::Core::setScene(std::unique_ptr<Scene> scene)
-{
-    mScene.reset();
-    mScene = std::move(scene);
-}
-
-void engine::Core::updateImguiMenuViewports()
-{
-    if (ImGui::BeginMenu("Viewports"))
+    
+    void Core::configureUiThemeColours(ImGuiStyle &style)
     {
-        if (ImGui::MenuItem("Show Position Buffer"))
-            mViewportToggles.showPositionBuffer = true;
-        if (ImGui::MenuItem("Show Normal Buffer"))
-            mViewportToggles.showNormalBuffer = true;
-        if (ImGui::MenuItem("Show Albedo Buffer"))
-            mViewportToggles.showAlbedoBuffer = true;
-        if (ImGui::MenuItem("Show Emissive Buffer"))
-            mViewportToggles.showEmissiveBuffer = true;
-        if (ImGui::MenuItem("Show Diffuse Buffer"))
-            mViewportToggles.showDiffuseBuffer = true;
-        if (ImGui::MenuItem("Show Depth Buffer"))
-            mViewportToggles.showDepthBuffer = true;
-        if (ImGui::MenuItem("Show Output Buffer"))
-            mViewportToggles.showDeferredLightingBuffer = true;
-        if (ImGui::MenuItem("Show Shadow Buffer"))
-            mViewportToggles.showShadowBuffer = true;
-        if (ImGui::MenuItem("Show Roughness Buffer"))
-            mViewportToggles.showRoughnessBuffer = true;
-        if (ImGui::MenuItem("Show Metallic Buffer"))
-            mViewportToggles.showMetallicBuffer = true;
-        if (ImGui::MenuItem("Show Primary Buffer"))
-            mViewportToggles.showPrimaryBuffer = true;
-        ImGui::EndMenu();
+        const ImVec4 background = ImVec4(0.16f, 0.16f, 0.17f, 1.f);
+        
+        const ImVec4 primary        = ImVec4(0.2f, 0.2f, 0.21f, 1.f);
+        const ImVec4 primaryHovered = ImVec4(0.3f, 0.3f, 0.32f, 1.f);
+        const ImVec4 primaryActive  = ImVec4(0.4f, 0.4f, 0.48f, 1.f);
+        
+        const ImVec4 accent         = ImVec4(0.09f, 0.32f, 0.14f, 1.f);
+        const ImVec4 accentHovered  = ImVec4(0.14f, 0.47f, 0.2f, 1.f);
+        const ImVec4 accentActive   = ImVec4(0.18f, 0.62f, 0.27f, 1.f);
+        
+        style.Colors[ImGuiCol_Text]     = ImVec4(0.85f, 0.85f, 0.85f, 1.f);
+        style.Colors[ImGuiCol_WindowBg] = background;
+        style.Colors[ImGuiCol_ChildBg]  = background;
+        style.Colors[ImGuiCol_PopupBg]  = primary;
+        
+        style.Colors[ImGuiCol_Header]           = primary;
+        style.Colors[ImGuiCol_HeaderHovered]    = primaryHovered;
+        style.Colors[ImGuiCol_HeaderActive]     = primaryActive;
+        
+        style.Colors[ImGuiCol_FrameBg]          = primary;
+        style.Colors[ImGuiCol_FrameBgHovered]   = primaryHovered;
+        style.Colors[ImGuiCol_FrameBgActive]    = primaryActive;
+        
+        style.Colors[ImGuiCol_TitleBg] = background;
+        style.Colors[ImGuiCol_TitleBgActive] = background;
+        
+        style.Colors[ImGuiCol_CheckMark]            = accentActive;
+        style.Colors[ImGuiCol_SliderGrab]           = accentHovered;
+        style.Colors[ImGuiCol_SliderGrabActive]     = accentActive;
+        style.Colors[ImGuiCol_Button]               = accent;
+        style.Colors[ImGuiCol_ButtonHovered]        = accentHovered;
+        style.Colors[ImGuiCol_ButtonActive]         = accentActive;
+        
+        style.Colors[ImGuiCol_Separator] = primary;
+        style.Colors[ImGuiCol_SeparatorHovered] = accentHovered;
+        style.Colors[ImGuiCol_SeparatorActive] = accentActive;
+        
+        style.Colors[ImGuiCol_Tab]                  = primary;
+        style.Colors[ImGuiCol_TabHovered]           = primaryHovered;
+        style.Colors[ImGuiCol_TabActive]            = primary;
+        style.Colors[ImGuiCol_TabUnfocused]         = background;
+        style.Colors[ImGuiCol_TabUnfocusedActive]   = background;
+        
+        style.Colors[ImGuiCol_DockingPreview] = accentHovered;
     }
-}
-
-void engine::Core::updateViewports()
-{
-    ui::showTextureBuffer("Albedo", mRenderer->getAlbedoBuffer(), &mViewportToggles.showAlbedoBuffer, false);
-    ui::showTextureBuffer("Position", mRenderer->getPositionBuffer(), &mViewportToggles.showPositionBuffer, false);
-    ui::showTextureBuffer("Normal", mRenderer->getNormalBuffer(), &mViewportToggles.showNormalBuffer, false);
-    ui::showTextureBuffer("Emissive", mRenderer->getEmissiveBuffer(), &mViewportToggles.showEmissiveBuffer, false);
-    ui::showTextureBuffer("Diffuse", mRenderer->getDiffuseBuffer(), &mViewportToggles.showDiffuseBuffer, false);
-    ui::showTextureBuffer("Depth", mRenderer->getDepthBuffer(), &mViewportToggles.showDepthBuffer, false);
-    ui::showTextureBuffer("Shadow", mRenderer->getShadowBuffer(), &mViewportToggles.showShadowBuffer, false);
-    ui::showTextureBuffer("Roughness", mRenderer->getRoughnessBuffer(), &mViewportToggles.showRoughnessBuffer, false);
-    ui::showTextureBuffer("Metallic", mRenderer->getMetallicBuffer(), &mViewportToggles.showMetallicBuffer, false);
-    ui::showTextureBuffer("DeferredLighting", mRenderer->getDeferredLightingBuffer(), &mViewportToggles.showDeferredLightingBuffer, false);
-    ui::showTextureBuffer("Primary", mRenderer->getPrimaryBuffer(), &mViewportToggles.showPrimaryBuffer, true);
-}
-
-engine::Scene *engine::Core::getScene()
-{
-    return mScene.get();
-}
-
-MainCamera *engine::Core::getCamera()
-{
-    return mMainCamera.get();
-}
-
-std::shared_ptr<Shader> &engine::Core::getStandardShader()
-{
-    return mStandardShader;
+    
+    Core::~Core()
+    {
+        destroy::windowIcon(mWindowIcon);
+        mScene.reset();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui_ImplOpenGL3_Shutdown();
+        glfwTerminate();
+    }
+    
+    void Core::run()
+    {
+        if (mScene == nullptr)
+            mIsRunning = false;
+        
+        double nextUpdateTick = 0.0;
+        
+        while (mIsRunning)
+        {
+            unsigned int loopAmount = 0;
+            
+            mEventHandler.beginFrame();
+            glfwPollEvents();
+            mIsRunning = !glfwWindowShouldClose(mWindow);
+            
+            while (timers::getTicks<double>() > nextUpdateTick && loopAmount < mMaxLoopCount)
+            {
+                mScene->onFixedUpdate();
+                
+                
+                nextUpdateTick += timers::fixedTime<double>();
+                ++loopAmount;
+            }
+            
+            mScene->update();
+            mMainCamera->update();
+            mEditor.update();
+            mScene->render();
+            mRenderer->submit(mMainCamera->toSettings());
+            mRenderer->render();
+            updateImgui();
+            mRenderer->clear();
+            
+            glfwSwapBuffers(mWindow);
+            timers::update();
+        }
+    }
+    
+    void Core::updateImgui()
+    {
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        ImGuizmo::BeginFrame();
+        
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glBindVertexArray(0);
+        ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+        
+        mEventHandler.update();
+        
+        if (ImGui::BeginMainMenuBar())
+        {
+            mScene->onImguiMenuUpdate();
+            const std::string text = "TPS: %.0f | Frame Rate: %.3f s/frame (%.1f FPS)";
+            ImGui::SetCursorPosX(
+                ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - ImGui::CalcTextSize(text.c_str()).x
+                - ImGui::GetScrollX() - 2 * ImGui::GetStyle().ItemSpacing.x);
+            ImGui::Text(text.c_str(), 1.f / timers::fixedTime<float>(), timers::deltaTime<float>(), ImGui::GetIO().Framerate);
+            ImGui::EndMainMenuBar();
+        }
+        
+        ImGui::Begin("Scene Settings");
+        mScene->imguiUpdate();
+        ImGui::End();
+        
+        ImGui::Begin("Renderer Settings");
+        ui::draw(mMainCamera);
+        graphics::displayShadowSettings();
+        ImGui::End();
+        
+        ui::draw(mEditor);
+        
+        ImGui::Render();
+        int display_w, display_h;
+        glfwGetFramebufferSize(mWindow, &display_w, &display_h);
+        
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        
+        if (mGuiIo->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            GLFWwindow* backup_current_context = glfwGetCurrentContext();
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backup_current_context);
+        }
+    }
+    
+    void Core::setScene(std::unique_ptr<Scene> scene)
+    {
+        mScene.reset();
+        mScene = std::move(scene);
+    }
+    
+    Scene *Core::getScene()
+    {
+        return mScene.get();
+    }
+    
+    MainCamera *Core::getCamera()
+    {
+        return mMainCamera.get();
+    }
+    
+    std::shared_ptr<Shader> &Core::getStandardShader()
+    {
+        return mStandardShader;
+    }
 }

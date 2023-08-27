@@ -15,6 +15,22 @@ namespace engine
 {
     void Editor::init()
     {
+        addComponentOption<MeshComponent>("Mesh Component", [](Actor& actor)
+        {
+            auto model = load::model<StandardVertex>("");
+            auto material = std::make_shared<StandardMaterial>();
+            material->attachShader(core->getStandardShader());
+            actor.addComponent(std::make_unique<MeshComponent>(model, material));
+        });
+        
+        addComponentOption<DirectionalLight>("Directional Light", [](Actor& actor) {
+            actor.addComponent(std::make_unique<DirectionalLight>(
+                glm::normalize(glm::vec3(1.f, 1.f, 1.f)),
+                glm::vec3(0.93f, 0.93f, 0.95f),
+                glm::ivec2(4096),
+                4));
+        });
+        
         mViewport.init();
     }
     
@@ -32,9 +48,10 @@ namespace engine
         if (mSelectedActor != nullptr)
         {
             ui::draw(mSelectedActor);
+            ImGui::SeparatorText("Components");
+            drawAddComponentCombo();
             if (!mSelectedActor->getComponents().empty())
             {
-                ImGui::SeparatorText("Components");
                 for (auto &component : mSelectedActor->getComponents())
                     ui::draw(component.get());
             }
@@ -116,5 +133,24 @@ namespace engine
         material->attachShader(core->getStandardShader());
         actor->addComponent(std::make_unique<MeshComponent>(model, material));
         mSelectedActor = actor;
+    }
+    
+    void Editor::drawAddComponentCombo()
+    {
+        if (ImGui::BeginCombo("Add Component", nullptr, ImGuiComboFlags_NoPreview))
+        {
+            for (auto &componentDetails : mComponentList)
+            {
+                // Don't show this option if it already has it.
+                if (componentDetails->hasThisComponent(*mSelectedActor))
+                    continue;
+                
+                std::string name = componentDetails->previewName + "##" + std::to_string(reinterpret_cast<int64_t>(&componentDetails));
+                if (ImGui::Selectable(name.c_str()))
+                    componentDetails->onCreate(*mSelectedActor);
+            }
+            
+            ImGui::EndCombo();
+        }
     }
 }

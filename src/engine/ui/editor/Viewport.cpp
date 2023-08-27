@@ -28,7 +28,7 @@ namespace engine
         mThirdPersonToken = eventHandler->viewport.thirdPerson.onStateChanged.subscribe([this](bool state) { toggleMouseState(state); });
         
         mViewportImages = {
-            ViewportImage { "Default",       []() -> const TextureBufferObject& { return graphics::renderer->getPrimaryBuffer(); } },
+            ViewportImage { "Default",      []() -> const TextureBufferObject& { return graphics::renderer->getPrimaryBuffer(); } },
             ViewportImage { "Position",     []() -> const TextureBufferObject& { return graphics::renderer->getPositionBuffer(); } },
             ViewportImage { "Normal",       []() -> const TextureBufferObject& { return graphics::renderer->getNormalBuffer(); } },
             ViewportImage { "Albedo",       []() -> const TextureBufferObject& { return graphics::renderer->getAlbedoBuffer(); } },
@@ -146,6 +146,4 @@ namespace engine
     {
         return mViewportWindow;
     }
-    
-    
 }

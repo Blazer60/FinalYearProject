@@ -56,6 +56,9 @@ namespace engine
         template<typename T>
         T* getComponent();
         
+        template<typename T>
+        bool hasComponent();
+        
     public:
         glm::vec3 position     { glm::vec3(0.f) };
         glm::quat rotation     { glm::identity<glm::quat>() };
@@ -80,5 +83,13 @@ namespace engine
                 return t;
         }
         return nullptr;
+    }
+    
+    template<typename T>
+    bool Actor::hasComponent()
+    {
+        return std::any_of(mComponents.begin(), mComponents.end(), [](auto &component) {
+            return dynamic_cast<T*>(component.get()) != nullptr;
+        });
     }
 } // engine

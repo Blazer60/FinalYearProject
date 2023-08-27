@@ -28,6 +28,9 @@ namespace load
     template<typename TVertex>
     SharedMesh model(std::string_view path)
     {
+        if (path.empty())
+            return { };
+        
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(
             path.data(),
