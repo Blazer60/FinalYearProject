@@ -93,6 +93,7 @@ add_executable(${PROJECT_NAME}
         include/engine/event/Input.h
         src/engine/event/EventHandler.cpp
         include/engine/event/EventHandler.h
+        include/engine/EngineMemory.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

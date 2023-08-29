@@ -100,8 +100,8 @@ namespace engine
         if (auto *x = reinterpret_cast<GLFWwindow*>(ImGui::GetWindowViewport()->PlatformHandle); x != nullptr)
             mViewportWindow = x;
         
-        Actor *selectedActor = editor->getSelectedActor();
-        if (selectedActor)
+        Ref<Actor> selectedActor = editor->getSelectedActor();
+        if (selectedActor.isValid())
         {
             const float windowWidth = ImGui::GetWindowWidth();
             const float windowHeight = ImGui::GetWindowHeight();

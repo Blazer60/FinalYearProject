@@ -11,6 +11,7 @@
 #include "detail/type_quat.hpp"
 #include "Drawable.h"
 #include "Component.h"
+#include "EngineMemory.h"
 
 namespace engine
 {
@@ -26,7 +27,10 @@ namespace engine
         friend class Scene;
         Actor() = default;
         explicit Actor(std::string name);
-        virtual ~Actor() = default;
+        virtual ~Actor()
+        {
+            MESSAGE("Deleting Actor.");
+        }
         
         void update();
         
@@ -39,12 +43,12 @@ namespace engine
         /**
          * @returns All of the components that are attached to this actor.
          */
-        [[nodiscard]] std::vector<std::unique_ptr<Component>> &getComponents();
+        [[nodiscard]] std::vector<Resource<Component>> &getComponents();
         
         /**
          * @brief Adds the component the the list of components attached to this actor.
          */
-        void addComponent(std::unique_ptr<Component> component);
+        Ref<Component> addComponent(Resource<Component> &&component);
         
         /**
          * @returns The transform of this actor in world space.
@@ -56,14 +60,14 @@ namespace engine
          * @returns The first component of type T or a subclass of T, Nullptr otherwise.
          */
         template<typename T>
-        T* getComponent();
+        Ref<Component> getComponent();
         
         /**
          * @tparam T - the type of component.
          * @returns True if it could find a component with type T, False otherwise.
          */
         template<typename T>
-        bool hasComponent();
+        [[nodiscard]] bool hasComponent() const;
         
         /**
          * @brief This actor will be destroyed at the end of the update loop.
@@ -88,7 +92,7 @@ namespace engine
         std::string mName       { "Actor" };
         glm::mat4 mTransform    { glm::mat4(1.f) };
         
-        std::vector<std::unique_ptr<Component>> mComponents;
+        std::vector<Resource<Component>> mComponents;
         class Scene *mScene;
         
     private:
@@ -96,21 +100,21 @@ namespace engine
     };
     
     template<typename T>
-    T* Actor::getComponent()
+    Ref<Component> Actor::getComponent()
     {
         for (auto &component : mComponents)
         {
             if (T* t = dynamic_cast<T*>(component.get()); t != nullptr)
                 return t;
         }
-        return nullptr;
+        return Ref<Component>();
     }
     
     template<typename T>
-    bool Actor::hasComponent()
+    bool Actor::hasComponent() const
     {
-        return std::any_of(mComponents.begin(), mComponents.end(), [](auto &component) {
-            T* t = dynamic_cast<T*>(component.get());
+        return std::any_of(mComponents.begin(), mComponents.end(), [](const auto &component) {
+            const T* t = dynamic_cast<const T*>(component.get());
             if (t == nullptr)
                 return false;
             else  // Make sure that it's the exact type rather than a child type.

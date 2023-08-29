@@ -15,35 +15,38 @@
 #include "Actor.h"
 #include "Callback.h"
 #include "LogWindow.h"
+#include "EngineMemory.h"
 
 namespace engine
 {
     struct ComponentDetails
     {
-        ComponentDetails(std::string previewName, std::function<void(Actor&)> onCreate)
+        typedef std::function<void(Ref<Actor>)> CreateFunc;
+        
+        ComponentDetails(std::string previewName, CreateFunc onCreate)
             : previewName(std::move(previewName)), onCreate(std::move(onCreate))
         {
         }
         virtual ~ComponentDetails() = default;
         
         std::string previewName;
-        std::function<void(Actor&)> onCreate;
+        std::function<void(Ref<Actor>)> onCreate;
         
-        virtual bool hasThisComponent(Actor& actor) = 0;
+        virtual bool hasThisComponent(const Ref<Actor>& actor) = 0;
     };
     
     template<typename T>
     struct CreateComponentDetails : public ComponentDetails
     {
-        CreateComponentDetails(std::string previewName, std::function<void(Actor&)> onCreate)
+        CreateComponentDetails(std::string previewName, CreateFunc onCreate)
             : ComponentDetails(previewName, onCreate)
         {
         
         }
         
-        bool hasThisComponent(Actor &actor) override
+        bool hasThisComponent(const Ref<Actor>& actor) override
         {
-            return actor.hasComponent<T>();
+            return actor->hasComponent<T>();
         }
     };
     
@@ -57,16 +60,12 @@ namespace engine
     public:
         void init();
         void update();
-        [[nodiscard]] Actor *getSelectedActor();
+        [[nodiscard]] Ref<Actor> getSelectedActor();
         bool isViewportHovered();
         GLFWwindow *getViewportContext();
         
         template<typename T>
-        void addComponentOption(const std::string &name, const std::function<void(Actor&)> &onCreate);
-        
-        void attachSceneCallbacks(Scene *scene);
-        void detachSceneCallbacks() const;
-    
+        void addComponentOption(const std::string &name, const ComponentDetails::CreateFunc &onCreate);
     protected:
         void onDrawUi() override;
         void drawSceneHierarchyPanel();
@@ -77,7 +76,7 @@ namespace engine
     protected:
         Viewport mViewport;
         LogWindow mLogWindow;
-        Actor *mSelectedActor { nullptr };
+        Ref<Actor> mSelectedActor;
         std::vector<std::unique_ptr<ComponentDetails>> mComponentList;
         
         uint64_t mDeletionToken { 0 };
@@ -85,7 +84,7 @@ namespace engine
     
     
     template<typename T>
-    void Editor::addComponentOption(const std::string &name, const std::function<void(Actor &)> &onCreate)
+    void Editor::addComponentOption(const std::string &name, const ComponentDetails::CreateFunc &onCreate)
     {
         mComponentList.push_back(std::make_unique<CreateComponentDetails<T>>(name, onCreate));
     }

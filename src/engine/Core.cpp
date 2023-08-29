@@ -305,10 +305,7 @@ namespace engine
     void Core::setScene(std::unique_ptr<Scene> scene)
     {
         mScene.reset();
-        
-        mEditor.detachSceneCallbacks();
         mScene = std::move(scene);
-        mEditor.attachSceneCallbacks(mScene.get());
     }
     
     Scene *Core::getScene()

@@ -15,16 +15,16 @@ namespace engine
 {
     void Editor::init()
     {
-        addComponentOption<MeshComponent>("Mesh Component", [](Actor& actor)
+        addComponentOption<MeshComponent>("Mesh Component", [](Ref<Actor> actor)
         {
             auto model = load::model<StandardVertex>("");
             auto material = std::make_shared<StandardMaterial>();
             material->attachShader(core->getStandardShader());
-            actor.addComponent(std::make_unique<MeshComponent>(model, material));
+            actor->addComponent(Resource<MeshComponent>(model, material));
         });
         
-        addComponentOption<DirectionalLight>("Directional Light", [](Actor& actor) {
-            actor.addComponent(std::make_unique<DirectionalLight>(
+        addComponentOption<DirectionalLight>("Directional Light", [](Ref<Actor> actor) {
+            actor->addComponent(Resource<DirectionalLight>(
                 glm::normalize(glm::vec3(1.f, 1.f, 1.f)),
                 glm::vec3(0.93f, 0.93f, 0.95f),
                 glm::ivec2(4096),
@@ -45,9 +45,9 @@ namespace engine
     void Editor::drawActorDetails()
     {
         ImGui::Begin("Details");
-        if (mSelectedActor != nullptr)
+        if (mSelectedActor.isValid())
         {
-            ui::draw(mSelectedActor);
+            ui::draw(mSelectedActor.get());
             ImGui::SeparatorText("Components");
             drawAddComponentCombo();
             if (!mSelectedActor->getComponents().empty())
@@ -85,14 +85,14 @@ namespace engine
         
         if (ImGui::BeginListBox("##ActorHierarchyListBox", ImVec2(-FLT_MIN, -FLT_MIN)))
         {
-            for (auto &actor : core->getScene()->getActors())
+            for (Ref<Actor> actor : core->getScene()->getActors())
             {
-                const bool isSelected = (actor.get() == mSelectedActor);
+                const bool isSelected = (actor.get() == mSelectedActor.get());
                 // All entries must have unique names.
                 const std::string name = std::string(actor->getName()) + "##" + std::to_string(reinterpret_cast<int64_t>(&actor));
                 if (ImGui::Selectable(name.c_str(), isSelected))
                 {
-                    mSelectedActor = actor.get();
+                    mSelectedActor = actor;
                     MESSAGE("Selected Actor: %", name);
                 }
                 
@@ -104,7 +104,7 @@ namespace engine
         ImGui::End();
     }
     
-    Actor *Editor::getSelectedActor()
+    Ref<Actor> Editor::getSelectedActor()
     {
         return mSelectedActor;
     }
@@ -126,12 +126,12 @@ namespace engine
     
     void Editor::createDefaultShape(const std::string& name, std::string_view path)
     {
-        auto *actor = core->getScene()->spawnActor<Actor>(name);
+        Ref<Actor> actor = core->getScene()->spawnActor<Actor>(name);
         actor->position = core->getCamera()->getEndOfBoomArmPosition();
         auto model = load::model<StandardVertex>(path);
         auto material = std::make_shared<StandardMaterial>();
         material->attachShader(core->getStandardShader());
-        actor->addComponent(std::make_unique<MeshComponent>(model, material));
+        actor->addComponent(Resource<MeshComponent>(model, material));
         mSelectedActor = actor;
     }
     
@@ -142,30 +142,15 @@ namespace engine
             for (auto &componentDetails : mComponentList)
             {
                 // Don't show this option if it already has it.
-                if (componentDetails->hasThisComponent(*mSelectedActor))
+                if (componentDetails->hasThisComponent(mSelectedActor))
                     continue;
                 
                 std::string name = componentDetails->previewName + "##" + std::to_string(reinterpret_cast<int64_t>(&componentDetails));
                 if (ImGui::Selectable(name.c_str()))
-                    componentDetails->onCreate(*mSelectedActor);
+                    componentDetails->onCreate(mSelectedActor);
             }
             
             ImGui::EndCombo();
         }
-    }
-    
-    void Editor::attachSceneCallbacks(Scene *scene)
-    {
-        mDeletionToken = scene->onDeath.subscribe([this](Actor *actor) {
-            // Todo: mSelectedActor should really have custom ref<Actor> to combat this.
-            if (mSelectedActor == actor)
-                mSelectedActor = nullptr;
-        });
-    }
-    
-    void Editor::detachSceneCallbacks() const
-    {
-        if (core->getScene() != nullptr)
-            core->getScene()->onDeath.unSubscribe(mDeletionToken);
     }
 }

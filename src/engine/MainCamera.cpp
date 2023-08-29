@@ -190,8 +190,8 @@ void MainCamera::rotateThirdPerson()
 
 void MainCamera::gotoSelectedActor()
 {
-    engine::Actor *actor = engine::editor->getSelectedActor();
-    if (!actor)
+    Ref<engine::Actor> actor = engine::editor->getSelectedActor();
+    if (!actor.isValid())
         return;
     
     const glm::vec3 actorPosition = actor->position;

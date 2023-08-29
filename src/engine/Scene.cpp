@@ -24,7 +24,7 @@ namespace engine
         
         for (const uint32_t index : mToDestroy)
         {
-            onDeath.broadcast(mActors[index].get());
+            onDeath.broadcast(mActors[index]);
             mActors.erase(mActors.begin() + index);
         }
         
@@ -61,7 +61,7 @@ namespace engine
         onImguiUpdate();
     }
     
-    std::vector<std::unique_ptr<Actor>> &Scene::getActors()
+    std::vector<Resource<Actor>> &Scene::getActors()
     {
         return mActors;
     }
@@ -76,9 +76,9 @@ namespace engine
         onRender();
     }
     
-    void Scene::destroy(Actor *actor)
+    void Scene::destroy(const Actor* actor)
     {
-        const auto it = std::find_if(mActors.begin(), mActors.end(), [&actor](const std::unique_ptr<Actor> &left) {
+        const auto it = std::find_if(mActors.begin(), mActors.end(), [&actor](const Ref<Actor> &left) {
             return left.get() == actor;
         });
         

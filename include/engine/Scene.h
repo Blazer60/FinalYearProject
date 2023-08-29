@@ -11,6 +11,7 @@
 #include "TextureBufferObject.h"
 #include "Renderer.h"
 #include "Actor.h"
+#include "EngineMemory.h"
 
 namespace engine
 {
@@ -22,40 +23,40 @@ namespace engine
     class Scene
     {
     public:
-        Callback<Actor*> onDeath;
+        Callback<Ref<Actor>> onDeath;
         
         virtual ~Scene() = default;
         
         void update();
         void render();
         void imguiUpdate();
-        std::vector<std::unique_ptr<Actor>> &getActors();
+        std::vector<Resource<Actor>> &getActors();
         
         /**
          * @brief Actors are destroyed at the end of the update loop.
          */
-        void destroy(Actor *actor);
+        void destroy(const Actor* actor);
         
         virtual void onFixedUpdate();
         virtual void onRender();
         virtual void onImguiMenuUpdate();
         
         template<typename TActor, typename ...TArgs>
-        TActor *spawnActor(TArgs&&... args);
+        Ref<TActor> spawnActor(TArgs &&... args);
         
     protected:
         virtual void onUpdate();
         virtual void onImguiUpdate();
         
-        std::vector<std::unique_ptr<Actor>> mActors;
+        std::vector<Resource<Actor>> mActors;
         std::set<uint32_t> mToDestroy;
     };
     
     template<typename TActor, typename... TArgs>
-    TActor *Scene::spawnActor(TArgs &&... args)
+    Ref<TActor> Scene::spawnActor(TArgs &&... args)
     {
-        std::unique_ptr<TActor> actor = std::make_unique<TActor>(std::forward<TArgs>(args)...);
-        TActor *actorRef = actor.get();
+        Resource<TActor> actor(std::forward<TArgs>(args)...);
+        Ref<TActor> actorRef = actor;
         
         actor->mScene = this;
         mActors.push_back(std::move(actor));

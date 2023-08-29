@@ -62,15 +62,18 @@ namespace engine
         mTransform = glm::translate(glm::mat4(1.f), position) *  glm::mat4_cast(rotation) * glm::scale(glm::mat4(1.f), scale);
     }
     
-    std::vector<std::unique_ptr<Component>> &Actor::getComponents()
+    std::vector<Resource<Component>> &Actor::getComponents()
     {
         return mComponents;
     }
     
-    void Actor::addComponent(std::unique_ptr<Component> component)
+    Ref<Component> Actor::addComponent(Resource<Component> &&component)
     {
+        Ref<Component> ref = component;
         component->attachToActor(this);
         mComponents.push_back(std::move(component));
+        
+        return ref;
     }
     
     glm::mat4 Actor::getTransform() const
@@ -102,7 +105,7 @@ namespace engine
             return;
         }
         
-        const auto it = std::find_if(mComponents.begin(), mComponents.end(), [&component](const std::unique_ptr<Component> &left) {
+        const auto it = std::find_if(mComponents.begin(), mComponents.end(), [&component](const Ref<Component> &left) {
             return left.get() == component;
         });
         
