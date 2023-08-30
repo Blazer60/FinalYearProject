@@ -35,9 +35,9 @@ MyScene::MyScene() :
     floorMaterial->roughness = 0.5f;
     floorMaterial->ambientColour = glm::vec3(0.8f);
     floor->addComponent(Resource<engine::MeshComponent>(floorMesh, floorMaterial));
-    
+
     auto ballMesh = load::model<StandardVertex>("../resources/models/blueSphere/BlueSphere.obj");
-    
+
     std::vector<glm::vec3> positions;
     std::vector<float> roughness;
     std::vector<float> metallic;
@@ -53,7 +53,7 @@ MyScene::MyScene() :
         roughness.emplace_back(i / 10.f);
         metallic.emplace_back(1.f);
     }
-    
+
     for (int i = 0; i < 20; ++i)
     {
         auto ball = spawnActor<engine::Actor>(std::string("Ball " + std::to_string(i)));
@@ -65,11 +65,11 @@ MyScene::MyScene() :
         ballMaterial->metallic = metallic[i];
         ball->addComponent(Resource<engine::MeshComponent>(ballMesh, ballMaterial));
     }
-    
+
     auto directionalLight = spawnActor<engine::Actor>("Directional Light");
     directionalLight->addComponent(Resource<DirectionalLight>(
         glm::normalize(glm::vec3(1.f, 1.f, 1.f)), glm::vec3(0.93f, 0.93f, 0.95f), glm::ivec2(4096), 4));
-    
+
     auto teapot = spawnActor<engine::Actor>("Teapot");
     teapot->position = glm::vec3(0.f, 0.f, 4.f);
     teapot->scale = glm::vec3(0.3f);
@@ -80,6 +80,15 @@ MyScene::MyScene() :
     teapotMaterial->roughness = 0.6f;
     teapotMaterial->metallic = 1.f;
     teapot->addComponent(Resource<engine::MeshComponent>(teapotMesh, teapotMaterial));
+    
+    SharedMesh childMesh = load::model<StandardVertex>("../resources/models/defaultObjects/DefaultTorus.glb");
+    auto childMaterial = std::make_shared<StandardMaterial>();
+    childMaterial->attachShader(mStandardShader);
+    childMaterial->ambientColour = glm::vec3(1.f, 0.f, 0.f);
+    
+    auto parent = spawnActor<engine::Actor>("Parent");
+    auto child = parent->addChildActor(Resource<engine::Actor>("Child"));
+    child->addComponent(Resource<engine::MeshComponent>(childMesh, childMaterial));
 }
 
 void MyScene::onFixedUpdate()

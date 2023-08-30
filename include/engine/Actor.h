@@ -27,10 +27,7 @@ namespace engine
         friend class Scene;
         Actor() = default;
         explicit Actor(std::string name);
-        virtual ~Actor()
-        {
-            MESSAGE("Deleting Actor.");
-        }
+        ~Actor() override = default;
         
         void update();
         
@@ -54,6 +51,8 @@ namespace engine
          * @returns The transform of this actor in world space.
          */
         [[nodiscard]] glm::mat4 getTransform() const;
+        
+        [[nodiscard]] glm::mat4 getLocalTransform() const;
         
         /**
          * @tparam T - The type of component.
@@ -79,6 +78,17 @@ namespace engine
         
         void removeComponent(Component *component);
         
+        template<typename TActor, std::enable_if_t<std::is_convertible_v<TActor*, Actor*>, bool> = true>
+        Ref<TActor> addChildActor(Resource<TActor> &&actor);
+        
+        void removeChildActor(Actor* actor);
+        
+        [[nodiscard]] std::vector<Resource<Actor>> &getChildren();
+        
+        [[nodiscard]] Actor *getParent();
+        
+        [[nodiscard]] glm::vec3 getWorldPosition();
+        
     public:
         glm::vec3 position     { glm::vec3(0.f) };
         glm::quat rotation     { glm::identity<glm::quat>() };
@@ -92,11 +102,14 @@ namespace engine
         std::string mName       { "Actor" };
         glm::mat4 mTransform    { glm::mat4(1.f) };
         
+        Actor*                           mParent { nullptr };  // Nullptr means that its parent is the scene.
+        std::vector<Resource<Actor>>     mChildren;
         std::vector<Resource<Component>> mComponents;
         class Scene *mScene;
         
     private:
-        std::set<uint32_t> mToDestroy;
+        std::set<uint32_t> mComponentsToDestroy;
+        std::set<uint32_t> mActorsToDestroy;
     };
     
     template<typename T>
@@ -113,24 +126,24 @@ namespace engine
     template<typename T>
     bool Actor::hasComponent() const
     {
-        return std::any_of(mComponents.begin(), mComponents.end(), [](const auto &component) {
+        return std::any_of(mComponents.begin(), mComponents.end(), [](const Resource<Component> &component) {
             const T* t = dynamic_cast<const T*>(component.get());
             if (t == nullptr)
                 return false;
             else  // Make sure that it's the exact type rather than a child type.
-                return typeid(T*).hash_code() == typeid(t).hash_code();
+                return typeid(const T*).hash_code() == typeid(t).hash_code();
         });
     }
     
     template<typename T>
     void Actor::removeComponent()
     {
-        const auto it = std::find_if(mComponents.begin(), mComponents.end(), [](const std::unique_ptr<Component> &component) {
-            T* t = dynamic_cast<T*>(component.get());
+        const auto it = std::find_if(mComponents.begin(), mComponents.end(), [](const Resource<Component> &component) {
+            const T* t = dynamic_cast<const T*>(component.get());
             if (t == nullptr)
                 return false;
             else  // Make sure that it's the exact type rather than a child type.
-                return typeid(T*).hash_code() == typeid(t).hash_code();
+                return typeid(const T*).hash_code() == typeid(t).hash_code();
         });
         
         if (it == mComponents.end())
@@ -141,6 +154,20 @@ namespace engine
         
         const uint32_t index = std::distance(mComponents.begin(), it);
         
-        mToDestroy.emplace(index);
+        mComponentsToDestroy.emplace(index);
+    }
+    
+    
+    template<typename TActor, std::enable_if_t<std::is_convertible_v<TActor*, Actor*>, bool>>
+    Ref<TActor> Actor::addChildActor(Resource<TActor> &&actor)
+    {
+        Ref<TActor> ref = actor;  // Getting a ref<> at the start to not lose the type.
+        
+        Resource<Actor> tempActor = std::move(actor);
+        tempActor->mParent = this;
+        tempActor->mScene = mScene;  // In case this wasn't created using spawnActor<>();
+        mChildren.push_back(std::move(tempActor));
+        
+        return ref;
     }
 } // engine

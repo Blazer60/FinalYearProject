@@ -44,6 +44,7 @@ namespace engine
         bool mIsHovered { false };
         glm::dvec2 mLastMousePosition { 0.0, 0.0 };
         ImGuizmo::OPERATION mOperation { ImGuizmo::OPERATION::TRANSLATE };
+        ImGuizmo::MODE mMode { ImGuizmo::MODE::LOCAL };
         uint32_t mFirstPersonToken { 0 };
         uint32_t mThirdPersonToken { 0 };
         

@@ -194,7 +194,7 @@ void MainCamera::gotoSelectedActor()
     if (!actor.isValid())
         return;
     
-    const glm::vec3 actorPosition = actor->position;
+    const glm::vec3 actorPosition = actor->getWorldPosition();
     const glm::vec3 forwardDirection = mRotation * glm::vec3(0.f, 0.f, 1.f);
     mPosition = actorPosition + forwardDirection * mCameraBoomDistance;
 }

@@ -40,10 +40,8 @@ namespace engine
         ui::drawToolTip("Actor's Name");
         ImGui::SameLine(ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("Delete Actor").x);
         if (ImGui::Button("Delete Actor"))
-        {
-            MESSAGE("Deleting Actor");
             markForDeath();
-        }
+        
         if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
         {
             bool changedFlag = false;
@@ -78,23 +76,40 @@ namespace engine
     
     glm::mat4 Actor::getTransform() const
     {
+        if (mParent != nullptr)
+            return mParent->getTransform() * mTransform;
         return mTransform;
     }
     
     void Actor::markForDeath()
     {
-        mScene->destroy(this);
+        if (mParent)
+            mParent->removeChildActor(this);
+        else
+            mScene->destroy(this);
     }
     
     void Actor::update()
     {
         onUpdate();
         
+        for (auto &component : getComponents())
+            component->update();
+        
+        for (Resource<Actor> &child : mChildren)
+            child->update();
+        
         // Removing components that are marked for deletion.
-        for (const uint32_t index : mToDestroy)
+        for (const uint32_t index : mComponentsToDestroy)
             mComponents.erase(mComponents.begin() + index);
         
-        mToDestroy.clear();
+        mComponentsToDestroy.clear();
+        
+        // Removing children that are marked for deletion.
+        for (const uint32_t index : mActorsToDestroy)
+            mChildren.erase(mChildren.begin() + index);
+        
+        mActorsToDestroy.clear();
     }
     
     void Actor::removeComponent(Component *component)
@@ -117,7 +132,61 @@ namespace engine
         
         const uint32_t index = std::distance(mComponents.begin(), it);
         
-        mToDestroy.emplace(index);
+        mComponentsToDestroy.emplace(index);
+    }
+    
+    
+    void Actor::removeChildActor(Actor* actor)
+    {
+        if (actor == nullptr)
+        {
+            WARN("This actor cannot be removed since it is nullptr!");
+            return;
+        }
+        
+        // Breadth-first-search as this will stop recursive calls sooner.
+        if (actor->mParent == this)
+        {
+            const auto it = std::find_if(
+                mChildren.begin(), mChildren.end(), [&actor](const Resource<Actor> &left) {
+                    return left.get() == actor;
+                }
+            );
+            
+            if (it == mChildren.end())
+                return;
+            
+            const uint32_t index = std::distance(mChildren.begin(), it);
+            
+            mActorsToDestroy.emplace(index);
+        }
+        else
+        {
+            for (Resource<Actor> &child : mChildren)
+                child->removeChildActor(actor);
+        }
+    }
+    
+    std::vector<Resource<Actor>> &Actor::getChildren()
+    {
+        return mChildren;
+    }
+    
+    glm::mat4 Actor::getLocalTransform() const
+    {
+        return mTransform;
+    }
+    
+    Actor *Actor::getParent()
+    {
+        return mParent;
+    }
+    
+    glm::vec3 Actor::getWorldPosition()
+    {
+        if (mParent != nullptr)
+            return mParent->getTransform() * glm::vec4(position, 1.f);
+        return position;
     }
 }
 

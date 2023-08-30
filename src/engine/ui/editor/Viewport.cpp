@@ -71,6 +71,13 @@ namespace engine
         if (ImGui::RadioButton("Scale", mOperation == ImGuizmo::OPERATION::SCALE))
             mOperation = ImGuizmo::OPERATION::SCALE;
         
+        ImGui::SameLine(0.f, ImGui::GetStyle().ItemSpacing.x * 3.f);
+        if (ImGui::RadioButton("Local", mMode == ImGuizmo::MODE::LOCAL))
+            mMode = ImGuizmo::MODE::LOCAL;
+        ImGui::SameLine();
+        if (ImGui::RadioButton("World", mMode == ImGuizmo::MODE::WORLD))
+            mMode = ImGuizmo::MODE::WORLD;
+        
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - 100.f);
         ImGui::SetNextItemWidth(100.f);
@@ -117,8 +124,14 @@ namespace engine
             glm::mat4 projection = camera->getProjectionMatrix();
             
             if (ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection),
-                                     mOperation, ImGuizmo::MODE::LOCAL, glm::value_ptr(actorTransform)))
+                                     mOperation, mMode, glm::value_ptr(actorTransform)))
             {
+                if (Actor *parent = selectedActor->getParent(); parent != nullptr)
+                {
+                    // Undo any parent transforms before applying a local transform.
+                    const glm::mat4 parentTransform = parent->getTransform();
+                    actorTransform = glm::inverse(parentTransform) * actorTransform;
+                }
                 math::decompose(actorTransform, selectedActor->position, selectedActor->rotation, selectedActor->scale);
             }
         }

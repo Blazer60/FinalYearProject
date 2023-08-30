@@ -64,6 +64,9 @@ void Renderer::drawMesh(
     graphics::drawMode renderMode, const glm::mat4 &matrix,
     const graphics::DrawCallback &onDraw)
 {
+    if (shader.expired())
+        WARN("A mesh was submitted with no shader. Was this intentional?");
+    
     static GLenum drawModeToGLenum[] { GL_TRIANGLES, GL_LINES };
     GLenum mode = drawModeToGLenum[(int)renderMode];
     mRenderQueue.emplace_back(graphics::RenderQueueObject { vao, indicesCount, std::move(shader), mode, matrix, onDraw });

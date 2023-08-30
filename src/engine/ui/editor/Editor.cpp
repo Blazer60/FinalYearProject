@@ -82,23 +82,11 @@ namespace engine
             ImGui::EndMenuBar();
         }
         
-        
         if (ImGui::BeginListBox("##ActorHierarchyListBox", ImVec2(-FLT_MIN, -FLT_MIN)))
         {
             for (Ref<Actor> actor : core->getScene()->getActors())
-            {
-                const bool isSelected = (actor.get() == mSelectedActor.get());
-                // All entries must have unique names.
-                const std::string name = std::string(actor->getName()) + "##" + std::to_string(reinterpret_cast<int64_t>(&actor));
-                if (ImGui::Selectable(name.c_str(), isSelected))
-                {
-                    mSelectedActor = actor;
-                    MESSAGE("Selected Actor: %", name);
-                }
-                
-                if (isSelected)
-                    ImGui::SetItemDefaultFocus();
-            }
+                drawSceneHierarchyForActor(actor);
+            
             ImGui::EndListBox();
         }
         ImGui::End();
@@ -151,6 +139,26 @@ namespace engine
             }
             
             ImGui::EndCombo();
+        }
+    }
+    
+    void Editor::drawSceneHierarchyForActor(Ref<Actor> &actor)
+    {
+        const std::string name = std::string(actor->getName()) + "##" + std::to_string(reinterpret_cast<int64_t>(&actor));
+        const bool isSelected = (actor.get() == mSelectedActor.get());
+        int flags = actor->getChildren().empty() ? ImGuiTreeNodeFlags_Leaf : ImGuiTreeNodeFlags_DefaultOpen;
+        if (isSelected)
+            flags |= ImGuiTreeNodeFlags_Selected;
+        
+        if (ImGui::TreeNodeEx(name.c_str(), flags | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth))
+        {
+            if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+                mSelectedActor = actor;
+            
+            for (Ref<Actor> child : actor->getChildren())
+                drawSceneHierarchyForActor(child);
+                
+            ImGui::TreePop();
         }
     }
 }

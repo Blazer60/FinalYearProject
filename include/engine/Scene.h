@@ -48,6 +48,8 @@ namespace engine
         virtual void onUpdate();
         virtual void onImguiUpdate();
         
+        void recursePreRender(Ref<Actor> actor);
+        
         std::vector<Resource<Actor>> mActors;
         std::set<uint32_t> mToDestroy;
     };

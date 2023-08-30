@@ -69,6 +69,7 @@ namespace engine
     protected:
         void onDrawUi() override;
         void drawSceneHierarchyPanel();
+        void drawSceneHierarchyForActor(Ref<Actor> &actor);
         void drawActorDetails();
         void drawAddComponentCombo();
         void createDefaultShape(const std::string& name, std::string_view path);

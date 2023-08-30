@@ -16,11 +16,7 @@ namespace engine
         onUpdate();
         
         for (auto &actor : mActors)
-        {
             actor->update();
-            for (auto &component : actor->getComponents())
-                component->update();
-        }
         
         for (const uint32_t index : mToDestroy)
         {
@@ -69,10 +65,8 @@ namespace engine
     void Scene::render()
     {
         for (auto &actor : mActors)
-        {
-            for (auto &component : actor->getComponents())
-                component->preRender();
-        }
+            recursePreRender(actor);
+        
         onRender();
     }
     
@@ -91,6 +85,15 @@ namespace engine
         const uint32_t index = std::distance(mActors.begin(), it);
         
         mToDestroy.emplace(index);
+    }
+    
+    void Scene::recursePreRender(Ref<Actor> actor)
+    {
+        for (Resource<Component> &component : actor->getComponents())
+            component->preRender();
+        
+        for (Resource<Actor> &child : actor->getChildren())
+            recursePreRender(child);
     }
     
 }
