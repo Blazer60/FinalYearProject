@@ -12,6 +12,7 @@
 #include "Drawable.h"
 #include "Component.h"
 #include "EngineMemory.h"
+#include "EngineMath.h"
 
 namespace engine
 {
@@ -170,6 +171,10 @@ namespace engine
         Resource<Actor> tempActor = std::move(actor);
         tempActor->mParent = this;
         tempActor->mScene = mScene;  // In case this wasn't created using spawnActor<>();
+        
+        tempActor->mTransform = glm::inverse(getTransform()) * tempActor->mTransform;
+        math::decompose(tempActor->mTransform, tempActor->position, tempActor->rotation, tempActor->scale);
+        
         mChildren.push_back(std::move(tempActor));
         
         return ref;

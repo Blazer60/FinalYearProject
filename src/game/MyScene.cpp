@@ -87,6 +87,7 @@ MyScene::MyScene() :
     childMaterial->ambientColour = glm::vec3(1.f, 0.f, 0.f);
     
     auto parent = spawnActor<engine::Actor>("Parent");
+    parent->position = glm::vec3(5.f, 5.f, -12.f);
     auto child = parent->addChildActor(Resource<engine::Actor>("Child"));
     child->addComponent(Resource<engine::MeshComponent>(childMesh, childMaterial));
 }

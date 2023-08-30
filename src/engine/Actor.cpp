@@ -204,6 +204,11 @@ namespace engine
         Resource<Actor> out = std::move(*it);
         mChildren.erase(it);
         
+        // We reset the transform to world space since we aren't connect to anything.
+        out->mTransform = out->getTransform();
+        MESSAGE(out->mTransform);
+        math::decompose(out->mTransform, out->position, out->rotation, out->scale);
+        
         out->mParent = nullptr;
         
         return out;
