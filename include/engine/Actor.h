@@ -89,6 +89,10 @@ namespace engine
         
         [[nodiscard]] glm::vec3 getWorldPosition();
         
+        Resource<Actor> popActor(Actor *actor);
+        
+        [[nodiscard]] Scene *getScene();
+        
     public:
         glm::vec3 position     { glm::vec3(0.f) };
         glm::quat rotation     { glm::identity<glm::quat>() };

@@ -44,6 +44,11 @@ namespace engine
         template<typename TActor, typename ...TArgs>
         Ref<TActor> spawnActor(TArgs &&... args);
         
+        template<typename TActor, std::enable_if_t<std::is_convertible_v<TActor*, Actor*>, bool> = true>
+        Ref<TActor> addActor(Resource<TActor> &&actor);
+        
+        Resource<Actor> popActor(Actor *actor);
+        
     protected:
         virtual void onUpdate();
         virtual void onImguiUpdate();
@@ -57,7 +62,12 @@ namespace engine
     template<typename TActor, typename... TArgs>
     Ref<TActor> Scene::spawnActor(TArgs &&... args)
     {
-        Resource<TActor> actor(std::forward<TArgs>(args)...);
+        return addActor<TActor>(Resource<TActor>(std::forward<TArgs>(args)...));
+    }
+    
+    template<typename TActor, std::enable_if_t<std::is_convertible_v<TActor *, Actor *>, bool>>
+    Ref<TActor> Scene::addActor(Resource<TActor> &&actor)
+    {
         Ref<TActor> actorRef = actor;
         
         actor->mScene = this;

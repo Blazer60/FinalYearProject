@@ -73,6 +73,7 @@ namespace engine
         void drawActorDetails();
         void drawAddComponentCombo();
         void createDefaultShape(const std::string& name, std::string_view path);
+        void moveActors();
     
     protected:
         Viewport mViewport;
@@ -80,7 +81,8 @@ namespace engine
         Ref<Actor> mSelectedActor;
         std::vector<std::unique_ptr<ComponentDetails>> mComponentList;
         
-        uint64_t mDeletionToken { 0 };
+        Actor* mMoveSourceActor { nullptr };
+        Actor* mMoveDestinationActor { nullptr };
     };
     
     

@@ -203,6 +203,7 @@ namespace engine
         style.Colors[ImGuiCol_TabUnfocusedActive]   = background;
         
         style.Colors[ImGuiCol_DockingPreview] = accentHovered;
+        style.Colors[ImGuiCol_DragDropTarget] = accent;
     }
     
     Core::~Core()

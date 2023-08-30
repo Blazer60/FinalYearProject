@@ -188,5 +188,30 @@ namespace engine
             return mParent->getTransform() * glm::vec4(position, 1.f);
         return position;
     }
+    
+    Resource<Actor> Actor::popActor(Actor *actor)
+    {
+        const auto it = std::find_if(mChildren.begin(), mChildren.end(), [&actor](const Resource<Actor> &child) {
+            return child.get() == actor;
+        });
+        
+        if (it == mChildren.end())
+        {
+            LOG_MAJOR("Failed to find actor while popping");
+            return Resource<Actor>();
+        }
+        
+        Resource<Actor> out = std::move(*it);
+        mChildren.erase(it);
+        
+        out->mParent = nullptr;
+        
+        return out;
+    }
+    
+    Scene *Actor::getScene()
+    {
+        return mScene;
+    }
 }
 

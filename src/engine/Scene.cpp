@@ -96,4 +96,22 @@ namespace engine
             recursePreRender(child);
     }
     
+    Resource<Actor> Scene::popActor(Actor *actor)
+    {
+        const auto it = std::find_if(mActors.begin(), mActors.end(), [&actor](const Resource<Actor> &child) {
+            return child.get() == actor;
+        });
+        
+        if (it == mActors.end())
+        {
+            LOG_MAJOR("Failed to find actor while popping");
+            return Resource<Actor>();
+        }
+        
+        Resource<Actor> out = std::move(*it);
+        mActors.erase(it);
+        
+        return out;
+    }
+    
 }

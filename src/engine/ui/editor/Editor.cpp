@@ -40,6 +40,9 @@ namespace engine
         ui::draw(mLogWindow);
         drawSceneHierarchyPanel();
         drawActorDetails();
+        
+        if (mMoveSourceActor != nullptr)
+            moveActors();
     }
     
     void Editor::drawActorDetails()
@@ -84,8 +87,26 @@ namespace engine
         
         if (ImGui::BeginListBox("##ActorHierarchyListBox", ImVec2(-FLT_MIN, -FLT_MIN)))
         {
-            for (Ref<Actor> actor : core->getScene()->getActors())
-                drawSceneHierarchyForActor(actor);
+            if (ImGui::TreeNodeEx("Scene", ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                if (ImGui::BeginDragDropTarget())
+                {
+                    if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("ActorHierarchy"))
+                    {
+                        Ref<Actor> payloadActor = *reinterpret_cast<Ref<Actor>*>(payload->Data);
+                        
+                        mMoveSourceActor = payloadActor.get();
+                        mMoveDestinationActor = nullptr;
+                    }
+                    
+                    ImGui::EndDragDropTarget();
+                }
+                
+                for (Ref<Actor> actor : core->getScene()->getActors())
+                    drawSceneHierarchyForActor(actor);
+                
+                ImGui::TreePop();
+            }
             
             ImGui::EndListBox();
         }
@@ -152,13 +173,57 @@ namespace engine
         
         if (ImGui::TreeNodeEx(name.c_str(), flags | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth))
         {
+            if (ImGui::BeginDragDropSource() && isSelected)
+            {
+                ImGui::SetDragDropPayload("ActorHierarchy", &actor, sizeof(Ref<Actor>));
+                
+                ImGui::Text("%s", actor->getName().data());
+                
+                ImGui::EndDragDropSource();
+            }
+            
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("ActorHierarchy"))
+                {
+                    Ref<Actor> payloadActor = *reinterpret_cast<Ref<Actor>*>(payload->Data);
+                    
+                    mMoveSourceActor = payloadActor.get();
+                    mMoveDestinationActor = actor.get();
+                }
+                ImGui::EndDragDropTarget();
+            }
+            
             if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
                 mSelectedActor = actor;
+            
             
             for (Ref<Actor> child : actor->getChildren())
                 drawSceneHierarchyForActor(child);
                 
             ImGui::TreePop();
         }
+    }
+    
+    void Editor::moveActors()
+    {
+        if (mMoveDestinationActor == nullptr)
+        {
+            if (Actor* parent = mMoveSourceActor->getParent(); parent != nullptr)
+            {
+                if (mMoveDestinationActor != parent)
+                    core->getScene()->addActor(parent->popActor(mMoveSourceActor));
+            }
+        }
+        else if (Actor* parent = mMoveSourceActor->getParent(); parent != nullptr)
+        {
+            if (mMoveDestinationActor != parent)
+                mMoveDestinationActor->addChildActor(parent->popActor(mMoveSourceActor));
+        }
+        else
+            mMoveDestinationActor->addChildActor(mMoveSourceActor->getScene()->popActor(mMoveSourceActor));
+        
+        mMoveSourceActor = nullptr;
+        mMoveDestinationActor = nullptr;
     }
 }
