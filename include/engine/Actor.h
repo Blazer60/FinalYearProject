@@ -94,6 +94,8 @@ namespace engine
         
         [[nodiscard]] Scene *getScene();
         
+    protected:
+        std::string mName       { "Actor" };  // I've put the name here so that the debugger shows this as the first field.
     public:
         glm::vec3 position     { glm::vec3(0.f) };
         glm::quat rotation     { glm::identity<glm::quat>() };
@@ -104,7 +106,6 @@ namespace engine
         void updateTransform();
         virtual void onUpdate();
         
-        std::string mName       { "Actor" };
         glm::mat4 mTransform    { glm::mat4(1.f) };
         
         Actor*                           mParent { nullptr };  // Nullptr means that its parent is the scene.

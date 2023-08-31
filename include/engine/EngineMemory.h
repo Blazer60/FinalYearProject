@@ -44,7 +44,7 @@ template<typename T>
 class HeapResource
     : public ControlBlock
 {
-protected:
+public:
     template<typename ...TArgs>
     explicit HeapResource(TArgs &&... args)
         : mData(new T(std::forward<TArgs>(args)...))
@@ -54,6 +54,7 @@ protected:
     
     ~HeapResource() override = default;
     
+protected:
     [[nodiscard]] bool isValid() const override { return mData != nullptr; }
     [[nodiscard]] uint64_t typeHash() const override { return typeid(T).hash_code(); };
     
@@ -91,12 +92,16 @@ public:
     explicit Resource() = default;
     
     // Default constructor
-    template<typename ...TArgs>
-    explicit Resource(TArgs && ...args)
+    // template<typename ...TArgs>
+    // explicit Resource(TArgs && ...args)
+    //     : Resource(new HeapResource<T>(std::forward<TArgs>(args)...))
+    // {
+    // }
+    
+    explicit Resource(HeapResource<T>* heapResource)
     {
-        auto *cb = new HeapResource<T>(std::forward<TArgs>(args)...);
-        mControlBlock = cb;
-        mPtr = cb->mData;
+       mControlBlock = heapResource;
+       mPtr = heapResource->mData;
     }
     
     // Copy-constructor. Not allowed.
@@ -264,3 +269,9 @@ public:
         return "The reference is trying to access a deleted resource pointer.";
     }
 };
+
+template<typename T, typename ...TArgs>
+Resource<T> makeResource(TArgs &&... args)
+{
+    return Resource<T>(new HeapResource<T>(std::forward<TArgs>(args)...));
+}

@@ -62,7 +62,7 @@ namespace engine
     template<typename TActor, typename... TArgs>
     Ref<TActor> Scene::spawnActor(TArgs &&... args)
     {
-        return addActor<TActor>(Resource<TActor>(std::forward<TArgs>(args)...));
+        return addActor<TActor>(makeResource<TActor>(std::forward<TArgs>(args)...));
     }
     
     template<typename TActor, std::enable_if_t<std::is_convertible_v<TActor *, Actor *>, bool>>

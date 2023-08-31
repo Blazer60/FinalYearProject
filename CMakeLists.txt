@@ -94,6 +94,8 @@ add_executable(${PROJECT_NAME}
         src/engine/event/EventHandler.cpp
         include/engine/event/EventHandler.h
         include/engine/EngineMemory.h
+        src/game/Rotator.cpp
+        include/game/Rotator.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

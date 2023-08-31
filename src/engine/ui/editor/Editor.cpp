@@ -20,11 +20,11 @@ namespace engine
             auto model = load::model<StandardVertex>("");
             auto material = std::make_shared<StandardMaterial>();
             material->attachShader(core->getStandardShader());
-            actor->addComponent(Resource<MeshComponent>(model, material));
+            actor->addComponent(makeResource<MeshComponent>(model, material));
         });
         
         addComponentOption<DirectionalLight>("Directional Light", [](Ref<Actor> actor) {
-            actor->addComponent(Resource<DirectionalLight>(
+            actor->addComponent(makeResource<DirectionalLight>(
                 glm::normalize(glm::vec3(1.f, 1.f, 1.f)),
                 glm::vec3(0.93f, 0.93f, 0.95f),
                 glm::ivec2(4096),
@@ -140,7 +140,7 @@ namespace engine
         auto model = load::model<StandardVertex>(path);
         auto material = std::make_shared<StandardMaterial>();
         material->attachShader(core->getStandardShader());
-        actor->addComponent(Resource<MeshComponent>(model, material));
+        actor->addComponent(makeResource<MeshComponent>(model, material));
         mSelectedActor = actor;
     }
     
