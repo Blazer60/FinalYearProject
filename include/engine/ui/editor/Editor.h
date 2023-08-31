@@ -19,6 +19,14 @@
 
 namespace engine
 {
+    struct ActorDetails
+    {
+        typedef std::function<Ref<Actor>(void)> CreateFunc;
+        
+        std::string previewName;
+        CreateFunc onCreate;
+    };
+    
     struct ComponentDetails
     {
         typedef std::function<void(Ref<Actor>)> CreateFunc;
@@ -66,19 +74,21 @@ namespace engine
         
         template<typename T>
         void addComponentOption(const std::string &name, const ComponentDetails::CreateFunc &onCreate);
+        void addMenuOption(const std::string &name, const ActorDetails::CreateFunc &onCreate);
+        static Ref<Actor> createDefaultShape(const std::string& name, std::string_view path);
     protected:
         void onDrawUi() override;
         void drawSceneHierarchyPanel();
         void drawSceneHierarchyForActor(Ref<Actor> &actor);
         void drawActorDetails();
         void drawAddComponentCombo();
-        void createDefaultShape(const std::string& name, std::string_view path);
         void moveActors();
     
     protected:
         Viewport mViewport;
         LogWindow mLogWindow;
         Ref<Actor> mSelectedActor;
+        std::vector<ActorDetails> mMenuList;
         std::vector<std::unique_ptr<ComponentDetails>> mComponentList;
         
         Actor* mMoveSourceActor { nullptr };

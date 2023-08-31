@@ -31,6 +31,16 @@ namespace engine
                 4));
         });
         
+        addMenuOption("Actor", []() {
+            Ref<Actor> actor = core->getScene()->spawnActor<Actor>("Actor");
+            actor->position = core->getCamera()->getEndOfBoomArmPosition();
+            return actor;
+        });
+        
+        addMenuOption("Cube",   []() { return Editor::createDefaultShape("Cube",    "../resources/models/defaultObjects/DefaultCube.glb"); });
+        addMenuOption("Sphere", []() { return Editor::createDefaultShape("Sphere",  "../resources/models/defaultObjects/DefaultSphere.glb"); });
+        addMenuOption("Torus",  []() { return Editor::createDefaultShape("Torus",   "../resources/models/defaultObjects/DefaultTorus.glb"); });
+        
         mViewport.init();
     }
     
@@ -69,17 +79,12 @@ namespace engine
         {
             if (ImGui::BeginMenu("Add"))
             {
-                if (ImGui::MenuItem("Actor"))
+                for (const auto &menuItem : mMenuList)
                 {
-                    mSelectedActor = core->getScene()->spawnActor<Actor>("Actor");
-                    mSelectedActor->position = core->getCamera()->getEndOfBoomArmPosition();
+                    const std::string name = menuItem.previewName + "##" + std::to_string(reinterpret_cast<uint64_t>(&menuItem));
+                    if (ImGui::MenuItem(name.c_str()))
+                        mSelectedActor = menuItem.onCreate();
                 }
-                if (ImGui::MenuItem("Cube"))
-                    createDefaultShape("Cube", "../resources/models/defaultObjects/DefaultCube.glb");
-                if (ImGui::MenuItem("Sphere"))
-                    createDefaultShape("Sphere", "../resources/models/defaultObjects/DefaultSphere.glb");
-                if (ImGui::MenuItem("Torus"))
-                    createDefaultShape("Torus", "../resources/models/defaultObjects/DefaultTorus.glb");
                 ImGui::EndMenu();
             }
             ImGui::EndMenuBar();
@@ -133,7 +138,7 @@ namespace engine
         return mViewport.getViewportContext();
     }
     
-    void Editor::createDefaultShape(const std::string& name, std::string_view path)
+    Ref<Actor> Editor::createDefaultShape(const std::string& name, std::string_view path)
     {
         Ref<Actor> actor = core->getScene()->spawnActor<Actor>(name);
         actor->position = core->getCamera()->getEndOfBoomArmPosition();
@@ -141,7 +146,8 @@ namespace engine
         auto material = std::make_shared<StandardMaterial>();
         material->attachShader(core->getStandardShader());
         actor->addComponent(makeResource<MeshComponent>(model, material));
-        mSelectedActor = actor;
+        
+        return actor;
     }
     
     void Editor::drawAddComponentCombo()
@@ -225,5 +231,10 @@ namespace engine
         
         mMoveSourceActor = nullptr;
         mMoveDestinationActor = nullptr;
+    }
+    
+    void Editor::addMenuOption(const std::string &name, const ActorDetails::CreateFunc &onCreate)
+    {
+        mMenuList.push_back(ActorDetails { name, onCreate });
     }
 }

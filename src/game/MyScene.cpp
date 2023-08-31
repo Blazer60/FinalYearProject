@@ -26,6 +26,12 @@ MyScene::MyScene() :
         actor->addComponent(makeResource<Rotator>());
     });
     
+    engine::editor->addMenuOption("Rotating Cube", []() {
+        Ref<engine::Actor> actor = engine::Editor::createDefaultShape("Rotating Cube", "../resources/models/defaultObjects/DefaultCube.glb");
+        actor->addComponent(makeResource<Rotator>());
+        return actor;
+    });
+    
     auto floor = spawnActor<engine::Actor>("Floor");
     auto floorMesh = load::model<StandardVertex>("../resources/models/stoneFloor/MedievalStoneFloor.obj");
     auto floorMaterial = std::make_shared<StandardMaterial>();
