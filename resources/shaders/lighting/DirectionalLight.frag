@@ -21,25 +21,9 @@ uniform int u_cascade_count;
 
 uniform vec2 u_bias;
 
-layout(location=0) out vec3 o_diffuse;
-layout(location=1) out float o_shadow;
+out layout(location = 0) vec3 o_irradiance;
 
 const float PI = 3.14159265359f;
-
-vec3 get_camera_direction(vec3 position)
-{
-    return normalize(u_camera_position_ws - position);
-}
-
-vec3 half_angle(vec3 position)
-{
-    return normalize(get_camera_direction(position) + u_light_direction);
-}
-
-float light_dot(vec3 a, vec3 b)
-{
-    return max(dot(a, b), 0.f);
-}
 
 float sample_shadow_map(vec2 uv, float depth, float bias, int layer)
 {
@@ -64,7 +48,7 @@ float calculate_shadow_map(vec3 position, vec3 normal)
     vec3 projection_coords = position_light_space.xyz / position_light_space.w;
     projection_coords = 0.5f * projection_coords + 0.5f;
     const float current_depth = projection_coords.z;
-    const float bias = mix(u_bias.x, u_bias.y, light_dot(normal, -u_light_direction));
+    const float bias = mix(u_bias.x, u_bias.y, max(dot(normal, -u_light_direction), 0.f));
 
     if (current_depth < 1.f)
     {
@@ -79,74 +63,75 @@ float calculate_shadow_map(vec3 position, vec3 normal)
     return 0.f;
 }
 
-vec3 fresnelSchlick(float cosTheta, vec3 f0)
+// Unreal's fresnel function using spherical gaussian approximation.
+vec3 fresnelSchlick(float vDotH, vec3 f0)
 {
-    // FSchlick(h,v,F0)=F0+(1−F0)(1−(h⋅v))^5
-    return f0 + (1.f - f0) * pow(clamp(1.f - cosTheta, 0.f, 1.f), 5.f);
+    return f0 + (1.f - f0) * pow(2.f, (-5.55473f * vDotH - 6.98316f) * vDotH);
 }
 
-float distributionGgx(vec3 N, vec3 H, float roughness)
+// Unreal's and Disney's distribution function.
+float distributionGgx(float nDotH, float roughness)
 {
-    const float a = roughness * roughness;
-    const float a2 = a * a;
-    const float nDotH = max(dot(N, H), 0.f);
+    const float alpha = roughness * roughness;
+    const float alpha2 = alpha * alpha;
     const float nDotH2 = nDotH * nDotH;
-    const float denominator = (nDotH2 * (a2 - 1.f) + 1.f);
+    const float denominator = nDotH2 * (alpha2 - 1.f) + 1.f;
 
-    return a2 / (PI * denominator * denominator);
+    return alpha2 / (PI * denominator * denominator);
 }
 
-float geometrySchlickGgx(float nDotV, float roughness)
+// Unreal's geometry schlick function.
+float geometrySchlick(float vDotN, float k)
+{
+    return vDotN / (vDotN * (1.f - k) + k);
+}
+
+// Unreal's geometry smith function. Note the remapping of roughness before squaring
+// should only be done on analytical lights. Remap function: (R + 1) / 2
+float geometrySmith(float vDotN, float lDotN, float roughness)
 {
     const float r = roughness + 1.f;
     const float k = r * r / 8.f;
-
-    return nDotV / (nDotV * (1.f - k) + k);
+    return geometrySchlick(vDotN, k) * geometrySchlick(lDotN, k);
 }
-
-float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
-{
-    const float nDotV = max(dot(N, V), 0.f);
-    const float nDotL = max(dot(N, L), 0.f);
-    const float ggx2 = geometrySchlickGgx(nDotV, roughness);
-    const float ggx1 = geometrySchlickGgx(nDotL, roughness);
-
-    return ggx1 * ggx2;
-}
-
 
 void main()
 {
+    // Calculate all of the random variables we need.
     const vec3 albedo = texture(u_albedo_texture, v_uv).rgb;
-    const vec3 normal = texture(u_normal_texture, v_uv).rgb;
     const vec3 position = texture(u_position_texture, v_uv).rgb;
     const float roughness = texture(u_roughness_texture, v_uv).r;
     const float metallic = texture(u_metallic_texture, v_uv).r;
 
-    const vec3 wi = normalize(u_light_direction);
-    const float cosTheta = max(dot(normal, wi), 0.f);
+    const vec3 l = normalize(u_light_direction);
+    const vec3 n = normalize(texture(u_normal_texture, v_uv).rgb);
+    const vec3 v = normalize(u_camera_position_ws - position);
+    const vec3 h = normalize(l + v);
+
+    const float vDotN = max(dot(v, n), 0.f);
+    const float lDotN = max(dot(l, n), 0.f);
+    const float vDotH = max(dot(v, h), 0.f);
+    const float nDotH = max(dot(n, h), 0.f);
+
+    const vec3 f0 = mix(vec3(0.04f), albedo, metallic);
+
+    // Calculate how the material interacts with the light.
+    const vec3 fresnel = fresnelSchlick(vDotH, f0);
+    const float distribution = distributionGgx(nDotH, roughness);
+    const float geometry = geometrySmith(vDotN, lDotN, roughness);
+
+    const vec3 specular = distribution * geometry * fresnel / (4.f * vDotN * lDotN + 0.0001f);
+
+    const vec3 kD = (vec3(1.f) - fresnel) * (1.f - metallic);
+    const vec3 diffuse = kD * albedo / PI;
+
+    const vec3 irradiance = diffuse + specular;
+
+    // Calculate the intensity of the light.
     const float attenuation = 1.f;
-    const vec3 radiance = u_light_intensity * attenuation * cosTheta;
+    const float shadow_intensity = calculate_shadow_map(position, n);
+    const vec3 radiance = (1.f - shadow_intensity) * u_light_intensity * attenuation;
 
-    const vec3 H = half_angle(position);
-    const vec3 V = get_camera_direction(position);
-    const vec3 N = normalize(normal);
-    const vec3 L = wi;
-
-    vec3 f0 = vec3(0.04f);
-    f0 = mix(f0, albedo, metallic);
-    const vec3 F = fresnelSchlick(max(dot(H, V), 0.f), f0);
-    const float NDF = distributionGgx(N, H, roughness);
-    const float G = geometrySmith(N, V, L, roughness);
-    const vec3 specular = NDF * G * F / (4.f * max(dot(N, V), 0.f) * max(dot(N, L), 0.f) + 0.0001f);
-
-    const vec3 kS = F;
-    vec3 kD = vec3(1.f) - kS;
-    kD *= 1.f - metallic;
-
-    const float nDotL = max(dot(N, L), 0.f);
-    const vec3 lo = (kD * albedo / PI + specular) * radiance * nDotL;
-
-    o_diffuse  = lo;
-    o_shadow = calculate_shadow_map(position, normal);
+    // Combine the output with dot(N, L).
+    o_irradiance = irradiance * radiance * lDotN;
 }

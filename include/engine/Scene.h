@@ -71,6 +71,7 @@ namespace engine
         Ref<TActor> actorRef = actor;
         
         actor->mScene = this;
+        actor->mParent = nullptr;
         mActors.push_back(std::move(actor));
         
         return actorRef;

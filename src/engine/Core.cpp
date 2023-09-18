@@ -160,6 +160,7 @@ namespace engine
     void Core::configureUiThemeColours(ImGuiStyle &style)
     {
         const ImVec4 background = ImVec4(0.16f, 0.16f, 0.17f, 1.f);
+        const ImVec4 accentBackground = ImVec4(0.196f, 0.212f, 0.197f, 1.f);
         
         const ImVec4 primary        = ImVec4(0.2f, 0.2f, 0.21f, 1.f);
         const ImVec4 primaryHovered = ImVec4(0.3f, 0.3f, 0.32f, 1.f);
@@ -172,7 +173,7 @@ namespace engine
         style.Colors[ImGuiCol_Text]     = ImVec4(0.85f, 0.85f, 0.85f, 1.f);
         style.Colors[ImGuiCol_WindowBg] = background;
         style.Colors[ImGuiCol_ChildBg]  = background;
-        style.Colors[ImGuiCol_PopupBg]  = primaryHovered;
+        style.Colors[ImGuiCol_PopupBg]  = accentBackground;
         
         style.Colors[ImGuiCol_Header]           = primary;
         style.Colors[ImGuiCol_HeaderHovered]    = primaryHovered;

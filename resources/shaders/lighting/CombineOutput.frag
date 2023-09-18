@@ -105,7 +105,7 @@ void main()
 
         const vec3 ambient = kD * diffuse + specular;
 
-        o_colour = emissive + ambient + (1.f - shadow) * l0;
+        o_colour = emissive + ambient + l0;
     }
     else
     {
