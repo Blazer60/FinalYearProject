@@ -42,6 +42,7 @@ void StandardMaterial::onDraw()
     mShader->set("u_max_height_samples", maxHeightSamples);
     mShader->set("u_roughness", roughness);
     mShader->set("u_metallic", metallic);
+    mShader->set("u_emissive_colour", emissive);
 }
 
 void StandardMaterial::onLoadMtlFile(const MtlMaterialInformation &materialInformation)
@@ -79,6 +80,7 @@ void StandardMaterial::onDrawUi()
         ImGui::ColorEdit3("Ambient Colour", glm::value_ptr(ambientColour));
         ImGui::SliderFloat("Roughness", &roughness, 0.f, 1.f);
         ImGui::SliderFloat("Metallic", &metallic, 0.f, 1.f);
+        ImGui::ColorEdit3("Emissive Colour", glm::value_ptr(emissive), ImGuiColorEditFlags_HDR);
         
         ImGui::TreePop();
     }

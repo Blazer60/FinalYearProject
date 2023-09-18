@@ -79,6 +79,7 @@ public:
     float roughness { 1.f };
     float metallic { 0 };
     glm::vec3 ambientColour { 1.f };
+    glm::vec3 emissive { 0.f };
     
 protected:
     void onDrawUi() override;

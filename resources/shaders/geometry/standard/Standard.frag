@@ -12,6 +12,7 @@ uniform sampler2D u_diffuse_texture;
 uniform sampler2D u_normal_texture;
 uniform sampler2D u_height_texture;
 uniform sampler2D u_roughness_texture;
+uniform vec3 u_emissive_colour;
 uniform mat4 u_model_matrix;
 
 uniform vec3 u_camera_position_ws;
@@ -103,5 +104,6 @@ void main()
 
     o_albedo = sRgbToLinear(u_ambient_colour * texture_colour);
     o_position = v_position_ws;
+    o_emissive = u_emissive_colour;
 //    o_depth = gl_FragCoord.z;
 }

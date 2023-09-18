@@ -191,19 +191,19 @@ void Renderer::render()
         
         // IBL ambient lighting. We already have the correct framebuffer bound.
         mIblShader->bind();
-        
+
         mIblShader->set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 0);
         mIblShader->set("u_position_texture", mPositionTextureBuffer->getId(), 1);
         mIblShader->set("u_normal_texture", mNormalTextureBuffer->getId(), 2);
         mIblShader->set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 3);
         mIblShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
-        
+
         mIblShader->set("u_irradiance_texture", mIrradianceMap->getId(), 5);
         mIblShader->set("u_pre_filter_texture", mPreFilterMap->getId(), 6);
         mIblShader->set("u_brdf_lut_texture", mBrdfLutTextureBuffer->getId(), 7);
-        
+
         mIblShader->set("u_camera_position_ws", cameraPosition);
-        
+
         drawFullscreenTriangleNow();
         
         // Deferred Lighting step.
@@ -581,7 +581,7 @@ const TextureBufferObject &Renderer::getEmissiveBuffer()
     return *mEmissiveTextureBuffer;
 }
 
-const TextureBufferObject &Renderer::getDiffuseBuffer()
+const TextureBufferObject &Renderer::getLightBuffer()
 {
     return *mLightTextureBuffer;
 }

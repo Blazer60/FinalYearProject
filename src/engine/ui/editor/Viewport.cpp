@@ -33,7 +33,7 @@ namespace engine
             ViewportImage { "Normal",       []() -> const TextureBufferObject& { return graphics::renderer->getNormalBuffer(); } },
             ViewportImage { "Albedo",       []() -> const TextureBufferObject& { return graphics::renderer->getAlbedoBuffer(); } },
             ViewportImage { "Emissive",     []() -> const TextureBufferObject& { return graphics::renderer->getEmissiveBuffer(); } },
-            ViewportImage { "Diffuse",      []() -> const TextureBufferObject& { return graphics::renderer->getDiffuseBuffer(); } },
+            ViewportImage { "Lighting",     []() -> const TextureBufferObject& { return graphics::renderer->getLightBuffer(); } },
             ViewportImage { "Depth",        []() -> const TextureBufferObject& { return graphics::renderer->getDepthBuffer(); } },
             ViewportImage { "Shadow",       []() -> const TextureBufferObject& { return graphics::renderer->getShadowBuffer(); } },
             ViewportImage { "Roughness",    []() -> const TextureBufferObject& { return graphics::renderer->getRoughnessBuffer(); } },

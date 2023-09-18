@@ -105,7 +105,7 @@ public:
     [[nodiscard]] const TextureBufferObject &getNormalBuffer();
     [[nodiscard]] const TextureBufferObject &getPositionBuffer();
     [[nodiscard]] const TextureBufferObject &getEmissiveBuffer();
-    [[nodiscard]] const TextureBufferObject &getDiffuseBuffer();
+    [[nodiscard]] const TextureBufferObject &getLightBuffer();
     [[nodiscard]] const TextureBufferObject &getDepthBuffer();
     [[nodiscard]] const TextureBufferObject &getShadowBuffer();
     [[nodiscard]] const TextureBufferObject &getRoughnessBuffer();

@@ -26,7 +26,6 @@ void main()
 {
     const vec3 albedo   = texture(u_albedo_texture, v_uv).rgb;
     const vec3 position = texture(u_position_texture, v_uv).rgb;
-    const vec3 normal = texture(u_normal_texture, v_uv).rgb;
     const float metallic = texture(u_metallic_texture, v_uv).r;
     const float roughness = texture(u_roughness_texture, v_uv).r;
 
@@ -40,17 +39,14 @@ void main()
 
     const vec3 fresnel = fresnelSchlickRoughness(vDotN, f0, roughness);
 
-//    const vec3 kD = (vec3(1.f) - fresnel) * (1.f - metallic);
-    const vec3 kS = fresnel;
-    vec3 kD = vec3(1.f) - kS;
-    kD *= 1.f - metallic;
+    const vec3 kD = (vec3(1.f) - fresnel) * (1.f - metallic);
 
     const vec3 irradiance = texture(u_irradiance_texture, n).rgb;
     const vec3 diffuse = kD * irradiance * albedo;
 
     const float maxReflectionLod = 4.f;
     const vec3 preFilterColour = textureLod(u_pre_filter_texture, r, roughness * maxReflectionLod).rgb;
-    const vec2 brdf = texture(u_brdf_lut_texture, vec2(max(dot(n, v), 0.f), roughness)).rg;
+    const vec2 brdf = texture(u_brdf_lut_texture, vec2(vDotN, roughness)).rg;
     const vec3 specular = preFilterColour * (fresnel * brdf.x + brdf.y);
 
     o_irradiance = specular + diffuse;
