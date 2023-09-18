@@ -152,6 +152,7 @@ protected:
     
     std::unique_ptr<Shader> mDeferredLightShader;
     std::unique_ptr<Shader> mDirectionalLightShader;
+    std::unique_ptr<Shader> mIblShader;
     std::unique_ptr<Shader> mShadowShader;
     std::unique_ptr<Shader> mHdrToCubemapShader;
     std::unique_ptr<Shader> mCubemapToIrradianceShader;

@@ -27,6 +27,7 @@ Renderer::Renderer() :
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     
     mDirectionalLightShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/lighting/DirectionalLight.frag");
+    mIblShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/lighting/IBL.frag");
     mDeferredLightShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/lighting/CombineOutput.frag");
     mShadowShader = std::make_unique<Shader>("../resources/shaders/shadow/Shadow.vert", "../resources/shaders/shadow/Shadow.frag");
     mHdrToCubemapShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/cubemap/ToCubemap.frag");
@@ -188,6 +189,23 @@ void Renderer::render()
             glDrawElements(GL_TRIANGLES, mFullscreenTriangle.indicesCount(), GL_UNSIGNED_INT, nullptr);
         }
         
+        // IBL ambient lighting. We already have the correct framebuffer bound.
+        mIblShader->bind();
+        
+        mIblShader->set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 0);
+        mIblShader->set("u_position_texture", mPositionTextureBuffer->getId(), 1);
+        mIblShader->set("u_normal_texture", mNormalTextureBuffer->getId(), 2);
+        mIblShader->set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 3);
+        mIblShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
+        
+        mIblShader->set("u_irradiance_texture", mIrradianceMap->getId(), 5);
+        mIblShader->set("u_pre_filter_texture", mPreFilterMap->getId(), 6);
+        mIblShader->set("u_brdf_lut_texture", mBrdfLutTextureBuffer->getId(), 7);
+        
+        mIblShader->set("u_camera_position_ws", cameraPosition);
+        
+        drawFullscreenTriangleNow();
+        
         // Deferred Lighting step.
         
         mDeferredLightFramebuffer->bind();
@@ -199,22 +217,12 @@ void Renderer::render()
         const glm::mat4 vp = cameraProjectionMatrix * v;
         const glm::mat4 ivp = glm::inverse(vp);
         
-        mDeferredLightShader->set("u_diffuse_texture", mLightTextureBuffer->getId(), 0);
-        mDeferredLightShader->set("u_position_texture", mPositionTextureBuffer->getId(), 1);
-        mDeferredLightShader->set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 2);
-        mDeferredLightShader->set("u_normal_texture", mNormalTextureBuffer->getId(), 3);
-        mDeferredLightShader->set("u_emissive_texture", mEmissiveTextureBuffer->getId(), 4);
-        mDeferredLightShader->set("u_depth_texture", mDepthTextureBuffer->getId(), 5);
-        mDeferredLightShader->set("u_skybox_texture", mHdrSkybox->getId(), 6);
-        mDeferredLightShader->set("u_irradiance_texture", mIrradianceMap->getId(), 7);
-        mDeferredLightShader->set("u_shadow_texture", mShadowTextureBuffer->getId(), 8);
-        mDeferredLightShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 9);
-        mDeferredLightShader->set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 10);
-        mDeferredLightShader->set("u_pre_filter_texture", mPreFilterMap->getId(), 11);
-        mDeferredLightShader->set("u_brdf_lut_texture", mBrdfLutTextureBuffer->getId(), 12);
+        mDeferredLightShader->set("u_irradiance_texture", mLightTextureBuffer->getId(), 0);
+        mDeferredLightShader->set("u_emissive_texture", mEmissiveTextureBuffer->getId(), 1);
+        mDeferredLightShader->set("u_depth_texture", mDepthTextureBuffer->getId(), 2);
+        mDeferredLightShader->set("u_skybox_texture", mHdrSkybox->getId(), 3);
         
         mDeferredLightShader->set("u_inverse_vp_matrix", ivp);
-        mDeferredLightShader->set("u_camera_position_ws", cameraPosition);
         
         drawFullscreenTriangleNow();
         
