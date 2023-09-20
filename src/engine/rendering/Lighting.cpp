@@ -14,9 +14,9 @@
 #include "Actor.h"
 
 DirectionalLight::DirectionalLight(
-    const glm::vec3 &direction, const glm::vec3 &intensity, const glm::ivec2 &shadowMapSize, uint32_t cascadeZoneCount)
+    const glm::vec3 &direction, const glm::vec3 &colour, const glm::ivec2 &shadowMapSize, uint32_t cascadeZoneCount)
     : direction(direction),
-      intensity(intensity),
+      colour(colour),
       shadowMap(std::make_shared<TextureArrayObject>(shadowMapSize, cascadeZoneCount, GL_DEPTH_COMPONENT32, graphics::filter::Linear, graphics::wrap::ClampToBorder)),
       Light()
 {
@@ -43,7 +43,8 @@ void DirectionalLight::onDrawUi()
         if (ImGui::Button("Destroy Component"))
             mActor->removeComponent(this);
         
-        ImGui::ColorEdit3("Intensity", glm::value_ptr(intensity), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_PickerHueWheel);
+        ImGui::ColorEdit3("Colour", glm::value_ptr(colour), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_PickerHueWheel);
+        ImGui::DragFloat("Intensity (Lux)", &intensity, 10.f);
         bool changed = false;
         ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x / 2.f * 0.65f);
         changed |= ImGui::DragFloat("Yaw", &yaw, 0.1f); ImGui::SameLine();

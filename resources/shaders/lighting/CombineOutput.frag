@@ -26,7 +26,7 @@ vec3 sample_skybox_colour()
 
     const vec3 direction = (far_plane - near_plane).xyz;
     const vec3 colour = texture(u_skybox_texture, direction.xyz).rgb;
-    return colour;
+    return colour * 1000.f;
 }
 
 void main()

@@ -43,6 +43,8 @@ protected:
     
     glm::ivec2 mCurrentSize { 0 };
     
+    // Todo: Make this use physically based units. It should take into account the current EV100 of the camera from the colour grading section.
+    // See pg.87 on Frostbite's paper.
     glm::vec3 mLightKeyThreshold { 1.f };
     glm::vec3 mLightMaxThreshold { 1.f };
     float mLightKeyIntensity { 5.f };

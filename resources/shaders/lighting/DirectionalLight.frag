@@ -58,7 +58,7 @@ float calculate_shadow_map(vec3 position, vec3 normal)
         sum += sample_shadow_map(projection_coords.xy + (texel_size * vec2( 1.5f, -1.5f)), current_depth, bias, layer);
         sum += sample_shadow_map(projection_coords.xy + (texel_size * vec2(-1.5f,  1.5f)), current_depth, bias, layer);
         sum += sample_shadow_map(projection_coords.xy + (texel_size * vec2( 1.5f,  1.5f)), current_depth, bias, layer);
-        return 0.25f * sum * dot(u_light_intensity, u_light_intensity) / 3.f;
+        return 0.25f * sum;
     }
     return 0.f;
 }

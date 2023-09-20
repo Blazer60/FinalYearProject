@@ -49,5 +49,5 @@ void main()
     const vec2 brdf = texture(u_brdf_lut_texture, vec2(vDotN, roughness)).rg;
     const vec3 specular = preFilterColour * (fresnel * brdf.x + brdf.y);
 
-    o_irradiance = specular + diffuse;
+    o_irradiance = (specular + diffuse) * 1000.f;  // todo: 1000.f needs to be exposed as a setting.
 }

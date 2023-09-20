@@ -23,17 +23,19 @@ struct DirectionalLight
     : public Light, public engine::Component
 {
     DirectionalLight(
-        const glm::vec3 &direction, const glm::vec3 &intensity, const glm::ivec2 &shadowMapSize,
+        const glm::vec3 &direction, const glm::vec3 &colour, const glm::ivec2 &shadowMapSize,
         uint32_t cascadeZoneCount);
     
     void updateLayerCount(uint32_t cascadeCount);
     
     glm::vec3 direction { glm::normalize(glm::vec3(1.f, 1.f, 1.f)) };
     
+    glm::vec3 colour { 1.f };
+    
     /**
      * @brief The colour of the light.
      */
-    glm::vec3 intensity { 1.f };
+    float intensity { 64000.f };
     
     std::shared_ptr<TextureArrayObject> shadowMap { nullptr };
     

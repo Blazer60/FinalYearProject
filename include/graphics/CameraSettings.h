@@ -32,5 +32,7 @@ public:
     glm::vec4 clearColour { glm::vec4(0.f, 0.f, 0.f, 1.f) };
     GLbitfield clearMask { GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT };
     
+    // todo: Camera exposure should be here rather than on one of the post-processing settings.
+    
     std::vector<std::unique_ptr<PostProcessLayer>> &postProcessStack;
 };

@@ -19,7 +19,7 @@ void ColourGrading::onDraw(TextureBufferObject *imageInput, TextureBufferObject 
     mShader.bind();
     mShader.set("u_texture", imageInput->getId(), 0);
     mShader.set("u_inv_gamma_correction", 1.f / 2.2f);
-    mShader.set("u_exposure", mExposure);
+    mShader.set("u_exposure", covertEV100ToExposure());
     
     graphics::renderer->drawFullscreenTriangleNow();
     
@@ -30,7 +30,13 @@ void ColourGrading::onDrawUi()
 {
     if (ImGui::TreeNode("Colour Grading"))
     {
-        ImGui::DragFloat("Exposure", &mExposure, 0.001f);
+        ImGui::DragFloat("EV100", &mManualEV100, 0.01f);
         ImGui::TreePop();
     }
+}
+
+float ColourGrading::covertEV100ToExposure() const
+{
+    float maxLuminance = 1.2f * glm::pow(2.f, mManualEV100);
+    return 1.f / maxLuminance;
 }
