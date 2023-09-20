@@ -23,8 +23,7 @@ void BloomPass::onDraw(TextureBufferObject *imageInput, TextureBufferObject *ima
     mFramebuffer->attach(mDownSampleTexture.get(), 0, 0);
     mPreFilter.bind();
     mPreFilter.set("u_texture", imageInput->getId(), 0);
-    mPreFilter.set("u_light_key_threshold", mLightKeyThreshold * mLightKeyIntensity);
-    mPreFilter.set("u_light_max_threshold", mLightMaxThreshold * mLightMaxIntensity);
+    mPreFilter.set("u_light_key_threshold", computeLuminanceThreshold());
     graphics::renderer->drawFullscreenTriangleNow();
     mFramebuffer->detach(0);
     
@@ -91,13 +90,18 @@ void BloomPass::onDrawUi()
 {
     if (ImGui::TreeNode("Bloom"))
     {
-        ImGui::ColorEdit3("Light key threshold", glm::value_ptr(mLightKeyThreshold), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_PickerHueWheel);
-        ImGui::DragFloat("Intensity threshold", &mLightKeyIntensity, 0.001f);
-        
-        ImGui::ColorEdit3("Light Max threshold", glm::value_ptr(mLightMaxThreshold), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_PickerHueWheel);
-        ImGui::DragFloat("Intensity Max", &mLightMaxIntensity, 0.001f);
+        ImGui::ColorEdit3("Colour", glm::value_ptr(mColour), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_PickerHueWheel);
+        ImGui::DragFloat("Bloom Exposure Compensation", &mExposureCompensation, 0.1f);
         
         ImGui::DragFloat("Bloom Scale", &mBloomScale, 0.01f);
         ImGui::TreePop();
     }
+}
+
+// Frostbite Pg.87 Course notes moving frostbite to pbr.
+glm::vec3 BloomPass::computeLuminanceThreshold()
+{
+    float bloomEV = graphics::renderer->getCurrentEV100() + mExposureCompensation;
+    
+    return (glm::vec3(1.f) - mColour) * glm::pow(2.f, bloomEV - 3.f);
 }

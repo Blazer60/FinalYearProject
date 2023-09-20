@@ -113,6 +113,8 @@ public:
     
     [[nodiscard]] std::vector<DirectionalLight> &getDirectionalLights();
     
+    [[nodiscard]] float getCurrentEV100() const;
+    
 public:
     /**
      * @brief Upon initialisation, if false, then the renderer will not work properly and the application must be
@@ -176,4 +178,6 @@ protected:
     std::unique_ptr<TextureBufferObject> mAuxiliaryImageBuffer;
     
     glm::ivec2 mCurrentRenderBufferSize;
+    
+    float mCurrentEV100 { 10.f };
 };

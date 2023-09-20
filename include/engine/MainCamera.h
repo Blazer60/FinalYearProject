@@ -67,6 +67,7 @@ protected:
     float           mFovY               { glm::radians(45.f) };
     float           mNearClip           { 0.001f };
     float           mFarClip            { 100.f };
+    float           mEV100              { 10.f };
     
     std::vector<std::unique_ptr<PostProcessLayer>> mPostProcessStack;
     

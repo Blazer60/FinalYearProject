@@ -143,6 +143,7 @@ void MainCamera::onDrawUi()
         float fovYDegrees = glm::degrees(mFovY);
         ImGui::SliderFloat("FOV Y", &fovYDegrees, 10, 180);
         mFovY = glm::radians(fovYDegrees);
+        ImGui::DragFloat("EV100", &mEV100, 0.01f);
     }
     
     if (ImGui::CollapsingHeader("Post-processing Settings"))
@@ -170,7 +171,7 @@ glm::mat4 MainCamera::getProjectionMatrix() const
 
 CameraSettings MainCamera::toSettings()
 {
-    return { mFovY, mNearClip, mFarClip, mViewMatrix, mPostProcessStack };
+    return { mFovY, mNearClip, mFarClip, mViewMatrix, mEV100, mPostProcessStack };
 }
 
 void MainCamera::rotateThirdPerson()

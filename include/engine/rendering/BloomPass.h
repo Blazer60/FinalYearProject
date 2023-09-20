@@ -35,6 +35,8 @@ protected:
     Shader mComposite   { "../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/postProcessing/bloom/BloomComposite.frag"   };
     
 protected:
+    glm::vec3 computeLuminanceThreshold();
+    
     std::unique_ptr<TextureBufferObject> mDownSampleTexture;
     std::unique_ptr<TextureBufferObject> mUpSampleTexture;
     
@@ -43,11 +45,8 @@ protected:
     
     glm::ivec2 mCurrentSize { 0 };
     
-    // Todo: Make this use physically based units. It should take into account the current EV100 of the camera from the colour grading section.
-    // See pg.87 on Frostbite's paper.
+    glm::vec3 mColour { 0.f };
     glm::vec3 mLightKeyThreshold { 1.f };
-    glm::vec3 mLightMaxThreshold { 1.f };
-    float mLightKeyIntensity { 5.f };
-    float mLightMaxIntensity { 20.f };
+    float mExposureCompensation { 0.f };
     float mBloomScale { 1.f };
 };

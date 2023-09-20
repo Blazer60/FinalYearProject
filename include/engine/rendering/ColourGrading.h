@@ -24,9 +24,7 @@ protected:
     void onDraw(TextureBufferObject *imageInput, TextureBufferObject *imageOutput) override;
     void onDrawUi() override;
     
-    [[nodiscard]] float covertEV100ToExposure() const;
+    [[nodiscard]] static float covertEV100ToExposure(float eV100) ;
     
     Shader mShader { "../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/postProcessing/colourGrading/ColourGrading.frag" };
-    
-    float mManualEV100 { 13.f };
 };

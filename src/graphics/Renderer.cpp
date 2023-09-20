@@ -127,6 +127,8 @@ void Renderer::render()
     
     for (CameraSettings &camera : mCameraQueue)
     {
+        mCurrentEV100 = camera.eV100;
+        
         mGeometryFramebuffer->bind();
         mGeometryFramebuffer->clear(camera.clearColour);
         
@@ -614,5 +616,10 @@ const TextureBufferObject &Renderer::getDeferredLightingBuffer()
 std::vector<DirectionalLight> &Renderer::getDirectionalLights()
 {
     return mDirectionalLightQueue;
+}
+
+float Renderer::getCurrentEV100() const
+{
+    return mCurrentEV100;
 }
 
