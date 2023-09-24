@@ -31,6 +31,10 @@ namespace engine
                 4));
         });
         
+        addComponentOption<PointLight>("Point Light", [](Ref<Actor> actor) {
+            actor->addComponent(makeResource<PointLight>());
+        });
+        
         addMenuOption("Actor", []() {
             Ref<Actor> actor = core->getScene()->spawnActor<Actor>("Actor");
             actor->position = core->getCamera()->getEndOfBoomArmPosition();

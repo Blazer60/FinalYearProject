@@ -25,6 +25,14 @@ namespace load
     template<typename TVertex>
     SharedMesh model(std::string_view path);
     
+    /**
+     * @brief Creates a single submesh with the first mesh found within the model loaded. This function with crash if the submesh is not valid. Use load::model if you want safety instead.
+     * @tparam TVertex - The type of vertex used to construct the primitive.
+     * @param path - The path to the primitive.
+     */
+    template<typename TVertex>
+    SubMesh primitive(std::string_view path);
+    
     template<typename TVertex>
     SharedMesh model(std::string_view path)
     {
@@ -84,5 +92,54 @@ namespace load
         // We're using assimp's logger so that the last message when collapsed is this.
         Assimp::DefaultLogger::get()->info("Load successful.");
         return std::move(sharedMesh);
+    }
+    
+    template<typename TVertex>
+    SubMesh primitive(std::string_view path)
+    {
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFile(
+            path.data(),
+            aiProcess_CalcTangentSpace      |
+            aiProcess_Triangulate           |
+            aiProcess_JoinIdenticalVertices |
+            aiProcess_SortByPType);
+        
+        if (scene == nullptr)
+            CRASH("Could not load model with path %\n%", path, importer.GetErrorString());
+        
+        if (scene->mNumMeshes < 1)
+            CRASH("Primitive does not contain any meshes (%).", path);
+        else if (scene->mNumMeshes > 1)
+            WARN("Primitive has too many meshes. Only the first one will be used (%).", path);
+        
+        const aiMesh *mesh = scene->mMeshes[0];
+        
+        std::vector<uint32_t> indices;
+        indices.reserve(mesh->mNumFaces * 3);
+        for (int j = 0; j < mesh->mNumFaces; ++j)
+        {
+            for (int k = 0; k < mesh->mFaces[j].mNumIndices; ++k)
+                indices.emplace_back(mesh->mFaces[j].mIndices[k]);
+        }
+        
+        std::vector<TVertex> vertices;
+        vertices.reserve(mesh->mNumVertices);
+        for (int j = 0; j < mesh->mNumVertices; ++j)
+        {
+            const glm::vec3 position = toVec3(mesh->mVertices[j]);
+            const glm::vec2 uv = mesh->HasTextureCoords(0) ? toVec2(mesh->mTextureCoords[0][j]) : glm::vec2(0.f);
+            const glm::vec3 normal = toVec3(mesh->mNormals[j]);
+            const glm::vec3 tangent = mesh->HasTangentsAndBitangents() ? toVec3(mesh->mTangents[j]) : glm::vec3(0.f);
+            // User defined conversion happens here.
+            vertices.emplace_back(AssimpVertex { position, uv, normal, tangent });
+        }
+        
+        if (!mesh->HasTextureCoords(0))
+            WARN("Primitive does not contain texture coordinates. (%)", path);
+        else if (!mesh->HasTangentsAndBitangents())  // No uvs = no tangents.
+            WARN("Primitive does not have bi-/tangents. (%)", path);
+        
+        return SubMesh(vertices, indices);
     }
 }

@@ -99,6 +99,10 @@ MyScene::MyScene() :
     parent->position = glm::vec3(5.f, 5.f, -12.f);
     auto child = parent->addChildActor(makeResource<engine::Actor>("Child"));
     child->addComponent(makeResource<engine::MeshComponent>(childMesh, childMaterial));
+    
+    auto pointLight = spawnActor<engine::Actor>("Point Light");
+    pointLight->position = glm::vec3(0.f, 6.f, 5.f);
+    pointLight->addComponent(makeResource<PointLight>());
 }
 
 void MyScene::onFixedUpdate()

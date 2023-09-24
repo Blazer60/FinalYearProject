@@ -52,3 +52,19 @@ protected:
     
     void calculateDirection();
 };
+
+struct PointLight
+    : public Light, public engine::Component
+{
+public:
+    PointLight() = default;
+    
+protected:
+    void onPreRender() override;
+    void onDrawUi() override;
+
+protected:
+    float mRadius       { 10.f };
+    float mIntensity    { 12'000.f };
+    glm::vec3 mColour   { 1.f };
+};

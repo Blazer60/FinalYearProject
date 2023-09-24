@@ -77,3 +77,26 @@ void DirectionalLight::onPreRender()
     // todo: change directional light to submit a light weight version independent of this class.
     graphics::renderer->submit(*this);
 }
+
+void PointLight::onPreRender()
+{
+    graphics::renderer->submit(graphics::AnalyticalPointLight { mActor->getWorldPosition(), mRadius, mIntensity, mColour } );
+}
+
+void PointLight::onDrawUi()
+{
+    ImGui::PushID("PointLightSettings");
+    if (ImGui::TreeNodeEx("Point Light Settings", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        if (ImGui::Button("Destroy Component"))
+            mActor->removeComponent(this);
+        
+        ImGui::ColorEdit3("Colour", glm::value_ptr(mColour), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_PickerHueWheel);
+        ImGui::DragFloat("Intensity (Lum)", &mIntensity, 10.f);
+        ImGui::DragFloat("Radius", &mRadius);
+        
+        ImGui::TreePop();
+    }
+    
+    ImGui::PopID();
+}

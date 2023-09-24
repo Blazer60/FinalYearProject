@@ -71,6 +71,11 @@ public:
     void submit(const DirectionalLight &directionalLight);
     
     /**
+     * @brief Submits a point light that will be used to light the world.
+     */
+    void submit(const graphics::AnalyticalPointLight &pointLight);
+    
+    /**
      * Starts rendering everything that was submitted to the renderer this frame.
      */
     void render();
@@ -143,6 +148,7 @@ protected:
     std::vector<graphics::RenderQueueObject>        mRenderQueue;
     std::vector<CameraSettings>                     mCameraQueue;
     std::vector<DirectionalLight>                   mDirectionalLightQueue;
+    std::vector<graphics::AnalyticalPointLight>     mPointLightQueue;
     
     std::unique_ptr<HdrTexture>  mHdrImage;
     std::unique_ptr<Cubemap>     mHdrSkybox;
@@ -156,6 +162,7 @@ protected:
     
     std::unique_ptr<Shader> mDeferredLightShader;
     std::unique_ptr<Shader> mDirectionalLightShader;
+    std::unique_ptr<Shader> mPointLightShader;
     std::unique_ptr<Shader> mIblShader;
     std::unique_ptr<Shader> mShadowShader;
     std::unique_ptr<Shader> mHdrToCubemapShader;
@@ -164,6 +171,7 @@ protected:
     std::unique_ptr<Shader> mIntegrateBrdfShader;
     
     SubMesh mFullscreenTriangle;
+    SubMesh mUnitSphere;
     
     std::unique_ptr<TextureBufferObject> mAlbedoTextureBuffer;
     std::unique_ptr<TextureBufferObject> mDepthTextureBuffer;

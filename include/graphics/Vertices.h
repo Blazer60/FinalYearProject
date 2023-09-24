@@ -105,3 +105,28 @@ struct StandardVertex
             };
     };
 };
+
+/**
+ * @brief A Vertex that only holds a position. Point lights use these as everything else come from uniforms.
+ * We just need to know where to place the light.
+ */
+struct PositionVertex
+    : public Vertex
+{
+    constexpr explicit PositionVertex(const ObjVertex &objVertex)
+        : position(objVertex.position)
+    {
+    }
+    
+    constexpr explicit PositionVertex(const AssimpVertex &v)
+        : position(v.position)
+    {
+    }
+    
+    glm::vec3 position;
+    
+    static Instructions layout()
+    {
+        return { { GL_FLOAT, 3 } };
+    }
+};
