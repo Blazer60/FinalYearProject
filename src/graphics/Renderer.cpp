@@ -169,39 +169,45 @@ void Renderer::render()
         
         mLightFramebuffer->bind();
         mLightFramebuffer->clear(glm::vec4(glm::vec3(0.f), 1.f));
+        const glm::vec3 cameraPosition = glm::inverse(camera.viewMatrix) * glm::vec4(glm::vec3(0.f), 1.f);
         
-        // mDirectionalLightShader->bind();
-        //
-        // mDirectionalLightShader->set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 0);
-        // mDirectionalLightShader->set("u_position_texture", mPositionTextureBuffer->getId(), 1);
-        // mDirectionalLightShader->set("u_normal_texture", mNormalTextureBuffer->getId(), 2);
-        // mDirectionalLightShader->set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 3);
-        // mDirectionalLightShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
-        //
-        // const glm::vec3 cameraPosition = glm::inverse(camera.viewMatrix) * glm::vec4(glm::vec3(0.f), 1.f);
-        // mDirectionalLightShader->set("u_camera_position_ws", cameraPosition);
-        // mDirectionalLightShader->set("u_view_matrix", camera.viewMatrix);
-        //
-        // mDirectionalLightShader->set("u_cascade_distances", &(cascadeDepths[0]), static_cast<int>(cascadeDepths.size()));
-        // mDirectionalLightShader->set("u_cascade_count", static_cast<int>(cascadeDepths.size()));
-        //
-        // mDirectionalLightShader->set("u_bias", shadowBias);
-        //
-        // glBindVertexArray(mFullscreenTriangle.vao());
-        //
-        // for (const DirectionalLight &directionalLight : mDirectionalLightQueue)
-        // {
-        //     mDirectionalLightShader->set("u_light_direction", directionalLight.direction);
-        //     mDirectionalLightShader->set("u_light_intensity", directionalLight.intensity * directionalLight.colour);
-        //     mDirectionalLightShader->set("u_light_vp_matrix", &(directionalLight.vpMatrices[0]), static_cast<int>(directionalLight.vpMatrices.size()));
-        //     mDirectionalLightShader->set("u_shadow_map_texture", directionalLight.shadowMap->getId(), 3);
-        //
-        //     glDrawElements(GL_TRIANGLES, mFullscreenTriangle.indicesCount(), GL_UNSIGNED_INT, nullptr);
-        // }
+        mDirectionalLightShader->bind();
+
+        mDirectionalLightShader->set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 0);
+        mDirectionalLightShader->set("u_position_texture", mPositionTextureBuffer->getId(), 1);
+        mDirectionalLightShader->set("u_normal_texture", mNormalTextureBuffer->getId(), 2);
+        mDirectionalLightShader->set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 3);
+        mDirectionalLightShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
+
+        mDirectionalLightShader->set("u_camera_position_ws", cameraPosition);
+        mDirectionalLightShader->set("u_view_matrix", camera.viewMatrix);
+
+        mDirectionalLightShader->set("u_cascade_distances", &(cascadeDepths[0]), static_cast<int>(cascadeDepths.size()));
+        mDirectionalLightShader->set("u_cascade_count", static_cast<int>(cascadeDepths.size()));
+
+        mDirectionalLightShader->set("u_bias", shadowBias);
+
+        glBindVertexArray(mFullscreenTriangle.vao());
+
+        for (const DirectionalLight &directionalLight : mDirectionalLightQueue)
+        {
+            mDirectionalLightShader->set("u_light_direction", directionalLight.direction);
+            mDirectionalLightShader->set("u_light_intensity", directionalLight.intensity * directionalLight.colour);
+            mDirectionalLightShader->set("u_light_vp_matrix", &(directionalLight.vpMatrices[0]), static_cast<int>(directionalLight.vpMatrices.size()));
+            mDirectionalLightShader->set("u_shadow_map_texture", directionalLight.shadowMap->getId(), 3);
+
+            glDrawElements(GL_TRIANGLES, mFullscreenTriangle.indicesCount(), GL_UNSIGNED_INT, nullptr);
+        }
         
         mPointLightShader->bind();
         
-        mPointLightShader->set("u_normal_texture", mNormalTextureBuffer->getId(), 0);
+        mPointLightShader->set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 0);
+        mPointLightShader->set("u_position_texture", mPositionTextureBuffer->getId(), 1);
+        mPointLightShader->set("u_normal_texture", mNormalTextureBuffer->getId(), 2);
+        mPointLightShader->set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 3);
+        mPointLightShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
+        
+        mPointLightShader->set("u_camera_position_ws", cameraPosition);
         
         glBindVertexArray(mUnitSphere.vao());
         
@@ -210,27 +216,31 @@ void Renderer::render()
             const glm::mat4 pointLightModelMatrix = glm::translate(glm::mat4(1.f), pointLight.position) * glm::scale(glm::mat4(1.f), glm::vec3(pointLight.radius));
             mPointLightShader->set("u_mvp_matrix", vpMatrix * pointLightModelMatrix);
             
+            mPointLightShader->set("u_light_position", pointLight.position);
+            mPointLightShader->set("u_light_intensity", pointLight.intensity * pointLight.colour);
+            mPointLightShader->set("u_light_inv_sqr_radius", 1.f / (pointLight.radius * pointLight.radius));
+            
             glDrawElements(GL_TRIANGLES, mUnitSphere.indicesCount(), GL_UNSIGNED_INT, nullptr);
         }
         
         // IBL ambient lighting. We already have the correct framebuffer bound.
-        // mIblShader->bind();
-        //
-        // mIblShader->set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 0);
-        // mIblShader->set("u_position_texture", mPositionTextureBuffer->getId(), 1);
-        // mIblShader->set("u_normal_texture", mNormalTextureBuffer->getId(), 2);
-        // mIblShader->set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 3);
-        // mIblShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
-        //
-        // mIblShader->set("u_irradiance_texture", mIrradianceMap->getId(), 5);
-        // mIblShader->set("u_pre_filter_texture", mPreFilterMap->getId(), 6);
-        // mIblShader->set("u_brdf_lut_texture", mBrdfLutTextureBuffer->getId(), 7);
-        //
-        // mIblShader->set("u_camera_position_ws", cameraPosition);
-        //
-        // mIblShader->set("u_luminance_multiplier", mIblLuminanceMultiplier);
-        //
-        // drawFullscreenTriangleNow();
+        mIblShader->bind();
+
+        mIblShader->set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 0);
+        mIblShader->set("u_position_texture", mPositionTextureBuffer->getId(), 1);
+        mIblShader->set("u_normal_texture", mNormalTextureBuffer->getId(), 2);
+        mIblShader->set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 3);
+        mIblShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
+
+        mIblShader->set("u_irradiance_texture", mIrradianceMap->getId(), 5);
+        mIblShader->set("u_pre_filter_texture", mPreFilterMap->getId(), 6);
+        mIblShader->set("u_brdf_lut_texture", mBrdfLutTextureBuffer->getId(), 7);
+
+        mIblShader->set("u_camera_position_ws", cameraPosition);
+
+        mIblShader->set("u_luminance_multiplier", mIblLuminanceMultiplier);
+
+        drawFullscreenTriangleNow();
         
         // Deferred Lighting step.
         

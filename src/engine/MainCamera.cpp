@@ -31,7 +31,7 @@ void MainCamera::init()
     const glm::vec2 size = glm::ivec2(window::bufferSize());
     mProjectionMatrix = glm::perspective(mFovY, size.x / size.y, mNearClip, mFarClip);
     
-    // mPostProcessStack.emplace_back(std::make_unique<BloomPass>());
+    mPostProcessStack.emplace_back(std::make_unique<BloomPass>());
     mPostProcessStack.emplace_back(std::make_unique<ColourGrading>());
     
     mFocusActorEventToken = engine::eventHandler->viewport.onFocusActor.subscribe([this]() { gotoSelectedActor(); });
