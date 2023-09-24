@@ -120,6 +120,8 @@ void MyScene::onImguiUpdate()
     ImGui::SameLine();
     if (ImGui::Button("Skybox 2"))
         graphics::renderer->generateSkybox("../resources/textures/hdr/norway/Norway.hdr", glm::ivec2(512));
+    if (ImGui::DragFloat("Luminance Multiplier", &mLuminanceMultiplier))
+        graphics::renderer->setIblMultiplier(mLuminanceMultiplier);
     
     static bool yes = true;
     ImGui::ShowDemoWindow(&yes);

@@ -35,7 +35,7 @@ struct DirectionalLight
     /**
      * @brief The colour of the light.
      */
-    float intensity { 64000.f };
+    float intensity { 10000.f };
     
     std::shared_ptr<TextureArrayObject> shadowMap { nullptr };
     

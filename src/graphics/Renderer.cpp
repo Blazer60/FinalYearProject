@@ -205,6 +205,8 @@ void Renderer::render()
         mIblShader->set("u_brdf_lut_texture", mBrdfLutTextureBuffer->getId(), 7);
 
         mIblShader->set("u_camera_position_ws", cameraPosition);
+        
+        mIblShader->set("u_luminance_multiplier", mIblLuminanceMultiplier);
 
         drawFullscreenTriangleNow();
         
@@ -225,6 +227,7 @@ void Renderer::render()
         mDeferredLightShader->set("u_skybox_texture", mHdrSkybox->getId(), 3);
         
         mDeferredLightShader->set("u_inverse_vp_matrix", ivp);
+        mDeferredLightShader->set("u_luminance_multiplier", mIblLuminanceMultiplier);
         
         drawFullscreenTriangleNow();
         
@@ -621,5 +624,10 @@ std::vector<DirectionalLight> &Renderer::getDirectionalLights()
 float Renderer::getCurrentEV100() const
 {
     return mCurrentEV100;
+}
+
+void Renderer::setIblMultiplier(float m)
+{
+    mIblLuminanceMultiplier = glm::abs(m);
 }
 

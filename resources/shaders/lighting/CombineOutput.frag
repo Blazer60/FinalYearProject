@@ -8,6 +8,7 @@ uniform sampler2D u_depth_texture;
 uniform samplerCube u_skybox_texture;
 
 uniform mat4 u_inverse_vp_matrix;
+uniform float u_luminance_multiplier;
 
 out layout(location = 0) vec3 o_colour;
 
@@ -26,7 +27,7 @@ vec3 sample_skybox_colour()
 
     const vec3 direction = (far_plane - near_plane).xyz;
     const vec3 colour = texture(u_skybox_texture, direction.xyz).rgb;
-    return colour * 1000.f;
+    return colour * u_luminance_multiplier;
 }
 
 void main()

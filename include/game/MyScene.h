@@ -35,4 +35,6 @@ public:
     
 protected:
     std::shared_ptr<Shader> mStandardShader;
+    
+    float mLuminanceMultiplier { 1000.f };
 };

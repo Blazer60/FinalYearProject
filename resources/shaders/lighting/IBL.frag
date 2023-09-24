@@ -14,6 +14,8 @@ uniform sampler2D u_brdf_lut_texture;
 
 uniform vec3 u_camera_position_ws;
 
+uniform float u_luminance_multiplier;
+
 out layout(location = 0) vec3 o_irradiance;
 
 // Unreal's fresnel function using spherical gaussian approximation.
@@ -49,5 +51,5 @@ void main()
     const vec2 brdf = texture(u_brdf_lut_texture, vec2(vDotN, roughness)).rg;
     const vec3 specular = preFilterColour * (fresnel * brdf.x + brdf.y);
 
-    o_irradiance = (specular + diffuse) * 1000.f;  // todo: 1000.f needs to be exposed as a setting.
+    o_irradiance = (specular + diffuse) * u_luminance_multiplier;
 }
