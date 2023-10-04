@@ -12,6 +12,7 @@ uniform sampler2D u_diffuse_texture;
 uniform sampler2D u_normal_texture;
 uniform sampler2D u_height_texture;
 uniform sampler2D u_roughness_texture;
+uniform sampler2D u_metallic_texture;
 uniform vec3 u_emissive_colour;
 uniform mat4 u_model_matrix;
 
@@ -92,7 +93,9 @@ void main()
     if (o_roughness <= 0.f)
         o_roughness = u_roughness;
 
-    o_metallic = u_metallic;
+    o_metallic = texture(u_metallic_texture, uv).r;
+    if (o_metallic <= 0.f)
+        o_metallic = u_metallic;
 
     if (texture_colour == vec3(0.f))
         texture_colour = vec3(1.f);

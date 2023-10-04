@@ -25,7 +25,8 @@ StandardMaterial::StandardMaterial() :
     mDiffuse(std::make_shared<Texture>("")),
     mNormal(std::make_shared<Texture>("")),
     mHeight(std::make_shared<Texture>("")),
-    mRoughnessMap(std::make_shared<Texture>(""))
+    mRoughnessMap(std::make_shared<Texture>("")),
+    mMetallicMap(std::make_shared<Texture>(""))
 {
     // We create empty textures so that the shader can still bind to slot zero.
 }
@@ -37,6 +38,7 @@ void StandardMaterial::onDraw()
     mShader->set("u_normal_texture", mNormal->id(), 2);
     mShader->set("u_height_texture", mHeight->id(), 3);
     mShader->set("u_roughness_texture", mRoughnessMap->id(), 4);
+    mShader->set("u_metallic_texture", mMetallicMap->id(), 5);
     mShader->set("u_height_scale", heightScale);
     mShader->set("u_min_height_samples", minHeightSamples);
     mShader->set("u_max_height_samples", maxHeightSamples);
@@ -72,9 +74,15 @@ void StandardMaterial::setNormalMap(std::shared_ptr<Texture> normalMap)
     mNormal = std::move(normalMap);
 }
 
+void StandardMaterial::setMetallicMap(std::shared_ptr<Texture> metallicMap)
+{
+    mMetallicMap = std::move(metallicMap);
+}
+
 void StandardMaterial::onDrawUi()
 {
-    ImGui::PushID("StandardMaterialSettings");
+    std::string id = "StandardMaterialSettings" + std::to_string((uint64_t)this);
+    ImGui::PushID(id.c_str());
     if (ImGui::TreeNodeEx("Material", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAvailWidth))
     {
         ImGui::ColorEdit3("Ambient Colour", glm::value_ptr(ambientColour));
@@ -86,6 +94,7 @@ void StandardMaterial::onDrawUi()
     }
     ImGui::PopID();
 }
+
 
 
 

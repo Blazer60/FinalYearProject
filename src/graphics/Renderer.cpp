@@ -194,7 +194,7 @@ void Renderer::render()
             mDirectionalLightShader->set("u_light_direction", directionalLight.direction);
             mDirectionalLightShader->set("u_light_intensity", directionalLight.intensity * directionalLight.colour);
             mDirectionalLightShader->set("u_light_vp_matrix", &(directionalLight.vpMatrices[0]), static_cast<int>(directionalLight.vpMatrices.size()));
-            mDirectionalLightShader->set("u_shadow_map_texture", directionalLight.shadowMap->getId(), 3);
+            mDirectionalLightShader->set("u_shadow_map_texture", directionalLight.shadowMap->getId(), 5);
 
             glDrawElements(GL_TRIANGLES, mFullscreenTriangle.indicesCount(), GL_UNSIGNED_INT, nullptr);
         }

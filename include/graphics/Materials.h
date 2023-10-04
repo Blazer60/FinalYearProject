@@ -72,6 +72,7 @@ public:
     void setNormalMap(std::shared_ptr<Texture> normalMap);
     void setHeightMap(std::shared_ptr<Texture> heightMap);
     void setRoughnessMap(std::shared_ptr<Texture> roughnessMap);
+    void setMetallicMap(std::shared_ptr<Texture> metallicMap);
 
     float heightScale { 0.1f };
     int32_t maxHeightSamples { 64 };
@@ -89,6 +90,7 @@ protected:
     std::shared_ptr<Texture> mNormal;
     std::shared_ptr<Texture> mHeight;
     std::shared_ptr<Texture> mRoughnessMap;
+    std::shared_ptr<Texture> mMetallicMap;
 };
 
 /**
