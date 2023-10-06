@@ -35,8 +35,6 @@ protected:
     Shader mComposite   { "../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/postProcessing/bloom/BloomComposite.frag"   };
     
 protected:
-    glm::vec3 computeLuminanceThreshold();
-    
     std::unique_ptr<TextureBufferObject> mDownSampleTexture;
     std::unique_ptr<TextureBufferObject> mUpSampleTexture;
     
@@ -45,8 +43,7 @@ protected:
     
     glm::ivec2 mCurrentSize { 0 };
     
-    glm::vec3 mColour { 0.f };
-    glm::vec3 mLightKeyThreshold { 1.f };
-    float mExposureCompensation { 0.f };
+    glm::vec3 mColour { 1.f };
     float mBloomScale { 1.f };
+    float mBloomStrength { 0.04f };
 };

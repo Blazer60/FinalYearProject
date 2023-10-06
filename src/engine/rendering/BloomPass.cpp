@@ -23,7 +23,6 @@ void BloomPass::onDraw(TextureBufferObject *imageInput, TextureBufferObject *ima
     mFramebuffer->attach(mDownSampleTexture.get(), 0, 0);
     mPreFilter.bind();
     mPreFilter.set("u_texture", imageInput->getId(), 0);
-    mPreFilter.set("u_light_key_threshold", computeLuminanceThreshold());
     graphics::renderer->drawFullscreenTriangleNow();
     mFramebuffer->detach(0);
     
@@ -73,6 +72,7 @@ void BloomPass::onDraw(TextureBufferObject *imageInput, TextureBufferObject *ima
     mComposite.bind();
     mComposite.set("u_original", imageInput->getId(), 0);
     mComposite.set("u_bloom", mUpSampleTexture->getId(), 1);
+    mComposite.set("u_strength", mBloomStrength * mColour);
     
     mFramebuffer->attach(imageOutput, 0);
     graphics::renderer->drawFullscreenTriangleNow();
@@ -91,17 +91,10 @@ void BloomPass::onDrawUi()
     if (ImGui::TreeNode("Bloom"))
     {
         ImGui::ColorEdit3("Colour", glm::value_ptr(mColour), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_PickerHueWheel);
-        ImGui::DragFloat("Bloom Exposure Compensation", &mExposureCompensation, 0.1f);
+        ImGui::DragFloat("Bloom strength", &mBloomStrength, 0.01f);
+        mBloomStrength = glm::clamp(mBloomStrength, 0.f, 1.f);
         
         ImGui::DragFloat("Bloom Scale", &mBloomScale, 0.01f);
         ImGui::TreePop();
     }
-}
-
-// Frostbite Pg.87 Course notes moving frostbite to pbr.
-glm::vec3 BloomPass::computeLuminanceThreshold()
-{
-    float bloomEV = graphics::renderer->getCurrentEV100() + mExposureCompensation;
-    
-    return (glm::vec3(1.f) - mColour) * glm::pow(2.f, bloomEV - 3.f);
 }
