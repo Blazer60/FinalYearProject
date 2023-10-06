@@ -56,7 +56,7 @@ void BloomPass::onDraw(TextureBufferObject *imageInput, TextureBufferObject *ima
     mFramebuffer->detach(0);
     
     mUpSample.set("u_up_sample_texture", mUpSampleTexture->getId(), 0);  // Up-sample texture changes to the correct one.
-    for (int i = count - 2; i > 0; --i)
+    for (int i = count - 2; i >= 0; --i)
     {
         glViewport(0, 0, upSampleSize.x >> i, upSampleSize.y >> i);
         mUpSample.set("u_up_mip_level", i + 1);

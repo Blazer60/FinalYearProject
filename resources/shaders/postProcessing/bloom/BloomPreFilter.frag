@@ -32,22 +32,23 @@ float karis_average(vec3 colour)
 // . . . . . . .
 vec3 down_filter_13_tap(vec2 uv, vec2 texel_size)
 {
+    const float lod = 0.f;
     // Unity uses a range of [-1, 1] using 0.5.
     // https://github.com/Unity-Technologies/Graphics/blob/master/com.unity.postprocessing/PostProcessing/Shaders/Sampling.hlsl
     // https://github.com/Unity-Technologies/Graphics/blob/master/com.unity.postprocessing/PostProcessing/Shaders/Builtins/Bloom.shader
-    const vec3 texel_a = textureLod(u_texture, uv + texel_size * vec2(-2, +2), 0).rgb;
-    const vec3 texel_b = textureLod(u_texture, uv + texel_size * vec2(+0, +2), 0).rgb;
-    const vec3 texel_c = textureLod(u_texture, uv + texel_size * vec2(+2, +2), 0).rgb;
-    const vec3 texel_d = textureLod(u_texture, uv + texel_size * vec2(-1, +1), 0).rgb;
-    const vec3 texel_e = textureLod(u_texture, uv + texel_size * vec2(+1, +1), 0).rgb;
-    const vec3 texel_f = textureLod(u_texture, uv + texel_size * vec2(-2, +0), 0).rgb;
-    const vec3 texel_g = textureLod(u_texture, uv,                             0).rgb;
-    const vec3 texel_h = textureLod(u_texture, uv + texel_size * vec2(+2, +0), 0).rgb;
-    const vec3 texel_i = textureLod(u_texture, uv + texel_size * vec2(-1, -1), 0).rgb;
-    const vec3 texel_j = textureLod(u_texture, uv + texel_size * vec2(+1, -1), 0).rgb;
-    const vec3 texel_k = textureLod(u_texture, uv + texel_size * vec2(-2, -2), 0).rgb;
-    const vec3 texel_l = textureLod(u_texture, uv + texel_size * vec2(+0, -2), 0).rgb;
-    const vec3 texel_m = textureLod(u_texture, uv + texel_size * vec2(+2, -2), 0).rgb;
+    const vec3 texel_a = textureLod(u_texture, uv + texel_size * vec2(-2, +2), lod).rgb;
+    const vec3 texel_b = textureLod(u_texture, uv + texel_size * vec2(+0, +2), lod).rgb;
+    const vec3 texel_c = textureLod(u_texture, uv + texel_size * vec2(+2, +2), lod).rgb;
+    const vec3 texel_d = textureLod(u_texture, uv + texel_size * vec2(-1, +1), lod).rgb;
+    const vec3 texel_e = textureLod(u_texture, uv + texel_size * vec2(+1, +1), lod).rgb;
+    const vec3 texel_f = textureLod(u_texture, uv + texel_size * vec2(-2, +0), lod).rgb;
+    const vec3 texel_g = textureLod(u_texture, uv,                             lod).rgb;
+    const vec3 texel_h = textureLod(u_texture, uv + texel_size * vec2(+2, +0), lod).rgb;
+    const vec3 texel_i = textureLod(u_texture, uv + texel_size * vec2(-1, -1), lod).rgb;
+    const vec3 texel_j = textureLod(u_texture, uv + texel_size * vec2(+1, -1), lod).rgb;
+    const vec3 texel_k = textureLod(u_texture, uv + texel_size * vec2(-2, -2), lod).rgb;
+    const vec3 texel_l = textureLod(u_texture, uv + texel_size * vec2(+0, -2), lod).rgb;
+    const vec3 texel_m = textureLod(u_texture, uv + texel_size * vec2(+2, -2), lod).rgb;
 
     vec3 sector_a = 0.125f * (texel_a + texel_b + texel_f + texel_g) / 4.f;
     vec3 sector_b = 0.125f * (texel_b + texel_c + texel_g + texel_h) / 4.f;
