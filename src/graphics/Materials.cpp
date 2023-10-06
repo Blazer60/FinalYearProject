@@ -8,6 +8,7 @@
 #include "Materials.h"
 #include "TextureLoader.h"
 #include "gtc/type_ptr.hpp"
+#include "Ui.h"
 
 #include <utility>
 
@@ -85,10 +86,26 @@ void StandardMaterial::onDrawUi()
     ImGui::PushID(id.c_str());
     if (ImGui::TreeNodeEx("Material", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAvailWidth))
     {
-        ImGui::ColorEdit3("Ambient Colour", glm::value_ptr(ambientColour));
+        
+        const ImVec2 imageSize = ImVec2(15.f, 15.f);
+        
+        ImGui::ImageButton("Diffuse Texture", reinterpret_cast<void *>(mDiffuse->id()), imageSize, ImVec2(0, 1), ImVec2(1, 0));
+        ui::drawToolTip("Albedo Texture");
+        ImGui::SameLine();
+        ImGui::ColorEdit3("Albedo", glm::value_ptr(ambientColour), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueWheel);
+        
+        ImGui::ImageButton("Roughness Texture", reinterpret_cast<void *>(mRoughnessMap->id()), imageSize, ImVec2(0, 1), ImVec2(1, 0));
+        ui::drawToolTip("Roughness Texture");
+        ImGui::SameLine();
         ImGui::SliderFloat("Roughness", &roughness, 0.f, 1.f);
+        
+        ImGui::ImageButton("Metallic Texture", reinterpret_cast<void *>(mMetallicMap->id()), imageSize, ImVec2(0, 1), ImVec2(1, 0));
+        ui::drawToolTip("Metallic Texture");
+        ImGui::SameLine();
         ImGui::SliderFloat("Metallic", &metallic, 0.f, 1.f);
-        ImGui::ColorEdit3("Emissive Colour", glm::value_ptr(emissive), ImGuiColorEditFlags_HDR);
+        
+        ImGui::ColorEdit3("Emissive Colour", glm::value_ptr(emissive), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueWheel);
+        ImGui::SliderFloat("Height", &heightScale, 0.f, 1.f);
         
         ImGui::TreePop();
     }

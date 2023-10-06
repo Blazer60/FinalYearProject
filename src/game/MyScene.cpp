@@ -103,6 +103,17 @@ MyScene::MyScene() :
     auto pointLight = spawnActor<engine::Actor>("Point Light");
     pointLight->position = glm::vec3(0.f, 6.f, 5.f);
     pointLight->addComponent(makeResource<PointLight>());
+    
+    auto leatherBall = spawnActor<engine::Actor>("Leather Ball");
+    leatherBall->position = glm::vec3(0.f, 5.f, 0.f);
+    auto leatherBallModel = load::model<StandardVertex>("../resources/models/leatherBall/LeatherBall.obj");
+    auto leatherMaterial = std::make_shared<StandardMaterial>();
+    leatherMaterial->attachShader(mStandardShader);
+    leatherMaterial->setDiffuseMap(load::texture("../resources/models/leatherBall/TexturesCom_Leather_Tufted_New_1K_albedo.png"));
+    leatherMaterial->setNormalMap(load::texture("../resources/models/leatherBall/TexturesCom_Leather_Tufted_New_1K_normal.png"));
+    leatherMaterial->setHeightMap(load::texture("../resources/models/leatherBall/TexturesCom_Leather_Tufted_New_1K_height.png"));
+    leatherMaterial->setRoughnessMap(load::texture("../resources/models/leatherBall/TexturesCom_Leather_Tufted_New_1K_roughness.png"));
+    leatherBall->addComponent(makeResource<engine::MeshComponent>(leatherBallModel, leatherMaterial));
 }
 
 void MyScene::onFixedUpdate()
