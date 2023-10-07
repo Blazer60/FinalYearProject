@@ -19,4 +19,7 @@ namespace ui
     void drawToolTip(std::string_view message, float tooltipWidth=20.f);
     
     bool inputText(const char *label, std::string *string, ImGuiInputTextFlags flags=0);
+    
+    void image(uint32_t id, const glm::vec2 &size);
+    bool imageButton(std::string_view imguiId, uint32_t glId, const glm::vec2 &size);
 }

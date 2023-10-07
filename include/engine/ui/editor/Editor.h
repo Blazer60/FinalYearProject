@@ -76,6 +76,13 @@ namespace engine
         void addComponentOption(const std::string &name, const ComponentDetails::CreateFunc &onCreate);
         void addMenuOption(const std::string &name, const ActorDetails::CreateFunc &onCreate);
         static Ref<Actor> createDefaultShape(const std::string& name, std::string_view path);
+        
+        /**
+         * @brief Allows callbacks to processed in the update function. This is mainly to stop imgui
+         * referencing deleted data. Only to be used as a last resort. If an object already has an
+         * onUpdate function, use that instead.
+         */
+        void addUpdateAction(const std::function<void()> &callback);
     protected:
         void onDrawUi() override;
         void drawSceneHierarchyPanel();
@@ -93,6 +100,8 @@ namespace engine
         
         Actor* mMoveSourceActor { nullptr };
         Actor* mMoveDestinationActor { nullptr };
+        
+        std::vector<std::function<void()>> mOnUpdate;
     };
     
     

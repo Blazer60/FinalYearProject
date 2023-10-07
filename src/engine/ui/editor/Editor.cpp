@@ -129,7 +129,10 @@ namespace engine
     
     void Editor::update()
     {
-    
+        for (auto &callback : mOnUpdate)
+            callback();
+        
+        mOnUpdate.clear();
     }
     
     bool Editor::isViewportHovered()
@@ -240,5 +243,10 @@ namespace engine
     void Editor::addMenuOption(const std::string &name, const ActorDetails::CreateFunc &onCreate)
     {
         mMenuList.push_back(ActorDetails { name, onCreate });
+    }
+    
+    void Editor::addUpdateAction(const std::function<void()> &callback)
+    {
+        mOnUpdate.push_back(callback);
     }
 }

@@ -142,4 +142,16 @@ namespace ui
         
         return result;
     }
+    
+    void image(uint32_t id, const glm::vec2 &size)
+    {
+        ImVec2 imSize { size.x, size.y };
+        ImGui::Image(reinterpret_cast<void *>(id), imSize, ImVec2(0, 1), ImVec2(1, 0));
+    }
+    
+    bool imageButton(std::string_view imguiId, uint32_t glId, const glm::vec2 &size)
+    {
+        ImVec2 imSize { size.x, size.y };
+        return ImGui::ImageButton(imguiId.data(), reinterpret_cast<void *>(glId), imSize, ImVec2(0, 1), ImVec2(1, 0));
+    }
 }

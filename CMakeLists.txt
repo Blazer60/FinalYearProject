@@ -96,6 +96,8 @@ add_executable(${PROJECT_NAME}
         include/engine/EngineMemory.h
         src/game/Rotator.cpp
         include/game/Rotator.h
+        src/engine/loader/FileExplorer.cpp
+        include/engine/loader/FileExplorer.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

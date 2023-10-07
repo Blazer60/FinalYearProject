@@ -9,6 +9,9 @@
 #include "TextureLoader.h"
 #include "gtc/type_ptr.hpp"
 #include "Ui.h"
+#include "FileExplorer.h"
+#include "EngineState.h"
+#include "Core.h"
 
 #include <utility>
 
@@ -86,25 +89,122 @@ void StandardMaterial::onDrawUi()
     ImGui::PushID(id.c_str());
     if (ImGui::TreeNodeEx("Material", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAvailWidth))
     {
+        const glm::vec2 imageSize = glm::vec2(15.f, 15.f);
         
-        const ImVec2 imageSize = ImVec2(15.f, 15.f);
-        
-        ImGui::ImageButton("Diffuse Texture", reinterpret_cast<void *>(mDiffuse->id()), imageSize, ImVec2(0, 1), ImVec2(1, 0));
+        if (ImGui::Button("X##Diffuse"))
+        {
+            engine::editor->addUpdateAction([this]() {
+                mDiffuse = std::make_shared<Texture>("");
+            });
+        }
+        ImGui::SameLine();
+        if (ui::imageButton("Diffuse texture", mDiffuse->id(), imageSize))
+        {
+            engine::editor->addUpdateAction([this]() {
+                std::string result = openFileExplorer();
+                if (result.empty())
+                    return;
+                
+                std::shared_ptr<Texture> newTexture = std::make_shared<Texture>(result);
+                if (newTexture->id() != 0)
+                    mDiffuse = newTexture;
+            });
+        }
         ui::drawToolTip("Albedo Texture");
         ImGui::SameLine();
         ImGui::ColorEdit3("Albedo", glm::value_ptr(ambientColour), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueWheel);
         
-        ImGui::ImageButton("Roughness Texture", reinterpret_cast<void *>(mRoughnessMap->id()), imageSize, ImVec2(0, 1), ImVec2(1, 0));
+        if (ImGui::Button("X##Normal"))
+        {
+            engine::editor->addUpdateAction([this]() {
+                mNormal = std::make_shared<Texture>("");
+            });
+        }
+        ImGui::SameLine();
+        if (ui::imageButton("Normal Texture", mNormal->id(), imageSize))
+        {
+            engine::editor->addUpdateAction([this]() {
+                std::string result = openFileExplorer();
+                if (result.empty())
+                    return;
+                
+                std::shared_ptr<Texture> newTexture = std::make_shared<Texture>(result);
+                if (newTexture->id() != 0)
+                    mNormal = newTexture;
+            });
+        }
+        ui::drawToolTip("Normal Map");
+        
+        if (ImGui::Button("X##Roughness"))
+        {
+            engine::editor->addUpdateAction([this]() {
+                mRoughnessMap = std::make_shared<Texture>("");
+            });
+        }
+        ImGui::SameLine();
+        if (ui::imageButton("Roughness Texture", mRoughnessMap->id(), imageSize))
+        {
+            engine::editor->addUpdateAction([this]() {
+                std::string result = openFileExplorer();
+                if (result.empty())
+                    return;
+                
+                std::shared_ptr<Texture> newTexture = std::make_shared<Texture>(result);
+                if (newTexture->id() != 0)
+                    mRoughnessMap = newTexture;
+            });
+        }
         ui::drawToolTip("Roughness Texture");
         ImGui::SameLine();
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("Roughness").x);
         ImGui::SliderFloat("Roughness", &roughness, 0.f, 1.f);
         
-        ImGui::ImageButton("Metallic Texture", reinterpret_cast<void *>(mMetallicMap->id()), imageSize, ImVec2(0, 1), ImVec2(1, 0));
+        if (ImGui::Button("X##Metallic"))
+        {
+            engine::editor->addUpdateAction([this]() {
+                mMetallicMap = std::make_shared<Texture>("");
+            });
+        }
+        ImGui::SameLine();
+        if (ui::imageButton("Metallic Texture", mMetallicMap->id(), imageSize))
+        {
+            engine::editor->addUpdateAction([this]() {
+                std::string result = openFileExplorer();
+                if (result.empty())
+                    return;
+                
+                std::shared_ptr<Texture> newTexture = std::make_shared<Texture>(result);
+                if (newTexture->id() != 0)
+                    mMetallicMap = newTexture;
+            });
+        }
         ui::drawToolTip("Metallic Texture");
         ImGui::SameLine();
         ImGui::SliderFloat("Metallic", &metallic, 0.f, 1.f);
         
         ImGui::ColorEdit3("Emissive Colour", glm::value_ptr(emissive), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueWheel);
+        
+        if (ImGui::Button("X##Height"))
+        {
+            engine::editor->addUpdateAction([this]() {
+                mHeight = std::make_shared<Texture>("");
+            });
+        }
+        ImGui::SameLine();
+        if (ui::imageButton("Height Texture", mHeight->id(), imageSize))
+        {
+            engine::editor->addUpdateAction([this]() {
+                std::string result = openFileExplorer();
+                if (result.empty())
+                    return;
+                
+                std::shared_ptr<Texture> newTexture = std::make_shared<Texture>(result);
+                if (newTexture->id() != 0)
+                    mHeight = newTexture;
+            });
+        }
+        ui::drawToolTip("Height Map Texture");
+        ImGui::SameLine();
         ImGui::SliderFloat("Height", &heightScale, 0.f, 1.f);
         
         ImGui::TreePop();
