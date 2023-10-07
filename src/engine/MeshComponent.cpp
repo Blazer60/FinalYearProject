@@ -8,6 +8,9 @@
 #include "MeshComponent.h"
 #include "GraphicsState.h"
 #include "Actor.h"
+#include "FileExplorer.h"
+#include "AssimpLoader.h"
+#include "Core.h"
 
 namespace engine
 {
@@ -29,13 +32,23 @@ namespace engine
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 1.f, 0.f, 1.f));
                 ImGui::Text("Mesh component does contain any meshes.");
                 ImGui::PopStyleColor();
+                drawMeshOptions();
             }
             else
             {
                 ImGui::Checkbox("Show", &mShow);
+                drawMeshOptions();
                 for (auto &material : mSharedMaterials)
                     ui::draw(material.get());
+                
+                if (ImGui::Button("Add Material"))
+                {
+                    auto material = std::make_shared<StandardMaterial>();
+                    material->attachShader(engine::core->getStandardShader());
+                    mSharedMaterials.push_back(material);
+                }
             }
+            
             
             ImGui::TreePop();
         }
@@ -46,5 +59,18 @@ namespace engine
     {
         if (mShow)
             graphics::renderer->drawMesh(mSharedMesh, mSharedMaterials, getWorldTransform());
+    }
+    
+    void MeshComponent::drawMeshOptions()
+    {
+        if (ImGui::Button("Change Mesh"))
+        {
+            std::string meshPath = openFileExplorer();
+            SharedMesh mesh = load::model<StandardVertex>(meshPath);
+            if (!mesh.empty())
+            {
+                mSharedMesh = mesh;
+            }
+        }
     }
 }

@@ -30,6 +30,8 @@ namespace engine
     protected:
         void onDrawUi() override;
         void onPreRender() override;
+        
+        void drawMeshOptions();
     
     protected:
         SharedMesh      mSharedMesh;
