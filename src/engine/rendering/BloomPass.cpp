@@ -9,9 +9,11 @@
 #include "imgui.h"
 #include "gtc/type_ptr.hpp"
 #include "GraphicsState.h"
+#include "ProfileTimer.h"
 
 void BloomPass::onDraw(TextureBufferObject *imageInput, TextureBufferObject *imageOutput)
 {
+    PROFILE_FUNC();
     if (mCurrentSize != imageOutput->getSize())
         generateAuxiliaryBuffers(imageOutput->getSize());
     

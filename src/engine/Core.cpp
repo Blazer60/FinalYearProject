@@ -19,12 +19,16 @@
 #include "ImGuizmo.h"
 #include "TextureLoader.h"
 #include "ModelDestroyer.h"
+#include "Profiler.h"
+#include "ProfileTimer.h"
 
 namespace engine
 {
     Core::Core(const glm::ivec2 &resolution, bool enableDebugging)
         : mResolution(resolution), mEnableDebugging(enableDebugging)
     {
+        mProfiler = std::make_unique<Profiler>();
+        profiler = mProfiler.get();
         mLogger = std::make_unique<Logger>();
         logger = mLogger.get();
         mLogger->setOutputFlag(OutputSourceFlag_File | OutputSourceFlag_Queue);
@@ -225,12 +229,14 @@ namespace engine
         
         while (mIsRunning)
         {
+            PROFILE_SCOPE_BEGIN(coreLoopTimer, "CPU Time");
             unsigned int loopAmount = 0;
             
             mEventHandler.beginFrame();
             glfwPollEvents();
             mIsRunning = !glfwWindowShouldClose(mWindow);
             
+            PROFILE_SCOPE_BEGIN(fixedTimer, "Fixed Update");
             while (timers::getTicks<double>() > nextUpdateTick && loopAmount < mMaxLoopCount)
             {
                 mScene->onFixedUpdate();
@@ -239,6 +245,7 @@ namespace engine
                 nextUpdateTick += timers::fixedTime<double>();
                 ++loopAmount;
             }
+            PROFILE_SCOPE_END(fixedTimer);
             
             mScene->update();
             mMainCamera->update();
@@ -249,13 +256,20 @@ namespace engine
             updateImgui();
             mRenderer->clear();
             
-            glfwSwapBuffers(mWindow);
             timers::update();
+            PROFILE_SCOPE_END(coreLoopTimer);
+            
+            PROFILE_SCOPE_BEGIN(awaitVSync, "CPU Idle");
+            glfwSwapBuffers(mWindow);
+            PROFILE_SCOPE_END(awaitVSync);
+            
+            mProfiler->updateAndClear();
         }
     }
     
     void Core::updateImgui()
     {
+        PROFILE_FUNC();
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -270,11 +284,11 @@ namespace engine
         if (ImGui::BeginMainMenuBar())
         {
             mScene->onImguiMenuUpdate();
-            const std::string text = "TPS: %.0f | Frame Rate: %.3f s/frame (%.1f FPS)";
+            const std::string text = "TPS: %.0f | Frame Rate: %.3f ms/frame (%.1f FPS)";
             ImGui::SetCursorPosX(
                 ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - ImGui::CalcTextSize(text.c_str()).x
                 - ImGui::GetScrollX() - 2 * ImGui::GetStyle().ItemSpacing.x);
-            ImGui::Text(text.c_str(), 1.f / timers::fixedTime<float>(), timers::deltaTime<float>(), ImGui::GetIO().Framerate);
+            ImGui::Text(text.c_str(), 1.f / timers::fixedTime<float>(), timers::deltaTime<float>() * 1000.f, ImGui::GetIO().Framerate);
             ImGui::EndMainMenuBar();
         }
         
@@ -288,6 +302,7 @@ namespace engine
         ImGui::End();
         
         ui::draw(mEditor);
+        ui::draw(mProfiler);
         
         ImGui::Render();
         int display_w, display_h;

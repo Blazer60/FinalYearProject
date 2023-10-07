@@ -10,6 +10,7 @@
 #include "Scene.h"
 #include "AssimpLoader.h"
 #include "MeshComponent.h"
+#include "ProfileTimer.h"
 
 namespace engine
 {
@@ -50,6 +51,7 @@ namespace engine
     
     void Editor::onDrawUi()
     {
+        PROFILE_FUNC();
         ui::draw(mViewport);
         ui::draw(mLogWindow);
         drawSceneHierarchyPanel();
@@ -61,6 +63,7 @@ namespace engine
     
     void Editor::drawActorDetails()
     {
+        PROFILE_FUNC();
         ImGui::Begin("Details");
         if (mSelectedActor.isValid())
         {
@@ -78,6 +81,7 @@ namespace engine
     
     void Editor::drawSceneHierarchyPanel()
     {
+        PROFILE_FUNC();
         ImGui::Begin("Scene Hierarchy", nullptr, ImGuiWindowFlags_MenuBar);
         if (ImGui::BeginMenuBar())
         {

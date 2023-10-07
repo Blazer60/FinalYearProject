@@ -15,6 +15,7 @@
 #include "gtc/type_ptr.hpp"
 #include "gtx/matrix_decompose.hpp"
 #include "EngineMath.h"
+#include "ProfileTimer.h"
 
 namespace engine
 {
@@ -57,6 +58,7 @@ namespace engine
     
     void Viewport::onDrawUi()
     {
+        PROFILE_FUNC();
         ImGui::PushID("Viewport");
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
         ImGui::Begin("Window");

@@ -8,11 +8,13 @@
 #include "Scene.h"
 #include "imgui.h"
 #include "WindowHelpers.h"
+#include "ProfileTimer.h"
 
 namespace engine
 {
     void Scene::update()
     {
+        PROFILE_FUNC();
         onUpdate();
         
         for (auto &actor : mActors)
@@ -54,6 +56,7 @@ namespace engine
     
     void Scene::imguiUpdate()
     {
+        PROFILE_FUNC();
         onImguiUpdate();
     }
     
@@ -64,6 +67,7 @@ namespace engine
     
     void Scene::render()
     {
+        PROFILE_FUNC();
         for (auto &actor : mActors)
             recursePreRender(actor);
         

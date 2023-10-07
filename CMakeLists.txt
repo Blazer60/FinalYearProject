@@ -98,6 +98,10 @@ add_executable(${PROJECT_NAME}
         include/game/Rotator.h
         src/engine/loader/FileExplorer.cpp
         include/engine/loader/FileExplorer.h
+        src/engine/ProfileTimer.cpp
+        include/engine/ProfileTimer.h
+        src/engine/ui/editor/Profiler.cpp
+        include/engine/ui/editor/Profiler.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

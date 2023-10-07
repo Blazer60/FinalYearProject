@@ -7,11 +7,13 @@
 
 #include "LogWindow.h"
 #include "Ui.h"
+#include "ProfileTimer.h"
 
 namespace engine
 {
     void LogWindow::onDrawUi()
     {
+        PROFILE_FUNC();
         ImGui::PushID("Logging");
         ImGui::Begin("Log Window");
         
@@ -53,6 +55,7 @@ namespace engine
     
     void LogWindow::drawMessageUi(const Message &message)
     {
+        PROFILE_FUNC();
         const std::string id = std::to_string(message.line) + message.file;
         if (mCollapse)
         {

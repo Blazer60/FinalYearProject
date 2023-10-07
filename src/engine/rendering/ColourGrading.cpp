@@ -8,9 +8,11 @@
 #include "ColourGrading.h"
 #include "imgui.h"
 #include "GraphicsState.h"
+#include "ProfileTimer.h"
 
 void ColourGrading::onDraw(TextureBufferObject *imageInput, TextureBufferObject *imageOutput)
 {
+    PROFILE_FUNC();
     glViewport(0, 0, imageOutput->getSize().x, imageOutput->getSize().y);
     
     mFramebuffer->bind();

@@ -59,7 +59,9 @@ std::string openFileExplorer()
     }
     
     std::wstring path(fPath);
-    std::string c(path.begin(), path.end());
+    std::vector<char> buf(path.size());  // We're doing this to avoid the possible loss of data message.
+    std::transform(path.begin(), path.end(), buf.begin(), [](wchar_t c) { return static_cast<char>(c); });
+    std::string c(buf.begin(), buf.end());
     
     CoTaskMemFree(fPath);
     fFiles->Release();

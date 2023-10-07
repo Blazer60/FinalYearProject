@@ -22,21 +22,6 @@ namespace engine
 {
     class Scene;
     
-    struct ViewportToggles
-    {
-        bool showPositionBuffer  { true };
-        bool showAlbedoBuffer    { true };
-        bool showNormalBuffer    { true };
-        bool showEmissiveBuffer  { true };
-        bool showDeferredLightingBuffer    { true };
-        bool showDiffuseBuffer   { true };
-        bool showDepthBuffer     { true };
-        bool showShadowBuffer    { true };
-        bool showRoughnessBuffer { true };
-        bool showMetallicBuffer  { true };
-        bool showPrimaryBuffer { true };
-    };
-
 /**
  * @author Ryan Purse
  * @date 12/06/2023
@@ -72,12 +57,12 @@ namespace engine
         std::unique_ptr<Scene> mScene;
         std::unique_ptr<Renderer> mRenderer;
         std::unique_ptr<Logger> mLogger;
+        std::unique_ptr<Profiler> mProfiler;
         
         ImGuiIO *mGuiIo { nullptr };
         bool mIsRunning { true };
         const unsigned int mMaxLoopCount { 10 };
         const bool mEnableDebugging { false };
-        ViewportToggles mViewportToggles;
         
         std::unique_ptr<MainCamera> mMainCamera;
         

@@ -14,6 +14,7 @@
 #include "Buffers.h"
 #include "Shader.h"
 #include "AssimpLoader.h"
+#include "ProfileTimer.h"
 
 Renderer::Renderer() :
     isOk(true),
@@ -121,6 +122,7 @@ void Renderer::submit(const graphics::AnalyticalPointLight &pointLight)
 
 void Renderer::render()
 {
+    PROFILE_FUNC();
     if (window::bufferSize().x <= 0 || window::bufferSize().y <= 0)
         return;
     
@@ -137,6 +139,7 @@ void Renderer::render()
     {
         mCurrentEV100 = camera.eV100;
         
+        PROFILE_SCOPE_BEGIN(geometryTimer, "Geometry Pass");
         mGeometryFramebuffer->bind();
         mGeometryFramebuffer->clear(camera.clearColour);
         
@@ -158,6 +161,8 @@ void Renderer::render()
             glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
         }
         
+        PROFILE_SCOPE_END(geometryTimer);
+        
         // Shadow mapping
         
         std::vector<float> cascadeDepths;
@@ -167,6 +172,7 @@ void Renderer::render()
         
         shadowMapping(camera, cascadeDepths);
         
+        PROFILE_SCOPE_BEGIN(directionalLightTimer, "Directional Lighting");
         mLightFramebuffer->bind();
         mLightFramebuffer->clear(glm::vec4(glm::vec3(0.f), 1.f));
         const glm::vec3 cameraPosition = glm::inverse(camera.viewMatrix) * glm::vec4(glm::vec3(0.f), 1.f);
@@ -199,6 +205,9 @@ void Renderer::render()
             glDrawElements(GL_TRIANGLES, mFullscreenTriangle.indicesCount(), GL_UNSIGNED_INT, nullptr);
         }
         
+        PROFILE_SCOPE_END(directionalLightTimer);
+        PROFILE_SCOPE_BEGIN(pointLightTimer, "Point Lighting");
+        
         mPointLightShader->bind();
         
         mPointLightShader->set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 0);
@@ -223,6 +232,9 @@ void Renderer::render()
             glDrawElements(GL_TRIANGLES, mUnitSphere.indicesCount(), GL_UNSIGNED_INT, nullptr);
         }
         
+        PROFILE_SCOPE_END(pointLightTimer);
+        PROFILE_SCOPE_BEGIN(iblTimer, "IBL Distant Light Probe");
+        
         // IBL ambient lighting. We already have the correct framebuffer bound.
         mIblShader->bind();
 
@@ -241,6 +253,9 @@ void Renderer::render()
         mIblShader->set("u_luminance_multiplier", mIblLuminanceMultiplier);
 
         drawFullscreenTriangleNow();
+        
+        PROFILE_SCOPE_END(iblTimer);
+        PROFILE_SCOPE_BEGIN(deferredTimer, "Skybox Pass");
         
         // Deferred Lighting step.
         
@@ -262,13 +277,16 @@ void Renderer::render()
         mDeferredLightShader->set("u_luminance_multiplier", mIblLuminanceMultiplier);
         
         drawFullscreenTriangleNow();
+        PROFILE_SCOPE_END(deferredTimer);
         
+        PROFILE_SCOPE_BEGIN(postProcessTimer, "Post-processing Stack");
         graphics::copyTexture2D(*mDeferredLightingTextureBuffer, *mPrimaryImageBuffer);
         for (std::unique_ptr<PostProcessLayer> &postProcessLayer : camera.postProcessStack)
         {
             postProcessLayer->draw(mPrimaryImageBuffer.get(), mAuxiliaryImageBuffer.get());
             graphics::copyTexture2D(*mAuxiliaryImageBuffer, *mPrimaryImageBuffer); // Yes this is bad. I'm lazy.
         }
+        PROFILE_SCOPE_END(postProcessTimer);
     }
 }
 
@@ -492,6 +510,7 @@ std::unique_ptr<TextureBufferObject> Renderer::generateBrdfLut(const glm::ivec2 
 
 void Renderer::shadowMapping(const CameraSettings &cameraSettings, const std::vector<float> &cascadeDepths)
 {
+    PROFILE_FUNC();
     const auto resize = [](const glm::vec4 &v) { return v / v.w; };
     
     mShadowFramebuffer->bind();

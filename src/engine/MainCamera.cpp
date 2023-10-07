@@ -14,6 +14,7 @@
 #include "Editor.h"
 #include "EngineState.h"
 #include "EventHandler.h"
+#include "ProfileTimer.h"
 
 MainCamera::MainCamera()
 {
@@ -58,6 +59,7 @@ MainCamera::~MainCamera()
 
 void MainCamera::update()
 {
+    PROFILE_FUNC();
     move();
     mProjectionMatrix = glm::perspective(mFovY, window::aspectRatio(), mNearClip, mFarClip);
     
@@ -122,6 +124,7 @@ const glm::mat4 &MainCamera::getViewMatrix() const
 
 void MainCamera::onDrawUi()
 {
+    PROFILE_FUNC();
     if (ImGui::CollapsingHeader("Camera Details"))
     {
         if (ImGui::TreeNode("Controls"))

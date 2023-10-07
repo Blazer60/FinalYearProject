@@ -13,6 +13,7 @@
 #include "GraphicsState.h"
 #include "GraphicsFunctions.h"
 #include "Buffers.h"
+#include "ProfileTimer.h"
 
 namespace graphics
 {
@@ -22,6 +23,7 @@ namespace graphics
     
     void displayShadowSettings()
     {
+        PROFILE_FUNC();
         if (ImGui::CollapsingHeader("Shadow Settings"))
         {
             if (ImGui::TreeNode("Cascade Depths"))

@@ -15,6 +15,7 @@ namespace engine
     extern class Core *core;
     extern class Editor *editor;
     extern class RootEventHandler *eventHandler;
+    extern class Profiler *profiler;
     
     void forwardOpenGlCallback(
         GLenum source, GLenum type, GLuint id,
