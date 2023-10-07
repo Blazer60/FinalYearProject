@@ -19,13 +19,16 @@ namespace engine
     {
         if (ImGui::Begin("Profiler"))
         {
+#ifndef ENABLE_PROFILING
+            ImGui::TextColored(ImVec4(1.f, 1.f, 0.f, 1.f), "Profiling has been disabled in the build settings.");
+#else
             ImGui::Checkbox("Freeze", &mIsFrozen);
             ImGui::SameLine();
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("Update Rate").x);
             ImGui::SliderFloat("Update Rate", &mUpdateRate, 0.f, 1.f);
             for (const auto &node : mTree)
                 drawNode(node);
-            
+#endif
             ImGui::End();
         }
     }
@@ -65,6 +68,7 @@ namespace engine
     
     void Profiler::updateAndClear()
     {
+#ifdef ENABLE_PROFILING
         if (!mIsFrozen)
         {
             mTimer += timers::deltaTime<float>();
@@ -75,6 +79,10 @@ namespace engine
                 createTree();
             }
         }
+#else
+        if (!mResults.empty())
+            LOG_MINOR("Profiling was accessed in a non-profiling build");
+#endif  // ENABLE_PROFILING
         
         mResults.clear();
     }

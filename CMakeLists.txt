@@ -14,6 +14,7 @@ set(TEXTURE_PATH    "resources/textures")
 
 set(USE_PRE_BUILT_LIBS OFF)
 set(USE_PSEUDO_PCH OFF)
+set(ENABLE_PROFILER ON)
 
 message(STATUS "Using Cmake:    " ${CMAKE_VERSION})
 message(STATUS "Compiling with: " ${CMAKE_CXX_COMPILER_ID})
@@ -137,6 +138,10 @@ add_compile_definitions(
         SHADER_PATH="${BINARY_TO_ROOT}/${SHADER_PATH}/"
         TEXTURE_PATH="${BINARY_TO_ROOT}/${TEXTURE_PATH}/")
 
+if (${ENABLE_PROFILER})
+    message(STATUS "Profiling Enabled")
+    add_compile_definitions(ENABLE_PROFILING)
+endif()
 
 find_package(OpenGL)  # Glew Requires OpenGL to be added.
 

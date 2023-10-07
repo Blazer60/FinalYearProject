@@ -33,6 +33,12 @@ namespace engine
 
 
 #define CONCAT(a, b) a ## b
-#define PROFILE_FUNC() engine::ProfileTimer CONCAT(engineProfileTimer, __LINE__)(__FUNCTION__)
-#define PROFILE_SCOPE_BEGIN(id, name) engine::ProfileTimer id(name)
-#define PROFILE_SCOPE_END(name) name.stop();
+#ifdef ENABLE_PROFILING
+    #define PROFILE_FUNC() engine::ProfileTimer CONCAT(engineProfileTimer, __LINE__)(__FUNCTION__)
+    #define PROFILE_SCOPE_BEGIN(id, name) engine::ProfileTimer id(name)
+    #define PROFILE_SCOPE_END(name) name.stop();
+#else
+    #define PROFILE_FUNC()
+    #define PROFILE_SCOPE_BEGIN(id, name)
+    #define PROFILE_SCOPE_END(name)
+#endif
