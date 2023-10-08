@@ -10,7 +10,7 @@
 #include "Pch.h"
 
 
-namespace engine
+namespace debug
 {
     /**
      * @author Ryan Purse
@@ -34,8 +34,8 @@ namespace engine
 
 #define CONCAT(a, b) a ## b
 #ifdef ENABLE_PROFILING
-    #define PROFILE_FUNC() engine::ProfileTimer CONCAT(engineProfileTimer, __LINE__)(__FUNCTION__)
-    #define PROFILE_SCOPE_BEGIN(id, name) engine::ProfileTimer id(name)
+    #define PROFILE_FUNC() debug::ProfileTimer CONCAT(debugProfileTimer, __LINE__)(__FUNCTION__)
+    #define PROFILE_SCOPE_BEGIN(id, name) debug::ProfileTimer id(name)
     #define PROFILE_SCOPE_END(name) name.stop();
 #else
     #define PROFILE_FUNC()

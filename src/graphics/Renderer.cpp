@@ -536,6 +536,7 @@ void Renderer::shadowMapping(const CameraSettings &cameraSettings)
     
     for (graphics::DirectionalLight &directionalLight : mDirectionalLightQueue)
     {
+        directionalLight.cascadeDepths.clear();
         directionalLight.cascadeDepths.reserve(directionalLight.shadowCascadeMultipliers.size());
         for (const auto &multiplier : directionalLight.shadowCascadeMultipliers)
             directionalLight.cascadeDepths.emplace_back(cameraSettings.farClipDistance * multiplier);

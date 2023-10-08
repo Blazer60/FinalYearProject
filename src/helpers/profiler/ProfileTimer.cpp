@@ -11,7 +11,7 @@
 
 #include <utility>
 
-namespace engine
+namespace debug
 {
     ProfileTimer::ProfileTimer(std::string_view name)
         : mName(name), mStartPoint(std::chrono::high_resolution_clock::now())

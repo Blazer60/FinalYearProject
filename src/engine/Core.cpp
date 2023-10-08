@@ -30,6 +30,9 @@ namespace engine
     {
         mProfiler = std::make_unique<Profiler>();
         profiler = mProfiler.get();
+        
+        mProfilerViewer = std::make_unique<ProfilerViewer>();
+        
         mLogger = std::make_unique<Logger>();
         logger = mLogger.get();
         mLogger->setOutputFlag(OutputSourceFlag_File | OutputSourceFlag_Queue);
@@ -304,7 +307,7 @@ namespace engine
         ImGui::End();
         
         ui::draw(mEditor);
-        ui::draw(mProfiler);
+        ui::draw(mProfilerViewer);
         
         ImGui::Render();
         int display_w, display_h;

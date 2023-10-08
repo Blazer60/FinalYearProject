@@ -17,6 +17,7 @@
 #include "MainCamera.h"
 #include "Viewport.h"
 #include "Editor.h"
+#include "ProfilerViewer.h"
 
 namespace engine
 {
@@ -57,6 +58,7 @@ namespace engine
         std::unique_ptr<Scene> mScene;
         std::unique_ptr<Renderer> mRenderer;
         std::unique_ptr<Logger> mLogger;
+        std::unique_ptr<ProfilerViewer> mProfilerViewer;
         std::unique_ptr<Profiler> mProfiler;
         
         ImGuiIO *mGuiIo { nullptr };

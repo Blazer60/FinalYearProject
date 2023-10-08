@@ -84,7 +84,7 @@ add_executable(${PROJECT_NAME}
         include/engine/ui/editor/Viewport.h
         src/engine/ui/editor/Editor.cpp
         include/engine/ui/editor/Editor.h
-        src/helpers/EngineMath.cpp include/helpers/EngineMath.h
+        src/engine/EngineMath.cpp include/engine/EngineMath.h
         include/helpers/Callback.h
         src/engine/ui/editor/LogWindow.cpp
         include/engine/ui/editor/LogWindow.h
@@ -99,17 +99,19 @@ add_executable(${PROJECT_NAME}
         include/game/Rotator.h
         src/engine/loader/FileExplorer.cpp
         include/engine/loader/FileExplorer.h
-        src/engine/ProfileTimer.cpp
-        include/engine/ProfileTimer.h
-        src/engine/ui/editor/Profiler.cpp
-        include/engine/ui/editor/Profiler.h
+        src/helpers/profiler/ProfileTimer.cpp
+        include/helpers/profiler/ProfileTimer.h
+        src/helpers/profiler/Profiler.cpp
+        include/helpers/profiler/Profiler.h
         include/graphics/GraphicsLighting.h
+        src/engine/ui/editor/ProfilerViewer.cpp
+        include/engine/ui/editor/ProfilerViewer.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
         include include/engine include/graphics include/game include/engine/loader include/graphics/buffers
         include/engine/ui include/graphics/postProcessing include/engine/rendering include/helpers/logger
-        include/engine/ui/editor include/helpers include/engine/event
+        include/engine/ui/editor include/helpers include/engine/event include/helpers/profiler
 
         # Vendor Files
         vendor/glm/glm vendor/glew/include/GL
