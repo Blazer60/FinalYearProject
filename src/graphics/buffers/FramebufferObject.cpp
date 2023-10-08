@@ -11,6 +11,7 @@
 #include "TextureBufferObject.h"
 #include "Cubemap.h"
 #include "RenderBufferObject.h"
+#include "GraphicsFunctions.h"
 
 FramebufferObject::FramebufferObject()
 {
@@ -146,12 +147,14 @@ void FramebufferObject::validate() const
 
 void FramebufferObject::clear(const glm::vec4 &clearColour)
 {
+    graphics::pushDebugGroup("Clear Pass");
     for (unsigned int attachment : mAttachments)
     {
         int drawBuffer = static_cast<int>(attachment) - GL_COLOR_ATTACHMENT0;
         glClearNamedFramebufferfv(mFboId, GL_COLOR, drawBuffer, glm::value_ptr(clearColour));
     }
     glClearNamedFramebufferfv(mFboId, GL_DEPTH, 0, &mDepthClearValue);
+    graphics::popDebugGroup();
 }
 
 unsigned int FramebufferObject::getFboName() const

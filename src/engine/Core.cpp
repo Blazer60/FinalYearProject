@@ -21,6 +21,7 @@
 #include "ModelDestroyer.h"
 #include "Profiler.h"
 #include "ProfileTimer.h"
+#include "GraphicsFunctions.h"
 
 namespace engine
 {
@@ -270,6 +271,8 @@ namespace engine
     void Core::updateImgui()
     {
         PROFILE_FUNC();
+        graphics::pushDebugGroup("ImGUI Pass");
+        
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -317,6 +320,8 @@ namespace engine
             ImGui::RenderPlatformWindowsDefault();
             glfwMakeContextCurrent(backup_current_context);
         }
+        
+        graphics::popDebugGroup();
     }
     
     void Core::setScene(std::unique_ptr<Scene> scene)

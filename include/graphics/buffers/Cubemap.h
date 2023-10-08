@@ -36,6 +36,8 @@ public:
     [[nodiscard]] uint32_t   getId()    const { return mId; }
     [[nodiscard]] glm::ivec2 getSize()  const { return mSize; }
     
+    void setDebugName(std::string_view name) const;
+    
 protected:
     uint32_t    mId;
     glm::ivec2  mSize;

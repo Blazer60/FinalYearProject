@@ -32,4 +32,14 @@ namespace graphics
             destination.getId(), GL_TEXTURE_2D, mipLevel, x, y, z,
             destination.getSize().x, destination.getSize().y, sourceDepth);
     }
+    
+    void pushDebugGroup(std::string_view message)
+    {
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, message.data());
+    }
+    
+    void popDebugGroup()
+    {
+        glPopDebugGroup();
+    }
 }

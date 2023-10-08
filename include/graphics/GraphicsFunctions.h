@@ -23,4 +23,12 @@ namespace graphics
      * @param destination - the image you want to paste into.
      */
     void copyTexture2D(const TextureBufferObject &source, const TextureBufferObject &destination);
+    
+    /**
+     * @brief Pushes a grouping for debuggers like RenderDoc. For instance, we can wrap our geometry calls to see how
+     * long they all take.
+     * @param message - The name of the group.
+     */
+    void pushDebugGroup(std::string_view message);
+    void popDebugGroup();
 }

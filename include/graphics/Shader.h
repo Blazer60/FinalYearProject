@@ -83,6 +83,8 @@ public:
     void set(const std::string &uniformName, const float* values, int count);
     
     void set(const std::string &uniformName, const glm::mat4 *values, int count);
+    
+    void setDebugName(std::string_view name) const;
 
 protected:
     std::string mDebugName { "" };

@@ -122,6 +122,7 @@ public:
     
     void setIblMultiplier(float m);
     
+    
 public:
     /**
      * @brief Upon initialisation, if false, then the renderer will not work properly and the application must be

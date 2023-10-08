@@ -10,10 +10,12 @@
 #include "gtc/type_ptr.hpp"
 #include "GraphicsState.h"
 #include "ProfileTimer.h"
+#include "GraphicsFunctions.h"
 
 void BloomPass::onDraw(TextureBufferObject *imageInput, TextureBufferObject *imageOutput)
 {
     PROFILE_FUNC();
+    graphics::pushDebugGroup("Bloom Pass");
     if (mCurrentSize != imageOutput->getSize())
         generateAuxiliaryBuffers(imageOutput->getSize());
     
@@ -79,6 +81,8 @@ void BloomPass::onDraw(TextureBufferObject *imageInput, TextureBufferObject *ima
     mFramebuffer->attach(imageOutput, 0);
     graphics::renderer->drawFullscreenTriangleNow();
     mFramebuffer->detach(0);
+    
+    graphics::popDebugGroup();
 }
 
 void BloomPass::generateAuxiliaryBuffers(const glm::ivec2 &size)

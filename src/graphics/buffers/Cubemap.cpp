@@ -123,3 +123,8 @@ Cubemap::~Cubemap()
         glDeleteTextures(1, &mId);
 }
 
+void Cubemap::setDebugName(std::string_view name) const
+{
+    glObjectLabel(GL_TEXTURE, mId, -1, name.data());
+}
+

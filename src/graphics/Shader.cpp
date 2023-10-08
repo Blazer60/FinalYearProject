@@ -11,7 +11,7 @@
 #include <sstream>
 
 Shader::Shader(const std::filesystem::path &vertexPath, const std::filesystem::path &fragmentPath)
-    : mDebugName(vertexPath.string() + " | " + fragmentPath.string())
+    : mDebugName(vertexPath.filename().string() + " | " + fragmentPath.filename().string())
 {
     mId = glCreateProgram();
     unsigned int vs = compile(GL_VERTEX_SHADER, vertexPath.string());
@@ -24,6 +24,8 @@ Shader::Shader(const std::filesystem::path &vertexPath, const std::filesystem::p
     
     glDeleteShader(vs);
     glDeleteShader(fs);
+    
+    setDebugName(mDebugName);
 }
 
 Shader::~Shader()
@@ -140,4 +142,9 @@ void Shader::set(const std::string &uniformName, const float *values, int count)
 void Shader::set(const std::string &uniformName, const glm::mat4 *values, int count)
 {
     glUniformMatrix4fv(getLocation(uniformName), count, GL_FALSE, glm::value_ptr(values[0]));
+}
+
+void Shader::setDebugName(std::string_view name) const
+{
+    glObjectLabel(GL_PROGRAM, mId, -1, name.data());
 }

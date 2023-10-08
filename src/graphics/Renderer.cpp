@@ -123,6 +123,7 @@ void Renderer::submit(const graphics::AnalyticalPointLight &pointLight)
 void Renderer::render()
 {
     PROFILE_FUNC();
+    graphics::pushDebugGroup("Render Pass");
     if (window::bufferSize().x <= 0 || window::bufferSize().y <= 0)
         return;
     
@@ -140,6 +141,8 @@ void Renderer::render()
         mCurrentEV100 = camera.eV100;
         
         PROFILE_SCOPE_BEGIN(geometryTimer, "Geometry Pass");
+        graphics::pushDebugGroup("Geometry Pass");
+        
         mGeometryFramebuffer->bind();
         mGeometryFramebuffer->clear(camera.clearColour);
         
@@ -162,6 +165,7 @@ void Renderer::render()
         }
         
         PROFILE_SCOPE_END(geometryTimer);
+        graphics::popDebugGroup();
         
         // Shadow mapping
         
@@ -173,6 +177,8 @@ void Renderer::render()
         shadowMapping(camera, cascadeDepths);
         
         PROFILE_SCOPE_BEGIN(directionalLightTimer, "Directional Lighting");
+        graphics::pushDebugGroup("Directional Lighting");
+        
         mLightFramebuffer->bind();
         mLightFramebuffer->clear(glm::vec4(glm::vec3(0.f), 1.f));
         const glm::vec3 cameraPosition = glm::inverse(camera.viewMatrix) * glm::vec4(glm::vec3(0.f), 1.f);
@@ -206,7 +212,9 @@ void Renderer::render()
         }
         
         PROFILE_SCOPE_END(directionalLightTimer);
+        graphics::popDebugGroup();
         PROFILE_SCOPE_BEGIN(pointLightTimer, "Point Lighting");
+        graphics::pushDebugGroup("Point Lighting");
         
         mPointLightShader->bind();
         
@@ -233,7 +241,9 @@ void Renderer::render()
         }
         
         PROFILE_SCOPE_END(pointLightTimer);
+        graphics::popDebugGroup();
         PROFILE_SCOPE_BEGIN(iblTimer, "IBL Distant Light Probe");
+        graphics::pushDebugGroup("IBL Distant Light Probe");
         
         // IBL ambient lighting. We already have the correct framebuffer bound.
         mIblShader->bind();
@@ -255,7 +265,9 @@ void Renderer::render()
         drawFullscreenTriangleNow();
         
         PROFILE_SCOPE_END(iblTimer);
+        graphics::popDebugGroup();
         PROFILE_SCOPE_BEGIN(deferredTimer, "Skybox Pass");
+        graphics::pushDebugGroup("Combine + Skybox Pass");
         
         // Deferred Lighting step.
         
@@ -278,16 +290,23 @@ void Renderer::render()
         
         drawFullscreenTriangleNow();
         PROFILE_SCOPE_END(deferredTimer);
+        graphics::popDebugGroup();
         
         PROFILE_SCOPE_BEGIN(postProcessTimer, "Post-processing Stack");
+        graphics::pushDebugGroup("Post-processing Pass");
+        
         graphics::copyTexture2D(*mDeferredLightingTextureBuffer, *mPrimaryImageBuffer);
         for (std::unique_ptr<PostProcessLayer> &postProcessLayer : camera.postProcessStack)
         {
             postProcessLayer->draw(mPrimaryImageBuffer.get(), mAuxiliaryImageBuffer.get());
             graphics::copyTexture2D(*mAuxiliaryImageBuffer, *mPrimaryImageBuffer); // Yes this is bad. I'm lazy.
         }
+        
         PROFILE_SCOPE_END(postProcessTimer);
+        graphics::popDebugGroup();
     }
+    
+    graphics::popDebugGroup();
 }
 
 void Renderer::clear()
@@ -511,6 +530,7 @@ std::unique_ptr<TextureBufferObject> Renderer::generateBrdfLut(const glm::ivec2 
 void Renderer::shadowMapping(const CameraSettings &cameraSettings, const std::vector<float> &cascadeDepths)
 {
     PROFILE_FUNC();
+    graphics::pushDebugGroup("Shadow Mapping");
     const auto resize = [](const glm::vec4 &v) { return v / v.w; };
     
     mShadowFramebuffer->bind();
@@ -518,6 +538,8 @@ void Renderer::shadowMapping(const CameraSettings &cameraSettings, const std::ve
     
     for (DirectionalLight &directionalLight : mDirectionalLightQueue)
     {
+        graphics::pushDebugGroup("Directional Light");
+        
         const glm::ivec2 &shadowMapSize = directionalLight.shadowMap->getSize();
         glViewport(0, 0, shadowMapSize.x, shadowMapSize.y);
         
@@ -528,6 +550,8 @@ void Renderer::shadowMapping(const CameraSettings &cameraSettings, const std::ve
         
         for (int j = 0; j < directionalLight.shadowMap->getLayerCount(); ++j)
         {
+            graphics::pushDebugGroup("Cascade Pass");
+            
             mShadowFramebuffer->attachDepthBuffer(*directionalLight.shadowMap, j);
             mShadowFramebuffer->clear(glm::vec4(glm::vec3(0.f), 1.f));
             
@@ -594,19 +618,26 @@ void Renderer::shadowMapping(const CameraSettings &cameraSettings, const std::ve
             }
             
             mShadowFramebuffer->detachDepthBuffer();
+            graphics::popDebugGroup();
         }
+        
+        graphics::popDebugGroup();
     }
     
     // Reset the viewport back to the normal size once we've finished rendering all the shadows.
     glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
+    graphics::popDebugGroup();
 }
 
 void Renderer::generateSkybox(std::string_view path, const glm::ivec2 desiredSize)
 {
     mHdrImage = std::make_unique<HdrTexture>(path);
     mHdrSkybox = createCubemapFromHdrTexture(mHdrImage.get(), desiredSize);
+    mHdrSkybox->setDebugName("Skybox");
     mIrradianceMap = generateIrradianceMap(mHdrSkybox.get(), desiredSize / 8);  // 8
+    mIrradianceMap->setDebugName("Irradiance");
     mPreFilterMap = generatePreFilterMap(mHdrSkybox.get(), desiredSize / 4);  // 4
+    mPreFilterMap->setDebugName("Prefilter Map");
     mBrdfLutTextureBuffer = generateBrdfLut(desiredSize);
 }
 

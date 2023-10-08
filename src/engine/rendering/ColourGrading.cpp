@@ -9,10 +9,13 @@
 #include "imgui.h"
 #include "GraphicsState.h"
 #include "ProfileTimer.h"
+#include "GraphicsFunctions.h"
 
 void ColourGrading::onDraw(TextureBufferObject *imageInput, TextureBufferObject *imageOutput)
 {
     PROFILE_FUNC();
+    graphics::pushDebugGroup("Colour Grading Pass");
+    
     glViewport(0, 0, imageOutput->getSize().x, imageOutput->getSize().y);
     
     mFramebuffer->bind();
@@ -26,6 +29,8 @@ void ColourGrading::onDraw(TextureBufferObject *imageInput, TextureBufferObject 
     graphics::renderer->drawFullscreenTriangleNow();
     
     mFramebuffer->detach(0);
+    
+    graphics::popDebugGroup();
 }
 
 void ColourGrading::onDrawUi()
