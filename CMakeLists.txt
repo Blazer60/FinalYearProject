@@ -24,6 +24,14 @@ add_subdirectory(vendor/glm)
 add_subdirectory(vendor/glew/build/cmake)
 add_subdirectory(vendor/glfw)
 add_subdirectory(vendor)
+set(ASSIMP_NO_EXPORT ON)
+set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
+set(ASSIMP_BUILD_OBJ_IMPORTER ON)
+set(ASSIMP_BUILD_PLY_IMPORTER ON)
+set(ASSIMP_BUILD_BLEND_IMPORTER ON)
+set(ASSIMP_BUILD_STL_IMPORTER ON)
+set(ASSIMP_BUILD_GLTF_IMPORTER ON)
+set(ASSIMP_BUILD_FBX_IMPORTER ON)
 add_subdirectory(vendor/assimp)
 
 set(HELPER_LIBRARY Statistics)
@@ -58,9 +66,6 @@ add_executable(${PROJECT_NAME}
         include/graphics/GraphicsDefinitions.h
         include/graphics/GraphicsLighting.h
         include/graphics/buffers/Buffers.h
-
-#        include/helpers/Callback.h
-#        include/helpers/logger/LoggerMacros.h
 
         src/Main.cpp
 
@@ -113,10 +118,6 @@ add_executable(${PROJECT_NAME}
         src/graphics/buffers/TextureArrayObject.cpp include/graphics/buffers/TextureArrayObject.h
         src/graphics/buffers/TextureBufferObject.cpp include/graphics/buffers/TextureBufferObject.h
         src/graphics/postProcessing/PostProcessLayer.cpp include/graphics/postProcessing/PostProcessLayer.h
-
-#        src/helpers/logger/Logger.cpp include/helpers/logger/Logger.h
-#        src/helpers/profiler/ProfileTimer.cpp include/helpers/profiler/ProfileTimer.h
-#        src/helpers/profiler/Profiler.cpp include/helpers/profiler/Profiler.h
 
         vendor/imguizmo/ImGuizmo.cpp vendor/imguizmo/ImGuizmo.h
 )
