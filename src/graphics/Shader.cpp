@@ -7,6 +7,7 @@
 
 #include "Shader.h"
 #include "gtc/type_ptr.hpp"
+#include <Statistics.h>
 #include <fstream>
 #include <sstream>
 

@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Pch.h"
+#include <Statistics.h>
 
 /**
  * Contains a position, uv coords and normal. Loaded in from .obj files.

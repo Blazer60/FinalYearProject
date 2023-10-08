@@ -8,6 +8,7 @@
 #include <filesystem>
 #include "Cubemap.h"
 #include "stb_image.h"
+#include <Statistics.h>
 
 Cubemap::Cubemap(const std::vector<std::string> &paths)
 {

@@ -7,7 +7,6 @@
 
 #include "ProfileTimer.h"
 #include "Profiler.h"
-#include "EngineState.h"
 
 #include <utility>
 

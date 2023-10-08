@@ -16,6 +16,7 @@
 #include "gtx/matrix_decompose.hpp"
 #include "EngineMath.h"
 #include "ProfileTimer.h"
+#include "EngineState.h"
 
 namespace engine
 {

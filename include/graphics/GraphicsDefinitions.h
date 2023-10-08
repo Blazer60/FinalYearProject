@@ -10,6 +10,7 @@
 #include "Pch.h"
 #include "Shader.h"
 #include <functional>
+#include <Statistics.h>
 
 namespace graphics
 {

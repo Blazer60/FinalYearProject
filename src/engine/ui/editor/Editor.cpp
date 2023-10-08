@@ -12,6 +12,7 @@
 #include "MeshComponent.h"
 #include "ProfileTimer.h"
 #include "Lighting.h"
+#include "EngineState.h"
 
 namespace engine
 {

@@ -8,6 +8,7 @@
 #include <filesystem>
 #include "HdrTexture.h"
 #include "stb_image.h"
+#include <Statistics.h>
 
 HdrTexture::HdrTexture(std::string_view path)
 {

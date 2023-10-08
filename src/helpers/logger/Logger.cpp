@@ -5,15 +5,18 @@
  */
 
 
-#include <sstream>
-#include <fstream>
 #include "Logger.h"
+#include "Statistics.h"
 
 #include <assimp/Logger.hpp>
 #include <assimp/LogStream.hpp>
 #include <assimp/DefaultLogger.hpp>
 
-namespace engine
+#include <sstream>
+#include <fstream>
+
+
+namespace debug
 {
     Logger *logger;
     

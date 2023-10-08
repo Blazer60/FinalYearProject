@@ -33,9 +33,9 @@ namespace engine
         
         mProfilerViewer = std::make_unique<ProfilerViewer>();
         
-        mLogger = std::make_unique<Logger>();
-        logger = mLogger.get();
-        mLogger->setOutputFlag(OutputSourceFlag_File | OutputSourceFlag_Queue);
+        mLogger = std::make_unique<debug::Logger>();
+        debug::logger = mLogger.get();
+        mLogger->setOutputFlag(debug::OutputSourceFlag_File | debug::OutputSourceFlag_Queue);
         eventHandler = &mEventHandler;
         core = this;
         editor = &mEditor;

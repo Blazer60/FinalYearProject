@@ -8,6 +8,7 @@
 #include "FileExplorer.h"
 #include <Windows.h>
 #include <shobjidl.h>
+#include <Statistics.h>
 
 
 std::string openFileExplorer()

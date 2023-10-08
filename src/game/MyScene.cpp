@@ -16,6 +16,7 @@
 #include "AssimpLoader.h"
 #include "Editor.h"
 #include "Rotator.h"
+#include "EngineState.h"
 
 MyScene::MyScene() :
     mStandardShader(std::make_shared<Shader>(

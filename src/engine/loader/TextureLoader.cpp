@@ -5,8 +5,11 @@
  */
 
 
+#include <filesystem>
 #include "TextureLoader.h"
 #include "stb_image.h"
+
+#include <Statistics.h>
 
 namespace load
 {

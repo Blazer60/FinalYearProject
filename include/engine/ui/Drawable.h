@@ -9,6 +9,7 @@
 
 #include "Pch.h"
 #include "imgui.h"
+#include <Statistics.h>
 
 namespace ui
 {

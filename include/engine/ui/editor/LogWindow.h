@@ -21,8 +21,8 @@ namespace engine
     {
     protected:
         void onDrawUi() override;
-        void drawMessageUi(const Message &message);
-        const ImVec4 &getSeverityColour(Severity severity);
+        void drawMessageUi(const debug::Message &message);
+        const ImVec4 &getSeverityColour(debug::Severity severity);
         
     protected:
         bool mWrapText          { true };

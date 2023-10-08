@@ -15,7 +15,7 @@
 #include "gtc/matrix_access.hpp"
 #include "assimp/LogStream.hpp"
 
-namespace engine
+namespace debug
 {
     extern class Logger *logger;
     

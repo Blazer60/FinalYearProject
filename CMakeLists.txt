@@ -26,45 +26,78 @@ add_subdirectory(vendor/glfw)
 add_subdirectory(vendor)
 add_subdirectory(vendor/assimp)
 
-add_executable(${PROJECT_NAME}
-        vendor/imguizmo/ImGuizmo.cpp vendor/imguizmo/ImGuizmo.h
+set(HELPER_LIBRARY Statistics)
+add_library(${HELPER_LIBRARY} STATIC
+        include/helpers/logger/LoggerMacros.h
 
+        src/helpers/logger/Logger.cpp include/helpers/logger/Logger.h
+        src/helpers/profiler/ProfileTimer.cpp include/helpers/profiler/ProfileTimer.h
+        src/helpers/profiler/Profiler.cpp include/helpers/profiler/Profiler.h
+        src/helpers/Timers.cpp include/helpers/Timers.h
+        include/helpers/Statistics.h
+)
+
+target_include_directories(${HELPER_LIBRARY} PUBLIC
+        include include/helpers include/helpers/logger include/helpers/profiler
+
+        # Vendor Files
+        vendor/glm/glm vendor/glew/include/GL
+        vendor/glfw/include/GLFW vendor/imgui
+        vendor/stb/include vendor/imguizmo
+        vendor/assimp/include ${CMAKE_CURRENT_BINARY_DIR}/vendor/assimp/include  # A config file is generated that is required by assimp code.
+)
+
+add_executable(${PROJECT_NAME}
         include/Pch.h
 
+        include/engine/Callback.h
+        include/engine/EngineMemory.h
         include/engine/loader/RawMesh.h
-        include/helpers/logger/LoggerMacros.h
 
         include/graphics/CameraSettings.h
         include/graphics/GraphicsDefinitions.h
+        include/graphics/GraphicsLighting.h
         include/graphics/buffers/Buffers.h
 
+#        include/helpers/Callback.h
+#        include/helpers/logger/LoggerMacros.h
+
         src/Main.cpp
+
         src/engine/Actor.cpp include/engine/Actor.h
         src/engine/Component.cpp include/engine/Component.h
         src/engine/Core.cpp include/engine/Core.h
+        src/engine/EngineMath.cpp include/engine/EngineMath.h
         src/engine/EngineState.cpp include/engine/EngineState.h
         src/engine/MainCamera.cpp include/engine/MainCamera.h
         src/engine/MeshComponent.cpp include/engine/MeshComponent.h
         src/engine/Scene.cpp include/engine/Scene.h
-        src/engine/Timers.cpp include/engine/Timers.h
+        src/engine/event/EventHandler.cpp include/engine/event/EventHandler.h
+        src/engine/event/Input.cpp include/engine/event/Input.h
+        src/engine/loader/AssimpLoader.cpp include/engine/loader/AssimpLoader.h
         src/engine/loader/CommonLoader.cpp include/engine/loader/CommonLoader.h
+        src/engine/loader/FileExplorer.cpp include/engine/loader/FileExplorer.h
         src/engine/loader/MaterialLoader.cpp include/engine/loader/MaterialLoader.h
         src/engine/loader/ModelDestroyer.cpp include/engine/loader/ModelDestroyer.h
         src/engine/loader/ModelLoader.cpp include/engine/loader/ModelLoader.h
         src/engine/loader/TextureLoader.cpp include/engine/loader/TextureLoader.h
-        src/helpers/logger/Logger.cpp include/helpers/logger/Logger.h
         src/engine/rendering/BloomPass.cpp include/engine/rendering/BloomPass.h
         src/engine/rendering/ColourGrading.cpp include/engine/rendering/ColourGrading.h
+        src/engine/rendering/Lighting.cpp include/engine/rendering/Lighting.h
         src/engine/ui/Drawable.cpp include/engine/ui/Drawable.h
         src/engine/ui/RendererImGui.cpp include/engine/ui/RendererImGui.h
         src/engine/ui/Ui.cpp include/engine/ui/Ui.h
+        src/engine/ui/editor/Editor.cpp include/engine/ui/editor/Editor.h
+        src/engine/ui/editor/LogWindow.cpp include/engine/ui/editor/LogWindow.h
+        src/engine/ui/editor/ProfilerViewer.cpp include/engine/ui/editor/ProfilerViewer.h
+        src/engine/ui/editor/Viewport.cpp include/engine/ui/editor/Viewport.h
 
         src/game/MyScene.cpp include/game/MyScene.h
+        src/game/Rotator.cpp include/game/Rotator.h
 
         src/graphics/GraphicsDefinitions.cpp
         src/graphics/GraphicsFunctions.cpp include/graphics/GraphicsFunctions.h
         src/graphics/GraphicsState.cpp include/graphics/GraphicsState.h
-        src/engine/rendering/Lighting.cpp include/engine/rendering/Lighting.h
         src/graphics/Materials.cpp include/graphics/Materials.h
         src/graphics/Mesh.cpp include/graphics/Mesh.h
         src/graphics/Primitives.cpp src/graphics/Primitives.h
@@ -80,32 +113,12 @@ add_executable(${PROJECT_NAME}
         src/graphics/buffers/TextureArrayObject.cpp include/graphics/buffers/TextureArrayObject.h
         src/graphics/buffers/TextureBufferObject.cpp include/graphics/buffers/TextureBufferObject.h
         src/graphics/postProcessing/PostProcessLayer.cpp include/graphics/postProcessing/PostProcessLayer.h
-        src/engine/ui/editor/Viewport.cpp
-        include/engine/ui/editor/Viewport.h
-        src/engine/ui/editor/Editor.cpp
-        include/engine/ui/editor/Editor.h
-        src/engine/EngineMath.cpp include/engine/EngineMath.h
-        include/helpers/Callback.h
-        src/engine/ui/editor/LogWindow.cpp
-        include/engine/ui/editor/LogWindow.h
-        src/engine/loader/AssimpLoader.cpp
-        include/engine/loader/AssimpLoader.h
-        src/engine/event/Input.cpp
-        include/engine/event/Input.h
-        src/engine/event/EventHandler.cpp
-        include/engine/event/EventHandler.h
-        include/engine/EngineMemory.h
-        src/game/Rotator.cpp
-        include/game/Rotator.h
-        src/engine/loader/FileExplorer.cpp
-        include/engine/loader/FileExplorer.h
-        src/helpers/profiler/ProfileTimer.cpp
-        include/helpers/profiler/ProfileTimer.h
-        src/helpers/profiler/Profiler.cpp
-        include/helpers/profiler/Profiler.h
-        include/graphics/GraphicsLighting.h
-        src/engine/ui/editor/ProfilerViewer.cpp
-        include/engine/ui/editor/ProfilerViewer.h
+
+#        src/helpers/logger/Logger.cpp include/helpers/logger/Logger.h
+#        src/helpers/profiler/ProfileTimer.cpp include/helpers/profiler/ProfileTimer.h
+#        src/helpers/profiler/Profiler.cpp include/helpers/profiler/Profiler.h
+
+        vendor/imguizmo/ImGuizmo.cpp vendor/imguizmo/ImGuizmo.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -128,9 +141,15 @@ else()
     target_precompile_headers(${PROJECT_NAME} PUBLIC
             <iostream> <vector> <unordered_map>
             <string> <string_view> <algorithm>
-            <memory> <numeric> <cstdint>
+            <memory> <numeric> <cstdint> <set> <chrono>
             <glm.hpp> <gtc/matrix_transform.hpp> <gtc/type_ptr.hpp>
-            [["Logger.h"]] [["EngineState.h"]] [["LoggerMacros.h"]] [["Callback.h"]]
+    )
+
+    target_precompile_headers(${HELPER_LIBRARY} PUBLIC
+            <iostream> <vector> <unordered_map>
+            <string> <string_view> <algorithm>
+            <memory> <numeric> <cstdint> <set> <chrono>
+            <glm.hpp> <gtc/matrix_transform.hpp> <gtc/type_ptr.hpp>
     )
 endif ()
 
@@ -162,9 +181,11 @@ if (${USE_PRE_BUILT_LIBS})
     message(STATUS "ASSIMP location: " ${ASSIMP})
     message(STATUS "  zLib location: " ${ZLIB})
 
-    target_link_libraries(${PROJECT_NAME} ${GLEW} ${GLFW} ${IMGUI} OpenGL::GL ${ASSIMP} ${ZLIB})
+    target_link_libraries(${HELPER_LIBRARY} ${GLEW} OpenGL::GL ${GLFW} ${ASSIMP})
+    target_link_libraries(${PROJECT_NAME} ${HELPER_LIBRARY} ${GLEW} ${GLFW} ${IMGUI} OpenGL::GL ${ASSIMP} ${ZLIB})
 else ()
     # The names listed are the names given to add_library(). CMake won't tell you if they're correct...
-    target_link_libraries(${PROJECT_NAME} glew_s glfw imgui OpenGL::GL assimp)
+    target_link_libraries(${HELPER_LIBRARY} glew_s OpenGL::GL glfw assimp)
+    target_link_libraries(${PROJECT_NAME} ${HELPER_LIBRARY} glew_s glfw imgui OpenGL::GL assimp)
 endif ()
 

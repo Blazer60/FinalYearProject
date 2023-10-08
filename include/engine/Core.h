@@ -57,7 +57,7 @@ namespace engine
         
         std::unique_ptr<Scene> mScene;
         std::unique_ptr<Renderer> mRenderer;
-        std::unique_ptr<Logger> mLogger;
+        std::unique_ptr<debug::Logger> mLogger;
         std::unique_ptr<ProfilerViewer> mProfilerViewer;
         std::unique_ptr<Profiler> mProfiler;
         

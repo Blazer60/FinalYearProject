@@ -20,8 +20,9 @@
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
-#include "Logger.h"
-#include "EngineState.h"
-#include "LoggerMacros.h"
-#include "Callback.h"
+#include <set>
+#include <chrono>
 #endif  // PCH
+
+// pch.h is typically the first thing we include. glew.h must be included before gl.h, so we add it here to try and avoid errors.
+#include <glew.h>

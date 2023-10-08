@@ -536,6 +536,7 @@ void Renderer::shadowMapping(const CameraSettings &cameraSettings)
     
     for (graphics::DirectionalLight &directionalLight : mDirectionalLightQueue)
     {
+        PROFILE_SCOPE_BEGIN(lightTimer, "Directional Light Shadow Mapping");
         directionalLight.cascadeDepths.clear();
         directionalLight.cascadeDepths.reserve(directionalLight.shadowCascadeMultipliers.size());
         for (const auto &multiplier : directionalLight.shadowCascadeMultipliers)
@@ -553,6 +554,7 @@ void Renderer::shadowMapping(const CameraSettings &cameraSettings)
         
         for (int j = 0; j < directionalLight.shadowMap->getLayerCount(); ++j)
         {
+            PROFILE_SCOPE_BEGIN(shadowCreation, "Cascade Pass");
             graphics::pushDebugGroup("Cascade Pass");
             
             mShadowFramebuffer->attachDepthBuffer(*directionalLight.shadowMap, j);
@@ -611,6 +613,7 @@ void Renderer::shadowMapping(const CameraSettings &cameraSettings)
             
             directionalLight.vpMatrices.emplace_back(lightProjectionMatrix * lightViewMatrix);
             
+            PROFILE_SCOPE_BEGIN(rqoTimer, "Command Upload");
             for (const auto &rqo : mRenderQueue)
             {
                 const glm::mat4 &modelMatrix = rqo.matrix;
@@ -619,12 +622,15 @@ void Renderer::shadowMapping(const CameraSettings &cameraSettings)
                 glBindVertexArray(rqo.vao);
                 glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
             }
+            PROFILE_SCOPE_END(rqoTimer);
             
             mShadowFramebuffer->detachDepthBuffer();
+            PROFILE_SCOPE_END(shadowCreation);
             graphics::popDebugGroup();
         }
         
         graphics::popDebugGroup();
+        PROFILE_SCOPE_END(lightTimer);
     }
     
     // Reset the viewport back to the normal size once we've finished rendering all the shadows.

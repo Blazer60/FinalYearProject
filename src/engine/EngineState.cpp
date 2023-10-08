@@ -17,6 +17,6 @@ namespace engine
         GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,
         const void *userParam)
     {
-        logger->openglCallBack(source, type, id, severity, length, message, userParam);
+        debug::logger->openglCallBack(source, type, id, severity, length, message, userParam);
     }
 }

@@ -18,7 +18,7 @@ namespace engine
         ImGui::Begin("Log Window");
         
         if (ImGui::Button("Clear"))
-            engine::logger->clearQueue();
+            debug::logger->clearQueue();
         ui::drawToolTip("Clears the log queue but does not clear the IO log.");
         ImGui::SameLine();
         ImGui::Checkbox("Wrap Text", &mWrapText);
@@ -41,7 +41,7 @@ namespace engine
             ImGui::TableHeadersRow();
             ImGui::PushTextWrapPos(mWrapText ? 0.f : -1.f);
             
-            const std::vector<Message> &logs = engine::logger->getLogs();
+            const std::vector<debug::Message> &logs = debug::logger->getLogs();
             for (auto it = logs.rbegin(); it != logs.rend(); ++it)
                 drawMessageUi(*it);
             
@@ -53,7 +53,7 @@ namespace engine
         ImGui::PopID();
     }
     
-    void LogWindow::drawMessageUi(const Message &message)
+    void LogWindow::drawMessageUi(const debug::Message &message)
     {
         PROFILE_FUNC();
         const std::string id = std::to_string(message.line) + message.file;
@@ -63,14 +63,14 @@ namespace engine
                 return;
         }
         
-        if (message.severity == Severity_Notification && mShowNotifications ||
-            message.severity == Severity_Warning && mShowWarnings ||
-            message.severity == Severity_Major && mShowErrors)
+        if (message.severity == debug::Severity_Notification && mShowNotifications ||
+            message.severity == debug::Severity_Warning && mShowWarnings ||
+            message.severity == debug::Severity_Major && mShowErrors)
         {
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
             ImGui::PushStyleColor(ImGuiCol_Text, getSeverityColour(message.severity));
-            ImGui::Text("%s", engine::logger->toStringView(message.severity).data());
+            ImGui::Text("%s", debug::logger->toStringView(message.severity).data());
             ImGui::TableNextColumn();
             ImGui::Text("%s", message.message.c_str());
             ImGui::PopStyleColor();
@@ -80,16 +80,16 @@ namespace engine
         }
     }
     
-    const ImVec4 &LogWindow::getSeverityColour(const Severity severity)
+    const ImVec4 &LogWindow::getSeverityColour(const debug::Severity severity)
     {
         switch (severity)
         {
             default:
-            case Severity_Notification:
+            case debug::Severity_Notification:
                 return mNotificationColour;
-            case Severity_Warning:
+            case debug::Severity_Warning:
                 return mWarningColour;
-            case Severity_Major:
+            case debug::Severity_Major:
                 return mErrorColour;
         }
     }

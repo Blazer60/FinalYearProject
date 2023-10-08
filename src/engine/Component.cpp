@@ -7,6 +7,7 @@
 
 #include "Component.h"
 #include "Actor.h"
+#include <Statistics.h>
 
 namespace engine
 {

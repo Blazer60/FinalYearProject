@@ -11,6 +11,7 @@
 #include "FileExplorer.h"
 #include "AssimpLoader.h"
 #include "Core.h"
+#include "EngineState.h"
 
 namespace engine
 {

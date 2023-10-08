@@ -8,6 +8,7 @@
 #include "EventHandler.h"
 #include "Editor.h"
 #include "glfw3.h"
+#include "EngineState.h"
 
 namespace engine
 {
