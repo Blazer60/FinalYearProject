@@ -301,7 +301,6 @@ namespace engine
         
         ImGui::Begin("Renderer Settings");
         ui::draw(mMainCamera);
-        graphics::displayShadowSettings();
         ImGui::End();
         
         ui::draw(mEditor);

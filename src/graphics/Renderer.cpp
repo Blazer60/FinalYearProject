@@ -49,12 +49,15 @@ Renderer::Renderer() :
 
 bool Renderer::debugMessageCallback(GLDEBUGPROC callback)
 {
-    glEnable(GL_DEBUG_OUTPUT);
-    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    glDebugMessageCallback(callback, nullptr);
-    
     int flags { 0 };  // Check to see if OpenGL debug context was set up correctly.
     glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+    
+    if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
+    {
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(callback, nullptr);
+    }
     
     return (flags & GL_CONTEXT_FLAG_DEBUG_BIT);
 }
@@ -110,12 +113,12 @@ void Renderer::submit(const CameraSettings &cameraSettings)
     mCameraQueue.emplace_back(cameraSettings);
 }
 
-void Renderer::submit(const DirectionalLight &directionalLight)
+void Renderer::submit(const graphics::DirectionalLight &directionalLight)
 {
     mDirectionalLightQueue.emplace_back(directionalLight);
 }
 
-void Renderer::submit(const graphics::AnalyticalPointLight &pointLight)
+void Renderer::submit(const graphics::PointLight &pointLight)
 {
     mPointLightQueue.emplace_back(pointLight);
 }
@@ -168,13 +171,7 @@ void Renderer::render()
         graphics::popDebugGroup();
         
         // Shadow mapping
-        
-        std::vector<float> cascadeDepths;
-        cascadeDepths.reserve(shadowCascadeMultipliers.size());
-        for (const auto &multiplier : shadowCascadeMultipliers)
-            cascadeDepths.emplace_back(camera.farClipDistance * multiplier);
-        
-        shadowMapping(camera, cascadeDepths);
+        shadowMapping(camera);
         
         PROFILE_SCOPE_BEGIN(directionalLightTimer, "Directional Lighting");
         graphics::pushDebugGroup("Directional Lighting");
@@ -194,17 +191,18 @@ void Renderer::render()
         mDirectionalLightShader->set("u_camera_position_ws", cameraPosition);
         mDirectionalLightShader->set("u_view_matrix", camera.viewMatrix);
 
-        mDirectionalLightShader->set("u_cascade_distances", &(cascadeDepths[0]), static_cast<int>(cascadeDepths.size()));
-        mDirectionalLightShader->set("u_cascade_count", static_cast<int>(cascadeDepths.size()));
-
-        mDirectionalLightShader->set("u_bias", shadowBias);
 
         glBindVertexArray(mFullscreenTriangle.vao());
 
-        for (const DirectionalLight &directionalLight : mDirectionalLightQueue)
+        for (const graphics::DirectionalLight &directionalLight : mDirectionalLightQueue)
         {
+            mDirectionalLightShader->set("u_cascade_distances", &(directionalLight.cascadeDepths[0]), static_cast<int>(directionalLight.cascadeDepths.size()));
+            mDirectionalLightShader->set("u_cascade_count", static_cast<int>(directionalLight.cascadeDepths.size()));
+            
+            mDirectionalLightShader->set("u_bias", directionalLight.shadowBias);
+            
             mDirectionalLightShader->set("u_light_direction", directionalLight.direction);
-            mDirectionalLightShader->set("u_light_intensity", directionalLight.intensity * directionalLight.colour);
+            mDirectionalLightShader->set("u_light_intensity", directionalLight.colourIntensity);
             mDirectionalLightShader->set("u_light_vp_matrix", &(directionalLight.vpMatrices[0]), static_cast<int>(directionalLight.vpMatrices.size()));
             mDirectionalLightShader->set("u_shadow_map_texture", directionalLight.shadowMap->getId(), 5);
 
@@ -234,7 +232,7 @@ void Renderer::render()
             mPointLightShader->set("u_mvp_matrix", vpMatrix * pointLightModelMatrix);
             
             mPointLightShader->set("u_light_position", pointLight.position);
-            mPointLightShader->set("u_light_intensity", pointLight.intensity * pointLight.colour);
+            mPointLightShader->set("u_light_intensity", pointLight.colourIntensity);
             mPointLightShader->set("u_light_inv_sqr_radius", 1.f / (pointLight.radius * pointLight.radius));
             
             glDrawElements(GL_TRIANGLES, mUnitSphere.indicesCount(), GL_UNSIGNED_INT, nullptr);
@@ -527,7 +525,7 @@ std::unique_ptr<TextureBufferObject> Renderer::generateBrdfLut(const glm::ivec2 
     return lut;
 }
 
-void Renderer::shadowMapping(const CameraSettings &cameraSettings, const std::vector<float> &cascadeDepths)
+void Renderer::shadowMapping(const CameraSettings &cameraSettings)
 {
     PROFILE_FUNC();
     graphics::pushDebugGroup("Shadow Mapping");
@@ -536,15 +534,19 @@ void Renderer::shadowMapping(const CameraSettings &cameraSettings, const std::ve
     mShadowFramebuffer->bind();
     mShadowShader->bind();
     
-    for (DirectionalLight &directionalLight : mDirectionalLightQueue)
+    for (graphics::DirectionalLight &directionalLight : mDirectionalLightQueue)
     {
+        directionalLight.cascadeDepths.reserve(directionalLight.shadowCascadeMultipliers.size());
+        for (const auto &multiplier : directionalLight.shadowCascadeMultipliers)
+            directionalLight.cascadeDepths.emplace_back(cameraSettings.farClipDistance * multiplier);
+        
         graphics::pushDebugGroup("Directional Light");
         
         const glm::ivec2 &shadowMapSize = directionalLight.shadowMap->getSize();
         glViewport(0, 0, shadowMapSize.x, shadowMapSize.y);
         
         std::vector<float> depths { cameraSettings.nearClipDistance };
-        for (const float &depth : cascadeDepths)
+        for (const float &depth : directionalLight.cascadeDepths)
             depths.emplace_back(depth);
         depths.emplace_back(cameraSettings.farClipDistance);
         
@@ -593,13 +595,13 @@ void Renderer::shadowMapping(const CameraSettings &cameraSettings, const std::ve
             }
             
             if (minLightSpacePoint.z < 0)
-                minLightSpacePoint.z *= shadowZMultiplier;
+                minLightSpacePoint.z *= directionalLight.shadowZMultiplier;
             else
-                minLightSpacePoint.z /= shadowZMultiplier;
+                minLightSpacePoint.z /= directionalLight.shadowZMultiplier;
             if (maxLightSpacePoint.z < 0)
-                maxLightSpacePoint.z /= shadowZMultiplier;
+                maxLightSpacePoint.z /= directionalLight.shadowZMultiplier;
             else
-                maxLightSpacePoint.z *= shadowZMultiplier;
+                maxLightSpacePoint.z *= directionalLight.shadowZMultiplier;
             
             const glm::mat4 lightProjectionMatrix = glm::ortho(
                 minLightSpacePoint.x, maxLightSpacePoint.x, minLightSpacePoint.y, maxLightSpacePoint.y,
@@ -632,6 +634,7 @@ void Renderer::shadowMapping(const CameraSettings &cameraSettings, const std::ve
 void Renderer::generateSkybox(std::string_view path, const glm::ivec2 desiredSize)
 {
     mHdrImage = std::make_unique<HdrTexture>(path);
+    mHdrImage->setDebugName("HDRSkyboxImage");
     mHdrSkybox = createCubemapFromHdrTexture(mHdrImage.get(), desiredSize);
     mHdrSkybox->setDebugName("Skybox");
     mIrradianceMap = generateIrradianceMap(mHdrSkybox.get(), desiredSize / 8);  // 8
@@ -702,7 +705,7 @@ const TextureBufferObject &Renderer::getDeferredLightingBuffer()
     return *mDeferredLightingTextureBuffer;
 }
 
-std::vector<DirectionalLight> &Renderer::getDirectionalLights()
+std::vector<graphics::DirectionalLight> &Renderer::getDirectionalLights()
 {
     return mDirectionalLightQueue;
 }

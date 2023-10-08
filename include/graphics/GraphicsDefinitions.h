@@ -42,15 +42,4 @@ namespace graphics
         glm::mat4 matrix;
         DrawCallback onDraw;
     };
-    
-    /**
-     * @brief Graphics Point Light. Named like this to not interfere with the engine point light.
-     */
-    struct AnalyticalPointLight
-    {
-        glm::vec3 position { 0.f };
-        float radius       { 10.f };
-        float intensity    { 12'000.f };
-        glm::vec3 colour   { 1.f };
-    };
 }

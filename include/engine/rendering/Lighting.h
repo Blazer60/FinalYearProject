@@ -12,6 +12,7 @@
 #include "geometric.hpp"
 #include "Buffers.h"
 #include "Component.h"
+#include "GraphicsLighting.h"
 
 struct Light
 {
@@ -26,8 +27,12 @@ struct DirectionalLight
         const glm::vec3 &direction, const glm::vec3 &colour, const glm::ivec2 &shadowMapSize,
         uint32_t cascadeZoneCount);
     
+protected:
     void updateLayerCount(uint32_t cascadeCount);
+    void onDrawUi() override;
+    void onPreRender() override;
     
+protected:
     glm::vec3 direction { glm::normalize(glm::vec3(1.f, 1.f, 1.f)) };
     
     glm::vec3 colour { 1.f };
@@ -37,18 +42,11 @@ struct DirectionalLight
      */
     float intensity { 10000.f };
     
-    std::shared_ptr<TextureArrayObject> shadowMap { nullptr };
-    
     std::vector<glm::mat4> vpMatrices;
-    
-protected:
-    void onDrawUi() override;
-    void onPreRender() override;
-    
-protected:
     float yaw   { 45.f };
     float pitch { 45.f };
     bool  debugShadowMaps { false };
+    graphics::DirectionalLight mDirectionalLight;
     
     void calculateDirection();
 };
@@ -67,4 +65,6 @@ protected:
     float mRadius       { 10.f };
     float mIntensity    { 12'000.f };
     glm::vec3 mColour   { 1.f };
+    
+    graphics::PointLight mPointLight;
 };

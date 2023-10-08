@@ -13,9 +13,9 @@
 #include "GraphicsDefinitions.h"
 #include "Mesh.h"
 #include "Materials.h"
-#include "Lighting.h"
 #include "PostProcessLayer.h"
 #include "Buffers.h"
+#include "GraphicsLighting.h"
 
 
 /**
@@ -68,12 +68,12 @@ public:
     /**
      * @brief Submits a directional light that will be used to light the world and cast shadows.
      */
-    void submit(const DirectionalLight &directionalLight);
+    void submit(const graphics::DirectionalLight &directionalLight);
     
     /**
      * @brief Submits a point light that will be used to light the world.
      */
-    void submit(const graphics::AnalyticalPointLight &pointLight);
+    void submit(const graphics::PointLight &pointLight);
     
     /**
      * Starts rendering everything that was submitted to the renderer this frame.
@@ -116,7 +116,7 @@ public:
     [[nodiscard]] const TextureBufferObject &getRoughnessBuffer();
     [[nodiscard]] const TextureBufferObject &getMetallicBuffer();
     
-    [[nodiscard]] std::vector<DirectionalLight> &getDirectionalLights();
+    [[nodiscard]] std::vector<graphics::DirectionalLight> &getDirectionalLights();
     
     [[nodiscard]] float getCurrentEV100() const;
     
@@ -130,11 +130,6 @@ public:
      */
     bool isOk { true };
     
-    float shadowZMultiplier { 5.f };
-    std::vector<float> shadowCascadeMultipliers { 0.04f, 0.16f, 0.36f, 0.64f };
-    uint32_t shadowCascadeZones { 5 };
-    glm::vec2 shadowBias { 0.001f, 0.f };
-    
 protected:
     void initFrameBuffers();
     void initTextureRenderBuffers();
@@ -143,13 +138,13 @@ protected:
     std::unique_ptr<Cubemap> generateIrradianceMap(Cubemap *cubemap, const glm::ivec2 &size);
     std::unique_ptr<Cubemap> generatePreFilterMap(Cubemap *cubemap, const glm::ivec2 &size);
     std::unique_ptr<TextureBufferObject> generateBrdfLut(const glm::ivec2 &size);
-    void shadowMapping(const CameraSettings &cameraSettings, const std::vector<float> &cascadeDepths);
+    void shadowMapping(const CameraSettings &cameraSettings);
     
 protected:
     std::vector<graphics::RenderQueueObject>        mRenderQueue;
     std::vector<CameraSettings>                     mCameraQueue;
-    std::vector<DirectionalLight>                   mDirectionalLightQueue;
-    std::vector<graphics::AnalyticalPointLight>     mPointLightQueue;
+    std::vector<graphics::DirectionalLight>         mDirectionalLightQueue;
+    std::vector<graphics::PointLight>               mPointLightQueue;
     
     std::unique_ptr<HdrTexture>  mHdrImage;
     std::unique_ptr<Cubemap>     mHdrSkybox;

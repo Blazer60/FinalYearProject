@@ -51,3 +51,8 @@ HdrTexture::~HdrTexture()
     if (mId != 0)
         glDeleteTextures(1, &mId);
 }
+
+void HdrTexture::setDebugName(std::string_view name)
+{
+    glObjectLabel(GL_TEXTURE, mId, -1, name.data());
+}

@@ -103,6 +103,7 @@ add_executable(${PROJECT_NAME}
         include/engine/ProfileTimer.h
         src/engine/ui/editor/Profiler.cpp
         include/engine/ui/editor/Profiler.h
+        include/graphics/GraphicsLighting.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

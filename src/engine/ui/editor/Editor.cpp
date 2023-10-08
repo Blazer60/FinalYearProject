@@ -11,6 +11,7 @@
 #include "AssimpLoader.h"
 #include "MeshComponent.h"
 #include "ProfileTimer.h"
+#include "Lighting.h"
 
 namespace engine
 {

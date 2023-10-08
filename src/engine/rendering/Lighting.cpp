@@ -12,25 +12,26 @@
 #include "RendererImGui.h"
 #include "Ui.h"
 #include "Actor.h"
+#include "GraphicsLighting.h"
 
 DirectionalLight::DirectionalLight(
     const glm::vec3 &direction, const glm::vec3 &colour, const glm::ivec2 &shadowMapSize, uint32_t cascadeZoneCount)
     : direction(direction),
       colour(colour),
-      shadowMap(std::make_shared<TextureArrayObject>(shadowMapSize, cascadeZoneCount, GL_DEPTH_COMPONENT32, graphics::filter::Linear, graphics::wrap::ClampToBorder)),
       Light()
 {
-    shadowMap->setBorderColour(glm::vec4(1.f));
-    vpMatrices.reserve(cascadeZoneCount);
+    mDirectionalLight.shadowMap = std::make_shared<TextureArrayObject>(shadowMapSize, cascadeZoneCount,GL_DEPTH_COMPONENT32, graphics::filter::Linear, graphics::wrap::ClampToBorder);
+    mDirectionalLight.shadowMap->setBorderColour(glm::vec4(1.f));
+    mDirectionalLight.vpMatrices.reserve(cascadeZoneCount);
     calculateDirection();
 }
 
 void DirectionalLight::updateLayerCount(uint32_t cascadeCount)
 {
-    if (shadowMap->getLayerCount() != cascadeCount)
+    if (mDirectionalLight.shadowMap->getLayerCount() != cascadeCount)
     {
-        const glm::ivec2 size = shadowMap->getSize();
-        shadowMap = std::make_unique<TextureArrayObject>(size, cascadeCount, GL_DEPTH_COMPONENT32, graphics::filter::Linear, graphics::wrap::ClampToBorder);
+        const glm::ivec2 size = mDirectionalLight.shadowMap->getSize();
+        mDirectionalLight.shadowMap = std::make_shared<TextureArrayObject>(size, cascadeCount, GL_DEPTH_COMPONENT32, graphics::filter::Linear, graphics::wrap::ClampToBorder);
         vpMatrices.reserve(cascadeCount);
     }
 }
@@ -49,13 +50,40 @@ void DirectionalLight::onDrawUi()
         ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x / 2.f * 0.65f);
         changed |= ImGui::DragFloat("Yaw", &yaw, 0.1f); ImGui::SameLine();
         changed |= ImGui::DragFloat("Pitch", &pitch, 0.1f);
-        ImGui::PopItemWidth();
-        ImGui::Checkbox("Debug Shadows Maps", &debugShadowMaps);
-        if (debugShadowMaps)
-            graphics::displayShadowMaps(shadowMap.get());
         
         if (changed)
             calculateDirection();
+        
+        ImGui::PopItemWidth();
+        
+        if (ImGui::TreeNode("Shadow Settings"))
+        {
+            if (ImGui::TreeNode("Cascade Depths"))
+            {
+                int intCascadeZones = static_cast<int>(mDirectionalLight.shadowCascadeZones);
+                if (ImGui::SliderInt("Cascade Zones", &intCascadeZones, 1, 16))
+                {
+                    mDirectionalLight.shadowCascadeMultipliers.resize(intCascadeZones - 1, 1.f);
+                    mDirectionalLight.shadowCascadeZones = intCascadeZones;
+                }
+                for (int i = 0; i < mDirectionalLight.shadowCascadeMultipliers.size(); ++i)
+                {
+                    const std::string name = "Cascade Depth " + std::to_string(i);
+                    ImGui::SliderFloat(name.c_str(), &mDirectionalLight.shadowCascadeMultipliers[i], 0.f, 1.f);
+                }
+
+                ImGui::TreePop();
+            }
+            
+            ImGui::DragFloat("Z Multiplier", &mDirectionalLight.shadowZMultiplier, 0.1f);
+            ImGui::DragFloat2("Bias", glm::value_ptr(mDirectionalLight.shadowBias), 0.001f);
+            
+            ImGui::Checkbox("Debug Shadows Maps", &debugShadowMaps);
+            if (debugShadowMaps)
+                graphics::displayShadowMaps(mDirectionalLight.shadowMap.get());
+            
+            ImGui::TreePop();
+        }
         
         ImGui::TreePop();
     }
@@ -73,14 +101,20 @@ void DirectionalLight::calculateDirection()
 
 void DirectionalLight::onPreRender()
 {
-    updateLayerCount(graphics::renderer->shadowCascadeZones);
-    // todo: change directional light to submit a light weight version independent of this class.
-    graphics::renderer->submit(*this);
+    mDirectionalLight.direction = direction;
+    mDirectionalLight.colourIntensity = colour * intensity;
+    updateLayerCount(mDirectionalLight.shadowCascadeZones);
+    
+    graphics::renderer->submit(mDirectionalLight);
 }
 
 void PointLight::onPreRender()
 {
-    graphics::renderer->submit(graphics::AnalyticalPointLight { mActor->getWorldPosition(), mRadius, mIntensity, mColour } );
+    mPointLight.colourIntensity = mIntensity * mColour;
+    mPointLight.position = mActor->getWorldPosition();
+    mPointLight.radius = mRadius;
+    
+    graphics::renderer->submit(mPointLight);
 }
 
 void PointLight::onDrawUi()

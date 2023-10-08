@@ -113,7 +113,7 @@ Cubemap::Cubemap(const glm::ivec2 &size, GLenum format, int mipLevels)
     glTextureParameteri(mId, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTextureParameteri(mId, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     
-    if (mipLevels)
+    if (mipLevels > 1)
         glGenerateTextureMipmap(mId);
 }
 

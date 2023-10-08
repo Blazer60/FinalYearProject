@@ -12,6 +12,5 @@
 
 namespace graphics
 {
-    void displayShadowSettings();
     void displayShadowMaps(TextureArrayObject *textureArrayObject);
 }
