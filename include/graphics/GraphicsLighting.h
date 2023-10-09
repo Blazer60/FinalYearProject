@@ -35,5 +35,7 @@ namespace graphics
         glm::vec3   position        { 0.f };
         glm::vec3   colourIntensity { 12'000.f };
         float       radius          { 50.f };
+        
+        std::shared_ptr<Cubemap> shadowMap { nullptr };
     };
 }

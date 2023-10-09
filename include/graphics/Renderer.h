@@ -160,7 +160,8 @@ protected:
     std::unique_ptr<Shader> mDirectionalLightShader;
     std::unique_ptr<Shader> mPointLightShader;
     std::unique_ptr<Shader> mIblShader;
-    std::unique_ptr<Shader> mShadowShader;
+    std::unique_ptr<Shader> mDirectionalLightShadowShader;
+    std::unique_ptr<Shader> mPointLightShadowShader;
     std::unique_ptr<Shader> mHdrToCubemapShader;
     std::unique_ptr<Shader> mCubemapToIrradianceShader;
     std::unique_ptr<Shader> mPreFilterShader;

@@ -41,6 +41,7 @@ public:
     void attach(const Cubemap *cubemap, int bindPoint, int layer, int mipLevel = 0);
     void attachDepthBuffer(const TextureBufferObject *textureBufferObject, int mipLevel = 0);
     void attachDepthBuffer(const TextureArrayObject &textureArrayObject, int layer = 0, int mipLevel = 0);
+    void attachDepthBuffer(const Cubemap &cubemap, int layer = 0, int mipLevel = 0);
     
     void detach(int bindPoint);
     void detachRenderBuffer() const;

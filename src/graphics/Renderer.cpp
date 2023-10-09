@@ -34,7 +34,10 @@ Renderer::Renderer() :
     mPointLightShader = std::make_unique<Shader>(file::shaderPath() / "lighting/PointLight.vert", file::shaderPath() / "lighting/PointLight.frag");
     mIblShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/IBL.frag");
     mDeferredLightShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/CombineOutput.frag");
-    mShadowShader = std::make_unique<Shader>(file::shaderPath() / "shadow/Shadow.vert", file::shaderPath() / "shadow/Shadow.frag");
+    mDirectionalLightShadowShader = std::make_unique<Shader>(file::shaderPath() / "shadow/Shadow.vert", file::shaderPath() / "shadow/Shadow.frag");
+    
+    // todo: Does the point light shadow just use the same shaders as the directional light shadow shaders?
+    mPointLightShadowShader = std::make_unique<Shader>(file::shaderPath() / "shadow/PointShadow.vert", file::shaderPath() / "shadow/PointShadow.frag");
     mHdrToCubemapShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "cubemap/ToCubemap.frag");
     mCubemapToIrradianceShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "cubemap/IrradianceMap.frag");
     mPreFilterShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() /  "cubemap/PreFilter.frag");
@@ -174,6 +177,56 @@ void Renderer::render()
         // Shadow mapping
         shadowMapping(camera);
         
+        // Point Light Shadow Mapping.
+        graphics::pushDebugGroup("Point Light Shadow Mapping");
+        mShadowFramebuffer->bind();
+        mPointLightShadowShader->bind();
+        const glm::mat4 viewRotations[] = {
+            glm::lookAt(glm::vec3(0.f), glm::vec3( 1.f,  0.f,  0.f), glm::vec3(0.f, -1.f,  0.f)),
+            glm::lookAt(glm::vec3(0.f), glm::vec3(-1.f,  0.f,  0.f), glm::vec3(0.f, -1.f,  0.f)),
+            glm::lookAt(glm::vec3(0.f), glm::vec3( 0.f, -1.f,  0.f), glm::vec3(0.f,  0.f, -1.f)),
+            glm::lookAt(glm::vec3(0.f), glm::vec3( 0.f,  1.f,  0.f), glm::vec3(0.f,  0.f,  1.f)),
+            glm::lookAt(glm::vec3(0.f), glm::vec3( 0.f,  0.f,  1.f), glm::vec3(0.f, -1.f,  0.f)),
+            glm::lookAt(glm::vec3(0.f), glm::vec3( 0.f,  0.f, -1.f), glm::vec3(0.f, -1.f,  0.f)),
+        };
+        
+        for (auto &pointLight : mPointLightQueue)
+        {
+            const glm::mat4 lightModelMatrix = glm::translate(glm::mat4(1.f), pointLight.position);
+            const glm::mat4 projectionMatrix = glm::perspective(glm::radians(90.f), 1.f, 0.01f, pointLight.radius);
+            const glm::ivec2 size = pointLight.shadowMap->getSize();
+            glViewport(0, 0, size.x, size.y);
+            
+            mPointLightShadowShader->set("u_light_pos", pointLight.position);
+            mPointLightShadowShader->set("u_z_far", pointLight.radius);
+            
+            for (int viewIndex = 0; viewIndex < 6; ++viewIndex)
+            {
+                Cubemap &shadowMap = *pointLight.shadowMap;
+                mShadowFramebuffer->attachDepthBuffer(shadowMap, viewIndex, 0);
+                mShadowFramebuffer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
+                const glm::mat4 viewMatrix = glm::inverse(lightModelMatrix * viewRotations[viewIndex]);
+                
+                
+                for (const auto &rqo : mRenderQueue)
+                {
+                    const glm::mat4 &modelMatrix = rqo.matrix;
+                    const glm::mat4 mvp = projectionMatrix * viewMatrix * modelMatrix;
+                    mPointLightShadowShader->set("u_model_matrix", modelMatrix);
+                    mPointLightShadowShader->set("u_mvp_matrix", mvp);
+                    
+                    glBindVertexArray(rqo.vao);
+                    glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
+                }
+                
+                mShadowFramebuffer->detachDepthBuffer();
+            }
+        }
+        graphics::popDebugGroup();
+        
+        // Reset the viewport back to the normal size once we've finished rendering all the shadows.
+        glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
+        
         PROFILE_SCOPE_BEGIN(directionalLightTimer, "Directional Lighting");
         graphics::pushDebugGroup("Directional Lighting");
         
@@ -235,6 +288,9 @@ void Renderer::render()
             mPointLightShader->set("u_light_position", pointLight.position);
             mPointLightShader->set("u_light_intensity", pointLight.colourIntensity);
             mPointLightShader->set("u_light_inv_sqr_radius", 1.f / (pointLight.radius * pointLight.radius));
+            mPointLightShader->set("u_shadow_map_texture", pointLight.shadowMap->getId(), 5);
+            mPointLightShader->set("u_z_near", 0.01f);
+            mPointLightShader->set("u_z_far", pointLight.radius);
             
             glDrawElements(GL_TRIANGLES, mUnitSphere.indicesCount(), GL_UNSIGNED_INT, nullptr);
         }
@@ -533,7 +589,7 @@ void Renderer::shadowMapping(const CameraSettings &cameraSettings)
     const auto resize = [](const glm::vec4 &v) { return v / v.w; };
     
     mShadowFramebuffer->bind();
-    mShadowShader->bind();
+    mDirectionalLightShadowShader->bind();
     
     for (graphics::DirectionalLight &directionalLight : mDirectionalLightQueue)
     {
@@ -619,7 +675,7 @@ void Renderer::shadowMapping(const CameraSettings &cameraSettings)
             {
                 const glm::mat4 &modelMatrix = rqo.matrix;
                 const glm::mat4 mvp = lightProjectionMatrix * lightViewMatrix * modelMatrix;
-                mShadowShader->set("u_mvp_matrix", mvp);
+                mDirectionalLightShadowShader->set("u_mvp_matrix", mvp);
                 glBindVertexArray(rqo.vao);
                 glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
             }
@@ -634,8 +690,6 @@ void Renderer::shadowMapping(const CameraSettings &cameraSettings)
         PROFILE_SCOPE_END(lightTimer);
     }
     
-    // Reset the viewport back to the normal size once we've finished rendering all the shadows.
-    glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
     graphics::popDebugGroup();
 }
 

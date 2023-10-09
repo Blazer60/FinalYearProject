@@ -55,7 +55,7 @@ struct PointLight
     : public Light, public engine::Component
 {
 public:
-    PointLight() = default;
+    PointLight();
     
 protected:
     void onPreRender() override;

@@ -7,16 +7,43 @@ uniform sampler2D u_position_texture;
 uniform sampler2D u_normal_texture;
 uniform sampler2D u_roughness_texture;
 uniform sampler2D u_metallic_texture;
+uniform samplerCube u_shadow_map_texture;
 
 uniform vec3 u_light_position;
 uniform vec3 u_light_intensity;
 uniform float u_light_inv_sqr_radius;
+uniform float u_z_near;
+uniform float u_z_far;
 
 uniform vec3 u_camera_position_ws;
 
 out layout(location = 0) vec3 o_colour;
 
 const float PI = 3.14159265359f;
+
+float linearise_depth(float depth)
+{
+    const float z = depth * 2.f - 1.f;
+    const float near = u_z_near;
+    const float far = u_z_far;
+    return (2.f * near * far) / (far + near - z * (far - near));
+}
+
+float calculate_shadow_map(vec3 light_direction)
+{
+    const float shadow_depth = texture(u_shadow_map_texture, -light_direction).x * u_z_far;
+//    const float linear_depth = linearise_depth(depth) / u_z_far;
+
+    const float pixel_depth = length(light_direction);
+
+//    return depth / u_z_far;
+//    if (pixel_depth / u_z_far < 1.f)
+//    {
+        const float shadow = pixel_depth - 0.05f > shadow_depth ? 1.f : 0.f;
+        return shadow;
+//    }
+//    return 0.f;
+}
 
 // Unreal's fresnel function using spherical gaussian approximation.
 vec3 fresnelSchlick(float vDotH, vec3 f0)
@@ -101,6 +128,9 @@ void main()
     // Point light lighting calculation.
     float attenuation = 1.f;
     attenuation *= getDistanceAttenuation(light_direction, u_light_inv_sqr_radius);
+    const float shadow_intensity = calculate_shadow_map(light_direction);
+    const vec3 radiance = attenuation * u_light_intensity * (1.f - shadow_intensity);
 
-    o_colour = irradiance * attenuation * u_light_intensity / (4.f * PI) * lDotN;
+    o_colour = irradiance * radiance * (4.f * PI) * lDotN;
+//    o_colour = shadow_intensity.xxx;
 }

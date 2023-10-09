@@ -95,14 +95,15 @@ Cubemap::Cubemap(const std::vector<std::string> &paths)
     glTextureParameteri(mId, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     
     mSize = { initialWidth, initialHeight };
+    mFormat = GL_RGBA8;
 }
 
 Cubemap::Cubemap(const glm::ivec2 &size, GLenum format, int mipLevels)
-    : mSize(size)
+    : mSize(size), mFormat(format)
 {
     glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &mId);
     
-    glTextureStorage2D(mId, mipLevels, format, mSize.x, mSize.y);
+    glTextureStorage2D(mId, mipLevels, mFormat, mSize.x, mSize.y);
     
     if (mipLevels > 1)
         glTextureParameteri(mId, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);

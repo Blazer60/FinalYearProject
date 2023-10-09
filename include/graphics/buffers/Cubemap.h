@@ -33,12 +33,14 @@ public:
     
     ~Cubemap();
     
-    [[nodiscard]] uint32_t   getId()    const { return mId; }
-    [[nodiscard]] glm::ivec2 getSize()  const { return mSize; }
+    [[nodiscard]] uint32_t   getId()     const { return mId; }
+    [[nodiscard]] glm::ivec2 getSize()   const { return mSize; }
+    [[nodiscard]] GLenum     getFormat() const { return mFormat; }
     
     void setDebugName(std::string_view name) const;
     
 protected:
     uint32_t    mId;
     glm::ivec2  mSize;
+    GLenum      mFormat;
 };

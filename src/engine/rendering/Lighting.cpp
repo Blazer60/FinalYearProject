@@ -134,3 +134,8 @@ void PointLight::onDrawUi()
     
     ImGui::PopID();
 }
+
+PointLight::PointLight()
+{
+    mPointLight.shadowMap = std::make_shared<Cubemap>(glm::ivec2(1024), GL_DEPTH_COMPONENT32);
+}
