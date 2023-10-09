@@ -13,7 +13,7 @@
 
 namespace load
 {
-    std::shared_ptr<Texture> texture(std::string_view path)
+    std::shared_ptr<Texture> texture(const std::filesystem::path &path)
     {
         return std::make_shared<Texture>(path);
     }

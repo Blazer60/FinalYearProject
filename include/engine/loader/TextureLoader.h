@@ -14,6 +14,6 @@
 
 namespace load
 {
-    std::shared_ptr<Texture> texture(std::string_view path);
+    std::shared_ptr<Texture> texture(const std::filesystem::path &path);
     GLFWimage windowIcon(std::string_view path);
 }

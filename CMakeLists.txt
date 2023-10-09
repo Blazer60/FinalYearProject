@@ -43,6 +43,8 @@ add_library(${HELPER_LIBRARY} STATIC
         src/helpers/profiler/Profiler.cpp include/helpers/profiler/Profiler.h
         src/helpers/Timers.cpp include/helpers/Timers.h
         include/helpers/Statistics.h
+        src/helpers/FileLoader.cpp
+        include/helpers/FileLoader.h
 )
 
 target_include_directories(${HELPER_LIBRARY} PUBLIC

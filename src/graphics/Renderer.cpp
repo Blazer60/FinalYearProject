@@ -15,12 +15,13 @@
 #include "Shader.h"
 #include "AssimpLoader.h"
 #include "ProfileTimer.h"
+#include "FileLoader.h"
 
 Renderer::Renderer() :
     isOk(true),
     mCurrentRenderBufferSize(window::bufferSize()),
     mFullscreenTriangle(primitives::fullscreenTriangle()),
-    mUnitSphere(load::primitive<PositionVertex>("../resources/models/renderer/UnitSphere.glb"))
+    mUnitSphere(load::primitive<PositionVertex>(file::modelPath() / "renderer/UnitSphere.glb"))
 {
     // Blending texture data / enabling lerping.
     glEnable(GL_BLEND);
@@ -29,17 +30,17 @@ Renderer::Renderer() :
     glEnable(GL_CULL_FACE);
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     
-    mDirectionalLightShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/lighting/DirectionalLight.frag");
-    mPointLightShader = std::make_unique<Shader>("../resources/shaders/lighting/PointLight.vert", "../resources/shaders/lighting/PointLight.frag");
-    mIblShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/lighting/IBL.frag");
-    mDeferredLightShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/lighting/CombineOutput.frag");
-    mShadowShader = std::make_unique<Shader>("../resources/shaders/shadow/Shadow.vert", "../resources/shaders/shadow/Shadow.frag");
-    mHdrToCubemapShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/cubemap/ToCubemap.frag");
-    mCubemapToIrradianceShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/cubemap/IrradianceMap.frag");
-    mPreFilterShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/cubemap/PreFilter.frag");
-    mIntegrateBrdfShader = std::make_unique<Shader>("../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/brdf/IntegrateBrdf.frag");
+    mDirectionalLightShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/DirectionalLight.frag");
+    mPointLightShader = std::make_unique<Shader>(file::shaderPath() / "lighting/PointLight.vert", file::shaderPath() / "lighting/PointLight.frag");
+    mIblShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/IBL.frag");
+    mDeferredLightShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/CombineOutput.frag");
+    mShadowShader = std::make_unique<Shader>(file::shaderPath() / "shadow/Shadow.vert", file::shaderPath() / "shadow/Shadow.frag");
+    mHdrToCubemapShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "cubemap/ToCubemap.frag");
+    mCubemapToIrradianceShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "cubemap/IrradianceMap.frag");
+    mPreFilterShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() /  "cubemap/PreFilter.frag");
+    mIntegrateBrdfShader = std::make_unique<Shader>(file::shaderPath() /  "FullscreenTriangle.vert", file::shaderPath() / "brdf/IntegrateBrdf.frag");
     
-    generateSkybox("../resources/textures/hdr/newport/NewportLoft.hdr", glm::ivec2(512));
+    generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
     
     initFrameBuffers();
     initTextureRenderBuffers();

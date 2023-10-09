@@ -22,6 +22,7 @@
 #include "Profiler.h"
 #include "ProfileTimer.h"
 #include "GraphicsFunctions.h"
+#include "FileLoader.h"
 
 namespace engine
 {
@@ -41,6 +42,8 @@ namespace engine
         editor = &mEditor;
         
         window::setBufferSize(mResolution);
+        
+        file::findResourceFolder();
         
         if (!initGlfw(4, 6))
         {
@@ -85,13 +88,13 @@ namespace engine
         
         mMainCamera = std::make_unique<MainCamera>(glm::vec3(0.f, 3.f, 21.f));
         
-        mWindowIcon = load::windowIcon("../resources/textures/Icon.png");
+        mWindowIcon = load::windowIcon((file::texturePath() / "Icon.png").string());
         if (mWindowIcon.pixels != nullptr)
             glfwSetWindowIcon(mWindow, 1, &mWindowIcon);
         
         mStandardShader = std::make_shared<Shader>(
-            "../resources/shaders/geometry/standard/Standard.vert",
-            "../resources/shaders/geometry/standard/Standard.frag");
+            file::shaderPath() / "geometry/standard/Standard.vert",
+            file::shaderPath() / "geometry/standard/Standard.frag");
         
     }
     
@@ -136,7 +139,7 @@ namespace engine
         mGuiIo->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         mGuiIo->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
         
-        mGuiIo->Fonts->AddFontFromFileTTF("../resources/fonts/robotoMono/static/RobotoMono-Regular.ttf", 15.f);
+        mGuiIo->Fonts->AddFontFromFileTTF((file::resourcePath() / "fonts/robotoMono/static/RobotoMono-Regular.ttf").string().c_str(), 15.f);
         
         ImGui::StyleColorsDark();
         ImGuiStyle &style = ImGui::GetStyle();

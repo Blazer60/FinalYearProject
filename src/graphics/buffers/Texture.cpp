@@ -13,16 +13,15 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-Texture::Texture(std::string_view path)
+Texture::Texture(const std::filesystem::path &path)
 {
     stbi_set_flip_vertically_on_load(true);
     if (path.empty())
         return;
     
-    std::filesystem::path systemPath(path);
-    if (!std::filesystem::exists(systemPath))
+    if (!std::filesystem::exists(path))
     {
-        WARN("File % does not exist.\nAborting texture generation", systemPath);
+        WARN("File % does not exist.\nAborting texture generation", path);
         return;
     }
     
@@ -32,7 +31,7 @@ Texture::Texture(std::string_view path)
     int height;
     int colourChannels;
     // Forcing 4 components so that is always aligns with opengl's internal format.
-    unsigned char *bytes = stbi_load(systemPath.string().c_str(), &width, &height, &colourChannels, 4);
+    unsigned char *bytes = stbi_load(path.string().c_str(), &width, &height, &colourChannels, 4);
     
     glTextureParameteri(mId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTextureParameteri(mId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -48,7 +47,7 @@ Texture::Texture(std::string_view path)
     
     if (colourChannels > 4)
     {
-        WARN("File % does not contain the correct amount of channels. Cannot generate textures", systemPath);
+        WARN("File % does not contain the correct amount of channels. Cannot generate textures", path);
         
         stbi_image_free(bytes);
         glDeleteTextures(1, &mId);

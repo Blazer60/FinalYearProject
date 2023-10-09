@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <filesystem>
 #include "Pch.h"
 
 
@@ -18,7 +19,7 @@
 class Texture
 {
 public:
-    explicit Texture(std::string_view path);
+    explicit Texture(const std::filesystem::path &path);
     ~Texture();
     
     [[nodiscard]] uint32_t id() const { return mId; }

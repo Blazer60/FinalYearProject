@@ -23,7 +23,7 @@ namespace load
     glm::vec2 toVec2(const aiVector3D &v);
     
     template<typename TVertex>
-    SharedMesh model(std::string_view path);
+    SharedMesh model(const std::filesystem::path &path);
     
     /**
      * @brief Creates a single submesh with the first mesh found within the model loaded. This function with crash if the submesh is not valid. Use load::model if you want safety instead.
@@ -31,17 +31,17 @@ namespace load
      * @param path - The path to the primitive.
      */
     template<typename TVertex>
-    SubMesh primitive(std::string_view path);
+    SubMesh primitive(const std::filesystem::path &path);
     
     template<typename TVertex>
-    SharedMesh model(std::string_view path)
+    SharedMesh model(const std::filesystem::path &path)
     {
         if (path.empty())
             return { };
         
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(
-            path.data(),
+            path.string(),
             aiProcess_CalcTangentSpace      |
             aiProcess_Triangulate           |
             aiProcess_JoinIdenticalVertices |
@@ -95,11 +95,11 @@ namespace load
     }
     
     template<typename TVertex>
-    SubMesh primitive(std::string_view path)
+    SubMesh primitive(const std::filesystem::path &path)
     {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(
-            path.data(),
+            path.string(),
             aiProcess_CalcTangentSpace      |
             aiProcess_Triangulate           |
             aiProcess_JoinIdenticalVertices |

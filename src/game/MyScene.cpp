@@ -17,36 +17,37 @@
 #include "Editor.h"
 #include "Rotator.h"
 #include "EngineState.h"
+#include <FileLoader.h>
 
 MyScene::MyScene() :
     mStandardShader(std::make_shared<Shader>(
-        "../resources/shaders/geometry/standard/Standard.vert",
-        "../resources/shaders/geometry/standard/Standard.frag"))
+        file::shaderPath() / "geometry/standard/Standard.vert",
+        file::shaderPath() / "geometry/standard/Standard.frag"))
 {
     engine::editor->addComponentOption<Rotator>("Rotator", [](Ref<engine::Actor> actor) {
         actor->addComponent(makeResource<Rotator>());
     });
     
     engine::editor->addMenuOption("Rotating Cube", []() {
-        Ref<engine::Actor> actor = engine::Editor::createDefaultShape("Rotating Cube", "../resources/models/defaultObjects/DefaultCube.glb");
+        Ref<engine::Actor> actor = engine::Editor::createDefaultShape("Rotating Cube", (file::modelPath() / "defaultObjects/DefaultCube.glb").string());
         actor->addComponent(makeResource<Rotator>());
         return actor;
     });
     
     auto floor = spawnActor<engine::Actor>("Floor");
-    auto floorMesh = load::model<StandardVertex>("../resources/models/stoneFloor/MedievalStoneFloor.obj");
+    auto floorMesh = load::model<StandardVertex>(file::modelPath() /  "stoneFloor/MedievalStoneFloor.obj");
     auto floorMaterial = std::make_shared<StandardMaterial>();
     floorMaterial->attachShader(mStandardShader);
-    floorMaterial->setDiffuseMap(load::texture("../resources/models/stoneFloor/TexturesCom_TileStones_1K_albedo.png"));
-    floorMaterial->setNormalMap(load::texture("../resources/models/stoneFloor/TexturesCom_TileStones_1K_normal.png"));
-    floorMaterial->setHeightMap(load::texture("../resources/models/stoneFloor/TexturesCom_TileStones_1K_height.png"));
-    floorMaterial->setRoughnessMap(load::texture("../resources/models/stoneFloor/TexturesCom_TileStones_1K_roughness.png"));
+    floorMaterial->setDiffuseMap(load::texture(file::modelPath() /  "stoneFloor/TexturesCom_TileStones_1K_albedo.png"));
+    floorMaterial->setNormalMap(load::texture(file::modelPath() /  "stoneFloor/TexturesCom_TileStones_1K_normal.png"));
+    floorMaterial->setHeightMap(load::texture(file::modelPath() /  "stoneFloor/TexturesCom_TileStones_1K_height.png"));
+    floorMaterial->setRoughnessMap(load::texture(file::modelPath() /  "stoneFloor/TexturesCom_TileStones_1K_roughness.png"));
     floorMaterial->metallic = 0.f;
     floorMaterial->roughness = 0.5f;
     floorMaterial->ambientColour = glm::vec3(0.8f);
     floor->addComponent(makeResource<engine::MeshComponent>(floorMesh, floorMaterial));
 
-    auto ballMesh = load::model<StandardVertex>("../resources/models/blueSphere/BlueSphere.obj");
+    auto ballMesh = load::model<StandardVertex>(file::modelPath() / "blueSphere/BlueSphere.obj");
 
     std::vector<glm::vec3> positions;
     std::vector<float> roughness;
@@ -83,7 +84,7 @@ MyScene::MyScene() :
     auto teapot = spawnActor<engine::Actor>("Teapot");
     teapot->position = glm::vec3(0.f, 0.f, 4.f);
     teapot->scale = glm::vec3(0.3f);
-    SharedMesh teapotMesh = load::model<StandardVertex>("../resources/models/utahTeapot/UtahTeapot.obj");
+    SharedMesh teapotMesh = load::model<StandardVertex>(file::modelPath() / "utahTeapot/UtahTeapot.obj");
     auto teapotMaterial = std::make_shared<StandardMaterial>();
     teapotMaterial->attachShader(mStandardShader);
     teapotMaterial->ambientColour = glm::vec3(0.f, 0.4f, 0.01f);
@@ -91,7 +92,7 @@ MyScene::MyScene() :
     teapotMaterial->metallic = 1.f;
     teapot->addComponent(makeResource<engine::MeshComponent>(teapotMesh, teapotMaterial));
     
-    SharedMesh childMesh = load::model<StandardVertex>("../resources/models/defaultObjects/DefaultTorus.glb");
+    SharedMesh childMesh = load::model<StandardVertex>(file::modelPath() / "defaultObjects/DefaultTorus.glb");
     auto childMaterial = std::make_shared<StandardMaterial>();
     childMaterial->attachShader(mStandardShader);
     childMaterial->ambientColour = glm::vec3(1.f, 0.f, 0.f);
@@ -107,13 +108,13 @@ MyScene::MyScene() :
     
     auto leatherBall = spawnActor<engine::Actor>("Leather Ball");
     leatherBall->position = glm::vec3(0.f, 5.f, 0.f);
-    auto leatherBallModel = load::model<StandardVertex>("../resources/models/leatherBall/LeatherBall.obj");
+    auto leatherBallModel = load::model<StandardVertex>(file::modelPath() / "leatherBall/LeatherBall.obj");
     auto leatherMaterial = std::make_shared<StandardMaterial>();
     leatherMaterial->attachShader(mStandardShader);
-    leatherMaterial->setDiffuseMap(load::texture("../resources/models/leatherBall/TexturesCom_Leather_Tufted_New_1K_albedo.png"));
-    leatherMaterial->setNormalMap(load::texture("../resources/models/leatherBall/TexturesCom_Leather_Tufted_New_1K_normal.png"));
-    leatherMaterial->setHeightMap(load::texture("../resources/models/leatherBall/TexturesCom_Leather_Tufted_New_1K_height.png"));
-    leatherMaterial->setRoughnessMap(load::texture("../resources/models/leatherBall/TexturesCom_Leather_Tufted_New_1K_roughness.png"));
+    leatherMaterial->setDiffuseMap(load::texture(file::modelPath() / "leatherBall/TexturesCom_Leather_Tufted_New_1K_albedo.png"));
+    leatherMaterial->setNormalMap(load::texture(file::modelPath() / "leatherBall/TexturesCom_Leather_Tufted_New_1K_normal.png"));
+    leatherMaterial->setHeightMap(load::texture(file::modelPath() / "leatherBall/TexturesCom_Leather_Tufted_New_1K_height.png"));
+    leatherMaterial->setRoughnessMap(load::texture(file::modelPath() / "leatherBall/TexturesCom_Leather_Tufted_New_1K_roughness.png"));
     leatherBall->addComponent(makeResource<engine::MeshComponent>(leatherBallModel, leatherMaterial));
 }
 
@@ -132,10 +133,10 @@ void MyScene::onRender()
 void MyScene::onImguiUpdate()
 {
     if (ImGui::Button("Skybox 1"))
-        graphics::renderer->generateSkybox("../resources/textures/hdr/newport/NewportLoft.hdr", glm::ivec2(512));
+        graphics::renderer->generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
     ImGui::SameLine();
     if (ImGui::Button("Skybox 2"))
-        graphics::renderer->generateSkybox("../resources/textures/hdr/norway/Norway.hdr", glm::ivec2(512));
+        graphics::renderer->generateSkybox((file::texturePath() / "hdr/norway/Norway.hdr").string(), glm::ivec2(512));
     if (ImGui::DragFloat("Luminance Multiplier", &mLuminanceMultiplier))
         graphics::renderer->setIblMultiplier(mLuminanceMultiplier);
     
