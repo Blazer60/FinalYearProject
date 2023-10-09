@@ -11,6 +11,7 @@
 #include "PostProcessLayer.h"
 #include "Shader.h"
 #include "Drawable.h"
+#include <FileLoader.h>
 
 
 /**
@@ -26,5 +27,5 @@ protected:
     
     [[nodiscard]] static float covertEV100ToExposure(float eV100) ;
     
-    Shader mShader { "../resources/shaders/FullscreenTriangle.vert", "../resources/shaders/postProcessing/colourGrading/ColourGrading.frag" };
+    Shader mShader { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "postProcessing/colourGrading/ColourGrading.frag" };
 };

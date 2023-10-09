@@ -13,6 +13,7 @@
 #include "ProfileTimer.h"
 #include "Lighting.h"
 #include "EngineState.h"
+#include <FileLoader.h>
 
 namespace engine
 {
@@ -44,9 +45,9 @@ namespace engine
             return actor;
         });
         
-        addMenuOption("Cube",   []() { return Editor::createDefaultShape("Cube",    "../resources/models/defaultObjects/DefaultCube.glb"); });
-        addMenuOption("Sphere", []() { return Editor::createDefaultShape("Sphere",  "../resources/models/defaultObjects/DefaultSphere.glb"); });
-        addMenuOption("Torus",  []() { return Editor::createDefaultShape("Torus",   "../resources/models/defaultObjects/DefaultTorus.glb"); });
+        addMenuOption("Cube",   []() { return Editor::createDefaultShape("Cube",   (file::modelPath() / "defaultObjects/DefaultCube.glb").string()); });
+        addMenuOption("Sphere", []() { return Editor::createDefaultShape("Sphere", (file::modelPath() / "defaultObjects/DefaultSphere.glb").string()); });
+        addMenuOption("Torus",  []() { return Editor::createDefaultShape("Torus",  (file::modelPath() / "defaultObjects/DefaultTorus.glb").string()); });
         
         mViewport.init();
     }
