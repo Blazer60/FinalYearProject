@@ -21,7 +21,7 @@ namespace debug
                 isInserted |= child.tryInsert(result);
             
             if (!isInserted)
-                children.push_back({ result.name, result.startMicroSeconds, result.stopMicroSeconds, { } });
+                children.push_back({ result.id, result.name, result.startMicroSeconds, result.stopMicroSeconds, { } });
             
             return true;
         }
@@ -37,7 +37,7 @@ void Profiler::addResult(const debug::ProfileResult &result)
 void Profiler::createTree()
 {
     std::sort(mResults.begin(), mResults.end(), [](const debug::ProfileResult &lhs, const debug::ProfileResult &rhs) {
-        return lhs.startMicroSeconds < rhs.startMicroSeconds;
+        return lhs.id < rhs.id;
     });
     
     for (const auto &item : mResults)
@@ -47,7 +47,7 @@ void Profiler::createTree()
             isInserted |= node.tryInsert(item);
         
         if (!isInserted)
-            mTree.push_back({ item.name, item.startMicroSeconds, item.stopMicroSeconds, {} });
+            mTree.push_back({ item.id, item.name, item.startMicroSeconds, item.stopMicroSeconds, {} });
     }
 }
 
@@ -70,6 +70,7 @@ void Profiler::updateAndClear()
 #endif  // ENABLE_PROFILING
     
     mResults.clear();
+    mId = 0;
 }
 
 bool Profiler::isFrozen() const
@@ -90,4 +91,9 @@ void Profiler::setUpdateRate(float updateRate)
 const std::vector<debug::ProfileNode> &Profiler::getTree() const
 {
     return mTree;
+}
+
+uint64_t Profiler::getNewId()
+{
+    return ++mId;
 }

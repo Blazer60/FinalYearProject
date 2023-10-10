@@ -35,7 +35,7 @@ namespace engine
     void ProfilerViewer::drawNode(const debug::ProfileNode &node)
     {
         const float time = static_cast<float>((node.stopNanoSeconds - node.startNanoSeconds)) * 0.001f * 0.001f;
-        std::string label = node.name.data();
+        std::string label = node.name.data() + std::to_string(node.id);
         ImGuiTreeNodeFlags treeFlags = ImGuiTreeNodeFlags_DefaultOpen;
         if (node.children.empty())
             treeFlags |= ImGuiTreeNodeFlags_Leaf;

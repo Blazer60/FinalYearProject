@@ -28,6 +28,7 @@ namespace debug
         std::string_view mName;
         std::chrono::time_point<std::chrono::steady_clock> mStartPoint;
         bool mStopped { false };
+        uint64_t mId { 0 };
     };
 }
 

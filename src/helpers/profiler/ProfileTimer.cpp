@@ -13,7 +13,7 @@
 namespace debug
 {
     ProfileTimer::ProfileTimer(std::string_view name)
-        : mName(name), mStartPoint(std::chrono::high_resolution_clock::now())
+        : mName(name), mStartPoint(std::chrono::high_resolution_clock::now()), mId(profiler->getNewId())
     {
     }
     
@@ -32,6 +32,6 @@ namespace debug
         
         mStopped = true;
         
-        profiler->addResult({ mName, start, end });
+        profiler->addResult({ mId, mName, start, end });
     }
 }

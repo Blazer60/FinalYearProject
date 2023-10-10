@@ -16,6 +16,7 @@ namespace debug
 {
     struct ProfileResult
     {
+        uint64_t id;
         std::string_view name;
         long long startMicroSeconds;
         long long stopMicroSeconds;
@@ -23,6 +24,7 @@ namespace debug
     
     struct ProfileNode
     {
+        uint64_t id;
         std::string_view name;
         long long startNanoSeconds;
         long long stopNanoSeconds;
@@ -40,12 +42,13 @@ class Profiler
 {
 public:
     void addResult(const debug::ProfileResult &result);
+    uint64_t getNewId();
     void updateAndClear();
     
-    bool isFrozen() const;
+    [[nodiscard]] bool isFrozen() const;
     void setFreeze(bool isFrozen);
     void setUpdateRate(float updateRate);
-    const std::vector<debug::ProfileNode> &getTree() const;
+    [[nodiscard]] const std::vector<debug::ProfileNode> &getTree() const;
 
 protected:
     void createTree();
@@ -56,5 +59,7 @@ protected:
     float mUpdateRate { 0.1f };
     float mTimer { 0.f };
     bool mIsFrozen { false };
+    
+    uint64_t mId { 0 };
 };
 
