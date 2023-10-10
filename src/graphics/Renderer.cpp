@@ -35,8 +35,6 @@ Renderer::Renderer() :
     mIblShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/IBL.frag");
     mDeferredLightShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/CombineOutput.frag");
     mDirectionalLightShadowShader = std::make_unique<Shader>(file::shaderPath() / "shadow/Shadow.vert", file::shaderPath() / "shadow/Shadow.frag");
-    
-    // todo: Does the point light shadow just use the same shaders as the directional light shadow shaders?
     mPointLightShadowShader = std::make_unique<Shader>(file::shaderPath() / "shadow/PointShadow.vert", file::shaderPath() / "shadow/PointShadow.frag");
     mHdrToCubemapShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "cubemap/ToCubemap.frag");
     mCubemapToIrradianceShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "cubemap/IrradianceMap.frag");
@@ -289,8 +287,9 @@ void Renderer::render()
             mPointLightShader->set("u_light_intensity", pointLight.colourIntensity);
             mPointLightShader->set("u_light_inv_sqr_radius", 1.f / (pointLight.radius * pointLight.radius));
             mPointLightShader->set("u_shadow_map_texture", pointLight.shadowMap->getId(), 5);
-            mPointLightShader->set("u_z_near", 0.01f);
             mPointLightShader->set("u_z_far", pointLight.radius);
+            mPointLightShader->set("u_softness_radius", pointLight.softnessRadius);
+            mPointLightShader->set("u_bias", pointLight.bias);
             
             glDrawElements(GL_TRIANGLES, mUnitSphere.indicesCount(), GL_UNSIGNED_INT, nullptr);
         }

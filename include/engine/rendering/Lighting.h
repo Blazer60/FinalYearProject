@@ -62,9 +62,12 @@ protected:
     void onDrawUi() override;
 
 protected:
-    float mRadius       { 10.f };
-    float mIntensity    { 12'000.f };
-    glm::vec3 mColour   { 1.f };
+    float mRadius           { 30.f };
+    float mIntensity        { 12'000.f };
+    glm::vec3 mColour       { 1.f };
+    glm::vec2 mBias         { 0.005f, 0.15f };
+    float mSoftnessRadius   { 0.02f };
+    int mResolution         { 1024 };
     
     graphics::PointLight mPointLight;
 };

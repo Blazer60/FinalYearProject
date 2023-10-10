@@ -113,6 +113,11 @@ void PointLight::onPreRender()
     mPointLight.colourIntensity = mIntensity * mColour;
     mPointLight.position = mActor->getWorldPosition();
     mPointLight.radius = mRadius;
+    mPointLight.bias = mBias;
+    mPointLight.softnessRadius = mSoftnessRadius;
+    
+    if (mPointLight.shadowMap->getSize().x != mResolution)
+        mPointLight.shadowMap = std::make_shared<Cubemap>(glm::ivec2(mResolution), GL_DEPTH_COMPONENT32);
     
     graphics::renderer->submit(mPointLight);
 }
@@ -128,6 +133,9 @@ void PointLight::onDrawUi()
         ImGui::ColorEdit3("Colour", glm::value_ptr(mColour), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_PickerHueWheel);
         ImGui::DragFloat("Intensity (Lum)", &mIntensity, 10.f);
         ImGui::DragFloat("Radius", &mRadius);
+        ImGui::DragFloat2("Bias", glm::value_ptr(mBias), 0.001f);
+        ImGui::DragFloat("Softness", &mSoftnessRadius, 0.001f);
+        ImGui::DragInt("Resolution", &mResolution, 0.f, 32, 8192, "%d", ImGuiSliderFlags_Logarithmic);
         
         ImGui::TreePop();
     }

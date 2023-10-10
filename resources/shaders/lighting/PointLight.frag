@@ -12,8 +12,9 @@ uniform samplerCube u_shadow_map_texture;
 uniform vec3 u_light_position;
 uniform vec3 u_light_intensity;
 uniform float u_light_inv_sqr_radius;
-uniform float u_z_near;
+uniform float u_softness_radius;
 uniform float u_z_far;
+uniform vec2 u_bias;
 
 uniform vec3 u_camera_position_ws;
 
@@ -21,28 +22,33 @@ out layout(location = 0) vec3 o_colour;
 
 const float PI = 3.14159265359f;
 
-float linearise_depth(float depth)
+float sample_shadow_map(vec3 direction, float pixel_depth, float bias)
 {
-    const float z = depth * 2.f - 1.f;
-    const float near = u_z_near;
-    const float far = u_z_far;
-    return (2.f * near * far) / (far + near - z * (far - near));
+    const float shadow_depth = texture(u_shadow_map_texture, -direction).x * u_z_far;
+    return pixel_depth - bias > shadow_depth ? 1.f : 0.f;
 }
 
 float calculate_shadow_map(vec3 light_direction)
 {
-    const float shadow_depth = texture(u_shadow_map_texture, -light_direction).x * u_z_far;
-//    const float linear_depth = linearise_depth(depth) / u_z_far;
+    const vec3 samples_offsets[20] = vec3[20](
+        vec3( 1,  1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1,  1,  1),
+        vec3( 1,  1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1,  1, -1),
+        vec3( 1,  1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1,  1,  0),
+        vec3( 1,  0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1,  0, -1),
+        vec3( 0,  1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0,  1, -1)
+    );
+    const float disk_radius = u_softness_radius;
 
-    const float pixel_depth = length(light_direction);
+    float shadow = 0.f;
+    for (int i = 0; i < 20; i++)
+    {
+        const vec3 direction = light_direction + samples_offsets[i] * disk_radius;
+        const float pixel_depth = length(direction);
+        const float bias = mix(u_bias.x, u_bias.y, clamp(pixel_depth / u_z_far, 0.f, 1.f));
+        shadow += sample_shadow_map(direction, pixel_depth, bias);
+    }
 
-//    return depth / u_z_far;
-//    if (pixel_depth / u_z_far < 1.f)
-//    {
-        const float shadow = pixel_depth - 0.05f > shadow_depth ? 1.f : 0.f;
-        return shadow;
-//    }
-//    return 0.f;
+    return shadow / 20.f;
 }
 
 // Unreal's fresnel function using spherical gaussian approximation.
@@ -132,5 +138,4 @@ void main()
     const vec3 radiance = attenuation * u_light_intensity * (1.f - shadow_intensity);
 
     o_colour = irradiance * radiance * (4.f * PI) * lDotN;
-//    o_colour = shadow_intensity.xxx;
 }
