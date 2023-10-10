@@ -172,55 +172,8 @@ void Renderer::render()
         PROFILE_SCOPE_END(geometryTimer);
         graphics::popDebugGroup();
         
-        // Shadow mapping
-        shadowMapping(camera);
-        
-        // Point Light Shadow Mapping.
-        graphics::pushDebugGroup("Point Light Shadow Mapping");
-        mShadowFramebuffer->bind();
-        mPointLightShadowShader->bind();
-        const glm::mat4 viewRotations[] = {
-            glm::lookAt(glm::vec3(0.f), glm::vec3( 1.f,  0.f,  0.f), glm::vec3(0.f, -1.f,  0.f)),
-            glm::lookAt(glm::vec3(0.f), glm::vec3(-1.f,  0.f,  0.f), glm::vec3(0.f, -1.f,  0.f)),
-            glm::lookAt(glm::vec3(0.f), glm::vec3( 0.f, -1.f,  0.f), glm::vec3(0.f,  0.f, -1.f)),
-            glm::lookAt(glm::vec3(0.f), glm::vec3( 0.f,  1.f,  0.f), glm::vec3(0.f,  0.f,  1.f)),
-            glm::lookAt(glm::vec3(0.f), glm::vec3( 0.f,  0.f,  1.f), glm::vec3(0.f, -1.f,  0.f)),
-            glm::lookAt(glm::vec3(0.f), glm::vec3( 0.f,  0.f, -1.f), glm::vec3(0.f, -1.f,  0.f)),
-        };
-        
-        for (auto &pointLight : mPointLightQueue)
-        {
-            const glm::mat4 lightModelMatrix = glm::translate(glm::mat4(1.f), pointLight.position);
-            const glm::mat4 projectionMatrix = glm::perspective(glm::radians(90.f), 1.f, 0.01f, pointLight.radius);
-            const glm::ivec2 size = pointLight.shadowMap->getSize();
-            glViewport(0, 0, size.x, size.y);
-            
-            mPointLightShadowShader->set("u_light_pos", pointLight.position);
-            mPointLightShadowShader->set("u_z_far", pointLight.radius);
-            
-            for (int viewIndex = 0; viewIndex < 6; ++viewIndex)
-            {
-                Cubemap &shadowMap = *pointLight.shadowMap;
-                mShadowFramebuffer->attachDepthBuffer(shadowMap, viewIndex, 0);
-                mShadowFramebuffer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
-                const glm::mat4 viewMatrix = glm::inverse(lightModelMatrix * viewRotations[viewIndex]);
-                
-                
-                for (const auto &rqo : mRenderQueue)
-                {
-                    const glm::mat4 &modelMatrix = rqo.matrix;
-                    const glm::mat4 mvp = projectionMatrix * viewMatrix * modelMatrix;
-                    mPointLightShadowShader->set("u_model_matrix", modelMatrix);
-                    mPointLightShadowShader->set("u_mvp_matrix", mvp);
-                    
-                    glBindVertexArray(rqo.vao);
-                    glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
-                }
-                
-                mShadowFramebuffer->detachDepthBuffer();
-            }
-        }
-        graphics::popDebugGroup();
+        directionalLightShadowMapping(camera);
+        pointLightShadowMapping();
         
         // Reset the viewport back to the normal size once we've finished rendering all the shadows.
         glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
@@ -360,6 +313,62 @@ void Renderer::render()
         graphics::popDebugGroup();
     }
     
+    graphics::popDebugGroup();
+}
+
+void Renderer::pointLightShadowMapping()
+{
+    PROFILE_FUNC();
+    graphics::pushDebugGroup("Point Light Shadow Mapping");
+    mShadowFramebuffer->bind();
+    mPointLightShadowShader->bind();
+    const glm::mat4 viewRotations[] = {
+        glm::lookAt(glm::vec3(0.f), glm::vec3( 1.f,  0.f,  0.f), glm::vec3(0.f, -1.f,  0.f)),
+        glm::lookAt(glm::vec3(0.f), glm::vec3(-1.f,  0.f,  0.f), glm::vec3(0.f, -1.f,  0.f)),
+        glm::lookAt(glm::vec3(0.f), glm::vec3( 0.f, -1.f,  0.f), glm::vec3(0.f,  0.f, -1.f)),
+        glm::lookAt(glm::vec3(0.f), glm::vec3( 0.f,  1.f,  0.f), glm::vec3(0.f,  0.f,  1.f)),
+        glm::lookAt(glm::vec3(0.f), glm::vec3( 0.f,  0.f,  1.f), glm::vec3(0.f, -1.f,  0.f)),
+        glm::lookAt(glm::vec3(0.f), glm::vec3( 0.f,  0.f, -1.f), glm::vec3(0.f, -1.f,  0.f)),
+    };
+    
+    for (auto &pointLight : mPointLightQueue)
+    {
+        PROFILE_SCOPE_BEGIN(pointLightTimer, "Point Light Shadow Pass");
+        graphics::pushDebugGroup("Point Light Pass");
+        const glm::mat4 lightModelMatrix = glm::translate(glm::mat4(1.f), pointLight.position);
+        const glm::mat4 projectionMatrix = glm::perspective(glm::radians(90.f), 1.f, 0.01f, pointLight.radius);
+        const glm::ivec2 size = pointLight.shadowMap->getSize();
+        glViewport(0, 0, size.x, size.y);
+        
+        mPointLightShadowShader->set("u_light_pos", pointLight.position);
+        mPointLightShadowShader->set("u_z_far", pointLight.radius);
+        
+        for (int viewIndex = 0; viewIndex < 6; ++viewIndex)
+        {
+            graphics::pushDebugGroup("Rendering Face");
+            Cubemap &shadowMap = *pointLight.shadowMap;
+            mShadowFramebuffer->attachDepthBuffer(shadowMap, viewIndex, 0);
+            mShadowFramebuffer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
+            const glm::mat4 viewMatrix = glm::inverse(lightModelMatrix * viewRotations[viewIndex]);
+            
+            
+            for (const auto &rqo : mRenderQueue)
+            {
+                const glm::mat4 &modelMatrix = rqo.matrix;
+                const glm::mat4 mvp = projectionMatrix * viewMatrix * modelMatrix;
+                mPointLightShadowShader->set("u_model_matrix", modelMatrix);
+                mPointLightShadowShader->set("u_mvp_matrix", mvp);
+                
+                glBindVertexArray(rqo.vao);
+                glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
+            }
+            
+            mShadowFramebuffer->detachDepthBuffer();
+            graphics::popDebugGroup();
+        }
+        PROFILE_SCOPE_END(pointLightTimer);
+        graphics::popDebugGroup();
+    }
     graphics::popDebugGroup();
 }
 
@@ -581,10 +590,10 @@ std::unique_ptr<TextureBufferObject> Renderer::generateBrdfLut(const glm::ivec2 
     return lut;
 }
 
-void Renderer::shadowMapping(const CameraSettings &cameraSettings)
+void Renderer::directionalLightShadowMapping(const CameraSettings &cameraSettings)
 {
     PROFILE_FUNC();
-    graphics::pushDebugGroup("Shadow Mapping");
+    graphics::pushDebugGroup("Directional Light Shadow Mapping");
     const auto resize = [](const glm::vec4 &v) { return v / v.w; };
     
     mShadowFramebuffer->bind();

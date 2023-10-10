@@ -138,7 +138,8 @@ protected:
     std::unique_ptr<Cubemap> generateIrradianceMap(Cubemap *cubemap, const glm::ivec2 &size);
     std::unique_ptr<Cubemap> generatePreFilterMap(Cubemap *cubemap, const glm::ivec2 &size);
     std::unique_ptr<TextureBufferObject> generateBrdfLut(const glm::ivec2 &size);
-    void shadowMapping(const CameraSettings &cameraSettings);
+    void directionalLightShadowMapping(const CameraSettings &cameraSettings);
+    void pointLightShadowMapping();
     
 protected:
     std::vector<graphics::RenderQueueObject>        mRenderQueue;
