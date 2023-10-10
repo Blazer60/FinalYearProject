@@ -200,5 +200,10 @@ void FramebufferObject::detachDepthBuffer() const
     glNamedFramebufferTexture(mFboId, GL_DEPTH_ATTACHMENT, 0, 0);
 }
 
+void FramebufferObject::clearDepthBuffer() const
+{
+    glClearNamedFramebufferfv(mFboId, GL_DEPTH, 0, &mDepthClearValue);
+}
+
 
 

@@ -322,21 +322,11 @@ void Renderer::pointLightShadowMapping()
     graphics::pushDebugGroup("Point Light Shadow Mapping");
     mShadowFramebuffer->bind();
     mPointLightShadowShader->bind();
-    const glm::mat4 viewRotations[] = {
-        glm::lookAt(glm::vec3(0.f), glm::vec3( 1.f,  0.f,  0.f), glm::vec3(0.f, -1.f,  0.f)),
-        glm::lookAt(glm::vec3(0.f), glm::vec3(-1.f,  0.f,  0.f), glm::vec3(0.f, -1.f,  0.f)),
-        glm::lookAt(glm::vec3(0.f), glm::vec3( 0.f, -1.f,  0.f), glm::vec3(0.f,  0.f, -1.f)),
-        glm::lookAt(glm::vec3(0.f), glm::vec3( 0.f,  1.f,  0.f), glm::vec3(0.f,  0.f,  1.f)),
-        glm::lookAt(glm::vec3(0.f), glm::vec3( 0.f,  0.f,  1.f), glm::vec3(0.f, -1.f,  0.f)),
-        glm::lookAt(glm::vec3(0.f), glm::vec3( 0.f,  0.f, -1.f), glm::vec3(0.f, -1.f,  0.f)),
-    };
     
     for (auto &pointLight : mPointLightQueue)
     {
         PROFILE_SCOPE_BEGIN(pointLightTimer, "Point Light Shadow Pass");
         graphics::pushDebugGroup("Point Light Pass");
-        const glm::mat4 lightModelMatrix = glm::translate(glm::mat4(1.f), pointLight.position);
-        const glm::mat4 projectionMatrix = glm::perspective(glm::radians(90.f), 1.f, 0.01f, pointLight.radius);
         const glm::ivec2 size = pointLight.shadowMap->getSize();
         glViewport(0, 0, size.x, size.y);
         
@@ -345,17 +335,16 @@ void Renderer::pointLightShadowMapping()
         
         for (int viewIndex = 0; viewIndex < 6; ++viewIndex)
         {
+            PROFILE_SCOPE_BEGIN(faceTimer, "View Pass");
             graphics::pushDebugGroup("Rendering Face");
             Cubemap &shadowMap = *pointLight.shadowMap;
             mShadowFramebuffer->attachDepthBuffer(shadowMap, viewIndex, 0);
-            mShadowFramebuffer->clear(glm::vec4(0.f, 0.f, 0.f, 1.f));
-            const glm::mat4 viewMatrix = glm::inverse(lightModelMatrix * viewRotations[viewIndex]);
-            
+            mShadowFramebuffer->clearDepthBuffer();
             
             for (const auto &rqo : mRenderQueue)
             {
                 const glm::mat4 &modelMatrix = rqo.matrix;
-                const glm::mat4 mvp = projectionMatrix * viewMatrix * modelMatrix;
+                const glm::mat4 mvp = pointLight.vpMatrices[viewIndex] * modelMatrix;
                 mPointLightShadowShader->set("u_model_matrix", modelMatrix);
                 mPointLightShadowShader->set("u_mvp_matrix", mvp);
                 
@@ -623,7 +612,7 @@ void Renderer::directionalLightShadowMapping(const CameraSettings &cameraSetting
             graphics::pushDebugGroup("Cascade Pass");
             
             mShadowFramebuffer->attachDepthBuffer(*directionalLight.shadowMap, j);
-            mShadowFramebuffer->clear(glm::vec4(glm::vec3(0.f), 1.f));
+            mShadowFramebuffer->clearDepthBuffer();
             
             const float aspectRatio = window::aspectRatio();
             const glm::mat4 projectionMatrix = glm::perspective(cameraSettings.fovY, aspectRatio, depths[j], depths[j + 1]);

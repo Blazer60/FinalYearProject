@@ -111,6 +111,10 @@ void DirectionalLight::onPreRender()
 void PointLight::onPreRender()
 {
     mPointLight.colourIntensity = mIntensity * mColour;
+    
+    if (mPointLight.position != mActor->getWorldPosition())
+        computeVpMatrices();
+    
     mPointLight.position = mActor->getWorldPosition();
     mPointLight.radius = mRadius;
     mPointLight.bias = mBias;
@@ -132,7 +136,9 @@ void PointLight::onDrawUi()
         
         ImGui::ColorEdit3("Colour", glm::value_ptr(mColour), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_PickerHueWheel);
         ImGui::DragFloat("Intensity (Lum)", &mIntensity, 10.f);
-        ImGui::DragFloat("Radius", &mRadius);
+        if (ImGui::DragFloat("Radius", &mRadius))
+            computeVpMatrices();
+        
         ImGui::DragFloat2("Bias", glm::value_ptr(mBias), 0.001f);
         ImGui::DragFloat("Softness", &mSoftnessRadius, 0.001f);
         ImGui::DragInt("Resolution", &mResolution, 0.f, 32, 8192, "%d", ImGuiSliderFlags_Logarithmic);
@@ -146,4 +152,26 @@ void PointLight::onDrawUi()
 PointLight::PointLight()
 {
     mPointLight.shadowMap = std::make_shared<Cubemap>(glm::ivec2(1024), GL_DEPTH_COMPONENT32);
+}
+
+void PointLight::computeVpMatrices()
+{
+    const glm::mat4 viewRotations[] = {
+        glm::lookAt(glm::vec3(0.f), glm::vec3( 1.f,  0.f,  0.f), glm::vec3(0.f, -1.f,  0.f)),
+        glm::lookAt(glm::vec3(0.f), glm::vec3(-1.f,  0.f,  0.f), glm::vec3(0.f, -1.f,  0.f)),
+        glm::lookAt(glm::vec3(0.f), glm::vec3( 0.f, -1.f,  0.f), glm::vec3(0.f,  0.f, -1.f)),
+        glm::lookAt(glm::vec3(0.f), glm::vec3( 0.f,  1.f,  0.f), glm::vec3(0.f,  0.f,  1.f)),
+        glm::lookAt(glm::vec3(0.f), glm::vec3( 0.f,  0.f,  1.f), glm::vec3(0.f, -1.f,  0.f)),
+        glm::lookAt(glm::vec3(0.f), glm::vec3( 0.f,  0.f, -1.f), glm::vec3(0.f, -1.f,  0.f)),
+    };
+    
+    const glm::mat4 lightModelMatrix = getWorldTransform();
+    const glm::mat4 projectionMatrix = glm::perspective(glm::radians(90.f), 1.f, 0.01f, mRadius);
+    
+    for (int i = 0; i < 6; ++i)
+    {
+        const glm::mat4 viewMatrix = glm::inverse(lightModelMatrix * viewRotations[i]);
+        const glm::mat4 vpMatrix = projectionMatrix * viewMatrix;
+        mPointLight.vpMatrices[i] = vpMatrix;
+    }
 }

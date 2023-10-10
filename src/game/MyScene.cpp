@@ -77,9 +77,9 @@ MyScene::MyScene() :
         ball->addComponent(makeResource<engine::MeshComponent>(ballMesh, ballMaterial));
     }
 
-    // auto directionalLight = spawnActor<engine::Actor>("Directional Light");
-    // directionalLight->addComponent(makeResource<DirectionalLight>(
-    //     glm::normalize(glm::vec3(1.f, 1.f, 1.f)), glm::vec3(0.93f, 0.93f, 0.95f), glm::ivec2(4096), 4));
+    auto directionalLight = spawnActor<engine::Actor>("Directional Light");
+    directionalLight->addComponent(makeResource<DirectionalLight>(
+        glm::normalize(glm::vec3(1.f, 1.f, 1.f)), glm::vec3(0.93f, 0.93f, 0.95f), glm::ivec2(4096), 4));
 
     auto teapot = spawnActor<engine::Actor>("Teapot");
     teapot->position = glm::vec3(0.f, 0.f, 5.f);

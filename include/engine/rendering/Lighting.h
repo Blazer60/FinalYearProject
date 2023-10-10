@@ -60,6 +60,7 @@ public:
 protected:
     void onPreRender() override;
     void onDrawUi() override;
+    void computeVpMatrices();
 
 protected:
     float mRadius           { 30.f };

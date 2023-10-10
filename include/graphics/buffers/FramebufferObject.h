@@ -47,6 +47,12 @@ public:
     void detachRenderBuffer() const;
     void detachDepthBuffer() const;
     void clear(const glm::vec4 &clearColour);
+    
+    /**
+     * @brief Only clears the depth buffer. This exists for cpu performance. clear() = ~0.2ms and
+     * clearDepthBuffer() = <0.01ms
+     */
+    void clearDepthBuffer() const;
     void bind() const;
     
     [[nodiscard]] unsigned int getFboName() const;

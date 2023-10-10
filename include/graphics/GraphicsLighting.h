@@ -37,6 +37,7 @@ namespace graphics
         float       radius          { 50.f };
         glm::vec2   bias            { 0.005f, 0.15f };
         float       softnessRadius  { 0.02f };
+        glm::mat4   vpMatrices[6];
         
         std::shared_ptr<Cubemap> shadowMap { nullptr };
     };
