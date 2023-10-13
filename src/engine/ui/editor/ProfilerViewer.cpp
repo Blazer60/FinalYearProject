@@ -36,11 +36,11 @@ namespace engine
     {
         const float time = static_cast<float>((node.stopNanoSeconds - node.startNanoSeconds)) * 0.001f * 0.001f;
         std::string label = node.name.data() + std::to_string(node.id);
-        ImGuiTreeNodeFlags treeFlags = ImGuiTreeNodeFlags_DefaultOpen;
+        ImGuiTreeNodeFlags treeFlags = 0;
         if (node.children.empty())
             treeFlags |= ImGuiTreeNodeFlags_Leaf;
         
-        if (ImGui::TreeNodeEx(label.c_str(), treeFlags, "%.3fms | %s", time, node.name.data()))
+        if (ImGui::TreeNodeEx(label.c_str(), treeFlags, "%05.2f ms | %s", time, node.name.data()))
         {
             for (const auto &child : node.children)
                 drawNode(child);

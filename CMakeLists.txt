@@ -45,6 +45,8 @@ add_library(${HELPER_LIBRARY} STATIC
         include/helpers/Statistics.h
         src/helpers/FileLoader.cpp
         include/helpers/FileLoader.h
+        include/helpers/Format.h
+        src/helpers/Format.cpp
 )
 
 target_include_directories(${HELPER_LIBRARY} PUBLIC
@@ -128,6 +130,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
         include include/engine include/graphics include/game include/engine/loader include/graphics/buffers
         include/engine/ui include/graphics/postProcessing include/engine/rendering include/helpers/logger
         include/engine/ui/editor include/helpers include/engine/event include/helpers/profiler
+        include/engine/serialize
 
         # Vendor Files
         vendor/glm/glm vendor/glew/include/GL
