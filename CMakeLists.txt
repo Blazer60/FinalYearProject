@@ -33,6 +33,7 @@ set(ASSIMP_BUILD_STL_IMPORTER ON)
 set(ASSIMP_BUILD_GLTF_IMPORTER ON)
 set(ASSIMP_BUILD_FBX_IMPORTER ON)
 add_subdirectory(vendor/assimp)
+add_subdirectory(vendor/yaml-cpp)
 
 set(HELPER_LIBRARY Statistics)
 add_library(${HELPER_LIBRARY} STATIC
@@ -124,6 +125,9 @@ add_executable(${PROJECT_NAME}
         src/graphics/postProcessing/PostProcessLayer.cpp include/graphics/postProcessing/PostProcessLayer.h
 
         vendor/imguizmo/ImGuizmo.cpp vendor/imguizmo/ImGuizmo.h
+        src/engine/serialize/SceneSerializer.cpp
+        include/engine/serialize/SceneSerializer.h
+        include/engine/serialize/SerializeMacros.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -137,6 +141,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
         vendor/glfw/include/GLFW vendor/imgui
         vendor/stb/include vendor/imguizmo
         vendor/assimp/include ${CMAKE_CURRENT_BINARY_DIR}/vendor/assimp/include  # A config file is generated that is required by assimp code.
+        vendor/yaml-cpp/include
         )
 
 if (${USE_PSEUDO_PCH})
@@ -180,18 +185,20 @@ if (${USE_PRE_BUILT_LIBS})
     find_library(IMGUI  NAMES imgui                 PATHS ${CMAKE_SOURCE_DIR}/vendor/lib                REQUIRED)
     find_library(ASSIMP NAMES assimp-vc142-mtd      PATHS ${CMAKE_SOURCE_DIR}/vendor/lib                REQUIRED)
     find_library(ZLIB   NAMES zlibstaticd           PATHS ${CMAKE_SOURCE_DIR}/vendor/lib                REQUIRED)
+    find_library(YAML   NAMES yaml-cpp              PATHS ${CMAKE_SOURCE_DIR}/vendor/lib                REQUIRED)
 
-    message(STATUS "  GLEW location: " ${GLEW})
-    message(STATUS "  GLFW location: " ${GLFW})
-    message(STATUS " Imgui location: " ${IMGUI})
-    message(STATUS "ASSIMP location: " ${ASSIMP})
-    message(STATUS "  zLib location: " ${ZLIB})
+    message(STATUS "    GLEW location: " ${GLEW})
+    message(STATUS "    GLFW location: " ${GLFW})
+    message(STATUS "   Imgui location: " ${IMGUI})
+    message(STATUS "  ASSIMP location: " ${ASSIMP})
+    message(STATUS "    zLib location: " ${ZLIB})
+    message(STATUS "yaml-cpp location: " ${YAML})
 
     target_link_libraries(${HELPER_LIBRARY} ${GLEW} OpenGL::GL ${GLFW} ${ASSIMP})
-    target_link_libraries(${PROJECT_NAME} ${HELPER_LIBRARY} ${GLEW} ${GLFW} ${IMGUI} OpenGL::GL ${ASSIMP} ${ZLIB})
+    target_link_libraries(${PROJECT_NAME} ${HELPER_LIBRARY} ${GLEW} ${GLFW} ${IMGUI} OpenGL::GL ${ASSIMP} ${ZLIB} ${YAML})
 else ()
     # The names listed are the names given to add_library(). CMake won't tell you if they're correct...
     target_link_libraries(${HELPER_LIBRARY} glew_s OpenGL::GL glfw assimp)
-    target_link_libraries(${PROJECT_NAME} ${HELPER_LIBRARY} glew_s glfw imgui OpenGL::GL assimp)
+    target_link_libraries(${PROJECT_NAME} ${HELPER_LIBRARY} glew_s glfw imgui OpenGL::GL assimp yaml-cpp)
 endif ()
 

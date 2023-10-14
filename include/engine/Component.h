@@ -9,6 +9,7 @@
 
 #include "Pch.h"
 #include "Drawable.h"
+#include "SerializeMacros.h"
 
 namespace engine
 {

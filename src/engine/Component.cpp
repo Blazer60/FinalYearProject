@@ -29,7 +29,7 @@ namespace engine
     {
         if (mActor)
             return mActor->getTransform();
-        WARN("The component has not been attached to an actor yet.");
+        WARN("The serializeComponent has not been attached to an serializeActor yet.");
         return glm::mat4(1.f);
     }
     

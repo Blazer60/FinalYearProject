@@ -31,7 +31,7 @@ namespace engine
             if (mSharedMesh.empty())
             {
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 1.f, 0.f, 1.f));
-                ImGui::Text("Mesh component does contain any meshes.");
+                ImGui::Text("Mesh serializeComponent does contain any meshes.");
                 ImGui::PopStyleColor();
                 drawMeshOptions();
             }
@@ -74,4 +74,11 @@ namespace engine
             }
         }
     }
+    
+    void serializeComponent(YAML::Emitter &out, MeshComponent *meshComponent)
+    {
+        MESSAGE("processing mesh serializeComponent");
+    }
+    
+    SERIALIZE_METHOD(MeshComponent);
 }

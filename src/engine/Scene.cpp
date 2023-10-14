@@ -108,7 +108,7 @@ namespace engine
         
         if (it == mActors.end())
         {
-            LOG_MAJOR("Failed to find actor while popping");
+            LOG_MAJOR("Failed to find serializeActor while popping");
             return Resource<Actor>();
         }
         

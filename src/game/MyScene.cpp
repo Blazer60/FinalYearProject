@@ -17,6 +17,7 @@
 #include "Editor.h"
 #include "Rotator.h"
 #include "EngineState.h"
+#include "SceneSerializer.h"
 #include <FileLoader.h>
 
 MyScene::MyScene() :
@@ -116,6 +117,8 @@ MyScene::MyScene() :
     leatherMaterial->setHeightMap(load::texture(file::modelPath() / "leatherBall/TexturesCom_Leather_Tufted_New_1K_height.png"));
     leatherMaterial->setRoughnessMap(load::texture(file::modelPath() / "leatherBall/TexturesCom_Leather_Tufted_New_1K_roughness.png"));
     leatherBall->addComponent(makeResource<engine::MeshComponent>(leatherBallModel, leatherMaterial));
+    
+    engine::serialize::scene(file::resourcePath() / "scenes/test.pcy", static_cast<engine::Scene*>(this));
 }
 
 void MyScene::onFixedUpdate()

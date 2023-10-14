@@ -21,6 +21,7 @@ namespace engine
     class MeshComponent
         : public Component
     {
+        SERIALIZABLE(MeshComponent);
     public:
         MeshComponent(SharedMesh sharedMesh, SharedMaterials sharedMaterials);
         

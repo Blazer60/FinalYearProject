@@ -33,7 +33,11 @@ namespace debug
 }
 
 
-#define CONCAT(a, b) a ## b
+#ifndef CONCAT
+    #define CONCAT_INNER(x, y) x ## y
+    #define CONCAT(x, y) CONCAT_INNER(x, y)
+#endif
+
 #ifdef ENABLE_PROFILING
     #define PROFILE_FUNC() debug::ProfileTimer CONCAT(debugProfileTimer, __LINE__)(__FUNCTION__)
     #define PROFILE_SCOPE_BEGIN(id, name) debug::ProfileTimer id(name)

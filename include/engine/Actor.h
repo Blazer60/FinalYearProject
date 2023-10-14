@@ -13,17 +13,20 @@
 #include "Component.h"
 #include "EngineMemory.h"
 #include "EngineMath.h"
+#include "SceneSerializer.h"
+#include <yaml-cpp/emitter.h>
 
 namespace engine
 {
     /**
-     * An actor is a game object that can live in a scene. Actors have components that can be attached to them.
+     * An serializeActor is a game object that can live in a scene. Actors have components that can be attached to them.
      * @author Ryan Purse
      * @date 07/08/2023
      */
     class Actor
         : public ui::Drawable
     {
+        friend void serialize::actor(YAML::Emitter &out, Actor *actor);
     public:
         friend class Scene;
         Actor() = default;
@@ -34,43 +37,43 @@ namespace engine
         
     
         /**
-         * @returns The name of the actor. This is the name that is shown in the hierarchy.
+         * @returns The name of the serializeActor. This is the name that is shown in the hierarchy.
          */
         [[nodiscard]] std::string_view getName() const;
         
         /**
-         * @returns All of the components that are attached to this actor.
+         * @returns All of the components that are attached to this serializeActor.
          */
         [[nodiscard]] std::vector<Resource<Component>> &getComponents();
         
         /**
-         * @brief Adds the component the the list of components attached to this actor.
+         * @brief Adds the serializeComponent the the list of components attached to this serializeActor.
          */
         Ref<Component> addComponent(Resource<Component> &&component);
         
         /**
-         * @returns The transform of this actor in world space.
+         * @returns The transform of this serializeActor in world space.
          */
         [[nodiscard]] glm::mat4 getTransform() const;
         
         [[nodiscard]] glm::mat4 getLocalTransform() const;
         
         /**
-         * @tparam T - The type of component.
-         * @returns The first component of type T or a subclass of T, Nullptr otherwise.
+         * @tparam T - The type of serializeComponent.
+         * @returns The first serializeComponent of type T or a subclass of T, Nullptr otherwise.
          */
         template<typename T>
         Ref<Component> getComponent();
         
         /**
-         * @tparam T - the type of component.
-         * @returns True if it could find a component with type T, False otherwise.
+         * @tparam T - the type of serializeComponent.
+         * @returns True if it could find a serializeComponent with type T, False otherwise.
          */
         template<typename T>
         [[nodiscard]] bool hasComponent() const;
         
         /**
-         * @brief This actor will be destroyed at the end of the update loop.
+         * @brief This serializeActor will be destroyed at the end of the update loop.
          */
         void markForDeath();
         
@@ -154,7 +157,7 @@ namespace engine
         
         if (it == mComponents.end())
         {
-            WARN("Component % does not exist in this actor and so it cannot be removed.", typeid(T).name());
+            WARN("Component % does not exist in this serializeActor and so it cannot be removed.", typeid(T).name());
             return;
         }
         

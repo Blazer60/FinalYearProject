@@ -116,7 +116,7 @@ namespace engine
     {
         if (component->getActor() != this)
         {
-            WARN("This actor does not own this component. The component will not be destroyed.");
+            WARN("This serializeActor does not own this component. The serializeComponent will not be destroyed.");
             return;
         }
         
@@ -126,7 +126,7 @@ namespace engine
         
         if (it == mComponents.end())
         {
-            WARN("Could not find the component attached to this actor.");
+            WARN("Could not find the serializeComponent attached to this serializeActor.");
             return;
         }
         
@@ -140,7 +140,7 @@ namespace engine
     {
         if (actor == nullptr)
         {
-            WARN("This actor cannot be removed since it is nullptr!");
+            WARN("This serializeActor cannot be removed since it is nullptr!");
             return;
         }
         
@@ -197,7 +197,7 @@ namespace engine
         
         if (it == mChildren.end())
         {
-            LOG_MAJOR("Failed to find actor while popping");
+            LOG_MAJOR("Failed to find serializeActor while popping");
             return Resource<Actor>();
         }
         
