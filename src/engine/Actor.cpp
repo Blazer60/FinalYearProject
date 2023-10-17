@@ -65,15 +65,6 @@ namespace engine
         return mComponents;
     }
     
-    Ref<Component> Actor::addComponent(Resource<Component> &&component)
-    {
-        Ref<Component> ref = component;
-        component->attachToActor(this);
-        mComponents.push_back(std::move(component));
-        
-        return ref;
-    }
-    
     glm::mat4 Actor::getTransform() const
     {
         if (mParent != nullptr)
@@ -218,5 +209,6 @@ namespace engine
     {
         return mScene;
     }
+    
 }
 

@@ -49,7 +49,8 @@ namespace engine
         /**
          * @brief Adds the serializeComponent the the list of components attached to this serializeActor.
          */
-        Ref<Component> addComponent(Resource<Component> &&component);
+        template<typename T>
+        Ref<T> addComponent(Resource<T> &&component);
         
         /**
          * @returns The transform of this serializeActor in world space.
@@ -120,6 +121,15 @@ namespace engine
         std::set<uint32_t> mComponentsToDestroy;
         std::set<uint32_t> mActorsToDestroy;
     };
+    
+    template<typename T>
+    Ref<T> Actor::addComponent(Resource<T> &&component)
+    {
+        Ref<T> ref = component;
+        component->attachToActor(this);
+        mComponents.push_back(std::move(component));
+        return ref;
+    }
     
     template<typename T>
     Ref<Component> Actor::getComponent()

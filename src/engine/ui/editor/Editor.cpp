@@ -13,6 +13,7 @@
 #include "ProfileTimer.h"
 #include "Lighting.h"
 #include "EngineState.h"
+#include "MeshRenderer.h"
 #include <FileLoader.h>
 
 namespace engine
@@ -37,6 +38,11 @@ namespace engine
         
         addComponentOption<PointLight>("Point Light", [](Ref<Actor> actor) {
             actor->addComponent(makeResource<PointLight>());
+        });
+        
+        addComponentOption<MeshRenderer>("Mesh Renderer", [](Ref<Actor> actor) {
+            const auto path = file::modelPath() / "defaultObjects/DefaultCube.glb";
+            actor->addComponent(makeResource<MeshRenderer>(load::model<StandardVertex>(path), path.string()));
         });
         
         addMenuOption("Actor", []() {

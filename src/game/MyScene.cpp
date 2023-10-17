@@ -20,6 +20,8 @@
 #include "Serializer.h"
 #include "SceneLoader.h"
 #include <FileLoader.h>
+#include "MeshRenderer.h"
+#include "MaterialSubComponent.h"
 
 MyScene::MyScene() :
     mStandardShader(std::make_shared<Shader>(
@@ -37,19 +39,17 @@ MyScene::MyScene() :
     });
     
     auto floor = spawnActor<engine::Actor>("Floor");
-    auto floorMesh = load::model<StandardVertex>(file::modelPath() /  "stoneFloor/MedievalStoneFloor.obj");
-    auto floorMaterial = std::make_shared<StandardMaterial>();
+    auto floorMesh = floor->addComponent(load::meshRenderer<StandardVertex>(file::modelPath() /  "stoneFloor/MedievalStoneFloor.obj"));
+    auto floorMaterial = std::make_shared<engine::StandardMaterialSubComponent>();
     floorMaterial->attachShader(mStandardShader);
-    floorMaterial->setDiffuseMap(load::texture(file::modelPath() /  "stoneFloor/TexturesCom_TileStones_1K_albedo.png"));
-    floorMaterial->setNormalMap(load::texture(file::modelPath() /  "stoneFloor/TexturesCom_TileStones_1K_normal.png"));
-    floorMaterial->setHeightMap(load::texture(file::modelPath() /  "stoneFloor/TexturesCom_TileStones_1K_height.png"));
-    floorMaterial->setRoughnessMap(load::texture(file::modelPath() /  "stoneFloor/TexturesCom_TileStones_1K_roughness.png"));
-    floorMaterial->metallic = 0.f;
-    floorMaterial->roughness = 0.5f;
-    floorMaterial->ambientColour = glm::vec3(0.8f);
-    floor->addComponent(makeResource<engine::MeshComponent>(floorMesh, floorMaterial));
-
-    auto ballMesh = load::model<StandardVertex>(file::modelPath() / "blueSphere/BlueSphere.obj");
+    floorMaterial->setDiffuseMap(file::modelPath() /  "stoneFloor/TexturesCom_TileStones_1K_albedo.png");
+    floorMaterial->setNormalMap(file::modelPath() /  "stoneFloor/TexturesCom_TileStones_1K_normal.png");
+    floorMaterial->setHeightMap(file::modelPath() /  "stoneFloor/TexturesCom_TileStones_1K_height.png");
+    floorMaterial->setRoughnessMap(file::modelPath() /  "stoneFloor/TexturesCom_TileStones_1K_roughness.png");
+    floorMaterial->setMetallic(0.f);
+    floorMaterial->setRoughness(0.5f);
+    floorMaterial->setAmbientColour(glm::vec3(0.8f));
+    floorMesh->addMaterial(floorMaterial);
 
     std::vector<glm::vec3> positions;
     std::vector<float> roughness;
@@ -71,12 +71,14 @@ MyScene::MyScene() :
     {
         auto ball = spawnActor<engine::Actor>(std::string("Ball " + std::to_string(i)));
         ball->position = positions[i];
-        auto ballMaterial = std::make_shared<StandardMaterial>();
+        auto ballMesh = ball->addComponent(load::meshRenderer<StandardVertex>(file::modelPath() / "blueSphere/BlueSphere.obj"));
+        // auto ballMesh = load::model<StandardVertex>(file::modelPath() / "blueSphere/BlueSphere.obj");
+        auto ballMaterial = std::make_shared<engine::StandardMaterialSubComponent>();
         ballMaterial->attachShader(mStandardShader);
-        ballMaterial->ambientColour = glm::vec3(1.f);
-        ballMaterial->roughness = roughness[i];
-        ballMaterial->metallic = metallic[i];
-        ball->addComponent(makeResource<engine::MeshComponent>(ballMesh, ballMaterial));
+        ballMaterial->setAmbientColour(glm::vec3(1.f));
+        ballMaterial->setRoughness(roughness[i]);
+        ballMaterial->setMetallic(metallic[i]);
+        ballMesh->addMaterial(ballMaterial);
     }
 
     auto directionalLight = spawnActor<engine::Actor>("Directional Light");
@@ -86,23 +88,23 @@ MyScene::MyScene() :
     auto teapot = spawnActor<engine::Actor>("Teapot");
     teapot->position = glm::vec3(0.f, 0.f, 5.f);
     teapot->scale = glm::vec3(0.3f);
-    SharedMesh teapotMesh = load::model<StandardVertex>(file::modelPath() / "utahTeapot/UtahTeapot.obj");
-    auto teapotMaterial = std::make_shared<StandardMaterial>();
+    auto teapotMesh = teapot->addComponent(load::meshRenderer<StandardVertex>(file::modelPath() / "utahTeapot/UtahTeapot.obj"));
+    auto teapotMaterial = std::make_shared<engine::StandardMaterialSubComponent>();
     teapotMaterial->attachShader(mStandardShader);
-    teapotMaterial->ambientColour = glm::vec3(0.f, 0.4f, 0.01f);
-    teapotMaterial->roughness = 0.6f;
-    teapotMaterial->metallic = 1.f;
-    teapot->addComponent(makeResource<engine::MeshComponent>(teapotMesh, teapotMaterial));
+    teapotMaterial->setAmbientColour(glm::vec3(0.f, 0.4f, 0.01f));
+    teapotMaterial->setRoughness(0.6f);
+    teapotMaterial->setMetallic(1.f);
+    teapotMesh->addMaterial(teapotMaterial);
     
-    SharedMesh childMesh = load::model<StandardVertex>(file::modelPath() / "defaultObjects/DefaultTorus.glb");
-    auto childMaterial = std::make_shared<StandardMaterial>();
-    childMaterial->attachShader(mStandardShader);
-    childMaterial->ambientColour = glm::vec3(1.f, 0.f, 0.f);
     
     auto parent = spawnActor<engine::Actor>("Parent");
     parent->position = glm::vec3(5.f, 5.f, -12.f);
     auto child = parent->addChildActor(makeResource<engine::Actor>("Child"));
-    child->addComponent(makeResource<engine::MeshComponent>(childMesh, childMaterial));
+    auto childMesh = child->addComponent(load::meshRenderer<StandardVertex>(file::modelPath() / "defaultObjects/DefaultTorus.glb"));
+    auto childMaterial = std::make_shared<engine::StandardMaterialSubComponent>();
+    childMaterial->attachShader(mStandardShader);
+    childMaterial->setAmbientColour(glm::vec3(1.f, 0.f, 0.f));
+    childMesh->addMaterial(childMaterial);
     
     auto pointLight = spawnActor<engine::Actor>("Point Light");
     pointLight->position = glm::vec3(0.f, 6.f, 5.f);
@@ -110,20 +112,18 @@ MyScene::MyScene() :
     
     auto leatherBall = spawnActor<engine::Actor>("Leather Ball");
     leatherBall->position = glm::vec3(0.f, 5.f, 0.f);
-    auto leatherBallModel = load::model<StandardVertex>(file::modelPath() / "leatherBall/LeatherBall.obj");
-    auto leatherMaterial = std::make_shared<StandardMaterial>();
+    auto leatherBallModel = leatherBall->addComponent(load::meshRenderer<StandardVertex>(file::modelPath() / "leatherBall/LeatherBall.obj"));
+    auto leatherMaterial = std::make_shared<engine::StandardMaterialSubComponent>();
     leatherMaterial->attachShader(mStandardShader);
-    leatherMaterial->setDiffuseMap(load::texture(file::modelPath() / "leatherBall/TexturesCom_Leather_Tufted_New_1K_albedo.png"));
-    leatherMaterial->setNormalMap(load::texture(file::modelPath() / "leatherBall/TexturesCom_Leather_Tufted_New_1K_normal.png"));
-    leatherMaterial->setHeightMap(load::texture(file::modelPath() / "leatherBall/TexturesCom_Leather_Tufted_New_1K_height.png"));
-    leatherMaterial->setRoughnessMap(load::texture(file::modelPath() / "leatherBall/TexturesCom_Leather_Tufted_New_1K_roughness.png"));
-    leatherBall->addComponent(makeResource<engine::MeshComponent>(leatherBallModel, leatherMaterial));
+    leatherMaterial->setDiffuseMap(file::modelPath() / "leatherBall/TexturesCom_Leather_Tufted_New_1K_albedo.png");
+    leatherMaterial->setNormalMap(file::modelPath() / "leatherBall/TexturesCom_Leather_Tufted_New_1K_normal.png");
+    leatherMaterial->setHeightMap(file::modelPath() / "leatherBall/TexturesCom_Leather_Tufted_New_1K_height.png");
+    leatherMaterial->setRoughnessMap(file::modelPath() / "leatherBall/TexturesCom_Leather_Tufted_New_1K_roughness.png");
+    leatherBallModel->addMaterial(leatherMaterial);
     
-    // todo: Make it so that you can load a model with materials in one go.
+    // engine::serialize::scene(file::resourcePath() / "scenes/test.pcy", static_cast<engine::Scene*>(this));
     
-    engine::serialize::scene(file::resourcePath() / "scenes/test.pcy", static_cast<engine::Scene*>(this));
-    
-    load::scene(file::resourcePath() / "scenes/test.pcy", this);
+    // load::scene(file::resourcePath() / "scenes/test.pcy", this);
 }
 
 void MyScene::onFixedUpdate()

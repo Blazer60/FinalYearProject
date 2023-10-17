@@ -131,6 +131,10 @@ add_executable(${PROJECT_NAME}
         include/engine/serialize/ComponentSerializer.h
         src/engine/loader/SceneLoader.cpp
         include/engine/loader/SceneLoader.h
+        src/engine/rendering/MeshRenderer.cpp
+        include/engine/rendering/MeshRenderer.h
+        src/engine/rendering/MaterialSubComponent.cpp
+        include/engine/rendering/MaterialSubComponent.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

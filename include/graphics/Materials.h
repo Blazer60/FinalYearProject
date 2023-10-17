@@ -73,6 +73,12 @@ public:
     void setHeightMap(std::shared_ptr<Texture> heightMap);
     void setRoughnessMap(std::shared_ptr<Texture> roughnessMap);
     void setMetallicMap(std::shared_ptr<Texture> metallicMap);
+    
+    [[nodiscard]] uint32_t diffuseMapId() const { return mDiffuse->id(); }
+    [[nodiscard]] uint32_t normalMapId() const { return mNormal->id(); }
+    [[nodiscard]] uint32_t heightMapId() const { return mHeight->id(); }
+    [[nodiscard]] uint32_t roughnessMapId() const { return mRoughnessMap->id(); }
+    [[nodiscard]] uint32_t metallicMapId() const { return mMetallicMap->id(); }
 
     float heightScale { 0.1f };
     int32_t maxHeightSamples { 64 };
