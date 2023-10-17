@@ -11,6 +11,7 @@
 #include "Component.h"
 #include "Mesh.h"
 #include "Materials.h"
+#include "ComponentSerializer.h"
 
 namespace engine
 {

@@ -17,7 +17,8 @@
 #include "Editor.h"
 #include "Rotator.h"
 #include "EngineState.h"
-#include "SceneSerializer.h"
+#include "Serializer.h"
+#include "SceneLoader.h"
 #include <FileLoader.h>
 
 MyScene::MyScene() :
@@ -118,7 +119,11 @@ MyScene::MyScene() :
     leatherMaterial->setRoughnessMap(load::texture(file::modelPath() / "leatherBall/TexturesCom_Leather_Tufted_New_1K_roughness.png"));
     leatherBall->addComponent(makeResource<engine::MeshComponent>(leatherBallModel, leatherMaterial));
     
+    // todo: Make it so that you can load a model with materials in one go.
+    
     engine::serialize::scene(file::resourcePath() / "scenes/test.pcy", static_cast<engine::Scene*>(this));
+    
+    load::scene(file::resourcePath() / "scenes/test.pcy", this);
 }
 
 void MyScene::onFixedUpdate()

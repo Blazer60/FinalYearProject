@@ -13,7 +13,7 @@
 #include "Component.h"
 #include "EngineMemory.h"
 #include "EngineMath.h"
-#include "SceneSerializer.h"
+#include "Serializer.h"
 #include <yaml-cpp/emitter.h>
 
 namespace engine

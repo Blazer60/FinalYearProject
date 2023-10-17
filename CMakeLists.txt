@@ -125,9 +125,12 @@ add_executable(${PROJECT_NAME}
         src/graphics/postProcessing/PostProcessLayer.cpp include/graphics/postProcessing/PostProcessLayer.h
 
         vendor/imguizmo/ImGuizmo.cpp vendor/imguizmo/ImGuizmo.h
-        src/engine/serialize/SceneSerializer.cpp
-        include/engine/serialize/SceneSerializer.h
-        include/engine/serialize/SerializeMacros.h
+        src/engine/serialize/Serializer.cpp
+        include/engine/serialize/Serializer.h
+        src/engine/serialize/ComponentSerializer.cpp
+        include/engine/serialize/ComponentSerializer.h
+        src/engine/loader/SceneLoader.cpp
+        include/engine/loader/SceneLoader.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

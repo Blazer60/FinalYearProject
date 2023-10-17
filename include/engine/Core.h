@@ -60,6 +60,7 @@ namespace engine
         std::unique_ptr<debug::Logger> mLogger;
         std::unique_ptr<ProfilerViewer> mProfilerViewer;
         std::unique_ptr<Profiler> mProfiler;
+        std::unique_ptr<Serializer> mSerializer;
         
         ImGuiIO *mGuiIo { nullptr };
         bool mIsRunning { true };

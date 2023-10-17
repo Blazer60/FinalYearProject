@@ -22,16 +22,25 @@ namespace engine
 
 typedef std::function<bool(YAML::Emitter &out, class engine::Component*)> SerializeDelegate;
 
+namespace engine
+{
+    class Serializer
+    {
+    public:
+        Serializer() = default;
+        void pushComponentDelegate(const SerializeDelegate &delegate);
+        void component(YAML::Emitter &out, Component *component);
+        
+    protected:
+        std::vector<SerializeDelegate> mComponentFunctions;
+    };
+}
+
 namespace engine::serialize
 {
-    const int componentFunctionsCountMax = 64;
-    extern SerializeDelegate serializeComponentFunctions[componentFunctionsCountMax];
-    extern int componentFunctionsCount;
-    
-    void pushComponentDelegate(const SerializeDelegate &delegate);
-    
     void scene(const std::filesystem::path &path, Scene* scene);
-    
     void actor(YAML::Emitter &out, Actor *actor);
     void component(YAML::Emitter &out, Component *component);
 }
+
+#define SERIALIZABLE(class) friend void ::serializeComponent(YAML::Emitter&, class*)

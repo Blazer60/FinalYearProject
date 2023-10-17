@@ -23,6 +23,7 @@
 #include "ProfileTimer.h"
 #include "GraphicsFunctions.h"
 #include "FileLoader.h"
+#include "ComponentSerializer.h"
 
 namespace engine
 {
@@ -96,6 +97,9 @@ namespace engine
             file::shaderPath() / "geometry/standard/Standard.vert",
             file::shaderPath() / "geometry/standard/Standard.frag");
         
+        mSerializer = std::make_unique<Serializer>();
+        serializer = mSerializer.get();
+        attachComponentSerialization();
     }
     
     bool engine::Core::initGlfw(int openGlMajorVersion, int openGlMinorVersion)

@@ -75,10 +75,4 @@ namespace engine
         }
     }
     
-    void serializeComponent(YAML::Emitter &out, MeshComponent *meshComponent)
-    {
-        MESSAGE("processing mesh serializeComponent");
-    }
-    
-    SERIALIZE_METHOD(MeshComponent);
 }

@@ -5,11 +5,12 @@
  */
 
 
-#include "SceneSerializer.h"
+#include "Serializer.h"
 #include "Scene.h"
 #include "Actor.h"
 #include "Component.h"
 #include "MeshComponent.h"
+#include "EngineState.h"
 
 #include <yaml-cpp/yaml.h>
 #include <fstream>
@@ -35,19 +36,25 @@ YAML::Emitter &operator<<(YAML::Emitter &out, const glm::quat &q)
     return out;
 }
 
+namespace engine
+{
+    void Serializer::pushComponentDelegate(const SerializeDelegate &delegate)
+    {
+        mComponentFunctions.push_back(delegate);
+    }
+    
+    void Serializer::component(YAML::Emitter &out, Component *component)
+    {
+        for (const auto &function : mComponentFunctions)
+        {
+            if (function(out, component))
+                return;
+        }
+    }
+}
 
 namespace engine::serialize
 {
-    // static const int componentFunctionsCountMax = 64;
-    SerializeDelegate serializeComponentFunctions[componentFunctionsCountMax];
-    int componentFunctionsCount = 0;
-    
-    void pushComponentDelegate(const SerializeDelegate &delegate)
-    {
-        serializeComponentFunctions[componentFunctionsCount] = delegate;
-        componentFunctionsCount++;
-    }
-    
     void scene(const std::filesystem::path &path, struct Scene *scene)
     {
         if (!exists(path.parent_path()))
@@ -99,17 +106,10 @@ namespace engine::serialize
     
     void component(YAML::Emitter &out, Component *component)
     {
-        const int count = componentFunctionsCount;
-        for (int i = 0; i < componentFunctionsCount; ++i)
-        {
-            if (serializeComponentFunctions[i](out, component))
-                break;  // One of the functions successfully serialized the component.
-        }
-        
-        // out << YAML::BeginMap;
-        // out << YAML::Key << "Component Type" << YAML::Value << "MeshComponent";
-        // out << YAML::Key << "show" << YAML::Value << meshComponent->mShow;
-        // out << YAML::EndMap;
+        out << YAML::BeginMap;
+        serializer->component(out, component);
+        out << YAML::EndMap;
     }
 }
+
 
