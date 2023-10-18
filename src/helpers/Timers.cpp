@@ -12,20 +12,14 @@ namespace timers
     double deltaTime_impl    { 0.16f };
     double fixedTime_impl    { 0.01f };  // 100 Ticks per second.
     
-    static double current           { 0 };
-    static double last              { 0 };
-    
-    void updateDeltaTime_impl();
+    static long long current           { 0 };
+    static long long last              { 0 };
     
     void update()
     {
-        updateDeltaTime_impl();
-    }
-    
-    void updateDeltaTime_impl()
-    {
-        current = glfwGetTime();
-        deltaTime_impl = current - last;
+        auto now = std::chrono::high_resolution_clock::now();
+        current = std::chrono::time_point_cast<std::chrono::nanoseconds>(now).time_since_epoch().count();
+        deltaTime_impl = static_cast<double>(current - last) * 1e-9;
         last = current;
     }
 }

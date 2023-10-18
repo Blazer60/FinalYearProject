@@ -200,7 +200,8 @@ if (${USE_PRE_BUILT_LIBS})
     message(STATUS "    zLib location: " ${ZLIB})
     message(STATUS "yaml-cpp location: " ${YAML})
 
-    target_link_libraries(${HELPER_LIBRARY} ${GLEW} OpenGL::GL ${GLFW} ${ASSIMP})
+    # The logger knows how to format OpenGl and Assimp errors.
+    target_link_libraries(${HELPER_LIBRARY} ${GLEW} OpenGL::GL ${ASSIMP})
     target_link_libraries(${PROJECT_NAME} ${HELPER_LIBRARY} ${GLEW} ${GLFW} ${IMGUI} OpenGL::GL ${ASSIMP} ${ZLIB} ${YAML})
 else ()
     # The names listed are the names given to add_library(). CMake won't tell you if they're correct...

@@ -8,7 +8,6 @@
 #pragma once
 
 #include "Pch.h"
-#include <glfw3.h>
 
 namespace timers
 {
@@ -20,7 +19,10 @@ namespace timers
     template<typename T>
     T getTicks()
     {
-        return static_cast<T>(glfwGetTime());
+        const auto now = std::chrono::high_resolution_clock::now();
+        const long long nowNanoSeconds = std::chrono::time_point_cast<std::chrono::nanoseconds>(now).time_since_epoch().count();
+        const double nowSeconds = static_cast<double>(nowNanoSeconds) * 1e-9;
+        return static_cast<T>(nowSeconds);
     }
     
     template<typename T>
@@ -34,5 +36,4 @@ namespace timers
     {
         return static_cast<T>(fixedTime_impl);
     }
-    
 }
