@@ -13,4 +13,5 @@
 namespace primitives
 {
     SubMesh fullscreenTriangle();
+    SubMesh invertedSphere();
 }

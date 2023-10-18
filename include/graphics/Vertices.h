@@ -124,6 +124,12 @@ struct PositionVertex
     {
     }
     
+    constexpr PositionVertex(float x, float y, float z)
+        : position(glm::vec3(x, y, z))
+    {
+    
+    }
+    
     glm::vec3 position;
     
     static Instructions layout()

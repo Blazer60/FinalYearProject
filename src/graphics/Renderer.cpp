@@ -8,12 +8,9 @@
 #include "Renderer.h"
 #include "WindowHelpers.h"
 #include "Primitives.h"
-#include "BloomPass.h"
-#include "ColourGrading.h"
 #include "GraphicsFunctions.h"
 #include "Buffers.h"
 #include "Shader.h"
-#include "AssimpLoader.h"
 #include "ProfileTimer.h"
 #include "FileLoader.h"
 
@@ -21,7 +18,7 @@ Renderer::Renderer() :
     isOk(true),
     mCurrentRenderBufferSize(window::bufferSize()),
     mFullscreenTriangle(primitives::fullscreenTriangle()),
-    mUnitSphere(load::primitive<PositionVertex>(file::modelPath() / "renderer/UnitSphere.glb"))
+    mUnitSphere(primitives::invertedSphere())
 {
     // Blending texture data / enabling lerping.
     glEnable(GL_BLEND);
