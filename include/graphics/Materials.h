@@ -13,7 +13,6 @@
 #include "Shader.h"
 #include "GraphicsDefinitions.h"
 #include "Texture.h"
-#include "Drawable.h"
 
 struct MtlMaterialInformation
 {

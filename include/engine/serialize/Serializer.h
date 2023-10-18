@@ -8,7 +8,7 @@
 #pragma once
 
 #include "Pch.h"
-#include <yaml-cpp/emitter.h>
+#include <yaml-cpp/yaml.h>
 #include <filesystem>
 #include <functional>
 

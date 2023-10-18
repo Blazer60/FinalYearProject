@@ -6,7 +6,6 @@
 
 
 #include "Materials.h"
-#include "TextureLoader.h"
 
 #include <utility>
 
@@ -44,8 +43,8 @@ void StandardMaterial::onDraw()
 void StandardMaterial::onLoadMtlFile(const MtlMaterialInformation &materialInformation)
 {
     ambientColour = materialInformation.kD;
-    mDiffuse = load::texture(materialInformation.mapKd);
-    mNormal = load::texture(materialInformation.mapBump);
+    mDiffuse = std::make_shared<Texture>(materialInformation.mapKd);
+    mNormal = std::make_shared<Texture>(materialInformation.mapBump);
 }
 
 void StandardMaterial::setHeightMap(std::shared_ptr<Texture> heightMap)

@@ -9,6 +9,7 @@
 
 #include "Pch.h"
 #include "Logger.h"
+#include "glew.h"
 
 namespace engine
 {
@@ -17,7 +18,7 @@ namespace engine
     extern class RootEventHandler *eventHandler;
     extern class Serializer *serializer;
     
-    void forwardOpenGlCallback(
+    void GLAPIENTRY forwardOpenGlCallback(
         GLenum source, GLenum type, GLuint id,
         GLenum severity, GLsizei length, const GLchar *message,
         const void *userParam);
