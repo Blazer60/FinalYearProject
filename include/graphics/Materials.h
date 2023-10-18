@@ -34,7 +34,6 @@ class Material;
 typedef std::vector<std::shared_ptr<Material>> SharedMaterials;
 
 class Material
-    : public ui::Drawable
 {
 public:
     explicit Material(graphics::drawMode drawMode=graphics::drawMode::Triangles)
@@ -47,9 +46,6 @@ public:
     
     virtual void onDraw() {};
     virtual void onLoadMtlFile(const MtlMaterialInformation &materialInformation) {}
-
-protected:
-    void onDrawUi() override;;
     
 protected:
     std::shared_ptr<Shader> mShader = nullptr;
@@ -89,28 +85,9 @@ public:
     glm::vec3 emissive { 0.f };
     
 protected:
-    void onDrawUi() override;
-
-protected:
     std::shared_ptr<Texture> mDiffuse;
     std::shared_ptr<Texture> mNormal;
     std::shared_ptr<Texture> mHeight;
     std::shared_ptr<Texture> mRoughnessMap;
     std::shared_ptr<Texture> mMetallicMap;
 };
-
-/**
- * @brief Performs a downcast to the base class material for an entire list.
- * @tparam TMaterial - The child class material that the list is made of.
- * @param materials - The vector containing all of the materials.
- * @returns A list shared materials that can be used by the renderer.
- */
-template<typename TMaterial>
-SharedMaterials toSharedMaterials(std::vector<std::shared_ptr<TMaterial>> materials)
-{
-    SharedMaterials sharedMaterials;
-    for (const auto &material : materials)
-        sharedMaterials.emplace_back(material);
-    
-    return sharedMaterials;
-}

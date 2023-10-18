@@ -80,7 +80,6 @@ add_executable(${PROJECT_NAME}
         src/engine/EngineMath.cpp include/engine/EngineMath.h
         src/engine/EngineState.cpp include/engine/EngineState.h
         src/engine/MainCamera.cpp include/engine/MainCamera.h
-        src/engine/MeshComponent.cpp include/engine/MeshComponent.h
         src/engine/Scene.cpp include/engine/Scene.h
         src/engine/event/EventHandler.cpp include/engine/event/EventHandler.h
         src/engine/event/Input.cpp include/engine/event/Input.h

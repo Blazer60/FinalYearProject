@@ -12,8 +12,6 @@
 #include "TextureLoader.h"
 #include "GraphicsState.h"
 #include "BloomPass.h"
-#include "MeshComponent.h"
-#include "AssimpLoader.h"
 #include "Editor.h"
 #include "Rotator.h"
 #include "EngineState.h"
@@ -72,7 +70,6 @@ MyScene::MyScene() :
         auto ball = spawnActor<engine::Actor>(std::string("Ball " + std::to_string(i)));
         ball->position = positions[i];
         auto ballMesh = ball->addComponent(load::meshRenderer<StandardVertex>(file::modelPath() / "blueSphere/BlueSphere.obj"));
-        // auto ballMesh = load::model<StandardVertex>(file::modelPath() / "blueSphere/BlueSphere.obj");
         auto ballMaterial = std::make_shared<engine::StandardMaterialSubComponent>();
         ballMaterial->attachShader(mStandardShader);
         ballMaterial->setAmbientColour(glm::vec3(1.f));

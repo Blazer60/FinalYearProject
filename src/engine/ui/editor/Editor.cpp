@@ -9,7 +9,6 @@
 #include "Core.h"
 #include "Scene.h"
 #include "AssimpLoader.h"
-#include "MeshComponent.h"
 #include "ProfileTimer.h"
 #include "Lighting.h"
 #include "EngineState.h"
@@ -20,14 +19,6 @@ namespace engine
 {
     void Editor::init()
     {
-        addComponentOption<MeshComponent>("Mesh Component", [](Ref<Actor> actor)
-        {
-            auto model = load::model<StandardVertex>("");
-            auto material = std::make_shared<StandardMaterial>();
-            material->attachShader(core->getStandardShader());
-            actor->addComponent(makeResource<MeshComponent>(model, material));
-        });
-        
         addComponentOption<DirectionalLight>("Directional Light", [](Ref<Actor> actor) {
             actor->addComponent(makeResource<DirectionalLight>(
                 glm::normalize(glm::vec3(1.f, 1.f, 1.f)),
@@ -42,7 +33,7 @@ namespace engine
         
         addComponentOption<MeshRenderer>("Mesh Renderer", [](Ref<Actor> actor) {
             const auto path = file::modelPath() / "defaultObjects/DefaultCube.glb";
-            actor->addComponent(makeResource<MeshRenderer>(load::model<StandardVertex>(path), path.string()));
+            actor->addComponent(load::meshRenderer<StandardVertex>(path));
         });
         
         addMenuOption("Actor", []() {
@@ -162,10 +153,10 @@ namespace engine
     {
         Ref<Actor> actor = core->getScene()->spawnActor<Actor>(name);
         actor->position = core->getCamera()->getEndOfBoomArmPosition();
-        auto model = load::model<StandardVertex>(path);
-        auto material = std::make_shared<StandardMaterial>();
+        auto model = actor->addComponent(load::meshRenderer<StandardVertex>(path));
+        auto material = std::make_shared<StandardMaterialSubComponent>();
         material->attachShader(core->getStandardShader());
-        actor->addComponent(makeResource<MeshComponent>(model, material));
+        model->addMaterial(material);
         
         return actor;
     }

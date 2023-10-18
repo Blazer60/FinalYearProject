@@ -13,8 +13,5 @@
 namespace engine
 {
     void attachComponentSerialization();
-    
-    class MeshComponent;
 }
 
-void serializeComponent(YAML::Emitter &out, engine::MeshComponent *meshComponent);

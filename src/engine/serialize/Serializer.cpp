@@ -9,7 +9,6 @@
 #include "Scene.h"
 #include "Actor.h"
 #include "Component.h"
-#include "MeshComponent.h"
 #include "EngineState.h"
 
 #include <yaml-cpp/yaml.h>
