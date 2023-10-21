@@ -14,6 +14,7 @@
 #include "AssimpLoader.h"
 #include "MaterialSubComponent.h"
 #include "EngineMemory.h"
+#include "ComponentSerializer.h"
 
 namespace engine
 {
@@ -24,6 +25,7 @@ namespace engine
     class MeshRenderer
         : public Component
     {
+        SERIALIZABLE(MeshRenderer);
     public:
         MeshRenderer(std::vector<std::shared_ptr<SubMesh>> &&mesh, std::string path);
         void addMaterial(const std::shared_ptr<MaterialSubComponent> &material);

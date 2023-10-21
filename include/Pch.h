@@ -7,7 +7,7 @@
 
 #pragma once
 
-#ifdef PCH
+#ifdef GLOBAL_ENGINE_PCH
 #include <iostream>
 #include <vector>
 #include <unordered_map>
@@ -22,7 +22,7 @@
 #include <gtc/type_ptr.hpp>
 #include <set>
 #include <chrono>
-#endif  // PCH
+#endif  // GLOBAL_ENGINE_PCH
 
 // pch.h is typically the first thing we include. glew.h must be included before gl.h, so we add it here to try and avoid errors.
 #include <glew.h>

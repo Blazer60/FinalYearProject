@@ -123,8 +123,8 @@ namespace engine
         
         glfwMakeContextCurrent(mWindow);
         
-        const int frameRate = 60;
-        glfwSwapInterval(frameRate);
+        // Enable/disable V-sync. 1 = on, else off. NVIDIA honours multiple numbers whereas AMD ignores them.
+        glfwSwapInterval(1);
         
         glfwSetCursorPosCallback(mWindow, [](GLFWwindow *window, double xPos, double yPos) {
             eventHandler->updateMouseDelta(xPos, yPos);
@@ -237,6 +237,7 @@ namespace engine
             mIsRunning = false;
         
         double nextUpdateTick = 0.0;
+        timers::update();  // To register a valid time into the system.
         
         while (mIsRunning)
         {

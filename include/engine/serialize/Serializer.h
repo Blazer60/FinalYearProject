@@ -8,6 +8,9 @@
 #pragma once
 
 #include "Pch.h"
+
+#include "ComponentSerializer.h"
+
 #include <yaml-cpp/yaml.h>
 #include <filesystem>
 #include <functional>

@@ -12,6 +12,10 @@
 
 namespace engine
 {
+    class MeshRenderer;
+    
     void attachComponentSerialization();
 }
+
+void serializeComponent(YAML::Emitter &, engine::MeshRenderer *);
 

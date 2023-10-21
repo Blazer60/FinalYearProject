@@ -10,9 +10,11 @@
 #include "Pch.h"
 #include "Materials.h"
 #include "Drawable.h"
+#include "Serializer.h"
 
 namespace engine
 {
+    class MeshRenderer;
 
 /**
  * @author Ryan Purse
@@ -29,6 +31,7 @@ namespace engine
     class StandardMaterialSubComponent
         : public MaterialSubComponent
     {
+        SERIALIZABLE(MeshRenderer);
     public:
         StandardMaterialSubComponent() = default;
         

@@ -144,7 +144,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 if (${USE_PSEUDO_PCH})
     message(STATUS "Using pseudo PCH")
-    add_compile_definitions(PCH=1)
+    add_compile_definitions(GLOBAL_ENGINE_PCH=1)
 else()
     message(STATUS "Using CMake PCH")
     target_precompile_headers(${PROJECT_NAME} PUBLIC
@@ -184,6 +184,12 @@ find_package(OpenGL)  # Glew Requires OpenGL to be added.
 
 message(STATUS "Using pre-built libraries: " ${USE_PRE_BUILT_LIBS})
 if (${USE_PRE_BUILT_LIBS})
+    # Assimp is expecting a config.h file that is generated when built from source.
+    target_compile_definitions(${HELPER_LIBRARY} PUBLIC USING_PRE_BUILT_LIBS)
+    target_include_directories(${HELPER_LIBRARY} PUBLIC vendor/generated/include)
+    target_include_directories(${PROJECT_NAME} PUBLIC vendor/generated/include)
+    target_include_directories(${GRAPHICS_LIBRARY} PUBLIC vendor/generated/include)
+
     # Getting information for machine type. Assembling compiler 'triplet' to load correct files.
     string(TOLOWER "${CMAKE_CXX_COMPILER_ID}" COMP)
     string(TOLOWER "${CMAKE_SYSTEM_NAME}" PLATFORM)
@@ -194,7 +200,7 @@ if (${USE_PRE_BUILT_LIBS})
     message(STATUS "Looking for lib files in: ${LIB_PATH}")
     message(STATUS "Some of the file paths may be wrong as CMake trys to cache variables")
 
-    find_library(GLEW   NAMES libglew32d libglew32   PATHS ${LIB_PATH} REQUIRED)
+    find_library(GLEW   NAMES glew32d glew32         PATHS ${LIB_PATH} REQUIRED)
     find_library(GLFW   NAMES glfw3d glfw3           PATHS ${LIB_PATH} REQUIRED)
     find_library(IMGUI  NAMES imgui                  PATHS ${LIB_PATH} REQUIRED)
     find_library(ASSIMP NAMES assimp                 PATHS ${LIB_PATH} REQUIRED)
