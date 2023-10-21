@@ -173,6 +173,16 @@ namespace engine
         mMaterial.ambientColour = colour;
     }
     
+    void StandardMaterialSubComponent::setEmissive(const glm::vec3 &colour)
+    {
+        mMaterial.emissive = colour;
+    }
+    
+    void StandardMaterialSubComponent::setHeightScale(float scale)
+    {
+        mMaterial.heightScale = scale;
+    }
+    
     void MaterialSubComponent::attachShader(const std::shared_ptr<Shader> &shader)
     {
         getMaterial().attachShader(shader);

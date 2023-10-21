@@ -120,7 +120,7 @@ MyScene::MyScene() :
     
     engine::serialize::scene(file::resourcePath() / "scenes/test.pcy", static_cast<engine::Scene*>(this));
     
-    // load::scene(file::resourcePath() / "scenes/test.pcy", this);
+    load::scene(file::resourcePath() / "scenes/test.pcy", this);
 }
 
 void MyScene::onFixedUpdate()

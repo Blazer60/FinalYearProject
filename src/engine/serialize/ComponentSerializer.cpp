@@ -42,11 +42,16 @@ void serializeComponent(YAML::Emitter &out, engine::MeshRenderer *meshRenderer)
             standardMaterial != nullptr)
         {
             out << YAML::Key << "MaterialType" << YAML::Value << "StandardMaterial";
-            out << YAML::Key << "Diffuse"   << YAML::Value << file::makeRelativeToResourcePath(standardMaterial->mDiffuseMapPath).string();
-            out << YAML::Key << "Normal"    << YAML::Value << file::makeRelativeToResourcePath(standardMaterial->mNormalMapPath).string();
-            out << YAML::Key << "Height"    << YAML::Value << file::makeRelativeToResourcePath(standardMaterial->mHeightMapPath).string();
-            out << YAML::Key << "Roughness" << YAML::Value << file::makeRelativeToResourcePath(standardMaterial->mRoughnessMapPath).string();
-            out << YAML::Key << "Metallic"  << YAML::Value << file::makeRelativeToResourcePath(standardMaterial->mMetallicMapPath).string();
+            out << YAML::Key << "Albedo"       << YAML::Value << standardMaterial->mMaterial.ambientColour;
+            out << YAML::Key << "Roughness"    << YAML::Value << standardMaterial->mMaterial.roughness;
+            out << YAML::Key << "Metallic"     << YAML::Value << standardMaterial->mMaterial.metallic;
+            out << YAML::Key << "Emissive"     << YAML::Value << standardMaterial->mMaterial.emissive;
+            out << YAML::Key << "HeightScale" << YAML::Value << standardMaterial->mMaterial.heightScale;
+            out << YAML::Key << "DiffuseMap"   << YAML::Value << file::makeRelativeToResourcePath(standardMaterial->mDiffuseMapPath).string();
+            out << YAML::Key << "NormalMap"    << YAML::Value << file::makeRelativeToResourcePath(standardMaterial->mNormalMapPath).string();
+            out << YAML::Key << "HeightMap"    << YAML::Value << file::makeRelativeToResourcePath(standardMaterial->mHeightMapPath).string();
+            out << YAML::Key << "RoughnessMap" << YAML::Value << file::makeRelativeToResourcePath(standardMaterial->mRoughnessMapPath).string();
+            out << YAML::Key << "MetallicMap"  << YAML::Value << file::makeRelativeToResourcePath(standardMaterial->mMetallicMapPath).string();
         }
 
         out << YAML::EndMap;

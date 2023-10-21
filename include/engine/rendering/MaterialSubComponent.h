@@ -44,6 +44,8 @@ namespace engine
         void setMetallic(float value);
         void setRoughness(float value);
         void setAmbientColour(const glm::vec3 &colour);
+        void setEmissive(const glm::vec3 &colour);
+        void setHeightScale(float scale);
         
     protected:
         Material &getMaterial() override { return mMaterial; };

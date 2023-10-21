@@ -8,6 +8,11 @@
 #include <fstream>
 #include "SceneLoader.h"
 #include "Scene.h"
+#include "AssimpLoader.h"
+#include "MeshRenderer.h"
+#include "FileLoader.h"
+#include "EngineState.h"
+#include "Core.h"
 
 #include <yaml-cpp/yaml.h>
 
@@ -93,6 +98,7 @@ namespace load
             load::actor(actorNode, scene);
     }
     
+    
     void actor(const YAML::Node &actorNode, engine::Scene *scene)
     {
         const auto name = actorNode["Actor"].as<std::string>() + " (Clone)";
@@ -103,6 +109,9 @@ namespace load
         
         for (auto &childNode : actorNode["Children"])
             load::actor(childNode, actor);
+        
+        for (auto &componentNode : actorNode["Components"])
+            load::component(componentNode, actor);
     }
     
     void actor(const YAML::Node &actorNode, Ref<engine::Actor> parent)
@@ -116,5 +125,60 @@ namespace load
         for (auto &childNode : actorNode["Children"])
             load::actor(childNode, actor);
         
+        for (auto &componentNode : actorNode["Components"])
+            load::component(componentNode, actor);
+    }
+    
+    void component(const YAML::Node &node, Ref<engine::Actor> actor)
+    {
+        if (!node["Component"].IsDefined())
+            return;
+        
+        const auto componentType = node["Component"].as<std::string>();
+        
+        if (componentType == "MeshRenderer")
+        {
+            const std::filesystem::path relativePath = node["MeshPath"].as<std::string>();
+            Ref<engine::MeshRenderer> meshRenderer = actor->addComponent(
+                load::meshRenderer<StandardVertex>(file::resourcePath() / relativePath));
+            
+            for (const auto &materialNode : node["Materials"])
+            {
+                const auto materialType = materialNode["MaterialType"].as<std::string>();
+                
+                if (materialType == "StandardMaterial")
+                {
+                    auto standardMaterial = std::make_shared<engine::StandardMaterialSubComponent>();
+                    standardMaterial->attachShader(engine::core->getStandardShader());
+                    meshRenderer->addMaterial(standardMaterial);
+                    
+                    standardMaterial->setAmbientColour(materialNode["Albedo"].as<glm::vec3>());
+                    standardMaterial->setRoughness(materialNode["Roughness"].as<float>());
+                    standardMaterial->setMetallic(materialNode["Metallic"].as<float>());
+                    standardMaterial->setEmissive(materialNode["Emissive"].as<glm::vec3>());
+                    standardMaterial->setHeightScale(materialNode["HeightScale"].as<float>());
+                    
+                    const auto diffuseRelativePath = materialNode["DiffuseMap"].as<std::string>();
+                    if (!diffuseRelativePath.empty())
+                        standardMaterial->setDiffuseMap(file::resourcePath() / diffuseRelativePath);
+                    
+                    const auto normalRelativePath = materialNode["NormalMap"].as<std::string>();
+                    if (!normalRelativePath.empty())
+                        standardMaterial->setNormalMap(file::resourcePath() / normalRelativePath);
+                    
+                    const auto heightRelativePath = materialNode["HeightMap"].as<std::string>();
+                    if (!heightRelativePath.empty())
+                        standardMaterial->setHeightMap(file::resourcePath() / heightRelativePath);
+                    
+                    const auto roughnessRelativePath = materialNode["RoughnessMap"].as<std::string>();
+                    if (!roughnessRelativePath.empty())
+                        standardMaterial->setRoughnessMap(file::resourcePath() / roughnessRelativePath);
+                    
+                    const auto metallicRelativePath = materialNode["MetallicMap"].as<std::string>();
+                    if (!metallicRelativePath.empty())
+                        standardMaterial->setMetallicMap(file::resourcePath() / metallicRelativePath);
+                }
+            }
+        }
     }
 }
