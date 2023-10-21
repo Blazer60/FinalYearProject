@@ -18,4 +18,6 @@ namespace file
     std::filesystem::path modelPath();
     std::filesystem::path shaderPath();
     std::filesystem::path texturePath();
+    
+    std::filesystem::path makeRelativeToResourcePath(const std::filesystem::path &path);
 }

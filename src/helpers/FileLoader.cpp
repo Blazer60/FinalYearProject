@@ -108,5 +108,10 @@ namespace file
     {
         return data::texturePath;
     }
+    
+    std::filesystem::path makeRelativeToResourcePath(const std::filesystem::path &path)
+    {
+        return relative(path, resourcePath());
+    }
 }
 
