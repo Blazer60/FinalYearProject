@@ -31,6 +31,10 @@ namespace engine
             actor->addComponent(makeResource<PointLight>());
         });
         
+        addComponentOption<DistantLightProbe>("Distant Light Probe", [](Ref<Actor> actor) {
+            actor->addComponent(makeResource<DistantLightProbe>(glm::ivec2(512)));
+        });
+        
         addComponentOption<MeshRenderer>("Mesh Renderer", [](Ref<Actor> actor) {
             const auto path = file::modelPath() / "defaultObjects/DefaultCube.glb";
             actor->addComponent(load::meshRenderer<StandardVertex>(path));

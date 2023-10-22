@@ -154,4 +154,54 @@ namespace ui
         ImVec2 imSize { size.x, size.y };
         return ImGui::ImageButton(imguiId.data(), reinterpret_cast<void *>(glId), imSize, ImVec2(0, 1), ImVec2(1, 0));
     }
+    
+    glm::ivec2 fitToRegion(const glm::ivec2 &imageSize, const glm::ivec2 &maxSize, const glm::ivec2 &padding)
+    {
+        ImVec2 regionSize = ImGui::GetContentRegionAvail();
+        regionSize.x -= static_cast<float>(padding.x);
+        regionSize.y -= static_cast<float>(padding.y);
+        regionSize.x = glm::min(regionSize.x, static_cast<float>(maxSize.x));
+        regionSize.y = glm::min(regionSize.y, static_cast<float>(maxSize.y));
+        
+        if (imageSize.x <= 0 || imageSize.y <= 0)
+            return { regionSize.x, regionSize.y };
+        
+        if (imageSize.x == imageSize.y)
+        {
+            if (regionSize.x > regionSize.y)
+            {
+                if (static_cast<float>(imageSize.y) >= regionSize.y)
+                {
+                    const float ratio = regionSize.y / static_cast<float>(imageSize.y);
+                    regionSize.x = ratio * static_cast<float>(imageSize.y);
+                }
+            }
+            else
+            {
+                if (static_cast<float>(imageSize.x) >= regionSize.x)
+                {
+                    const float ratio = regionSize.x / static_cast<float>(imageSize.x);
+                    regionSize.y = ratio * static_cast<float>(imageSize.y);
+                }
+            }
+        }
+        if (imageSize.x > imageSize.y)
+        {
+            if (static_cast<float>(imageSize.x) >= regionSize.x)
+            {
+                const float ratio = regionSize.x / static_cast<float>(imageSize.x);
+                regionSize.y = ratio * static_cast<float>(imageSize.y);
+            }
+        }
+        else
+        {
+            if (static_cast<float>(imageSize.y) >= regionSize.y)
+            {
+                const float ratio = regionSize.y / static_cast<float>(imageSize.y);
+                regionSize.x = ratio * static_cast<float>(imageSize.y);
+            }
+        }
+        
+        return { regionSize.x, regionSize.y };
+    }
 }

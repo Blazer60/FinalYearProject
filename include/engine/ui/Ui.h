@@ -22,4 +22,6 @@ namespace ui
     
     void image(uint32_t id, const glm::vec2 &size);
     bool imageButton(std::string_view imguiId, uint32_t glId, const glm::vec2 &size);
+    
+    glm::ivec2 fitToRegion(const glm::ivec2 &imageSize, const glm::ivec2 &maxSize, const glm::ivec2 &padding=glm::ivec2(50));
 }

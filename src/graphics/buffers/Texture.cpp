@@ -38,6 +38,8 @@ Texture::Texture(const std::filesystem::path &path)
     glTextureParameteri(mId, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTextureParameteri(mId, GL_TEXTURE_WRAP_T, GL_REPEAT);
     
+    mSize = { width, height };
+    
     const unsigned int levels = 1;
     const int lod = 0;
     const int xOffSet = 0;

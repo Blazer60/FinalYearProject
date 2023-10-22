@@ -6,6 +6,8 @@
 
 
 #include "Lighting.h"
+
+#include <utility>
 #include "gtc/type_ptr.hpp"
 #include "GraphicsState.h"
 #include "gtx/euler_angles.hpp"
@@ -13,6 +15,9 @@
 #include "Ui.h"
 #include "Actor.h"
 #include "GraphicsLighting.h"
+#include "EngineState.h"
+#include "Editor.h"
+#include "FileExplorer.h"
 
 namespace engine
 {
@@ -23,7 +28,7 @@ namespace engine
         colour(colour), yaw(yaw), pitch(pitch), intensity(intensity), Light()
     {
         const glm::ivec2 shadowMapSize = glm::ivec2(2048);
-        mDirectionalLight.shadowMap = std::make_shared<TextureArrayObject>(shadowMapSize, depths.size(), GL_DEPTH_COMPONENT32, graphics::filter::Linear, graphics::wrap::ClampToBorder);
+        mDirectionalLight.shadowMap = std::make_shared<TextureArrayObject>(shadowMapSize, static_cast<int32_t >(depths.size()), GL_DEPTH_COMPONENT32, graphics::filter::Linear, graphics::wrap::ClampToBorder);
         mDirectionalLight.shadowMap->setBorderColour(glm::vec4(1.f));
         mDirectionalLight.vpMatrices.reserve(depths.size());
         mDirectionalLight.shadowBias = bias;
@@ -202,5 +207,60 @@ namespace engine
             const glm::mat4 vpMatrix = projectionMatrix * viewMatrix;
             mPointLight.vpMatrices[i] = vpMatrix;
         }
+    }
+    
+    DistantLightProbe::DistantLightProbe(const std::filesystem::path &path, const glm::ivec2 &size)
+        : mPath(path), mSize(size), mThumbnailTexture(std::make_unique<Texture>(path))
+    {
+    
+    }
+    
+    DistantLightProbe::DistantLightProbe(const glm::ivec2 &size)
+        : mSize(size), mThumbnailTexture(std::make_unique<Texture>(""))
+    {
+    
+    }
+    
+    void DistantLightProbe::onPreRender()
+    {
+        graphics::renderer->setIblMultiplier(mRadianceMultiplier);
+        if (!mIsUpdated)
+        {
+            if (!mPath.empty())
+                graphics::renderer->generateSkybox(mPath.string(), mSize);
+            mIsUpdated = true;
+        }
+    }
+    
+    void DistantLightProbe::onDrawUi()
+    {
+        ImGui::PushID("DistantLightProbeSettings");
+        if (ImGui::TreeNodeEx("Distant Light Probe", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            if (ImGui::Button("Destroy Component"))
+                mActor->removeComponent(this);
+            
+            ImGui::DragFloat("Radiance Multiplier", &mRadianceMultiplier);
+            ImGui::SliderInt2("Size", glm::value_ptr(mSize), 32, 4096, "%d");
+            if (ImGui::Button("Update"))
+                mIsUpdated = false;
+            
+            if (ui::imageButton("HDR Texture", mThumbnailTexture->id(), ui::fitToRegion(mThumbnailTexture->size(), glm::ivec2(512))))
+            {
+                engine::editor->addUpdateAction([this]() {
+                    const std::string result = openFileExplorer();
+                    if (result.empty())
+                        return;
+                    
+                    mPath = result;
+                    mThumbnailTexture = std::make_unique<Texture>(result);
+                    mIsUpdated = false;
+                });
+            }
+            
+            ImGui::TreePop();
+        }
+        
+        ImGui::PopID();
     }
 }

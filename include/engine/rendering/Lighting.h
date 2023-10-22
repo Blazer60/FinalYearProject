@@ -84,4 +84,22 @@ namespace engine
         SERIALIZABLE(PointLight);
     };
 
+    struct DistantLightProbe
+        : Light, engine::Component
+    {
+    public:
+        explicit DistantLightProbe(const glm::ivec2 &size);
+        DistantLightProbe(const std::filesystem::path &path, const glm::ivec2 &size);
+        
+    protected:
+        void onPreRender() override;
+        void onDrawUi() override;
+        
+    protected:
+        glm::ivec2 mSize;
+        float mRadianceMultiplier { 1.f };
+        std::filesystem::path mPath;
+        std::unique_ptr<Texture> mThumbnailTexture;
+        bool mIsUpdated { false };
+    };
 }

@@ -19,6 +19,5 @@ namespace engine
         const void *userParam)
     {
         debug::logger->openglCallBack(source, type, id, severity, length, message, userParam);
-        
     }
 }

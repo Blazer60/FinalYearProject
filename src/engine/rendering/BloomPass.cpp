@@ -90,6 +90,7 @@ void BloomPass::generateAuxiliaryBuffers(const glm::ivec2 &size)
     mMipLevelCount = glm::min(mMaxMipLevelCount, (int)glm::floor(glm::log2((float)glm::max(size.x, size.y))));
     mDownSampleTexture  = std::make_unique<TextureBufferObject>(size / 2, GL_RGBA16F, GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR, mMipLevelCount);
     mUpSampleTexture    = std::make_unique<TextureBufferObject>(size    , GL_RGBA16F, GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR, mMipLevelCount);
+    mCurrentSize = size;
 }
 
 void BloomPass::onDrawUi()
