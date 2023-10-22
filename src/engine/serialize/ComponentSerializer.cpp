@@ -12,19 +12,27 @@
 #include "Component.h"
 #include "MeshRenderer.h"
 #include "FileLoader.h"
+#include "Lighting.h"
 
 namespace engine
 {
+    // todo: Can this be inlined into the serializer?
+    template<typename T>
+    bool autoCast(YAML::Emitter &out, Component *component)
+    {
+        if (auto x = dynamic_cast<T*>(component); x != nullptr)
+        {
+            serializeComponent(out, x);
+            return true;
+        }
+        return false;
+    }
+    
     void attachComponentSerialization()
     {
-        serializer->pushComponentDelegate([](YAML::Emitter &out, Component *component) -> bool {
-            if (auto meshComponent = dynamic_cast<MeshRenderer*>(component); meshComponent != nullptr)
-            {
-                serializeComponent(out, meshComponent);
-                return true;
-            }
-            return false;
-        });
+        serializer->pushComponentDelegate(autoCast<MeshRenderer>);
+        serializer->pushComponentDelegate(autoCast<DirectionalLight>);
+        serializer->pushComponentDelegate(autoCast<PointLight>);
     }
 }
 
@@ -57,4 +65,33 @@ void serializeComponent(YAML::Emitter &out, engine::MeshRenderer *meshRenderer)
         out << YAML::EndMap;
     }
     out << YAML::EndSeq;
+}
+
+
+void serializeComponent(YAML::Emitter &out, engine::DirectionalLight *directionalLight)
+{
+    out << YAML::Key << "Component"         << YAML::Value << "DirectionalLight";
+    out << YAML::Key << "Colour"            << YAML::Value << directionalLight->colour;
+    out << YAML::Key << "Intensity"         << YAML::Value << directionalLight->intensity;
+    out << YAML::Key << "Yaw"               << YAML::Value << directionalLight->yaw;
+    out << YAML::Key << "Pitch"             << YAML::Value << directionalLight->pitch;
+    
+    out << YAML::Key << "CascadeDepths"     << YAML::Value << YAML::Flow << YAML::BeginSeq;
+    for (const auto &multiplier : directionalLight->mDirectionalLight.shadowCascadeMultipliers)
+        out << multiplier;
+    out << YAML::EndSeq;
+    
+    out << YAML::Key << "ZMultiplier"       << YAML::Value << directionalLight->mDirectionalLight.shadowZMultiplier;
+    out << YAML::Key << "Bias"              << YAML::Value << directionalLight->mDirectionalLight.shadowBias;
+}
+
+void serializeComponent(YAML::Emitter &out, engine::PointLight *pointLight)
+{
+    out << YAML::Key << "Component"     << YAML::Value << "PointLight";
+    out << YAML::Key << "Colour"        << YAML::Value << pointLight->mColour;
+    out << YAML::Key << "Intensity"     << YAML::Value << pointLight->mIntensity;
+    out << YAML::Key << "Radius"        << YAML::Value << pointLight->mRadius;
+    out << YAML::Key << "Bias"          << YAML::Value << pointLight->mBias;
+    out << YAML::Key << "Softness"      << YAML::Value << pointLight->mSoftnessRadius;
+    out << YAML::Key << "Resolution"    << YAML::Value << pointLight->mResolution;
 }

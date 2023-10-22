@@ -79,7 +79,7 @@ MyScene::MyScene() :
     }
 
     auto directionalLight = spawnActor<engine::Actor>("Directional Light");
-    directionalLight->addComponent(makeResource<DirectionalLight>(
+    directionalLight->addComponent(makeResource<engine::DirectionalLight>(
         glm::normalize(glm::vec3(1.f, 1.f, 1.f)), glm::vec3(0.93f, 0.93f, 0.95f), glm::ivec2(4096), 4));
 
     auto teapot = spawnActor<engine::Actor>("Teapot");
@@ -105,7 +105,7 @@ MyScene::MyScene() :
     
     auto pointLight = spawnActor<engine::Actor>("Point Light");
     pointLight->position = glm::vec3(0.f, 6.f, 5.f);
-    pointLight->addComponent(makeResource<PointLight>());
+    pointLight->addComponent(makeResource<engine::PointLight>());
     
     auto leatherBall = spawnActor<engine::Actor>("Leather Ball");
     leatherBall->position = glm::vec3(0.f, 5.f, 0.f);
@@ -118,9 +118,9 @@ MyScene::MyScene() :
     leatherMaterial->setRoughnessMap(file::modelPath() / "leatherBall/TexturesCom_Leather_Tufted_New_1K_roughness.png");
     leatherBallModel->addMaterial(leatherMaterial);
     
-    engine::serialize::scene(file::resourcePath() / "scenes/test.pcy", static_cast<engine::Scene*>(this));
+    // engine::serialize::scene(file::resourcePath() / "scenes/test.pcy", static_cast<engine::Scene*>(this));
     
-    load::scene(file::resourcePath() / "scenes/test.pcy", this);
+    // load::scene(file::resourcePath() / "scenes/test.pcy", this);
 }
 
 void MyScene::onFixedUpdate()

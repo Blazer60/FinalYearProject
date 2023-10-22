@@ -776,3 +776,9 @@ void Renderer::setIblMultiplier(float m)
     mIblLuminanceMultiplier = glm::abs(m);
 }
 
+void Renderer::rendererGuiNewFrame()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindVertexArray(0);
+}
+

@@ -13,6 +13,7 @@
 #include "FileLoader.h"
 #include "EngineState.h"
 #include "Core.h"
+#include "Lighting.h"
 
 #include <yaml-cpp/yaml.h>
 
@@ -38,6 +39,28 @@ namespace YAML
             rhs.x = node[0].as<float>();
             rhs.y = node[1].as<float>();
             rhs.z = node[2].as<float>();
+            return true;
+        }
+    };
+    
+    template<>
+    struct convert<glm::vec2>
+    {
+        static Node encode(const glm::vec2 &rhs)
+        {
+            Node node;
+            node.push_back(rhs.x);
+            node.push_back(rhs.y);
+            return node;
+        }
+        
+        static bool decode(const Node& node, glm::vec2 &rhs)
+        {
+            if (!node.IsSequence() || node.size() != 2)
+                return false;
+            
+            rhs.x = node[0].as<float>();
+            rhs.y = node[1].as<float>();
             return true;
         }
     };
@@ -179,6 +202,35 @@ namespace load
                         standardMaterial->setMetallicMap(file::resourcePath() / metallicRelativePath);
                 }
             }
+        }
+        else if (componentType == "DirectionalLight")
+        {
+            const auto colour = node["Colour"].as<glm::vec3>();
+            const auto intensity = node["Intensity"].as<float>();
+            const auto yaw = node["Yaw"].as<float>();
+            const auto pitch = node["Pitch"].as<float>();
+            
+            const auto depthCount = node["CascadeDepths"].size();
+            std::vector<float> depths;
+            depths.reserve(depthCount);
+            for (int i = 0; i < depthCount; ++i)
+                depths.emplace_back(node["CascadeDepths"][i].as<float>());
+            
+            const auto zMultiplier = node["ZMultiplier"].as<float>();
+            const auto bias = node["Bias"].as<glm::vec2>();
+            
+            actor->addComponent(makeResource<engine::DirectionalLight>(yaw, pitch, colour, intensity, depths, zMultiplier, bias));
+        }
+        else if (componentType == "PointLight")
+        {
+            const auto colour = node["Colour"].as<glm::vec3>();
+            const auto intensity = node["Intensity"].as<float>();
+            const auto radius = node["Radius"].as<float>();
+            const auto bias = node["Bias"].as<glm::vec2>();
+            const auto softness = node["Softness"].as<float>();
+            const auto resolution = node["Resolution"].as<int>();
+            
+            actor->addComponent(makeResource<engine::PointLight>(colour, intensity, radius, bias, softness, resolution));
         }
     }
 }

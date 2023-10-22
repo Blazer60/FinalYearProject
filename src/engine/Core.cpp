@@ -24,6 +24,7 @@
 #include "GraphicsFunctions.h"
 #include "FileLoader.h"
 #include "ComponentSerializer.h"
+#include "SceneLoader.h"
 
 namespace engine
 {
@@ -289,14 +290,27 @@ namespace engine
         ImGui::NewFrame();
         ImGuizmo::BeginFrame();
         
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glBindVertexArray(0);
+        Renderer::rendererGuiNewFrame();
         ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
         
         mEventHandler.update();
         
         if (ImGui::BeginMainMenuBar())
         {
+            if (ImGui::BeginMenu("File"))
+            {
+                if (ImGui::MenuItem("Save"))
+                {
+                    serialize::scene(file::resourcePath() / "scenes/test.pcy", getScene());
+                }
+                if (ImGui::MenuItem("Load"))
+                {
+                    auto newScene = std::make_unique<Scene>();
+                    load::scene(file::resourcePath() / "scenes/test.pcy", newScene.get());
+                    setScene(std::move(newScene));
+                }
+                ImGui::EndMenu();
+            }
             mScene->onImguiMenuUpdate();
             const std::string text = "TPS: %.0f | Frame Rate: %.3f ms/frame (%.1f FPS)";
             ImGui::SetCursorPosX(

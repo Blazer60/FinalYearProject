@@ -21,7 +21,7 @@ namespace engine
         : public ui::Drawable
     {
     public:
-        virtual ~Component() = default;
+        ~Component() override = default;
         void update();
         void preRender();
         void attachToActor(class Actor *actor);

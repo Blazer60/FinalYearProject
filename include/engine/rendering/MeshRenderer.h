@@ -28,6 +28,7 @@ namespace engine
         SERIALIZABLE(MeshRenderer);
     public:
         MeshRenderer(std::vector<std::shared_ptr<SubMesh>> &&mesh, std::string path);
+        ~MeshRenderer() override = default;
         void addMaterial(const std::shared_ptr<MaterialSubComponent> &material);
         
     protected:

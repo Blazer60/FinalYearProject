@@ -95,7 +95,7 @@ public:
     
     [[nodiscard]] static std::string getVersion();
     
-    void generateSkybox(std::string_view path, const glm::ivec2 desiredSize);
+    void generateSkybox(std::string_view path, glm::ivec2 desiredSize);
     
     /**
      * @brief Draws a triangle to the screen so that fullscreen passes can be performs without
@@ -103,6 +103,11 @@ public:
      * calling this method.
      */
     void drawFullscreenTriangleNow();
+    
+    /**
+     * @brief Resets some internal state so that the GUI system doesn't override anything in the renderer.
+     */
+    static void rendererGuiNewFrame();
     
     [[nodiscard]] const TextureBufferObject &getPrimaryBuffer();
     [[nodiscard]] const TextureBufferObject &getDeferredLightingBuffer();

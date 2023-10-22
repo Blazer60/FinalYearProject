@@ -19,6 +19,7 @@ class Rotator
     : public engine::Component
 {
 public:
+    ~Rotator() override = default;
 
 protected:
     void onUpdate() override;
