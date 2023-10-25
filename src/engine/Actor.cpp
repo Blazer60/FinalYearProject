@@ -46,7 +46,9 @@ namespace engine
         {
             bool changedFlag = false;
             changedFlag |= ImGui::DragFloat3("Position", glm::value_ptr(position));
-            changedFlag |= ImGui::DragFloat4("Rotation", glm::value_ptr(rotation));
+            glm::vec3 euler = glm::degrees(glm::eulerAngles(rotation));
+            changedFlag |= ImGui::DragFloat3("Rotation", glm::value_ptr(euler));
+            rotation = glm::quat(glm::radians(euler));
             changedFlag |= ImGui::DragFloat3("Scale", glm::value_ptr(scale));
             
             if (changedFlag)

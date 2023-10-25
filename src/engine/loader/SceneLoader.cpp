@@ -48,7 +48,7 @@ namespace load
     
     void actor(const YAML::Node &actorNode, engine::Scene *scene)
     {
-        const auto name = actorNode["Actor"].as<std::string>() + " (Clone)";
+        const auto name = actorNode["Actor"].as<std::string>();
         auto actor = scene->spawnActor<engine::Actor>(name);
         actor->position = actorNode["position"].as<glm::vec3>();
         actor->rotation = actorNode["rotation"].as<glm::quat>();
@@ -63,7 +63,7 @@ namespace load
     
     void actor(const YAML::Node &actorNode, Ref<engine::Actor> parent)
     {
-        const auto name = actorNode["Actor"].as<std::string>() + " (Clone)";
+        const auto name = actorNode["Actor"].as<std::string>();
         Ref<engine::Actor> actor = parent->addChildActor(makeResource<engine::Actor>(name));
         actor->position = actorNode["position"].as<glm::vec3>();
         actor->rotation = actorNode["rotation"].as<glm::quat>();

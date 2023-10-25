@@ -67,7 +67,10 @@ namespace engine
             std::string meshPath = openFileExplorer();
             SharedMesh mesh = load::model<StandardVertex>(meshPath);
             if (!mesh.empty())
+            {
                 mMeshes = mesh;
+                mMeshPath = meshPath;
+            }
         }
     }
     
