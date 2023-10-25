@@ -38,8 +38,8 @@ Renderer::Renderer() :
     mPreFilterShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() /  "cubemap/PreFilter.frag");
     mIntegrateBrdfShader = std::make_unique<Shader>(file::shaderPath() /  "FullscreenTriangle.vert", file::shaderPath() / "brdf/IntegrateBrdf.frag");
     
-    // generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
-    generateSkybox("", glm::ivec2(512));
+    generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
+    // generateSkybox("", glm::ivec2(512));
     
     initFrameBuffers();
     initTextureRenderBuffers();

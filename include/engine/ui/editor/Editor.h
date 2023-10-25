@@ -16,6 +16,7 @@
 #include "Callback.h"
 #include "LogWindow.h"
 #include "EngineMemory.h"
+#include "ResourceFolder.h"
 
 namespace engine
 {
@@ -94,6 +95,7 @@ namespace engine
     protected:
         Viewport mViewport;
         LogWindow mLogWindow;
+        ResourceFolder mResourceFolder;
         Ref<Actor> mSelectedActor;
         std::vector<ActorDetails> mMenuList;
         std::vector<std::unique_ptr<ComponentDetails>> mComponentList;

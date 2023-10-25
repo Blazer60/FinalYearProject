@@ -113,5 +113,31 @@ namespace file
     {
         return relative(path, resourcePath());
     }
+    
+    bool hasImageExtension(const std::string &extension)
+    {
+        const char *whiteList[] = { ".jpg", ".jpeg", ".bmp", ".png", ".tif", ".hdr" };
+        return std::any_of(std::begin(whiteList), std::end(whiteList), [&extension](const char *p) {
+            return p == extension;
+        });
+    }
+    
+    bool hasImageExtension(const std::filesystem::path &path)
+    {
+        return hasImageExtension(path.extension().string());
+    }
+    
+    bool hasModelExtension(const std::string &extension)
+    {
+        const char *whiteList[] = { ".obj", ".ply", ".blend", ".stl", "gltf", ".glb", ".fbx" };
+        return std::any_of(std::begin(whiteList), std::end(whiteList), [&extension](const char *p) {
+            return p == extension;
+        });
+    }
+    
+    bool hasModelExtension(const std::filesystem::path &path)
+    {
+        return hasModelExtension(path.extension().string());
+    }
 }
 

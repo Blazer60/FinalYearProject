@@ -58,6 +58,7 @@ namespace engine
         PROFILE_FUNC();
         ui::draw(mViewport);
         ui::draw(mLogWindow);
+        ui::draw(mResourceFolder);
         drawSceneHierarchyPanel();
         drawActorDetails();
         

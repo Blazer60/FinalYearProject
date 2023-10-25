@@ -20,4 +20,10 @@ namespace file
     std::filesystem::path texturePath();
     
     std::filesystem::path makeRelativeToResourcePath(const std::filesystem::path &path);
+    
+    bool hasImageExtension(const std::string &extension);
+    bool hasImageExtension(const std::filesystem::path &path);
+    
+    bool hasModelExtension(const std::string &extension);
+    bool hasModelExtension(const std::filesystem::path &path);
 }

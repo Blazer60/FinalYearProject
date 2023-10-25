@@ -126,6 +126,8 @@ add_executable(${PROJECT_NAME}
         src/game/Rotator.cpp include/game/Rotator.h
 
         vendor/imguizmo/ImGuizmo.cpp vendor/imguizmo/ImGuizmo.h
+        src/engine/ui/editor/ResourceFolder.cpp
+        include/engine/ui/editor/ResourceFolder.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

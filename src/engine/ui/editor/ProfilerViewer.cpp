@@ -28,8 +28,8 @@ namespace engine
             for (const auto &node : profiler->getTree())
                 drawNode(node);
 #endif
-            ImGui::End();
         }
+        ImGui::End();
     }
     
     void ProfilerViewer::drawNode(const debug::ProfileNode &node)

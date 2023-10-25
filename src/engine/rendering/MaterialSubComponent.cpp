@@ -11,6 +11,8 @@
 #include "FileExplorer.h"
 #include "EngineState.h"
 #include "Editor.h"
+#include "ResourceFolder.h"
+#include "FileLoader.h"
 
 namespace engine
 {
@@ -73,6 +75,14 @@ namespace engine
                 });
             }
             ui::drawToolTip("Albedo Texture");
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(resourceImagePayload))
+                {
+                    std::filesystem::path path = *reinterpret_cast<std::filesystem::path*>(payload->Data);
+                    engine::editor->addUpdateAction([this, path]() { setDiffuseMap(path); });
+                }
+            }
             ImGui::SameLine();
             ImGui::ColorEdit3("Albedo", glm::value_ptr(mMaterial.ambientColour), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueWheel);
             
@@ -92,6 +102,14 @@ namespace engine
                 });
             }
             ui::drawToolTip("Normal Map");
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(resourceImagePayload))
+                {
+                    std::filesystem::path path = *reinterpret_cast<std::filesystem::path*>(payload->Data);
+                    engine::editor->addUpdateAction([this, path]() { setNormalMap(path); });
+                }
+            }
             
             if (ImGui::Button("X##Roughness"))
             {
@@ -109,6 +127,14 @@ namespace engine
                 });
             }
             ui::drawToolTip("Roughness Texture");
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(resourceImagePayload))
+                {
+                    std::filesystem::path path = *reinterpret_cast<std::filesystem::path*>(payload->Data);
+                    engine::editor->addUpdateAction([this, path]() { setRoughnessMap(path); });
+                }
+            }
             ImGui::SameLine();
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("Roughness").x);
             ImGui::SliderFloat("Roughness", &mMaterial.roughness, 0.f, 1.f);
@@ -129,6 +155,14 @@ namespace engine
                 });
             }
             ui::drawToolTip("Metallic Texture");
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(resourceImagePayload))
+                {
+                    std::filesystem::path path = *reinterpret_cast<std::filesystem::path*>(payload->Data);
+                    engine::editor->addUpdateAction([this, path]() { setMetallicMap(path); });
+                }
+            }
             ImGui::SameLine();
             ImGui::SliderFloat("Metallic", &mMaterial.metallic, 0.f, 1.f);
             
@@ -150,6 +184,14 @@ namespace engine
                 });
             }
             ui::drawToolTip("Height Map Texture");
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(resourceImagePayload))
+                {
+                    std::filesystem::path path = *reinterpret_cast<std::filesystem::path*>(payload->Data);
+                    engine::editor->addUpdateAction([this, path]() { setHeightMap(path); });
+                }
+            }
             ImGui::SameLine();
             ImGui::SliderFloat("Height", &mMaterial.heightScale, 0.f, 1.f);
             

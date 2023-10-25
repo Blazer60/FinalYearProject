@@ -12,6 +12,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include "FileLoader.h"
 
 Texture::Texture(const std::filesystem::path &path)
 {
@@ -22,6 +23,12 @@ Texture::Texture(const std::filesystem::path &path)
     if (!std::filesystem::exists(path))
     {
         WARN("File % does not exist.\nAborting texture generation", path);
+        return;
+    }
+    
+    if (!file::hasImageExtension(path))
+    {
+        WARN("Incompatible format for %. No texture will be loaded.", path);
         return;
     }
     

@@ -11,6 +11,7 @@
 #include "Core.h"
 #include "FileExplorer.h"
 #include "GraphicsState.h"
+#include "ResourceFolder.h"
 
 #include <utility>
 
@@ -70,6 +71,19 @@ namespace engine
             {
                 mMeshes = mesh;
                 mMeshPath = meshPath;
+            }
+        }
+        if (ImGui::BeginDragDropTarget())
+        {
+            if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(resourceModelPayload))
+            {
+                std::filesystem::path path = *reinterpret_cast<std::filesystem::path*>(payload->Data);
+                SharedMesh mesh = load::model<StandardVertex>(path);
+                if (!mesh.empty())
+                {
+                    mMeshes = mesh;
+                    mMeshPath = path.string();
+                }
             }
         }
     }
