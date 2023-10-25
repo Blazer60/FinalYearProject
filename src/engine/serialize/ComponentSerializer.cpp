@@ -13,14 +13,89 @@
 #include "MeshRenderer.h"
 #include "FileLoader.h"
 #include "Lighting.h"
+#include "Actor.h"
+#include "Core.h"
 
 namespace engine
 {
     void attachComponentSerialization()
     {
-        serializer->pushComponent<MeshRenderer>();
-        serializer->pushComponent<DirectionalLight>();
-        serializer->pushComponent<PointLight>();
+        serializer->pushSaveComponent<MeshRenderer>();
+        serializer->pushSaveComponent<DirectionalLight>();
+        serializer->pushSaveComponent<PointLight>();
+        
+        serializer->pushLoadComponent("MeshRenderer", [](const YAML::Node &node, Ref<Actor> actor) {
+            const std::filesystem::path relativePath = node["MeshPath"].as<std::string>();
+            Ref<engine::MeshRenderer> meshRenderer = actor->addComponent(
+                load::meshRenderer<StandardVertex>(file::resourcePath() / relativePath));
+            
+            for (const auto &materialNode : node["Materials"])
+            {
+                const auto materialType = materialNode["MaterialType"].as<std::string>();
+                
+                if (materialType == "StandardMaterial")
+                {
+                    auto standardMaterial = std::make_shared<engine::StandardMaterialSubComponent>();
+                    standardMaterial->attachShader(engine::core->getStandardShader());
+                    meshRenderer->addMaterial(standardMaterial);
+                    
+                    standardMaterial->setAmbientColour(materialNode["Albedo"].as<glm::vec3>());
+                    standardMaterial->setRoughness(materialNode["Roughness"].as<float>());
+                    standardMaterial->setMetallic(materialNode["Metallic"].as<float>());
+                    standardMaterial->setEmissive(materialNode["Emissive"].as<glm::vec3>());
+                    standardMaterial->setHeightScale(materialNode["HeightScale"].as<float>());
+                    
+                    const auto diffuseRelativePath = materialNode["DiffuseMap"].as<std::string>();
+                    if (!diffuseRelativePath.empty())
+                        standardMaterial->setDiffuseMap(file::resourcePath() / diffuseRelativePath);
+                    
+                    const auto normalRelativePath = materialNode["NormalMap"].as<std::string>();
+                    if (!normalRelativePath.empty())
+                        standardMaterial->setNormalMap(file::resourcePath() / normalRelativePath);
+                    
+                    const auto heightRelativePath = materialNode["HeightMap"].as<std::string>();
+                    if (!heightRelativePath.empty())
+                        standardMaterial->setHeightMap(file::resourcePath() / heightRelativePath);
+                    
+                    const auto roughnessRelativePath = materialNode["RoughnessMap"].as<std::string>();
+                    if (!roughnessRelativePath.empty())
+                        standardMaterial->setRoughnessMap(file::resourcePath() / roughnessRelativePath);
+                    
+                    const auto metallicRelativePath = materialNode["MetallicMap"].as<std::string>();
+                    if (!metallicRelativePath.empty())
+                        standardMaterial->setMetallicMap(file::resourcePath() / metallicRelativePath);
+                }
+            }
+        });
+        
+        serializer->pushLoadComponent("DirectionalLight", [](const YAML::Node &node, Ref<Actor> actor) {
+            const auto colour = node["Colour"].as<glm::vec3>();
+            const auto intensity = node["Intensity"].as<float>();
+            const auto yaw = node["Yaw"].as<float>();
+            const auto pitch = node["Pitch"].as<float>();
+            
+            const auto depthCount = node["CascadeDepths"].size();
+            std::vector<float> depths;
+            depths.reserve(depthCount);
+            for (int i = 0; i < depthCount; ++i)
+                depths.emplace_back(node["CascadeDepths"][i].as<float>());
+            
+            const auto zMultiplier = node["ZMultiplier"].as<float>();
+            const auto bias = node["Bias"].as<glm::vec2>();
+            
+            actor->addComponent(makeResource<engine::DirectionalLight>(yaw, pitch, colour, intensity, depths, zMultiplier, bias));
+        });
+        
+        serializer->pushLoadComponent("PointLight", [](const YAML::Node &node, Ref<Actor> actor) {
+            const auto colour = node["Colour"].as<glm::vec3>();
+            const auto intensity = node["Intensity"].as<float>();
+            const auto radius = node["Radius"].as<float>();
+            const auto bias = node["Bias"].as<glm::vec2>();
+            const auto softness = node["Softness"].as<float>();
+            const auto resolution = node["Resolution"].as<int>();
+            
+            actor->addComponent(makeResource<engine::PointLight>(colour, intensity, radius, bias, softness, resolution));
+        });
     }
 }
 

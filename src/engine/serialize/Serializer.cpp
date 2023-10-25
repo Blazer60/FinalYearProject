@@ -45,18 +45,38 @@ YAML::Emitter &operator<<(YAML::Emitter &out, const glm::quat &q)
 
 namespace engine
 {
-    void Serializer::pushComponentDelegate(const SerializeDelegate &delegate)
+    void Serializer::pushComponentDelegate(const SerializeComponentDelegate &delegate)
     {
-        mComponentFunctions.push_back(delegate);
+        mComponentSerializeFunctions.push_back(delegate);
     }
     
-    void Serializer::component(YAML::Emitter &out, Component *component)
+    void Serializer::saveComponent(YAML::Emitter &out, Component *component)
     {
-        for (const auto &function : mComponentFunctions)
+        for (const auto &function : mComponentSerializeFunctions)
         {
             if (function(out, component))
                 return;
         }
+    }
+    
+    void Serializer::loadComponent(const YAML::Node &node, const Ref<Actor> &actor)
+    {
+        if (!node["Component"].IsDefined())
+            return;
+        
+        const auto componentType = node["Component"].as<std::string>();
+        if (auto it = mLoadComponentFunctions.find(componentType); it != mLoadComponentFunctions.end())
+        {
+            it->second(node, actor);
+            return;
+        }
+        
+        WARN("Could not find a function to load component type: %", componentType);
+    }
+    
+    void Serializer::pushLoadComponent(std::string type, const LoadComponentDelegate &loadComponentDelegate)
+    {
+        mLoadComponentFunctions.emplace(std::move(type), loadComponentDelegate);
     }
 }
 
@@ -114,7 +134,7 @@ namespace engine::serialize
     void component(YAML::Emitter &out, Component *component)
     {
         out << YAML::BeginMap;
-        serializer->component(out, component);
+        serializer->saveComponent(out, component);
         out << YAML::EndMap;
     }
 }

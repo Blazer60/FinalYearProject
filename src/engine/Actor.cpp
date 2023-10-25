@@ -107,7 +107,7 @@ namespace engine
     {
         if (component->getActor() != this)
         {
-            WARN("This serializeActor does not own this component. The serializeComponent will not be destroyed.");
+            WARN("This serializeActor does not own this saveComponent. The serializeComponent will not be destroyed.");
             return;
         }
         

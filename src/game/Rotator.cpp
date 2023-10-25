@@ -9,6 +9,12 @@
 #include "Actor.h"
 #include "Timers.h"
 
+Rotator::Rotator(const glm::vec3 &rotation)
+    : mRotation(rotation)
+{
+
+}
+
 void Rotator::onUpdate()
 {
     mActor->rotation = mActor->rotation * glm::quat(mRotation * timers::deltaTime<float>());

@@ -9,88 +9,12 @@
 #include "SceneLoader.h"
 #include "Scene.h"
 #include "AssimpLoader.h"
-#include "MeshRenderer.h"
 #include "FileLoader.h"
 #include "EngineState.h"
 #include "Core.h"
-#include "Lighting.h"
 
 #include <yaml-cpp/yaml.h>
 
-namespace YAML
-{
-    template<>
-    struct convert<glm::vec3>
-    {
-        static Node encode(const glm::vec3 &rhs)
-        {
-            Node node;
-            node.push_back(rhs.x);
-            node.push_back(rhs.y);
-            node.push_back(rhs.z);
-            return node;
-        }
-        
-        static bool decode(const Node& node, glm::vec3 &rhs)
-        {
-            if (!node.IsSequence() || node.size() != 3)
-                return false;
-            
-            rhs.x = node[0].as<float>();
-            rhs.y = node[1].as<float>();
-            rhs.z = node[2].as<float>();
-            return true;
-        }
-    };
-    
-    template<>
-    struct convert<glm::vec2>
-    {
-        static Node encode(const glm::vec2 &rhs)
-        {
-            Node node;
-            node.push_back(rhs.x);
-            node.push_back(rhs.y);
-            return node;
-        }
-        
-        static bool decode(const Node& node, glm::vec2 &rhs)
-        {
-            if (!node.IsSequence() || node.size() != 2)
-                return false;
-            
-            rhs.x = node[0].as<float>();
-            rhs.y = node[1].as<float>();
-            return true;
-        }
-    };
-    
-    template<>
-    struct convert<glm::quat>
-    {
-        static Node encode(const glm::quat &rhs)
-        {
-            Node node;
-            node.push_back(rhs.w);
-            node.push_back(rhs.x);
-            node.push_back(rhs.y);
-            node.push_back(rhs.z);
-            return node;
-        }
-        
-        static bool decode(const Node& node, glm::quat &rhs)
-        {
-            if (!node.IsSequence() || node.size() != 4)
-                return false;
-            
-            rhs.w = node[0].as<float>();
-            rhs.x = node[1].as<float>();
-            rhs.y = node[2].as<float>();
-            rhs.z = node[3].as<float>();
-            return true;
-        }
-    };
-}
 
 namespace load
 {
@@ -134,7 +58,7 @@ namespace load
             load::actor(childNode, actor);
         
         for (auto &componentNode : actorNode["Components"])
-            load::component(componentNode, actor);
+            engine::serializer->loadComponent(componentNode, actor);
     }
     
     void actor(const YAML::Node &actorNode, Ref<engine::Actor> parent)
@@ -149,88 +73,6 @@ namespace load
             load::actor(childNode, actor);
         
         for (auto &componentNode : actorNode["Components"])
-            load::component(componentNode, actor);
-    }
-    
-    void component(const YAML::Node &node, Ref<engine::Actor> actor)
-    {
-        if (!node["Component"].IsDefined())
-            return;
-        
-        const auto componentType = node["Component"].as<std::string>();
-        
-        if (componentType == "MeshRenderer")
-        {
-            const std::filesystem::path relativePath = node["MeshPath"].as<std::string>();
-            Ref<engine::MeshRenderer> meshRenderer = actor->addComponent(
-                load::meshRenderer<StandardVertex>(file::resourcePath() / relativePath));
-            
-            for (const auto &materialNode : node["Materials"])
-            {
-                const auto materialType = materialNode["MaterialType"].as<std::string>();
-                
-                if (materialType == "StandardMaterial")
-                {
-                    auto standardMaterial = std::make_shared<engine::StandardMaterialSubComponent>();
-                    standardMaterial->attachShader(engine::core->getStandardShader());
-                    meshRenderer->addMaterial(standardMaterial);
-                    
-                    standardMaterial->setAmbientColour(materialNode["Albedo"].as<glm::vec3>());
-                    standardMaterial->setRoughness(materialNode["Roughness"].as<float>());
-                    standardMaterial->setMetallic(materialNode["Metallic"].as<float>());
-                    standardMaterial->setEmissive(materialNode["Emissive"].as<glm::vec3>());
-                    standardMaterial->setHeightScale(materialNode["HeightScale"].as<float>());
-                    
-                    const auto diffuseRelativePath = materialNode["DiffuseMap"].as<std::string>();
-                    if (!diffuseRelativePath.empty())
-                        standardMaterial->setDiffuseMap(file::resourcePath() / diffuseRelativePath);
-                    
-                    const auto normalRelativePath = materialNode["NormalMap"].as<std::string>();
-                    if (!normalRelativePath.empty())
-                        standardMaterial->setNormalMap(file::resourcePath() / normalRelativePath);
-                    
-                    const auto heightRelativePath = materialNode["HeightMap"].as<std::string>();
-                    if (!heightRelativePath.empty())
-                        standardMaterial->setHeightMap(file::resourcePath() / heightRelativePath);
-                    
-                    const auto roughnessRelativePath = materialNode["RoughnessMap"].as<std::string>();
-                    if (!roughnessRelativePath.empty())
-                        standardMaterial->setRoughnessMap(file::resourcePath() / roughnessRelativePath);
-                    
-                    const auto metallicRelativePath = materialNode["MetallicMap"].as<std::string>();
-                    if (!metallicRelativePath.empty())
-                        standardMaterial->setMetallicMap(file::resourcePath() / metallicRelativePath);
-                }
-            }
-        }
-        else if (componentType == "DirectionalLight")
-        {
-            const auto colour = node["Colour"].as<glm::vec3>();
-            const auto intensity = node["Intensity"].as<float>();
-            const auto yaw = node["Yaw"].as<float>();
-            const auto pitch = node["Pitch"].as<float>();
-            
-            const auto depthCount = node["CascadeDepths"].size();
-            std::vector<float> depths;
-            depths.reserve(depthCount);
-            for (int i = 0; i < depthCount; ++i)
-                depths.emplace_back(node["CascadeDepths"][i].as<float>());
-            
-            const auto zMultiplier = node["ZMultiplier"].as<float>();
-            const auto bias = node["Bias"].as<glm::vec2>();
-            
-            actor->addComponent(makeResource<engine::DirectionalLight>(yaw, pitch, colour, intensity, depths, zMultiplier, bias));
-        }
-        else if (componentType == "PointLight")
-        {
-            const auto colour = node["Colour"].as<glm::vec3>();
-            const auto intensity = node["Intensity"].as<float>();
-            const auto radius = node["Radius"].as<float>();
-            const auto bias = node["Bias"].as<glm::vec2>();
-            const auto softness = node["Softness"].as<float>();
-            const auto resolution = node["Resolution"].as<int>();
-            
-            actor->addComponent(makeResource<engine::PointLight>(colour, intensity, radius, bias, softness, resolution));
-        }
+            engine::serializer->loadComponent(componentNode, actor);
     }
 }

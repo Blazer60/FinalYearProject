@@ -20,6 +20,8 @@ class Rotator
 {
     SERIALIZABLE_COMPONENT(Rotator);
 public:
+    Rotator() = default;
+    explicit Rotator(const glm::vec3 &rotation);
     ~Rotator() override = default;
 
 protected:
