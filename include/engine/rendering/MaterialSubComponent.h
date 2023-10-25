@@ -31,7 +31,7 @@ namespace engine
     class StandardMaterialSubComponent
         : public MaterialSubComponent
     {
-        SERIALIZABLE(MeshRenderer);
+        ENGINE_SERIALIZABLE_COMPONENT(MeshRenderer);
     public:
         StandardMaterialSubComponent() = default;
         

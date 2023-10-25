@@ -31,10 +31,14 @@ namespace engine
     {
     public:
         Serializer() = default;
-        void pushComponentDelegate(const SerializeDelegate &delegate);
         void component(YAML::Emitter &out, Component *component);
         
+        template<typename T>
+        void pushComponent();
+        
     protected:
+        void pushComponentDelegate(const SerializeDelegate &delegate);
+        
         std::vector<SerializeDelegate> mComponentFunctions;
     };
 }
@@ -51,4 +55,23 @@ namespace engine::serialize
     void component(YAML::Emitter &out, Component *component);
 }
 
-#define SERIALIZABLE(class) friend void ::serializeComponent(YAML::Emitter&, class*)
+// Used within the engine due to the namespace. We cannot forward declare and friend at the same time in a namespace.
+#define ENGINE_SERIALIZABLE_COMPONENT(class) friend void ::serializeComponent(YAML::Emitter&, class*)
+#define FORWARD_COMPONENT(cl) class cl; void serializeComponent(YAML::Emitter &, cl *)
+
+// Create a serializeComponent() function and then add it using engine::serializer->pushComponent<T>();
+#define SERIALIZABLE_COMPONENT(class) friend void serializeComponent(YAML::Emitter&, class*)
+
+template<typename T>
+void engine::Serializer::pushComponent()
+{
+    pushComponentDelegate([](YAML::Emitter &out, Component *component) -> bool {
+        if (auto x = dynamic_cast<T*>(component); x != nullptr)
+        {
+            serializeComponent(out, x);
+            return true;
+        }
+        
+        return false;
+    });
+}

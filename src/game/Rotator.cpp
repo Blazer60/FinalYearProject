@@ -29,3 +29,9 @@ void Rotator::onDrawUi()
     
     ImGui::PopID();
 }
+
+void serializeComponent(YAML::Emitter &out, Rotator *rotator)
+{
+    out << YAML::Key << "Component" << YAML::Value << "Rotator";
+    out << YAML::Key << "Rotation" << YAML::Value << rotator->mRotation;
+}

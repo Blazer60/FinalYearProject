@@ -55,7 +55,7 @@ namespace engine
         
         void calculateDirection();
         
-        SERIALIZABLE(DirectionalLight);
+        ENGINE_SERIALIZABLE_COMPONENT(DirectionalLight);
     };
 
     struct PointLight
@@ -81,7 +81,7 @@ namespace engine
         
         graphics::PointLight mPointLight;
         
-        SERIALIZABLE(PointLight);
+        ENGINE_SERIALIZABLE_COMPONENT(PointLight);
     };
 
     struct DistantLightProbe

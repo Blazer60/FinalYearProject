@@ -25,7 +25,7 @@ namespace engine
     class MeshRenderer
         : public Component
     {
-        SERIALIZABLE(MeshRenderer);
+        ENGINE_SERIALIZABLE_COMPONENT(MeshRenderer);
     public:
         MeshRenderer(std::vector<std::shared_ptr<SubMesh>> &&mesh, std::string path);
         ~MeshRenderer() override = default;

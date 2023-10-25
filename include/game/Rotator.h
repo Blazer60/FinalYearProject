@@ -18,6 +18,7 @@
 class Rotator
     : public engine::Component
 {
+    SERIALIZABLE_COMPONENT(Rotator);
 public:
     ~Rotator() override = default;
 

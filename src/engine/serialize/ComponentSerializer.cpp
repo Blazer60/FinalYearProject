@@ -16,23 +16,11 @@
 
 namespace engine
 {
-    // todo: Can this be inlined into the serializer?
-    template<typename T>
-    bool autoCast(YAML::Emitter &out, Component *component)
-    {
-        if (auto x = dynamic_cast<T*>(component); x != nullptr)
-        {
-            serializeComponent(out, x);
-            return true;
-        }
-        return false;
-    }
-    
     void attachComponentSerialization()
     {
-        serializer->pushComponentDelegate(autoCast<MeshRenderer>);
-        serializer->pushComponentDelegate(autoCast<DirectionalLight>);
-        serializer->pushComponentDelegate(autoCast<PointLight>);
+        serializer->pushComponent<MeshRenderer>();
+        serializer->pushComponent<DirectionalLight>();
+        serializer->pushComponent<PointLight>();
     }
 }
 
