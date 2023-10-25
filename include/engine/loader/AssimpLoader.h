@@ -42,6 +42,7 @@ namespace load
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(
             path.string(),
+            aiProcess_GlobalScale           |
             aiProcess_CalcTangentSpace      |
             aiProcess_Triangulate           |
             aiProcess_JoinIdenticalVertices |
