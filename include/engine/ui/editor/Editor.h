@@ -69,6 +69,7 @@ namespace engine
     public:
         void init();
         void update();
+        
         [[nodiscard]] Ref<Actor> getSelectedActor();
         bool isViewportHovered();
         GLFWwindow *getViewportContext();
@@ -77,6 +78,7 @@ namespace engine
         void addComponentOption(const std::string &name, const ComponentDetails::CreateFunc &onCreate);
         void addMenuOption(const std::string &name, const ActorDetails::CreateFunc &onCreate);
         static Ref<Actor> createDefaultShape(const std::string& name, std::string_view path);
+        void createModel(const std::filesystem::path &path);
         
         /**
          * @brief Allows callbacks to processed in the update function. This is mainly to stop imgui

@@ -17,6 +17,9 @@
 #include "EngineMath.h"
 #include "ProfileTimer.h"
 #include "EngineState.h"
+#include "AssimpLoader.h"
+#include "Scene.h"
+#include "MeshRenderer.h"
 
 namespace engine
 {
@@ -104,6 +107,11 @@ namespace engine
         window::setBufferSize(glm::ivec2(regionSize.x, regionSize.y));
         const TextureBufferObject &texture = mViewportImages[mCurrentSelectedImage].requestTexture();
         ImGui::Image(reinterpret_cast<void *>(texture.getId()), regionSize, ImVec2(0, 1), ImVec2(1, 0));
+        if (ImGui::BeginDragDropTarget())
+        {
+            if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(resourceModelPayload))
+                editor->createModel(*reinterpret_cast<std::filesystem::path*>(payload->Data));
+        }
         
         mIsHovered = ImGui::IsWindowHovered();
         

@@ -258,4 +258,16 @@ namespace engine
     {
         mOnUpdate.push_back(callback);
     }
+    
+    void Editor::createModel(const std::filesystem::path &path)
+    {
+        Ref<engine::Actor> actor = core->getScene()->spawnActor<engine::Actor>("Model");
+        actor->position = core->getCamera()->getEndOfBoomArmPosition();
+        Ref<MeshRenderer> meshRenderer = actor->addComponent(load::meshRenderer<StandardVertex>(path));
+        auto material = std::make_shared<StandardMaterialSubComponent>();
+        material->attachShader(core->getStandardShader());
+        meshRenderer->addMaterial(material);
+        
+        mSelectedActor = actor;
+    }
 }
