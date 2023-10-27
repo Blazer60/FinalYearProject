@@ -139,5 +139,15 @@ namespace file
     {
         return hasModelExtension(path.extension().string());
     }
+    
+    bool hasSceneExtension(const std::string &extension)
+    {
+        return extension == ".pcy";
+    }
+    
+    bool hasSceneExtension(const std::filesystem::path &path)
+    {
+        return hasSceneExtension(path.extension().string());
+    }
 }
 

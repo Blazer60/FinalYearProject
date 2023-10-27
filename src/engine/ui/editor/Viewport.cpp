@@ -20,6 +20,7 @@
 #include "AssimpLoader.h"
 #include "Scene.h"
 #include "MeshRenderer.h"
+#include "SceneLoader.h"
 
 namespace engine
 {
@@ -109,8 +110,15 @@ namespace engine
         ImGui::Image(reinterpret_cast<void *>(texture.getId()), regionSize, ImVec2(0, 1), ImVec2(1, 0));
         if (ImGui::BeginDragDropTarget())
         {
-            if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(resourceModelPayload))
-                editor->createModel(*reinterpret_cast<std::filesystem::path*>(payload->Data));
+            if (const ImGuiPayload *payload0 = ImGui::AcceptDragDropPayload(resourceModelPayload))
+                editor->createModel(*reinterpret_cast<std::filesystem::path*>(payload0->Data));
+            else if (const ImGuiPayload *payload1 = ImGui::AcceptDragDropPayload(resourceScenePayload))
+            {
+                const auto path = *reinterpret_cast<std::filesystem::path*>(payload1->Data);
+                auto newScene = std::make_unique<Scene>();
+                load::scene(path, newScene.get());
+                core->setScene(std::move(newScene));
+            }
         }
         
         mIsHovered = ImGui::IsWindowHovered();

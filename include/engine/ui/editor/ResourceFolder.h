@@ -18,9 +18,14 @@ namespace engine
     extern const char *resourceImagePayload;
     
     /**
-     * @brief The name for places accept models from imgui payloads. See MeshRenderer for an example.
+     * @brief The name for places that accept models from imgui payloads. See MeshRenderer for an example.
      */
     extern const char *resourceModelPayload;
+    
+    /**
+     * @brief The name for places that accept scenes from imgui payloads.
+     */
+    extern const char *resourceScenePayload;
     
 /**
  * @author Ryan Purse

@@ -26,4 +26,7 @@ namespace file
     
     bool hasModelExtension(const std::string &extension);
     bool hasModelExtension(const std::filesystem::path &path);
+    
+    bool hasSceneExtension(const std::string &extension);
+    bool hasSceneExtension(const std::filesystem::path &path);
 }
