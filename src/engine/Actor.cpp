@@ -85,7 +85,38 @@ namespace engine
     void Actor::update()
     {
         onUpdate();
+        updateComponents();
         
+        for (int i = 0; i < mActorsToAdd.size(); ++i)
+        {
+            // child.begin()
+            mChildren.push_back(std::move(mActorsToAdd[i]));
+        }
+        mActorsToAdd.clear();
+        
+        for (auto &child : mChildren)
+            child->update();
+        
+        auto currentActorDestroyBuffer = mActorsToDestroy;
+        if (mActorsToDestroy == &mActorDestroyBuffer0)
+            mActorsToDestroy = &mActorDestroyBuffer1;
+        else
+            mActorsToDestroy = &mActorDestroyBuffer0;
+        
+        // Removing children that are marked for deletion.
+        for (const Actor *actor : *currentActorDestroyBuffer)
+        {
+            const auto it = std::find_if(mChildren.begin(), mChildren.end(), [&actor](const Resource<Actor> &left) {
+                return left.get() == actor;
+            });
+            
+            mChildren.erase(it);
+        }
+        currentActorDestroyBuffer->clear();
+    }
+    
+    void Actor::updateComponents()
+    {
         // Components could create more components.
         for (int i = 0; i < mComponentsToAdd.size(); ++i)
         {
@@ -106,7 +137,8 @@ namespace engine
         // Removing components that are marked for deletion.
         for (const Component *component : *currentComponentDestroyBuffer)
         {
-            const auto it = std::find_if(mComponents.begin(), mComponents.end(), [&component](const Ref<Component> &left) {
+            const auto it = std::find_if(
+                mComponents.begin(), mComponents.end(), [&component](const Ref<Component> &left) {
                 return left.get() == component;
             });
             
@@ -116,24 +148,6 @@ namespace engine
         }
         
         currentComponentDestroyBuffer->clear();
-        
-        for (int i = 0; i < mChildren.size(); ++i)
-            mChildren[i]->update();
-        
-        // Removing children that are marked for deletion.
-        for (const Actor *actor : mActorsToDestroy)
-        {
-            const auto it = std::find_if(mChildren.begin(), mChildren.end(), [&actor](const Resource<Actor> &left) {
-                return left.get() == actor;
-            });
-            
-            mChildren.erase(it);
-        }
-        mActorsToDestroy.clear();
-        
-        for (auto &child : mActorsToAdd)
-            mChildren.push_back(std::move(child));
-        mActorsToAdd.clear();
     }
     
     void Actor::removeComponent(const Component *component)
@@ -190,9 +204,20 @@ namespace engine
             );
             
             if (it == mChildren.end())
+            {
+                const auto it2 = std::find_if(
+                    mActorsToAdd.begin(), mActorsToAdd.end(), [&actor](const Resource<Actor> &left) {
+                        return left.get() == actor;
+                    }
+                );
+                
+                if (it2 == mActorsToAdd.end())
+                    mActorsToAdd.erase(it2);
+                
                 return;
+            }
             
-            mActorsToDestroy.emplace(actor);
+            mActorsToDestroy->emplace(actor);
         }
         else
         {
@@ -225,27 +250,39 @@ namespace engine
     
     Resource<Actor> Actor::popActor(Actor *actor)
     {
+        auto moveOut = [](Resource<Actor> &&out) {
+            // We reset the transform to world space since we aren't connect to anything.
+            out->mTransform = out->getTransform();
+            math::decompose(out->mTransform, out->position, out->rotation, out->scale);
+            out->mParent = nullptr;
+            return out;
+        };
+        
         const auto it = std::find_if(mChildren.begin(), mChildren.end(), [&actor](const Resource<Actor> &child) {
             return child.get() == actor;
         });
         
         if (it == mChildren.end())
         {
-            LOG_MAJOR("Failed to find serializeActor while popping");
+            const auto it2 = std::find_if(mActorsToAdd.begin(), mActorsToAdd.end(), [&actor](const Resource<Actor> &child) {
+                return child.get() == actor;
+            });
+            
+            if (it2 != mActorsToAdd.end())
+            {
+                Resource<Actor> out = std::move(*it2);
+                mActorsToAdd.erase(it2);
+                return moveOut(std::move(out));
+            }
+            
+            LOG_MAJOR("Failed to find Actor while popping");
             return Resource<Actor>();
         }
         
         Resource<Actor> out = std::move(*it);
         mChildren.erase(it);
         
-        // We reset the transform to world space since we aren't connect to anything.
-        out->mTransform = out->getTransform();
-        MESSAGE(out->mTransform);
-        math::decompose(out->mTransform, out->position, out->rotation, out->scale);
-        
-        out->mParent = nullptr;
-        
-        return out;
+        return moveOut(std::move(out));
     }
     
     Scene *Actor::getScene()

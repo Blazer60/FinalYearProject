@@ -130,6 +130,8 @@ add_executable(${PROJECT_NAME}
         include/engine/ui/editor/ResourceFolder.h
         src/game/Spammer.cpp
         src/game/Spammer.h
+        src/game/MyTestActor.cpp
+        src/game/MyTestActor.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

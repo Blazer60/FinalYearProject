@@ -96,8 +96,8 @@ namespace engine
         [[nodiscard]] Scene *getScene();
         
     protected:
-        std::string mName       { "Actor" };  // I've put the name here so that the debugger shows this as the first field.
-        class Scene *mScene;
+        std::string mName      { "Actor" };  // I've put the name here so that the debugger shows this as the first field.
+        class Scene *mScene    { nullptr };
     public:
         glm::vec3 position     { glm::vec3(0.f) };
         glm::quat rotation     { glm::identity<glm::quat>() };
@@ -108,7 +108,9 @@ namespace engine
         std::set<const Component*>  mComponentDestroyBuffer1;
         std::set<const Component*> *mComponentsToDestroy { &mComponentDestroyBuffer0 };
         
-        std::set<const Actor*> mActorsToDestroy;
+        std::set<const Actor*>  mActorDestroyBuffer0;
+        std::set<const Actor*>  mActorDestroyBuffer1;
+        std::set<const Actor*> *mActorsToDestroy { &mActorDestroyBuffer0 };
         
         std::vector<Resource<Actor>> mActorsToAdd;
         std::vector<Resource<Component>> mComponentsToAdd;
@@ -117,6 +119,7 @@ namespace engine
         void onDrawUi() override;
         void updateTransform();
         virtual void onUpdate();
+        void updateComponents();
         
         glm::mat4 mTransform    { glm::mat4(1.f) };
         

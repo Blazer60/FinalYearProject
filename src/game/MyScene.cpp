@@ -21,6 +21,7 @@
 #include "MeshRenderer.h"
 #include "MaterialSubComponent.h"
 #include "Spammer.h"
+#include "MyTestActor.h"
 
 MyScene::MyScene() :
     mStandardShader(std::make_shared<Shader>(
@@ -120,6 +121,8 @@ MyScene::MyScene() :
     leatherBallModel->addMaterial(leatherMaterial);
     
     spawnActor<engine::Actor>("Virus")->addComponent(makeResource<Spammer>());
+    
+    spawnActor<MyTestActor>("My Test Actor");
     
     // engine::serialize::scene(file::resourcePath() / "scenes/test.pcy", static_cast<engine::Scene*>(this));
     
