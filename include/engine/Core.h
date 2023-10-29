@@ -57,6 +57,7 @@ namespace engine
         
         std::unique_ptr<Scene> mScene;
         Scene *mScenePointer;
+        std::filesystem::path mScenePath;
         
         std::unique_ptr<Renderer> mRenderer;
         std::unique_ptr<debug::Logger> mLogger;

@@ -67,7 +67,7 @@ namespace engine
             if (ui::imageButton("Diffuse texture", mMaterial.diffuseMapId(), imageSize))
             {
                 engine::editor->addUpdateAction([this]() {
-                    const std::string result = openFileExplorer();
+                    const std::string result = openFileDialog();
                     if (result.empty())
                         return;
                     
@@ -94,7 +94,7 @@ namespace engine
             if (ui::imageButton("Normal Texture", mMaterial.normalMapId(), imageSize))
             {
                 engine::editor->addUpdateAction([this]() {
-                    const std::string result = openFileExplorer();
+                    const std::string result = openFileDialog();
                     if (result.empty())
                         return;
                     
@@ -119,7 +119,7 @@ namespace engine
             if (ui::imageButton("Roughness Texture", mMaterial.roughnessMapId(), imageSize))
             {
                 engine::editor->addUpdateAction([this]() {
-                    const std::string result = openFileExplorer();
+                    const std::string result = openFileDialog();
                     if (result.empty())
                         return;
                     
@@ -147,7 +147,7 @@ namespace engine
             if (ui::imageButton("Metallic Texture", mMaterial.metallicMapId(), imageSize))
             {
                 engine::editor->addUpdateAction([this]() {
-                    const std::string result = openFileExplorer();
+                    const std::string result = openFileDialog();
                     if (result.empty())
                         return;
                     
@@ -176,7 +176,7 @@ namespace engine
             if (ui::imageButton("Height Texture", mMaterial.heightMapId(), imageSize))
             {
                 engine::editor->addUpdateAction([this]() {
-                    const std::string result = openFileExplorer();
+                    const std::string result = openFileDialog();
                     if (result.empty())
                         return;
                     

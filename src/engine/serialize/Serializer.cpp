@@ -84,6 +84,9 @@ namespace engine::serialize
 {
     void scene(const std::filesystem::path &path, struct Scene *scene)
     {
+        if (path.empty())
+            return;
+        
         if (!exists(path.parent_path()))
         {
             const bool success = std::filesystem::create_directories(path.parent_path());

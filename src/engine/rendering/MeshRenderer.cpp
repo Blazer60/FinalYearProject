@@ -65,7 +65,7 @@ namespace engine
     {
         if (ImGui::Button("Change Mesh"))
         {
-            std::string meshPath = openFileExplorer();
+            std::string meshPath = openFileDialog();
             SharedMesh mesh = load::model<StandardVertex>(meshPath);
             if (!mesh.empty())
             {

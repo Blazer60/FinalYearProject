@@ -25,6 +25,7 @@
 #include "FileLoader.h"
 #include "ComponentSerializer.h"
 #include "SceneLoader.h"
+#include "FileExplorer.h"
 
 namespace engine
 {
@@ -303,13 +304,29 @@ namespace engine
             {
                 if (ImGui::MenuItem("Save"))
                 {
-                    serialize::scene(file::resourcePath() / "scenes/test.pcy", getScene());
+                    if (mScenePath.empty())
+                        WARN("No Scene is loaded.");
+                    serialize::scene(mScenePath, getScene());
+                }
+                if (ImGui::MenuItem("Save as"))
+                {
+                    auto scenePath = saveFileDialog();
+                    if (!scenePath.empty())
+                    {
+                        mScenePath = scenePath;
+                        serialize::scene(mScenePath, getScene());
+                    }
                 }
                 if (ImGui::MenuItem("Load"))
                 {
                     auto newScene = std::make_unique<Scene>();
-                    load::scene(file::resourcePath() / "scenes/test.pcy", newScene.get());
-                    setScene(std::move(newScene));
+                    auto scenePath = openFileDialog();
+                    if (!scenePath.empty())
+                    {
+                        mScenePath = scenePath;
+                        load::scene(mScenePath, newScene.get());
+                        setScene(std::move(newScene));
+                    }
                 }
                 ImGui::EndMenu();
             }

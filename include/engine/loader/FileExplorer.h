@@ -9,4 +9,5 @@
 
 #include "Pch.h"
 
-std::string openFileExplorer();
+std::string openFileDialog();
+std::string saveFileDialog();

@@ -248,7 +248,7 @@ namespace engine
             if (ui::imageButton("HDR Texture", mThumbnailTexture->id(), ui::fitToRegion(mThumbnailTexture->size(), glm::ivec2(512))))
             {
                 engine::editor->addUpdateAction([this]() {
-                    const std::string result = openFileExplorer();
+                    const std::string result = openFileDialog();
                     if (result.empty())
                         return;
                     

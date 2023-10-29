@@ -120,10 +120,10 @@ MyScene::MyScene() :
     leatherMaterial->setRoughnessMap(file::modelPath() / "leatherBall/TexturesCom_Leather_Tufted_New_1K_roughness.png");
     leatherBallModel->addMaterial(leatherMaterial);
     
-    spawnActor<engine::Actor>("Virus")->addComponent(makeResource<Spammer>());
+    // spawnActor<engine::Actor>("Virus")->addComponent(makeResource<Spammer>());
     
-    spawnActor<MyTestActor>("My Test Actor");
-    
+    // spawnActor<MyTestActor>("My Test Actor");
+
     // engine::serialize::scene(file::resourcePath() / "scenes/test.pcy", static_cast<engine::Scene*>(this));
     
     // load::scene(file::resourcePath() / "scenes/test.pcy", this);
