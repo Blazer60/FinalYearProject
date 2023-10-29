@@ -240,8 +240,19 @@ public:
         swap(lhs.mControlBlock, rhs.mControlBlock);
     }
     
-    T* operator->() { return isValid() ? get() : throw InvalidReference(); }
-    const T* operator->() const { return isValid() ? get() : throw InvalidReference(); }
+    T* operator->()
+    {
+        return isValid()
+            ? get()
+            : throw InvalidReference("Ref<" + std::string(typeid(T).name()) + "> is pointing to a deleted resource.");
+    }
+    
+    const T* operator->() const
+    {
+        return isValid()
+            ? get()
+            : throw InvalidReference("Ref<" + std::string(typeid(T).name()) + "> is pointing to a deleted resource.");
+    }
     [[nodiscard]] T* get() { return mPtr; }
     [[nodiscard]] T* get() const { return mPtr; }
     [[nodiscard]] uint64_t typeHash() const { return mControlBlock->typeHash(); }
@@ -271,10 +282,19 @@ class InvalidReference
     : public std::exception
 {
 public:
+    InvalidReference() = default;
+    explicit InvalidReference(std::string what)
+        : mMessage(std::move(what))
+    {
+    
+    }
+    
     [[nodiscard]] const char *what() const override
     {
-        return "The reference is trying to access a deleted resource pointer.";
+        return mMessage.c_str();
     }
+    
+    std::string mMessage { "The reference is trying to access a deleted resource pointer." };
 };
 
 template<typename T, typename ...TArgs>

@@ -29,6 +29,7 @@ namespace debug
         Severity_Minor          = 0b001000,
         Severity_Major          = 0b010000,
         Severity_Fatal          = 0b100000,
+        Severity_Error          = 0b111000,
     };
     
     enum OutputSourceFlag_

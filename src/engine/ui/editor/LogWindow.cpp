@@ -55,7 +55,6 @@ namespace engine
     
     void LogWindow::drawMessageUi(const debug::Message &message)
     {
-        PROFILE_FUNC();
         const std::string id = std::to_string(message.line) + message.file;
         if (mCollapse)
         {
@@ -65,7 +64,7 @@ namespace engine
         
         if (message.severity == debug::Severity_Notification && mShowNotifications ||
             message.severity == debug::Severity_Warning && mShowWarnings ||
-            message.severity == debug::Severity_Major && mShowErrors)
+            ((message.severity & debug::Severity_Error) > 0 && mShowErrors))
         {
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
@@ -89,6 +88,7 @@ namespace engine
                 return mNotificationColour;
             case debug::Severity_Warning:
                 return mWarningColour;
+            case debug::Severity_Minor:
             case debug::Severity_Major:
                 return mErrorColour;
         }

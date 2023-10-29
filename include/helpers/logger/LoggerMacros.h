@@ -25,6 +25,11 @@
 #define WARN(message, ...)      (debug::logger->log(__FILE__, __LINE__, debug::Severity_Warning,          message, __VA_ARGS__))
 
 /**
+ * @brief Logs a minor error message.
+ */
+#define ERROR(message, ...)     (debug::logger->log(__FILE__, __LINE__, debug::Severity_Minor,            message, __VA_ARGS__))
+
+/**
  * @brief Logs a crash message.
  */
 #define CRASH(message, ...)     (debug::logger->log(__FILE__, __LINE__, debug::Severity_Fatal,            message, __VA_ARGS__))

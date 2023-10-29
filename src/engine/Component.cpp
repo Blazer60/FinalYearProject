@@ -19,7 +19,7 @@ namespace engine
         }
         catch (InvalidReference &e)
         {
-            WARN("%", e.what());
+            ERROR("OnBegin() error in one of %'s components: %", mActor->getName(), e.what());
         }
     }
     

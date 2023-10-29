@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <unordered_set>
 #include "Pch.h"
 #include "Drawable.h"
 
@@ -33,9 +34,9 @@ namespace engine
         
         ImVec4 mNotificationColour  { 1.f, 1.f, 1.f, 1.f };
         ImVec4 mWarningColour       { 1.f, 1.f, 0.f, 1.f };
-        ImVec4 mErrorColour         { 1.f, 0.f, 0.f, 1.f };
+        ImVec4 mErrorColour         { 1.f, 0.4f, 0.4f, 1.f };
         
-        std::set<std::string> mUniqueMessages;
+        std::unordered_set<std::string> mUniqueMessages;
     };
     
 } // engine
