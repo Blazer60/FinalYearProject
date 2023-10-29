@@ -211,6 +211,13 @@ public:
         incrementIfAble();
     }
     
+    // Copy-constructor downcast to derived class.
+    template<typename U, std::enable_if_t<std::is_convertible_v<T*, U*>, bool> = true>
+    Ref(const Ref<U> &other, T *p)
+        : mPtr(p), mControlBlock(other.mControlBlock)
+    {
+        incrementIfAble();
+    }
     
     // Destructor
     ~Ref()
@@ -236,7 +243,7 @@ public:
     T* operator->() { return isValid() ? get() : throw InvalidReference(); }
     const T* operator->() const { return isValid() ? get() : throw InvalidReference(); }
     [[nodiscard]] T* get() { return mPtr; }
-    [[nodiscard]] const T* get() const { return mPtr; }
+    [[nodiscard]] T* get() const { return mPtr; }
     [[nodiscard]] uint64_t typeHash() const { return mControlBlock->typeHash(); }
     [[nodiscard]] bool isValid() const { return mControlBlock != nullptr && mControlBlock->isValid(); }
 
@@ -274,4 +281,26 @@ template<typename T, typename ...TArgs>
 Resource<T> makeResource(TArgs &&... args)
 {
     return Resource<T>(new HeapResource<T>(std::forward<TArgs>(args)...));
+}
+
+/**
+ * @brief Downcast a reference to a derived class.
+ * @returns - A reference with the derived type. An empty reference if unable to.
+ */
+template<typename T, typename U>
+[[nodiscard]] Ref<T> dynamic_ref_cast(const Ref<U> &other)
+{
+    if (T* pointer = dynamic_cast<T*>(other.get()); pointer != nullptr)
+        return Ref<T>(other, pointer);
+    return Ref<T>();
+}
+
+/**
+ * @brief Downcast a resource to a derived reference class.
+ * @returns - A reference with the derived type or an empty reference if unable to.
+ */
+template<typename T, typename U>
+[[nodiscard]] Ref<T> dynamic_ref_cast(const Resource<U> &other)
+{
+    return dynamic_ref_cast<T>(Ref<U>(other));
 }

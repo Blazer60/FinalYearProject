@@ -11,6 +11,18 @@
 
 namespace engine
 {
+    void Component::begin()
+    {
+        try
+        {
+            onBegin();
+        }
+        catch (InvalidReference &e)
+        {
+            WARN("%", e.what());
+        }
+    }
+    
     void Component::update()
     {
         onUpdate();
@@ -51,5 +63,10 @@ namespace engine
     Actor *Component::getActor() const
     {
         return mActor;
+    }
+    
+    void Component::onBegin()
+    {
+    
     }
 }

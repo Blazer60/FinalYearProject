@@ -128,6 +128,8 @@ add_executable(${PROJECT_NAME}
         vendor/imguizmo/ImGuizmo.cpp vendor/imguizmo/ImGuizmo.h
         src/engine/ui/editor/ResourceFolder.cpp
         include/engine/ui/editor/ResourceFolder.h
+        src/game/Spammer.cpp
+        src/game/Spammer.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

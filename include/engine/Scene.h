@@ -56,8 +56,15 @@ namespace engine
         
         void recursePreRender(Ref<Actor> actor);
         
+        
+        std::set<const Actor*> mDestroyBuffer0;
+        std::set<const Actor*> mDestroyBuffer1;
+        std::set<const Actor*> *mToDestroy { &mDestroyBuffer0 };
+        
+        // todo: This thing needs to be created for when ~componet() trys to create an actor.
+        std::vector<Resource<Actor>> mToAdd;
+        
         std::vector<Resource<Actor>> mActors;
-        std::set<uint32_t> mToDestroy;
     };
     
     template<typename TActor, typename... TArgs>
@@ -73,7 +80,7 @@ namespace engine
         
         actor->mScene = this;
         actor->mParent = nullptr;
-        mActors.push_back(std::move(actor));
+        mToAdd.push_back(std::move(actor));
         
         return actorRef;
     }

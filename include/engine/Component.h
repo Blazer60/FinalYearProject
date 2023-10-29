@@ -22,12 +22,14 @@ namespace engine
     {
     public:
         ~Component() override = default;
+        void begin();
         void update();
         void preRender();
         void attachToActor(class Actor *actor);
         [[nodiscard]] class Actor *getActor() const;
         
     protected:
+        virtual void onBegin();
         virtual void onUpdate();
         virtual void onPreRender();
         void onDrawUi() override;

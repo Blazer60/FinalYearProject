@@ -20,6 +20,7 @@
 #include <FileLoader.h>
 #include "MeshRenderer.h"
 #include "MaterialSubComponent.h"
+#include "Spammer.h"
 
 MyScene::MyScene() :
     mStandardShader(std::make_shared<Shader>(
@@ -117,6 +118,8 @@ MyScene::MyScene() :
     leatherMaterial->setHeightMap(file::modelPath() / "leatherBall/TexturesCom_Leather_Tufted_New_1K_height.png");
     leatherMaterial->setRoughnessMap(file::modelPath() / "leatherBall/TexturesCom_Leather_Tufted_New_1K_roughness.png");
     leatherBallModel->addMaterial(leatherMaterial);
+    
+    spawnActor<engine::Actor>("Virus")->addComponent(makeResource<Spammer>());
     
     // engine::serialize::scene(file::resourcePath() / "scenes/test.pcy", static_cast<engine::Scene*>(this));
     

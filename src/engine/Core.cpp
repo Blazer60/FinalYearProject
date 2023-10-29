@@ -225,8 +225,9 @@ namespace engine
     
     Core::~Core()
     {
-        destroy::windowIcon(mWindowIcon);
+        // Should be calling scene cleanup.
         mScene.reset();
+        destroy::windowIcon(mWindowIcon);
         ImGui_ImplGlfw_Shutdown();
         ImGui_ImplOpenGL3_Shutdown();
         glfwTerminate();
@@ -239,6 +240,7 @@ namespace engine
         
         double nextUpdateTick = 0.0;
         timers::update();  // To register a valid time into the system.
+        timers::update();
         
         while (mIsRunning)
         {
@@ -352,11 +354,13 @@ namespace engine
     {
         mScene.reset();
         mScene = std::move(scene);
+        mScenePointer = mScene.get();
     }
     
     Scene *Core::getScene()
     {
-        return mScene.get();
+        return mScenePointer;
+        // return mScene.get();
     }
     
     MainCamera *Core::getCamera()

@@ -56,6 +56,8 @@ namespace engine
         GLFWwindow *mWindow { nullptr };
         
         std::unique_ptr<Scene> mScene;
+        Scene *mScenePointer;
+        
         std::unique_ptr<Renderer> mRenderer;
         std::unique_ptr<debug::Logger> mLogger;
         std::unique_ptr<ProfilerViewer> mProfilerViewer;

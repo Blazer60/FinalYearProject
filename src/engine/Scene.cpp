@@ -17,16 +17,30 @@ namespace engine
         PROFILE_FUNC();
         onUpdate();
         
-        for (auto &actor : mActors)
+        for (auto & actor : mActors)
             actor->update();
         
-        for (const uint32_t index : mToDestroy)
+        auto currentDestroyBuffer = mToDestroy;
+        if (currentDestroyBuffer == &mDestroyBuffer0)
+            mToDestroy = &mDestroyBuffer1;
+        else
+            mToDestroy = &mDestroyBuffer0;
+        
+        for (const Actor *actor : *currentDestroyBuffer)
         {
-            onDeath.broadcast(mActors[index]);
-            mActors.erase(mActors.begin() + index);
+            const auto it = std::find_if(mActors.begin(), mActors.end(), [&actor](const Ref<Actor> &left) {
+                return left.get() == actor;
+            });
+            
+            onDeath.broadcast(mActors[std::distance(mActors.begin(), it)]);
+            mActors.erase(it);
         }
         
-        mToDestroy.clear();
+        currentDestroyBuffer->clear();
+        
+        for (auto &child : mToAdd)
+            mActors.push_back(std::move(child));
+        mToAdd.clear();
     }
 
     void Scene::onFixedUpdate()
@@ -86,9 +100,7 @@ namespace engine
             return;
         }
         
-        const uint32_t index = std::distance(mActors.begin(), it);
-        
-        mToDestroy.emplace(index);
+        mToDestroy->emplace(actor);
     }
     
     void Scene::recursePreRender(Ref<Actor> actor)
@@ -117,5 +129,4 @@ namespace engine
         
         return out;
     }
-    
 }

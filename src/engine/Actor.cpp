@@ -86,30 +86,64 @@ namespace engine
     {
         onUpdate();
         
-        for (auto &component : getComponents())
+        // Components could create more components.
+        for (int i = 0; i < mComponentsToAdd.size(); ++i)
+        {
+            mComponentsToAdd[i]->begin();
+            mComponents.push_back(std::move(mComponentsToAdd[i]));
+        }
+        mComponentsToAdd.clear();
+        
+        for (auto &component : mComponents)
             component->update();
         
-        for (Resource<Actor> &child : mChildren)
-            child->update();
+        auto currentComponentDestroyBuffer = mComponentsToDestroy;
+        if (mComponentsToDestroy == &mComponentDestroyBuffer0)
+            mComponentsToDestroy = &mComponentDestroyBuffer1;
+        else
+            mComponentsToDestroy = &mComponentDestroyBuffer0;
         
         // Removing components that are marked for deletion.
-        for (const uint32_t index : mComponentsToDestroy)
-            mComponents.erase(mComponents.begin() + index);
+        for (const Component *component : *currentComponentDestroyBuffer)
+        {
+            const auto it = std::find_if(mComponents.begin(), mComponents.end(), [&component](const Ref<Component> &left) {
+                return left.get() == component;
+            });
+            
+            // We've already removed it in a previous pass.
+            if (it != mComponents.end())
+                mComponents.erase(it);
+        }
         
-        mComponentsToDestroy.clear();
+        currentComponentDestroyBuffer->clear();
+        
+        for (int i = 0; i < mChildren.size(); ++i)
+            mChildren[i]->update();
         
         // Removing children that are marked for deletion.
-        for (const uint32_t index : mActorsToDestroy)
-            mChildren.erase(mChildren.begin() + index);
-        
+        for (const Actor *actor : mActorsToDestroy)
+        {
+            const auto it = std::find_if(mChildren.begin(), mChildren.end(), [&actor](const Resource<Actor> &left) {
+                return left.get() == actor;
+            });
+            
+            mChildren.erase(it);
+        }
         mActorsToDestroy.clear();
+        
+        for (auto &child : mActorsToAdd)
+            mChildren.push_back(std::move(child));
+        mActorsToAdd.clear();
     }
     
-    void Actor::removeComponent(Component *component)
+    void Actor::removeComponent(const Component *component)
     {
+        if (component == nullptr)
+            return;  // Most likely already removed.
+        
         if (component->getActor() != this)
         {
-            WARN("This serializeActor does not own this saveComponent. The serializeComponent will not be destroyed.");
+            WARN("This serializeActor does not own this Component. The Component will not be destroyed.");
             return;
         }
         
@@ -119,21 +153,30 @@ namespace engine
         
         if (it == mComponents.end())
         {
-            WARN("Could not find the serializeComponent attached to this serializeActor.");
-            return;
+            const auto it2 = std::find_if(mComponentsToAdd.begin(), mComponentsToAdd.end(), [&component](const Ref<Component> &left) {
+                return left.get() == component;
+            });
+            
+            if (it2 == mComponentsToAdd.end())
+            {
+                WARN("Could not find the Component attached to this Actor.");
+                return;
+            }
+            else
+            {
+                // Pretend it never existed.
+                mComponentsToAdd.erase(it2);
+            }
         }
         
-        const uint32_t index = std::distance(mComponents.begin(), it);
-        
-        mComponentsToDestroy.emplace(index);
+        mComponentsToDestroy->emplace(component);
     }
     
-    
-    void Actor::removeChildActor(Actor* actor)
+    void Actor::removeChildActor(const Actor* actor)
     {
         if (actor == nullptr)
         {
-            WARN("This serializeActor cannot be removed since it is nullptr!");
+            WARN("This Actor cannot be removed since it is nullptr!");
             return;
         }
         
@@ -149,9 +192,7 @@ namespace engine
             if (it == mChildren.end())
                 return;
             
-            const uint32_t index = std::distance(mChildren.begin(), it);
-            
-            mActorsToDestroy.emplace(index);
+            mActorsToDestroy.emplace(actor);
         }
         else
         {
@@ -212,5 +253,10 @@ namespace engine
         return mScene;
     }
     
+    void Actor::removeComponent(const Ref<Component> &component)
+    {
+        if (component.isValid())
+            removeComponent(component.get());
+    }
 }
 

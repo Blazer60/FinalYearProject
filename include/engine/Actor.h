@@ -64,7 +64,7 @@ namespace engine
          * @returns The first serializeComponent of type T or a subclass of T, Nullptr otherwise.
          */
         template<typename T>
-        Ref<Component> getComponent();
+        Ref<T> getComponent();
         
         /**
          * @tparam T - the type of serializeComponent.
@@ -81,29 +81,37 @@ namespace engine
         template<typename T>
         void removeComponent();
         
-        void removeComponent(Component *component);
+        void removeComponent(const Component *component);
+        void removeComponent(const Ref<Component> &component);
         
         template<typename TActor, std::enable_if_t<std::is_convertible_v<TActor*, Actor*>, bool> = true>
         Ref<TActor> addChildActor(Resource<TActor> &&actor);
         
-        void removeChildActor(Actor* actor);
+        void removeChildActor(const Actor* actor);
         
         [[nodiscard]] std::vector<Resource<Actor>> &getChildren();
-        
         [[nodiscard]] Actor *getParent();
-        
         [[nodiscard]] glm::vec3 getWorldPosition();
-        
         Resource<Actor> popActor(Actor *actor);
-        
         [[nodiscard]] Scene *getScene();
         
     protected:
         std::string mName       { "Actor" };  // I've put the name here so that the debugger shows this as the first field.
+        class Scene *mScene;
     public:
         glm::vec3 position     { glm::vec3(0.f) };
         glm::quat rotation     { glm::identity<glm::quat>() };
         glm::vec3 scale        { glm::vec3(1.f) };
+    
+    private:
+        std::set<const Component*>  mComponentDestroyBuffer0;
+        std::set<const Component*>  mComponentDestroyBuffer1;
+        std::set<const Component*> *mComponentsToDestroy { &mComponentDestroyBuffer0 };
+        
+        std::set<const Actor*> mActorsToDestroy;
+        
+        std::vector<Resource<Actor>> mActorsToAdd;
+        std::vector<Resource<Component>> mComponentsToAdd;
         
     protected:
         void onDrawUi() override;
@@ -115,11 +123,6 @@ namespace engine
         Actor*                           mParent { nullptr };  // Nullptr means that its parent is the scene.
         std::vector<Resource<Actor>>     mChildren;
         std::vector<Resource<Component>> mComponents;
-        class Scene *mScene;
-        
-    private:
-        std::set<uint32_t> mComponentsToDestroy;
-        std::set<uint32_t> mActorsToDestroy;
     };
     
     template<typename T>
@@ -127,31 +130,63 @@ namespace engine
     {
         Ref<T> ref = component;
         component->attachToActor(this);
-        mComponents.push_back(std::move(component));
+        mComponentsToAdd.push_back(std::move(component));
         return ref;
     }
     
     template<typename T>
-    Ref<Component> Actor::getComponent()
+    Ref<T> Actor::getComponent()
     {
-        for (auto &component : mComponents)
-        {
-            if (T* t = dynamic_cast<T*>(component.get()); t != nullptr)
-                return t;
-        }
-        return Ref<Component>();
-    }
-    
-    template<typename T>
-    bool Actor::hasComponent() const
-    {
-        return std::any_of(mComponents.begin(), mComponents.end(), [](const Resource<Component> &component) {
+        const auto it = std::find_if(mComponents.begin(), mComponents.end(), [](const Resource<Component> &component) {
             const T* t = dynamic_cast<const T*>(component.get());
             if (t == nullptr)
                 return false;
             else  // Make sure that it's the exact type rather than a child type.
                 return typeid(const T*).hash_code() == typeid(t).hash_code();
         });
+        
+        if (it == mComponents.end())
+        {
+            const auto it2 = std::find_if(mComponentsToAdd.begin(), mComponentsToAdd.end(), [](const Resource<Component> &component) {
+                const T* t = dynamic_cast<const T*>(component.get());
+                if (t == nullptr)
+                    return false;
+                else  // Make sure that it's the exact type rather than a child type.
+                    return typeid(const T*).hash_code() == typeid(t).hash_code();
+            });
+            
+            if (it2 == mComponentsToAdd.end())
+            {
+                WARN("Component % does not exist.", typeid(T).name());
+                return Ref<T>();
+            }
+            
+            return dynamic_ref_cast<T>(*it2);
+        }
+        
+        return dynamic_ref_cast<T>(*it);
+    }
+    
+    template<typename T>
+    bool Actor::hasComponent() const
+    {
+        bool inComponentList = std::any_of(mComponents.begin(), mComponents.end(), [](const Resource<Component> &component) {
+            const T* t = dynamic_cast<const T*>(component.get());
+            if (t == nullptr)
+                return false;
+            else  // Make sure that it's the exact type rather than a child type.
+                return typeid(const T*).hash_code() == typeid(t).hash_code();
+        });
+        
+        bool inAddList = std::any_of(mComponentsToAdd.begin(), mComponentsToAdd.end(), [](const Resource<Component> &component) {
+            const T* t = dynamic_cast<const T*>(component.get());
+            if (t == nullptr)
+                return false;
+            else  // Make sure that it's the exact type rather than a child type.
+                return typeid(const T*).hash_code() == typeid(t).hash_code();
+        });
+        
+        return inComponentList || inAddList;
     }
     
     template<typename T>
@@ -167,13 +202,25 @@ namespace engine
         
         if (it == mComponents.end())
         {
-            WARN("Component % does not exist in this serializeActor and so it cannot be removed.", typeid(T).name());
+            const auto it2 = std::find_if(mComponentsToAdd.begin(), mComponentsToAdd.end(), [](const Resource<Component> &component) {
+                const T* t = dynamic_cast<const T*>(component.get());
+                if (t == nullptr)
+                    return false;
+                else  // Make sure that it's the exact type rather than a child type.
+                    return typeid(const T*).hash_code() == typeid(t).hash_code();
+            });
+            
+            if (it2 == mComponentsToAdd.end())
+            {
+                WARN("Component % does not exist in this Actor and so it cannot be removed.", typeid(T).name());
+                return;
+            }
+            
+            mComponentsToAdd.erase(it2);
             return;
         }
-        
-        const uint32_t index = std::distance(mComponents.begin(), it);
-        
-        mComponentsToDestroy.emplace(index);
+        else
+            mComponentsToDestroy->emplace((*it).get());
     }
     
     
@@ -189,7 +236,7 @@ namespace engine
         tempActor->mTransform = glm::inverse(getTransform()) * tempActor->mTransform;
         math::decompose(tempActor->mTransform, tempActor->position, tempActor->rotation, tempActor->scale);
         
-        mChildren.push_back(std::move(tempActor));
+        mActorsToAdd.push_back(std::move(tempActor));
         
         return ref;
     }
