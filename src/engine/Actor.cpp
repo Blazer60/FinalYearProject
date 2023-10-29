@@ -20,6 +20,12 @@ namespace engine
     
     }
     
+    void Actor::begin()
+    {
+        onBegin();
+    }
+    
+    
     void Actor::onUpdate()
     {
         updateTransform();
@@ -89,7 +95,7 @@ namespace engine
         
         for (int i = 0; i < mActorsToAdd.size(); ++i)
         {
-            // child.begin()
+            mActorsToAdd[i]->begin();
             mChildren.push_back(std::move(mActorsToAdd[i]));
         }
         mActorsToAdd.clear();
@@ -212,9 +218,10 @@ namespace engine
                 );
                 
                 if (it2 == mActorsToAdd.end())
-                    mActorsToAdd.erase(it2);
-                
-                return;
+                {
+                    ERROR("Actor has this parent but is not in the child list.");
+                    return;
+                }
             }
             
             mActorsToDestroy->emplace(actor);
@@ -294,6 +301,11 @@ namespace engine
     {
         if (component.isValid())
             removeComponent(component.get());
+    }
+    
+    void Actor::onBegin()
+    {
+    
     }
 }
 

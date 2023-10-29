@@ -61,7 +61,6 @@ namespace engine
         std::set<const Actor*> mDestroyBuffer1;
         std::set<const Actor*> *mToDestroy { &mDestroyBuffer0 };
         
-        // todo: This thing needs to be created for when ~componet() trys to create an actor.
         std::vector<Resource<Actor>> mToAdd;
         
         std::vector<Resource<Actor>> mActors;

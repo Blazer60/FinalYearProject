@@ -14,16 +14,21 @@ MyTestActor::MyTestActor(std::string name)
 
 }
 
+void MyTestActor::onBegin()
+{
+    Ref<engine::Actor> a = addChildActor(makeResource<engine::Actor>("Should be dead."));
+    a->markForDeath();
+}
+
 void MyTestActor::onUpdate()
 {
     mTimer += timers::deltaTime<float>();
-    if (mTimer > 0.1f)
+    if (mTimer > 0.001f)
     {
-        mTimer -= 0.1f;
+        mTimer -= 0.001f;
         addChildActor(makeResource<engine::Actor>("Child"));
-        
-        if (mChildren.size() > 10)
+
+        if (mChildren.size() > 100)
             mChildren.clear();
     }
 }
-

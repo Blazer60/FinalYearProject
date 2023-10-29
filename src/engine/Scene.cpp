@@ -17,6 +17,13 @@ namespace engine
         PROFILE_FUNC();
         onUpdate();
         
+        for (int i = 0; i <mToAdd.size(); ++i)
+        {
+            mToAdd[i]->begin();
+            mActors.push_back(std::move(mToAdd[i]));
+        }
+        mToAdd.clear();
+        
         for (auto & actor : mActors)
             actor->update();
         
@@ -37,10 +44,6 @@ namespace engine
         }
         
         currentDestroyBuffer->clear();
-        
-        for (auto &child : mToAdd)
-            mActors.push_back(std::move(child));
-        mToAdd.clear();
     }
 
     void Scene::onFixedUpdate()
@@ -96,8 +99,15 @@ namespace engine
         
         if (it == mActors.end())
         {
-            WARN("Actor % does not exist in this scene and so it cannot be removed.", actor->getName());
-            return;
+            const auto it2 = std::find_if(mToAdd.begin(), mToAdd.end(), [&actor](const Ref<Actor> &left) {
+                return left.get() == actor;
+            });
+            
+            if (it2 == mToAdd.end())
+            {
+                WARN("Actor % does not exist in this scene and so it cannot be removed.", actor->getName());
+                return;
+            }
         }
         
         mToDestroy->emplace(actor);

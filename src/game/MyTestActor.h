@@ -20,6 +20,7 @@ class MyTestActor
 {
 public:
     explicit MyTestActor(std::string name);
+    void onBegin() override;
     void onUpdate() override;
 protected:
     float mTimer { 0 };

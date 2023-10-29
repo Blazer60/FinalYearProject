@@ -33,6 +33,7 @@ namespace engine
         explicit Actor(std::string name);
         ~Actor() override = default;
         
+        void begin();
         void update();
         
     
@@ -119,6 +120,7 @@ namespace engine
         void onDrawUi() override;
         void updateTransform();
         virtual void onUpdate();
+        virtual void onBegin();
         void updateComponents();
         
         glm::mat4 mTransform    { glm::mat4(1.f) };
