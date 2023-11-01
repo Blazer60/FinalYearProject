@@ -267,11 +267,13 @@ namespace engine
     void SpotLight::onPreRender()
     {
         calculateDirection();
-        mSpotLight.colourIntensity = mColour * mIntensity;
-        mSpotLight.position = mActor->getWorldPosition();
-        mSpotLight.cosInnerAngle = glm::cos(glm::radians(mInnerAngleDegrees));
-        mSpotLight.cosOuterAngle = glm::cos(glm::radians(mOuterAngleDegrees));
-        graphics::renderer->submit(mSpotLight);
+        mSpotlight.colourIntensity = mColour * mIntensity;
+        mSpotlight.position = mActor->getWorldPosition();
+        mSpotlight.cosInnerAngle = glm::cos(glm::radians(mInnerAngleDegrees));
+        // todo: Should this just be passed in as a single variable?
+        mSpotlight.outerAngle = glm::radians(mOuterAngleDegrees);
+        mSpotlight.cosOuterAngle = glm::cos(mSpotlight.outerAngle);
+        graphics::renderer->submit(mSpotlight);
     }
     
     void SpotLight::onDrawUi()
@@ -288,6 +290,7 @@ namespace engine
             
             ImGui::SliderFloat("Inner Angle", &mInnerAngleDegrees, 0.f, 180.f);
             ImGui::SliderFloat("outer Angle", &mOuterAngleDegrees, 0.f, 180.f);
+            ImGui::DragFloat("Radius", &mSpotlight.radius);
             
             ImGui::Checkbox("Use Actor's Rotation", &mUseActorRotation);
             if (!mUseActorRotation)
@@ -297,6 +300,12 @@ namespace engine
                 ImGui::DragFloat("Pitch", &mPitch, 0.1f);
             }
             
+            ImGui::Checkbox("Debug Shadow Map", &mDebugShadowMap);
+            if (mDebugShadowMap)
+                ui::showTextureBuffer(
+                    "Spotlight Shadow Map", *mSpotlight.shadowMap,
+                    &mDebugShadowMap, glm::ivec2(mSpotlight.shadowMap->getSize()), true);
+            
             ImGui::TreePop();
         }
         
@@ -305,16 +314,31 @@ namespace engine
     
     void SpotLight::calculateDirection()
     {
+        const glm::mat4 projectionMatrix = glm::perspective(2.f * mSpotlight.outerAngle, 1.f, 0.001f, mSpotlight.radius);
         if (mUseActorRotation)
         {
-            mSpotLight.direction = glm::normalize(getWorldTransform() * glm::vec4(0.f, 0.f, -1.f, 0.f));
+            mSpotlight.direction = glm::normalize(getWorldTransform() * glm::vec4(0.f, 0.f, -1.f, 0.f));
+            const glm::mat4 viewMatrix = glm::inverse(getWorldTransform());
+            mSpotlight.vpMatrix = projectionMatrix * viewMatrix;
         }
         else
         {
             const float yawRadians = glm::radians(mYaw);
             const float pitchRadians = glm::radians(mPitch);
             
-            mSpotLight.direction = glm::yawPitchRoll(yawRadians, pitchRadians, 0.f) * glm::vec4(0.f, 0.f, -1.f, 0.f);
+            const glm::mat4 rotationMatrix = glm::yawPitchRoll(yawRadians, pitchRadians, 0.f);
+            mSpotlight.direction = rotationMatrix * glm::vec4(0.f, 0.f, -1.f, 0.f);
+            const glm::mat4 viewMatrix = glm::inverse(glm::translate(glm::mat4(1.f) * rotationMatrix, mActor->getWorldPosition()));
+            mSpotlight.vpMatrix = projectionMatrix * viewMatrix;
         }
+    }
+    
+    SpotLight::SpotLight()
+        : Light()
+    {
+        mSpotlight.shadowMap = std::make_shared<TextureBufferObject>(
+            glm::ivec2(1024), GL_DEPTH_COMPONENT32,
+            graphics::filter::Linear, graphics::wrap::ClampToBorder);
+        mSpotlight.shadowMap->setBorderColour(glm::vec4(1.f));
     }
 }

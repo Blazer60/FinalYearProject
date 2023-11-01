@@ -29,11 +29,12 @@ Renderer::Renderer() :
     
     mDirectionalLightShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/DirectionalLight.frag");
     mPointLightShader = std::make_unique<Shader>(file::shaderPath() / "lighting/PointLight.vert", file::shaderPath() / "lighting/PointLight.frag");
-    mSpotLightShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/SpotLight.frag");
+    mSpotlightShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/SpotLight.frag");
     mIblShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/IBL.frag");
     mDeferredLightShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/CombineOutput.frag");
     mDirectionalLightShadowShader = std::make_unique<Shader>(file::shaderPath() / "shadow/Shadow.vert", file::shaderPath() / "shadow/Shadow.frag");
     mPointLightShadowShader = std::make_unique<Shader>(file::shaderPath() / "shadow/PointShadow.vert", file::shaderPath() / "shadow/PointShadow.frag");
+    mSpotlightShadowShader = std::make_unique<Shader>(file::shaderPath() / "shadow/Shadow.vert", file::shaderPath() / "shadow/Shadow.frag");
     mHdrToCubemapShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "cubemap/ToCubemap.frag");
     mCubemapToIrradianceShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "cubemap/IrradianceMap.frag");
     mPreFilterShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() /  "cubemap/PreFilter.frag");
@@ -124,9 +125,9 @@ void Renderer::submit(const graphics::PointLight &pointLight)
     mPointLightQueue.emplace_back(pointLight);
 }
 
-void Renderer::submit(const graphics::SpotLight &spotLight)
+void Renderer::submit(const graphics::Spotlight &spotLight)
 {
-    mSpotLightQueue.emplace_back(spotLight);
+    mSpotlightQueue.emplace_back(spotLight);
 }
 
 
@@ -179,6 +180,7 @@ void Renderer::render()
         
         directionalLightShadowMapping(camera);
         pointLightShadowMapping();
+        spotlightShadowMapping();
         
         // Reset the viewport back to the normal size once we've finished rendering all the shadows.
         glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
@@ -258,26 +260,31 @@ void Renderer::render()
         PROFILE_SCOPE_BEGIN(spotLightTimer, "Spot Light");
         graphics::pushDebugGroup("Spot Light");
         
-        mSpotLightShader->bind();
+        mSpotlightShader->bind();
         
-        mSpotLightShader->set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 0);
-        mSpotLightShader->set("u_position_texture", mPositionTextureBuffer->getId(), 1);
-        mSpotLightShader->set("u_normal_texture", mNormalTextureBuffer->getId(), 2);
-        mSpotLightShader->set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 3);
-        mSpotLightShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
+        mSpotlightShader->set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 0);
+        mSpotlightShader->set("u_position_texture", mPositionTextureBuffer->getId(), 1);
+        mSpotlightShader->set("u_normal_texture", mNormalTextureBuffer->getId(), 2);
+        mSpotlightShader->set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 3);
+        mSpotlightShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
         
-        mSpotLightShader->set("u_camera_position_ws", cameraPosition);
+        mSpotlightShader->set("u_camera_position_ws", cameraPosition);
+        mSpotlightShader->set("u_view_matrix", camera.viewMatrix);
         
-        for (const auto &spotLight : mSpotLightQueue)
+        for (const auto &spotLight : mSpotlightQueue)
         {
-            mSpotLightShader->set("u_light_position", spotLight.position);
-            mSpotLightShader->set("u_light_direction", spotLight.direction);
+            mSpotlightShader->set("u_shadow_map_texture", spotLight.shadowMap->getId(), 5);
+            
+            mSpotlightShader->set("u_light_position", spotLight.position);
+            mSpotlightShader->set("u_light_direction", spotLight.direction);
             const float lightAngleScale = 1.f / glm::max(0.001f, (spotLight.cosInnerAngle - spotLight.cosOuterAngle));
             const float lightAngleOffset = -spotLight.cosOuterAngle * lightAngleScale;
-            mSpotLightShader->set("u_light_angle_scale", lightAngleScale);
-            mSpotLightShader->set("u_light_angle_offset", lightAngleOffset);
-            mSpotLightShader->set("u_light_inv_sqr_radius", 1.f / (spotLight.radius * spotLight.radius));
-            mSpotLightShader->set("u_light_intensity", spotLight.colourIntensity);
+            mSpotlightShader->set("u_light_angle_scale", lightAngleScale);
+            mSpotlightShader->set("u_light_angle_offset", lightAngleOffset);
+            mSpotlightShader->set("u_light_inv_sqr_radius", 1.f / (spotLight.radius * spotLight.radius));
+            mSpotlightShader->set("u_light_intensity", spotLight.colourIntensity);
+            mSpotlightShader->set("u_light_vp_matrix", spotLight.vpMatrix);
+            mSpotlightShader->set("u_bias", glm::vec2(0.f, 0.f));
             
             drawFullscreenTriangleNow();
         }
@@ -351,6 +358,117 @@ void Renderer::render()
     graphics::popDebugGroup();
 }
 
+void Renderer::directionalLightShadowMapping(const CameraSettings &cameraSettings)
+{
+    PROFILE_FUNC();
+    graphics::pushDebugGroup("Directional Light Shadow Mapping");
+    const auto resize = [](const glm::vec4 &v) { return v / v.w; };
+    
+    mShadowFramebuffer->bind();
+    mDirectionalLightShadowShader->bind();
+    
+    for (graphics::DirectionalLight &directionalLight : mDirectionalLightQueue)
+    {
+        PROFILE_SCOPE_BEGIN(lightTimer, "Directional Light Shadow Mapping");
+        directionalLight.cascadeDepths.clear();
+        directionalLight.cascadeDepths.reserve(directionalLight.shadowCascadeMultipliers.size());
+        for (const auto &multiplier : directionalLight.shadowCascadeMultipliers)
+            directionalLight.cascadeDepths.emplace_back(cameraSettings.farClipDistance * multiplier);
+        
+        graphics::pushDebugGroup("Directional Light");
+        
+        const glm::ivec2 &shadowMapSize = directionalLight.shadowMap->getSize();
+        glViewport(0, 0, shadowMapSize.x, shadowMapSize.y);
+        
+        std::vector<float> depths { cameraSettings.nearClipDistance };
+        for (const float &depth : directionalLight.cascadeDepths)
+            depths.emplace_back(depth);
+        depths.emplace_back(cameraSettings.farClipDistance);
+        
+        for (int j = 0; j < directionalLight.shadowMap->getLayerCount(); ++j)
+        {
+            PROFILE_SCOPE_BEGIN(shadowCreation, "Cascade Pass");
+            graphics::pushDebugGroup("Cascade Pass");
+            
+            mShadowFramebuffer->attachDepthBuffer(*directionalLight.shadowMap, j);
+            mShadowFramebuffer->clearDepthBuffer();
+            
+            const float aspectRatio = window::aspectRatio();
+            const glm::mat4 projectionMatrix = glm::perspective(cameraSettings.fovY, aspectRatio, depths[j], depths[j + 1]);
+            
+            // We only want the shadow map to encompass the camera's frustum.
+            const glm::mat4 inverseVpMatrix = glm::inverse(projectionMatrix * cameraSettings.viewMatrix);
+            const std::vector<glm::vec4> worldPoints = {
+                resize(inverseVpMatrix * glm::vec4(1.f, 1.f, -1.f, 1.f)),
+                resize(inverseVpMatrix * glm::vec4(1.f, -1.f, -1.f, 1.f)),
+                resize(inverseVpMatrix * glm::vec4(-1.f, 1.f, -1.f, 1.f)),
+                resize(inverseVpMatrix * glm::vec4(-1.f, -1.f, -1.f, 1.f)),
+                
+                resize(inverseVpMatrix * glm::vec4(1.f, 1.f, 1.f, 1.f)),
+                resize(inverseVpMatrix * glm::vec4(1.f, -1.f, 1.f, 1.f)),
+                resize(inverseVpMatrix * glm::vec4(-1.f, 1.f, 1.f, 1.f)),
+                resize(inverseVpMatrix * glm::vec4(-1.f, -1.f, 1.f, 1.f)),
+            };
+            
+            glm::vec3 minWorldBound = worldPoints[0];
+            glm::vec3 maxWorldBound = worldPoints[0];
+            for (int i = 1; i < worldPoints.size(); ++i)
+            {
+                minWorldBound = glm::min(minWorldBound, glm::vec3(worldPoints[i]));
+                maxWorldBound = glm::max(maxWorldBound, glm::vec3(worldPoints[i]));
+            }
+            const glm::vec3 centerPoint = minWorldBound + 0.5f * (maxWorldBound - minWorldBound);
+            
+            const glm::mat4 lightViewMatrix = glm::lookAt(
+                centerPoint + directionalLight.direction, centerPoint, glm::vec3(0.f, 1.f, 0.f));
+            glm::vec3 minLightSpacePoint = lightViewMatrix * worldPoints[0];
+            glm::vec3 maxLightSpacePoint = lightViewMatrix * worldPoints[0];
+            for (int i = 1; i < worldPoints.size(); ++i)
+            {
+                const glm::vec3 lightPoint = lightViewMatrix * worldPoints[i];
+                minLightSpacePoint = glm::min(minLightSpacePoint, lightPoint);
+                maxLightSpacePoint = glm::max(maxLightSpacePoint, lightPoint);
+            }
+            
+            if (minLightSpacePoint.z < 0)
+                minLightSpacePoint.z *= directionalLight.shadowZMultiplier;
+            else
+                minLightSpacePoint.z /= directionalLight.shadowZMultiplier;
+            if (maxLightSpacePoint.z < 0)
+                maxLightSpacePoint.z /= directionalLight.shadowZMultiplier;
+            else
+                maxLightSpacePoint.z *= directionalLight.shadowZMultiplier;
+            
+            const glm::mat4 lightProjectionMatrix = glm::ortho(
+                minLightSpacePoint.x, maxLightSpacePoint.x, minLightSpacePoint.y, maxLightSpacePoint.y,
+                minLightSpacePoint.z, maxLightSpacePoint.z
+            );
+            
+            directionalLight.vpMatrices.emplace_back(lightProjectionMatrix * lightViewMatrix);
+            
+            PROFILE_SCOPE_BEGIN(rqoTimer, "Command Upload");
+            for (const auto &rqo : mRenderQueue)
+            {
+                const glm::mat4 &modelMatrix = rqo.matrix;
+                const glm::mat4 mvp = lightProjectionMatrix * lightViewMatrix * modelMatrix;
+                mDirectionalLightShadowShader->set("u_mvp_matrix", mvp);
+                glBindVertexArray(rqo.vao);
+                glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
+            }
+            PROFILE_SCOPE_END(rqoTimer);
+            
+            mShadowFramebuffer->detachDepthBuffer();
+            PROFILE_SCOPE_END(shadowCreation);
+            graphics::popDebugGroup();
+        }
+        
+        graphics::popDebugGroup();
+        PROFILE_SCOPE_END(lightTimer);
+    }
+    
+    graphics::popDebugGroup();
+}
+
 void Renderer::pointLightShadowMapping()
 {
     PROFILE_FUNC();
@@ -396,6 +514,39 @@ void Renderer::pointLightShadowMapping()
     graphics::popDebugGroup();
 }
 
+void Renderer::spotlightShadowMapping()
+{
+    PROFILE_FUNC();
+    graphics::pushDebugGroup("Spotlight Shadow Mapping");
+    
+    mSpotlightShadowShader->bind();
+    mShadowFramebuffer->bind();
+    
+    for (const graphics::Spotlight &spotlight : mSpotlightQueue)
+    {
+        glm::ivec2 size = spotlight.shadowMap->getSize();
+        glViewport(0, 0, size.x, size.y);
+        
+        mShadowFramebuffer->attachDepthBuffer(spotlight.shadowMap.get());
+        mShadowFramebuffer->clearDepthBuffer();
+        
+        const glm::mat4 &vpMatrix = spotlight.vpMatrix;
+        
+        for (const auto &rqo : mRenderQueue)
+        {
+            const glm::mat4 mvpMatrix = vpMatrix * rqo.matrix;
+            mSpotlightShadowShader->set("u_mvp_matrix", mvpMatrix);
+            
+            glBindVertexArray(rqo.vao);
+            glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
+        }
+        
+        mShadowFramebuffer->detachDepthBuffer();
+    }
+    
+    graphics::popDebugGroup();
+}
+
 void Renderer::clear()
 {
     uint64_t renderQueueCount = mRenderQueue.size();
@@ -414,9 +565,9 @@ void Renderer::clear()
     mPointLightQueue.clear();
     mPointLightQueue.reserve(pointLightCount);
     
-    uint64_t spotLightCount = mSpotLightQueue.size();
-    mSpotLightQueue.clear();
-    mSpotLightQueue.reserve(spotLightCount);
+    uint64_t spotLightCount = mSpotlightQueue.size();
+    mSpotlightQueue.clear();
+    mSpotlightQueue.reserve(spotLightCount);
 }
 
 void Renderer::initFrameBuffers()
@@ -618,116 +769,6 @@ std::unique_ptr<TextureBufferObject> Renderer::generateBrdfLut(const glm::ivec2 
     return lut;
 }
 
-void Renderer::directionalLightShadowMapping(const CameraSettings &cameraSettings)
-{
-    PROFILE_FUNC();
-    graphics::pushDebugGroup("Directional Light Shadow Mapping");
-    const auto resize = [](const glm::vec4 &v) { return v / v.w; };
-    
-    mShadowFramebuffer->bind();
-    mDirectionalLightShadowShader->bind();
-    
-    for (graphics::DirectionalLight &directionalLight : mDirectionalLightQueue)
-    {
-        PROFILE_SCOPE_BEGIN(lightTimer, "Directional Light Shadow Mapping");
-        directionalLight.cascadeDepths.clear();
-        directionalLight.cascadeDepths.reserve(directionalLight.shadowCascadeMultipliers.size());
-        for (const auto &multiplier : directionalLight.shadowCascadeMultipliers)
-            directionalLight.cascadeDepths.emplace_back(cameraSettings.farClipDistance * multiplier);
-        
-        graphics::pushDebugGroup("Directional Light");
-        
-        const glm::ivec2 &shadowMapSize = directionalLight.shadowMap->getSize();
-        glViewport(0, 0, shadowMapSize.x, shadowMapSize.y);
-        
-        std::vector<float> depths { cameraSettings.nearClipDistance };
-        for (const float &depth : directionalLight.cascadeDepths)
-            depths.emplace_back(depth);
-        depths.emplace_back(cameraSettings.farClipDistance);
-        
-        for (int j = 0; j < directionalLight.shadowMap->getLayerCount(); ++j)
-        {
-            PROFILE_SCOPE_BEGIN(shadowCreation, "Cascade Pass");
-            graphics::pushDebugGroup("Cascade Pass");
-            
-            mShadowFramebuffer->attachDepthBuffer(*directionalLight.shadowMap, j);
-            mShadowFramebuffer->clearDepthBuffer();
-            
-            const float aspectRatio = window::aspectRatio();
-            const glm::mat4 projectionMatrix = glm::perspective(cameraSettings.fovY, aspectRatio, depths[j], depths[j + 1]);
-            
-            // We only want the shadow map to encompass the camera's frustum.
-            const glm::mat4 inverseVpMatrix = glm::inverse(projectionMatrix * cameraSettings.viewMatrix);
-            const std::vector<glm::vec4> worldPoints = {
-                resize(inverseVpMatrix * glm::vec4(1.f, 1.f, -1.f, 1.f)),
-                resize(inverseVpMatrix * glm::vec4(1.f, -1.f, -1.f, 1.f)),
-                resize(inverseVpMatrix * glm::vec4(-1.f, 1.f, -1.f, 1.f)),
-                resize(inverseVpMatrix * glm::vec4(-1.f, -1.f, -1.f, 1.f)),
-                
-                resize(inverseVpMatrix * glm::vec4(1.f, 1.f, 1.f, 1.f)),
-                resize(inverseVpMatrix * glm::vec4(1.f, -1.f, 1.f, 1.f)),
-                resize(inverseVpMatrix * glm::vec4(-1.f, 1.f, 1.f, 1.f)),
-                resize(inverseVpMatrix * glm::vec4(-1.f, -1.f, 1.f, 1.f)),
-            };
-            
-            glm::vec3 minWorldBound = worldPoints[0];
-            glm::vec3 maxWorldBound = worldPoints[0];
-            for (int i = 1; i < worldPoints.size(); ++i)
-            {
-                minWorldBound = glm::min(minWorldBound, glm::vec3(worldPoints[i]));
-                maxWorldBound = glm::max(maxWorldBound, glm::vec3(worldPoints[i]));
-            }
-            const glm::vec3 centerPoint = minWorldBound + 0.5f * (maxWorldBound - minWorldBound);
-            
-            const glm::mat4 lightViewMatrix = glm::lookAt(
-                centerPoint + directionalLight.direction, centerPoint, glm::vec3(0.f, 1.f, 0.f));
-            glm::vec3 minLightSpacePoint = lightViewMatrix * worldPoints[0];
-            glm::vec3 maxLightSpacePoint = lightViewMatrix * worldPoints[0];
-            for (int i = 1; i < worldPoints.size(); ++i)
-            {
-                const glm::vec3 lightPoint = lightViewMatrix * worldPoints[i];
-                minLightSpacePoint = glm::min(minLightSpacePoint, lightPoint);
-                maxLightSpacePoint = glm::max(maxLightSpacePoint, lightPoint);
-            }
-            
-            if (minLightSpacePoint.z < 0)
-                minLightSpacePoint.z *= directionalLight.shadowZMultiplier;
-            else
-                minLightSpacePoint.z /= directionalLight.shadowZMultiplier;
-            if (maxLightSpacePoint.z < 0)
-                maxLightSpacePoint.z /= directionalLight.shadowZMultiplier;
-            else
-                maxLightSpacePoint.z *= directionalLight.shadowZMultiplier;
-            
-            const glm::mat4 lightProjectionMatrix = glm::ortho(
-                minLightSpacePoint.x, maxLightSpacePoint.x, minLightSpacePoint.y, maxLightSpacePoint.y,
-                minLightSpacePoint.z, maxLightSpacePoint.z
-            );
-            
-            directionalLight.vpMatrices.emplace_back(lightProjectionMatrix * lightViewMatrix);
-            
-            PROFILE_SCOPE_BEGIN(rqoTimer, "Command Upload");
-            for (const auto &rqo : mRenderQueue)
-            {
-                const glm::mat4 &modelMatrix = rqo.matrix;
-                const glm::mat4 mvp = lightProjectionMatrix * lightViewMatrix * modelMatrix;
-                mDirectionalLightShadowShader->set("u_mvp_matrix", mvp);
-                glBindVertexArray(rqo.vao);
-                glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
-            }
-            PROFILE_SCOPE_END(rqoTimer);
-            
-            mShadowFramebuffer->detachDepthBuffer();
-            PROFILE_SCOPE_END(shadowCreation);
-            graphics::popDebugGroup();
-        }
-        
-        graphics::popDebugGroup();
-        PROFILE_SCOPE_END(lightTimer);
-    }
-    
-    graphics::popDebugGroup();
-}
 
 void Renderer::generateSkybox(std::string_view path, const glm::ivec2 desiredSize)
 {

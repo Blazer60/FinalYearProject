@@ -78,7 +78,7 @@ public:
     /**
      * @brief Submits a spot light that will be used to light the world.
      */
-    void submit(const graphics::SpotLight &spotLight);
+    void submit(const graphics::Spotlight &spotLight);
     
     /**
      * Starts rendering everything that was submitted to the renderer this frame.
@@ -150,13 +150,14 @@ protected:
     std::unique_ptr<TextureBufferObject> generateBrdfLut(const glm::ivec2 &size);
     void directionalLightShadowMapping(const CameraSettings &cameraSettings);
     void pointLightShadowMapping();
+    void spotlightShadowMapping();
     
 protected:
     std::vector<graphics::RenderQueueObject>        mRenderQueue;
     std::vector<CameraSettings>                     mCameraQueue;
     std::vector<graphics::DirectionalLight>         mDirectionalLightQueue;
     std::vector<graphics::PointLight>               mPointLightQueue;
-    std::vector<graphics::SpotLight>                mSpotLightQueue;
+    std::vector<graphics::Spotlight>                mSpotlightQueue;
     
     std::unique_ptr<HdrTexture>  mHdrImage;
     std::unique_ptr<Cubemap>     mHdrSkybox;
@@ -171,10 +172,11 @@ protected:
     std::unique_ptr<Shader> mDeferredLightShader;
     std::unique_ptr<Shader> mDirectionalLightShader;
     std::unique_ptr<Shader> mPointLightShader;
-    std::unique_ptr<Shader> mSpotLightShader;
+    std::unique_ptr<Shader> mSpotlightShader;
     std::unique_ptr<Shader> mIblShader;
     std::unique_ptr<Shader> mDirectionalLightShadowShader;
     std::unique_ptr<Shader> mPointLightShadowShader;
+    std::unique_ptr<Shader> mSpotlightShadowShader;
     std::unique_ptr<Shader> mHdrToCubemapShader;
     std::unique_ptr<Shader> mCubemapToIrradianceShader;
     std::unique_ptr<Shader> mPreFilterShader;

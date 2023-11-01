@@ -87,13 +87,13 @@ namespace engine
     struct SpotLight
         : Light, engine::Component
     {
-    
+        SpotLight();
     
     protected:
         void onDrawUi() override;
         void onPreRender() override;
         
-        graphics::SpotLight mSpotLight;
+        graphics::Spotlight mSpotlight;
         glm::vec3 mColour        { 1.f };
         float mIntensity         { 12'000.f };
         float mInnerAngleDegrees { 22.5f };
@@ -101,6 +101,7 @@ namespace engine
         float mPitch             { -90.f };
         float mYaw               { 0.f };
         bool  mUseActorRotation  { true };
+        bool  mDebugShadowMap    { false };
         
         void calculateDirection();
     };
