@@ -25,9 +25,9 @@ namespace debug
         Assimp::DefaultLogger::create("", Assimp::Logger::VERBOSE);
         
         // Streams are handled by the Default Logger's destructor.
-        Assimp::DefaultLogger::get()->attachStream(new StreamOutput(Severity_Notification), Assimp::Logger::Info | Assimp::Logger::Debugging);
-        Assimp::DefaultLogger::get()->attachStream(new StreamOutput(Severity_Warning), Assimp::Logger::Warn);
-        Assimp::DefaultLogger::get()->attachStream(new StreamOutput(Severity_Major), Assimp::Logger::Err);
+        // Assimp::DefaultLogger::get()->attachStream(new StreamOutput(Severity_Notification), Assimp::Logger::Info | Assimp::Logger::Debugging);
+        // Assimp::DefaultLogger::get()->attachStream(new StreamOutput(Severity_Warning), Assimp::Logger::Warn);
+        // Assimp::DefaultLogger::get()->attachStream(new StreamOutput(Severity_Major), Assimp::Logger::Err);
     }
     
     Logger::~Logger()
