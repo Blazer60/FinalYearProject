@@ -263,4 +263,58 @@ namespace engine
         
         ImGui::PopID();
     }
+    
+    void SpotLight::onPreRender()
+    {
+        calculateDirection();
+        mSpotLight.colourIntensity = mColour * mIntensity;
+        mSpotLight.position = mActor->getWorldPosition();
+        mSpotLight.cosInnerAngle = glm::cos(glm::radians(mInnerAngleDegrees));
+        mSpotLight.cosOuterAngle = glm::cos(glm::radians(mOuterAngleDegrees));
+        graphics::renderer->submit(mSpotLight);
+    }
+    
+    void SpotLight::onDrawUi()
+    {
+        ImGui::PushID("Spot Light Settings");
+        if (ImGui::TreeNodeEx("Spot Light Settings", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            if (ImGui::Button("Destroy Component"))
+                mActor->removeComponent(this);
+            
+            
+            ImGui::ColorEdit3("Colour", glm::value_ptr(mColour), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_PickerHueWheel);
+            ImGui::DragFloat("Intensity (Lum)", &mIntensity, 10.f);
+            
+            ImGui::SliderFloat("Inner Angle", &mInnerAngleDegrees, 0.f, 180.f);
+            ImGui::SliderFloat("outer Angle", &mOuterAngleDegrees, 0.f, 180.f);
+            
+            ImGui::Checkbox("Use Actor's Rotation", &mUseActorRotation);
+            if (!mUseActorRotation)
+            {
+                ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x / 2.f * 0.65f);
+                ImGui::DragFloat("Yaw", &mYaw, 0.1f); ImGui::SameLine();
+                ImGui::DragFloat("Pitch", &mPitch, 0.1f);
+            }
+            
+            ImGui::TreePop();
+        }
+        
+        ImGui::PopID();
+    }
+    
+    void SpotLight::calculateDirection()
+    {
+        if (mUseActorRotation)
+        {
+            mSpotLight.direction = glm::normalize(getWorldTransform() * glm::vec4(0.f, 0.f, -1.f, 0.f));
+        }
+        else
+        {
+            const float yawRadians = glm::radians(mYaw);
+            const float pitchRadians = glm::radians(mPitch);
+            
+            mSpotLight.direction = glm::yawPitchRoll(yawRadians, pitchRadians, 0.f) * glm::vec4(0.f, 0.f, -1.f, 0.f);
+        }
+    }
 }

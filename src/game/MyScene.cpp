@@ -81,9 +81,9 @@ MyScene::MyScene() :
         ballMesh->addMaterial(ballMaterial);
     }
 
-    auto directionalLight = spawnActor<engine::Actor>("Directional Light");
-    directionalLight->addComponent(makeResource<engine::DirectionalLight>(
-        glm::normalize(glm::vec3(1.f, 1.f, 1.f)), glm::vec3(0.93f, 0.93f, 0.95f), glm::ivec2(4096), 4));
+    // auto directionalLight = spawnActor<engine::Actor>("Directional Light");
+    // directionalLight->addComponent(makeResource<engine::DirectionalLight>(
+    //     glm::normalize(glm::vec3(1.f, 1.f, 1.f)), glm::vec3(0.93f, 0.93f, 0.95f), glm::ivec2(4096), 4));
 
     auto teapot = spawnActor<engine::Actor>("Teapot");
     teapot->position = glm::vec3(0.f, 0.f, 5.f);
@@ -106,9 +106,9 @@ MyScene::MyScene() :
     childMaterial->setAmbientColour(glm::vec3(1.f, 0.f, 0.f));
     childMesh->addMaterial(childMaterial);
     
-    auto pointLight = spawnActor<engine::Actor>("Point Light");
-    pointLight->position = glm::vec3(0.f, 6.f, 5.f);
-    pointLight->addComponent(makeResource<engine::PointLight>());
+    // auto pointLight = spawnActor<engine::Actor>("Point Light");
+    // pointLight->position = glm::vec3(0.f, 6.f, 5.f);
+    // pointLight->addComponent(makeResource<engine::PointLight>());
     
     auto leatherBall = spawnActor<engine::Actor>("Leather Ball");
     leatherBall->position = glm::vec3(0.f, 5.f, 0.f);
@@ -120,6 +120,10 @@ MyScene::MyScene() :
     leatherMaterial->setHeightMap(file::modelPath() / "leatherBall/TexturesCom_Leather_Tufted_New_1K_height.png");
     leatherMaterial->setRoughnessMap(file::modelPath() / "leatherBall/TexturesCom_Leather_Tufted_New_1K_roughness.png");
     leatherBallModel->addMaterial(leatherMaterial);
+    
+    auto spotLight = spawnActor<engine::Actor>("Spot Light");
+    spotLight->position = glm::vec3(0, 10.f, 0);
+    spotLight->addComponent(makeResource<engine::SpotLight>());
     
     // spawnActor<engine::Actor>("Virus")->addComponent(makeResource<Spammer>());
     

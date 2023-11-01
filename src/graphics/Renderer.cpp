@@ -29,6 +29,7 @@ Renderer::Renderer() :
     
     mDirectionalLightShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/DirectionalLight.frag");
     mPointLightShader = std::make_unique<Shader>(file::shaderPath() / "lighting/PointLight.vert", file::shaderPath() / "lighting/PointLight.frag");
+    mSpotLightShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/SpotLight.frag");
     mIblShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/IBL.frag");
     mDeferredLightShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/CombineOutput.frag");
     mDirectionalLightShadowShader = std::make_unique<Shader>(file::shaderPath() / "shadow/Shadow.vert", file::shaderPath() / "shadow/Shadow.frag");
@@ -122,6 +123,12 @@ void Renderer::submit(const graphics::PointLight &pointLight)
 {
     mPointLightQueue.emplace_back(pointLight);
 }
+
+void Renderer::submit(const graphics::SpotLight &spotLight)
+{
+    mSpotLightQueue.emplace_back(spotLight);
+}
+
 
 void Renderer::render()
 {
@@ -245,7 +252,37 @@ void Renderer::render()
             glDrawElements(GL_TRIANGLES, mUnitSphere.indicesCount(), GL_UNSIGNED_INT, nullptr);
         }
         
+        
         PROFILE_SCOPE_END(pointLightTimer);
+        graphics::popDebugGroup();
+        PROFILE_SCOPE_BEGIN(spotLightTimer, "Spot Light");
+        graphics::pushDebugGroup("Spot Light");
+        
+        mSpotLightShader->bind();
+        
+        mSpotLightShader->set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 0);
+        mSpotLightShader->set("u_position_texture", mPositionTextureBuffer->getId(), 1);
+        mSpotLightShader->set("u_normal_texture", mNormalTextureBuffer->getId(), 2);
+        mSpotLightShader->set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 3);
+        mSpotLightShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
+        
+        mSpotLightShader->set("u_camera_position_ws", cameraPosition);
+        
+        for (const auto &spotLight : mSpotLightQueue)
+        {
+            mSpotLightShader->set("u_light_position", spotLight.position);
+            mSpotLightShader->set("u_light_direction", spotLight.direction);
+            const float lightAngleScale = 1.f / glm::max(0.001f, (spotLight.cosInnerAngle - spotLight.cosOuterAngle));
+            const float lightAngleOffset = -spotLight.cosOuterAngle * lightAngleScale;
+            mSpotLightShader->set("u_light_angle_scale", lightAngleScale);
+            mSpotLightShader->set("u_light_angle_offset", lightAngleOffset);
+            mSpotLightShader->set("u_light_inv_sqr_radius", 1.f / (spotLight.radius * spotLight.radius));
+            mSpotLightShader->set("u_light_intensity", spotLight.colourIntensity);
+            
+            drawFullscreenTriangleNow();
+        }
+        
+        PROFILE_SCOPE_END(spotLightTimer);
         graphics::popDebugGroup();
         PROFILE_SCOPE_BEGIN(iblTimer, "IBL Distant Light Probe");
         graphics::pushDebugGroup("IBL Distant Light Probe");
@@ -376,6 +413,10 @@ void Renderer::clear()
     uint64_t pointLightCount = mPointLightQueue.size();
     mPointLightQueue.clear();
     mPointLightQueue.reserve(pointLightCount);
+    
+    uint64_t spotLightCount = mSpotLightQueue.size();
+    mSpotLightQueue.clear();
+    mSpotLightQueue.reserve(spotLightCount);
 }
 
 void Renderer::initFrameBuffers()

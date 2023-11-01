@@ -83,6 +83,27 @@ namespace engine
         
         ENGINE_SERIALIZABLE_COMPONENT(PointLight);
     };
+    
+    struct SpotLight
+        : Light, engine::Component
+    {
+    
+    
+    protected:
+        void onDrawUi() override;
+        void onPreRender() override;
+        
+        graphics::SpotLight mSpotLight;
+        glm::vec3 mColour        { 1.f };
+        float mIntensity         { 12'000.f };
+        float mInnerAngleDegrees { 22.5f };
+        float mOuterAngleDegrees { 45.f };
+        float mPitch             { -90.f };
+        float mYaw               { 0.f };
+        bool  mUseActorRotation  { true };
+        
+        void calculateDirection();
+    };
 
     struct DistantLightProbe
         : Light, engine::Component

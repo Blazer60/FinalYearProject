@@ -76,6 +76,11 @@ public:
     void submit(const graphics::PointLight &pointLight);
     
     /**
+     * @brief Submits a spot light that will be used to light the world.
+     */
+    void submit(const graphics::SpotLight &spotLight);
+    
+    /**
      * Starts rendering everything that was submitted to the renderer this frame.
      */
     void render();
@@ -151,6 +156,7 @@ protected:
     std::vector<CameraSettings>                     mCameraQueue;
     std::vector<graphics::DirectionalLight>         mDirectionalLightQueue;
     std::vector<graphics::PointLight>               mPointLightQueue;
+    std::vector<graphics::SpotLight>                mSpotLightQueue;
     
     std::unique_ptr<HdrTexture>  mHdrImage;
     std::unique_ptr<Cubemap>     mHdrSkybox;
@@ -165,6 +171,7 @@ protected:
     std::unique_ptr<Shader> mDeferredLightShader;
     std::unique_ptr<Shader> mDirectionalLightShader;
     std::unique_ptr<Shader> mPointLightShader;
+    std::unique_ptr<Shader> mSpotLightShader;
     std::unique_ptr<Shader> mIblShader;
     std::unique_ptr<Shader> mDirectionalLightShadowShader;
     std::unique_ptr<Shader> mPointLightShadowShader;

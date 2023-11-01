@@ -41,4 +41,14 @@ namespace graphics
         
         std::shared_ptr<Cubemap> shadowMap { nullptr };
     };
+    
+    struct SpotLight
+    {
+        glm::vec3   position        { glm::vec3(0.f) };
+        glm::vec3   colourIntensity { 12'000.f };
+        glm::vec3   direction       { glm::vec3(0.f, -1.f, 0.f) };
+        float       cosInnerAngle   { glm::cos(glm::radians(22.5f)) };
+        float       cosOuterAngle   { glm::cos(glm::radians(45.f)) };
+        float       radius          { 50.f };
+    };
 }
