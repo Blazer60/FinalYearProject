@@ -132,6 +132,10 @@ add_executable(${PROJECT_NAME}
         src/game/Spammer.h
         src/game/MyTestActor.cpp
         src/game/MyTestActor.h
+        src/engine/loader/ResourcePool.cpp
+        include/engine/loader/ResourcePool.h
+        src/engine/loader/ShaderLoader.cpp
+        include/engine/loader/ShaderLoader.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

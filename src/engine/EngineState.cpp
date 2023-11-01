@@ -13,6 +13,7 @@ namespace engine
     Editor *editor;
     RootEventHandler *eventHandler;
     Serializer *serializer;
+    ResourcePool *resourcePool;
     
     void GLAPIENTRY forwardOpenGlCallback(
         GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,

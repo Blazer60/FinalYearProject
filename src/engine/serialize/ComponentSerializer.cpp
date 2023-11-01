@@ -15,6 +15,7 @@
 #include "Lighting.h"
 #include "Actor.h"
 #include "Core.h"
+#include "ShaderLoader.h"
 
 namespace engine
 {
@@ -36,7 +37,9 @@ namespace engine
                 if (materialType == "StandardMaterial")
                 {
                     auto standardMaterial = std::make_shared<engine::StandardMaterialSubComponent>();
-                    standardMaterial->attachShader(engine::core->getStandardShader());
+                    standardMaterial->attachShader(load::shader(
+                        file::shaderPath() / "geometry/standard/Standard.vert",
+                        file::shaderPath() / "geometry/standard/Standard.frag"));
                     meshRenderer->addMaterial(standardMaterial);
                     
                     standardMaterial->setAmbientColour(materialNode["Albedo"].as<glm::vec3>());

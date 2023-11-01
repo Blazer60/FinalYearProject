@@ -94,14 +94,14 @@ void Renderer::drawMesh(const SharedMesh &mesh, const SharedMaterials &materials
     {
         Material& material = *materials[0];
         
-        for (const auto &subMesh : mesh)
+        for (const auto &subMesh : *mesh)
             drawMesh(*subMesh, material, matrix);
     }
     else
     {
-        for (int i = 0; i < mesh.size(); ++i)
+        for (int i = 0; i < mesh->size(); ++i)
         {
-            SubMesh& subMesh = *mesh[i];
+            SubMesh& subMesh = *(*mesh)[i];
             Material& material = *materials[glm::min(i, static_cast<int>((materials.size() - 1)))];
             drawMesh(subMesh, material, matrix);
         }

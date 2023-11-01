@@ -18,6 +18,7 @@
 #include "Viewport.h"
 #include "Editor.h"
 #include "ProfilerViewer.h"
+#include "ResourcePool.h"
 
 namespace engine
 {
@@ -39,9 +40,7 @@ namespace engine
         
         [[nodiscard]] Scene *getScene();
         [[nodiscard]] MainCamera *getCamera();
-        
-        std::shared_ptr<Shader> &getStandardShader();
-        
+    
     protected:
         bool initGlfw(int openGlMajorVersion, int openGlMinorVersion);
         bool initImGui();
@@ -59,6 +58,7 @@ namespace engine
         Scene *mScenePointer;
         std::filesystem::path mScenePath;
         
+        std::unique_ptr<ResourcePool> mResourcePool;
         std::unique_ptr<Renderer> mRenderer;
         std::unique_ptr<debug::Logger> mLogger;
         std::unique_ptr<ProfilerViewer> mProfilerViewer;
@@ -75,7 +75,6 @@ namespace engine
         Editor mEditor;
         RootEventHandler mEventHandler;
         
-        std::shared_ptr<Shader> mStandardShader;
     };
     
 } // engine

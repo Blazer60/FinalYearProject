@@ -10,12 +10,14 @@
 #include "stb_image.h"
 
 #include <Statistics.h>
+#include "EngineState.h"
+#include "ResourcePool.h"
 
 namespace load
 {
     std::shared_ptr<Texture> texture(const std::filesystem::path &path)
     {
-        return std::make_shared<Texture>(path);
+        return engine::resourcePool->loadTexture(path);
     }
     
     GLFWimage windowIcon(std::string_view path)

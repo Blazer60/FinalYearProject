@@ -26,6 +26,7 @@
 #include "ComponentSerializer.h"
 #include "SceneLoader.h"
 #include "FileExplorer.h"
+#include "ShaderLoader.h"
 
 namespace engine
 {
@@ -95,9 +96,8 @@ namespace engine
         if (mWindowIcon.pixels != nullptr)
             glfwSetWindowIcon(mWindow, 1, &mWindowIcon);
         
-        mStandardShader = std::make_shared<Shader>(
-            file::shaderPath() / "geometry/standard/Standard.vert",
-            file::shaderPath() / "geometry/standard/Standard.frag");
+        mResourcePool = std::make_unique<ResourcePool>();
+        resourcePool = mResourcePool.get();
         
         mSerializer = std::make_unique<Serializer>();
         serializer = mSerializer.get();
@@ -273,6 +273,7 @@ namespace engine
             mRenderer->clear();
             
             timers::update();
+            mResourcePool->clean();
             PROFILE_SCOPE_END(coreLoopTimer);
             
             PROFILE_SCOPE_BEGIN(awaitVSync, "CPU Idle");
@@ -385,8 +386,4 @@ namespace engine
         return mMainCamera.get();
     }
     
-    std::shared_ptr<Shader> &Core::getStandardShader()
-    {
-        return mStandardShader;
-    }
 }

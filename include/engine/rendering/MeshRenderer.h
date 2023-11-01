@@ -27,7 +27,7 @@ namespace engine
     {
         ENGINE_SERIALIZABLE_COMPONENT(MeshRenderer);
     public:
-        MeshRenderer(std::vector<std::shared_ptr<SubMesh>> &&mesh, std::string path);
+        MeshRenderer(SharedMesh &&mesh, std::string path);
         ~MeshRenderer() override = default;
         void addMaterial(const std::shared_ptr<MaterialSubComponent> &material);
         
@@ -38,7 +38,7 @@ namespace engine
         
         // An ideal world with have all of these with an equal length. Some mesh renderers can have multiple meshes
         // but only a single material.
-        std::vector<std::shared_ptr<SubMesh>>               mMeshes;
+        SharedMesh                                          mMeshes;
         std::vector<std::shared_ptr<MaterialSubComponent>>  mMaterials;
         
         bool mIsShowing { true };

@@ -17,6 +17,7 @@ namespace engine
     extern class Editor *editor;
     extern class RootEventHandler *eventHandler;
     extern class Serializer *serializer;
+    extern class ResourcePool *resourcePool;
     
     void GLAPIENTRY forwardOpenGlCallback(
         GLenum source, GLenum type, GLuint id,

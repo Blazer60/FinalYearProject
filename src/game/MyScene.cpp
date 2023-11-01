@@ -22,9 +22,10 @@
 #include "MaterialSubComponent.h"
 #include "Spammer.h"
 #include "MyTestActor.h"
+#include "ShaderLoader.h"
 
 MyScene::MyScene() :
-    mStandardShader(std::make_shared<Shader>(
+    mStandardShader(load::shader(
         file::shaderPath() / "geometry/standard/Standard.vert",
         file::shaderPath() / "geometry/standard/Standard.frag"))
 {

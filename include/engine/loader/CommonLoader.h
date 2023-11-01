@@ -19,6 +19,10 @@
 
 namespace load
 {
+    glm::vec3 toVec3(const aiVector3D &v);
+    glm::vec2 toVec2(const aiVector2D &v);
+    glm::vec2 toVec2(const aiVector3D &v);
+    
     template<typename TMaterial>
     struct Model
     {

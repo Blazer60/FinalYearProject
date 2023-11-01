@@ -12,12 +12,14 @@
 #include "FileExplorer.h"
 #include "GraphicsState.h"
 #include "ResourceFolder.h"
+#include "ShaderLoader.h"
+#include "FileLoader.h"
 
 #include <utility>
 
 namespace engine
 {
-    MeshRenderer::MeshRenderer(std::vector<std::shared_ptr<SubMesh>> &&mesh, std::string path)
+    MeshRenderer::MeshRenderer(SharedMesh &&mesh, std::string path)
         : mMeshes(mesh), mMeshPath(std::move(path))
     {
     
@@ -31,7 +33,7 @@ namespace engine
             if (ImGui::Button("Destroy Component"))
                 mActor->removeComponent(this);
             
-            if (mMeshes.empty())
+            if (mMeshes->empty())
             {
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 1.f, 0.f, 1.f));
                 ImGui::Text("Mesh serializeComponent does contain any meshes.");
@@ -50,7 +52,10 @@ namespace engine
                 {
                     // todo: How do we add different types of materials? - Most likely references them off disk.
                     auto standardMaterial = std::make_shared<StandardMaterialSubComponent>();
-                    standardMaterial->attachShader(engine::core->getStandardShader());
+                    standardMaterial->attachShader(
+                        load::shader(
+                            file::shaderPath() / "geometry/standard/Standard.vert",
+                            file::shaderPath() / "geometry/standard/Standard.frag"));
                     mMaterials.push_back(standardMaterial);
                 }
             }
@@ -67,7 +72,7 @@ namespace engine
         {
             std::string meshPath = openFileDialog();
             SharedMesh mesh = load::model<StandardVertex>(meshPath);
-            if (!mesh.empty())
+            if (!mesh->empty())
             {
                 mMeshes = mesh;
                 mMeshPath = meshPath;
@@ -79,7 +84,7 @@ namespace engine
             {
                 std::filesystem::path path = *reinterpret_cast<std::filesystem::path*>(payload->Data);
                 SharedMesh mesh = load::model<StandardVertex>(path);
-                if (!mesh.empty())
+                if (!mesh->empty())
                 {
                     mMeshes = mesh;
                     mMeshPath = path.string();
@@ -95,14 +100,14 @@ namespace engine
     
     void MeshRenderer::onPreRender()
     {
-        if (mMaterials.empty() || mMeshes.empty())
+        if (mMaterials.empty() || mMeshes->empty())
             return;
         
-        for (int i = 0; i < glm::max(mMaterials.size(), mMeshes.size()); ++i)
+        for (int i = 0; i < glm::max(mMaterials.size(), mMeshes->size()); ++i)
         {
-            const int meshIndex = glm::min(i, static_cast<int>(mMeshes.size() - 1));
+            const int meshIndex = glm::min(i, static_cast<int>(mMeshes->size() - 1));
             const int materialIndex = glm::min(i, static_cast<int>(mMaterials.size() - 1));
-            graphics::renderer->drawMesh(*mMeshes[meshIndex], mMaterials[materialIndex]->getMaterial(), getWorldTransform());
+            graphics::renderer->drawMesh(*(*mMeshes)[meshIndex], mMaterials[materialIndex]->getMaterial(), getWorldTransform());
         }
     }
 }

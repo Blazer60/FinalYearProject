@@ -13,6 +13,7 @@
 #include "Lighting.h"
 #include "EngineState.h"
 #include "MeshRenderer.h"
+#include "ShaderLoader.h"
 #include <FileLoader.h>
 
 namespace engine
@@ -160,7 +161,9 @@ namespace engine
         actor->position = core->getCamera()->getEndOfBoomArmPosition();
         auto model = actor->addComponent(load::meshRenderer<StandardVertex>(path));
         auto material = std::make_shared<StandardMaterialSubComponent>();
-        material->attachShader(core->getStandardShader());
+        material->attachShader(load::shader(
+            file::shaderPath() / "geometry/standard/Standard.vert",
+            file::shaderPath() / "geometry/standard/Standard.frag"));
         model->addMaterial(material);
         
         return actor;
@@ -265,7 +268,9 @@ namespace engine
         actor->position = core->getCamera()->getEndOfBoomArmPosition();
         Ref<MeshRenderer> meshRenderer = actor->addComponent(load::meshRenderer<StandardVertex>(path));
         auto material = std::make_shared<StandardMaterialSubComponent>();
-        material->attachShader(core->getStandardShader());
+        material->attachShader(load::shader(
+            file::shaderPath() / "geometry/standard/Standard.vert",
+            file::shaderPath() / "geometry/standard/Standard.frag"));
         meshRenderer->addMaterial(material);
         
         mSelectedActor = actor;

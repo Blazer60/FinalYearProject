@@ -12,7 +12,7 @@
 
 class SubMesh;
 
-typedef std::vector<std::shared_ptr<SubMesh>> SharedMesh;
+typedef std::shared_ptr<std::vector<std::unique_ptr<SubMesh>>> SharedMesh;
 
 void setVaoLayout(unsigned int vao, const Instructions &instructions);
 
