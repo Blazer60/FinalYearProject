@@ -34,7 +34,7 @@ Renderer::Renderer() :
     mDeferredLightShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/CombineOutput.frag");
     mDirectionalLightShadowShader = std::make_unique<Shader>(file::shaderPath() / "shadow/Shadow.vert", file::shaderPath() / "shadow/Shadow.frag");
     mPointLightShadowShader = std::make_unique<Shader>(file::shaderPath() / "shadow/PointShadow.vert", file::shaderPath() / "shadow/PointShadow.frag");
-    mSpotlightShadowShader = std::make_unique<Shader>(file::shaderPath() / "shadow/Shadow.vert", file::shaderPath() / "shadow/Shadow.frag");
+    mSpotlightShadowShader = std::make_unique<Shader>(file::shaderPath() / "shadow/PointShadow.vert", file::shaderPath() / "shadow/PointShadow.frag");
     mHdrToCubemapShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "cubemap/ToCubemap.frag");
     mCubemapToIrradianceShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "cubemap/IrradianceMap.frag");
     mPreFilterShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() /  "cubemap/PreFilter.frag");
@@ -269,9 +269,8 @@ void Renderer::render()
         mSpotlightShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
         
         mSpotlightShader->set("u_camera_position_ws", cameraPosition);
-        mSpotlightShader->set("u_view_matrix", camera.viewMatrix);
         
-        for (const auto &spotLight : mSpotlightQueue)
+        for (const graphics::Spotlight &spotLight : mSpotlightQueue)
         {
             mSpotlightShader->set("u_shadow_map_texture", spotLight.shadowMap->getId(), 5);
             
@@ -284,7 +283,8 @@ void Renderer::render()
             mSpotlightShader->set("u_light_inv_sqr_radius", 1.f / (spotLight.radius * spotLight.radius));
             mSpotlightShader->set("u_light_intensity", spotLight.colourIntensity);
             mSpotlightShader->set("u_light_vp_matrix", spotLight.vpMatrix);
-            mSpotlightShader->set("u_bias", glm::vec2(0.f, 0.f));
+            mSpotlightShader->set("u_z_far", spotLight.radius);
+            mSpotlightShader->set("u_bias", spotLight.shadowBias);
             
             drawFullscreenTriangleNow();
         }
@@ -531,11 +531,14 @@ void Renderer::spotlightShadowMapping()
         mShadowFramebuffer->clearDepthBuffer();
         
         const glm::mat4 &vpMatrix = spotlight.vpMatrix;
+        mSpotlightShadowShader->set("u_light_pos", spotlight.position);
+        mSpotlightShadowShader->set("u_z_far", spotlight.radius);
         
         for (const auto &rqo : mRenderQueue)
         {
             const glm::mat4 mvpMatrix = vpMatrix * rqo.matrix;
             mSpotlightShadowShader->set("u_mvp_matrix", mvpMatrix);
+            mSpotlightShadowShader->set("u_model_matrix", rqo.matrix);
             
             glBindVertexArray(rqo.vao);
             glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);

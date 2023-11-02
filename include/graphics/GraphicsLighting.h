@@ -54,5 +54,6 @@ namespace graphics
         
         std::shared_ptr<TextureBufferObject> shadowMap { nullptr };
         glm::mat4   vpMatrix;
+        glm::vec2   shadowBias { 0.005f, 0.001f };
     };
 }

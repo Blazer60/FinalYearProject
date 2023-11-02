@@ -122,7 +122,7 @@ MyScene::MyScene() :
     leatherBallModel->addMaterial(leatherMaterial);
     
     auto spotLight = spawnActor<engine::Actor>("Spot Light");
-    spotLight->position = glm::vec3(0, 10.f, 0);
+    spotLight->position = glm::vec3(0, 2.f, 5.f);
     spotLight->addComponent(makeResource<engine::SpotLight>());
     
     // spawnActor<engine::Actor>("Virus")->addComponent(makeResource<Spammer>());

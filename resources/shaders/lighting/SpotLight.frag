@@ -10,13 +10,13 @@ uniform sampler2D u_metallic_texture;
 uniform sampler2D u_shadow_map_texture;
 
 uniform vec3 u_camera_position_ws;
-uniform mat4 u_view_matrix;
 
 uniform vec3 u_light_position;
 uniform vec3 u_light_direction;
 uniform float u_light_inv_sqr_radius;
 uniform vec3 u_light_intensity;
 uniform vec2 u_bias;
+uniform float u_z_far;
 //uniform float u_light_cut_off_angle;
 
 uniform mat4 u_light_vp_matrix;
@@ -34,25 +34,24 @@ float sample_shadow_map(vec2 uv, float depth, float bias)
     return depth - bias > shadow_depth ? 1.f : 0.f;
 }
 
-float calculate_shadow_map(vec3 position, vec3 normal)
+float calculate_shadow_map(vec3 light_direction, vec3 position, vec3 normal)
 {
-    const float depth = abs((u_view_matrix * vec4(position, 1.f)).z);
-
     const vec4 position_light_space = u_light_vp_matrix * vec4(position, 1.f);
     vec3 projection_coords = position_light_space.xyz / position_light_space.w;
     projection_coords = 0.5f * projection_coords + 0.5f;
-    const float current_depth = projection_coords.z;
+    const float current_depth = length(light_direction) / u_z_far;
     const float bias = mix(u_bias.x, u_bias.y, max(dot(normal, -u_light_direction), 0.f));
 
     if (current_depth < 1.f)
     {
         vec2 texel_size = 1.f / textureSize(u_shadow_map_texture, 0).xy;
         float sum = 0.f;
-        sum += sample_shadow_map(projection_coords.xy + (texel_size * vec2(-1.5f, -1.5f)), current_depth, bias);
-        sum += sample_shadow_map(projection_coords.xy + (texel_size * vec2( 1.5f, -1.5f)), current_depth, bias);
-        sum += sample_shadow_map(projection_coords.xy + (texel_size * vec2(-1.5f,  1.5f)), current_depth, bias);
-        sum += sample_shadow_map(projection_coords.xy + (texel_size * vec2( 1.5f,  1.5f)), current_depth, bias);
-        return 0.25f * sum;
+        sum += sample_shadow_map(projection_coords.xy + (texel_size * vec2(-0.5f, -0.5f)), current_depth, bias);
+        sum += sample_shadow_map(projection_coords.xy + (texel_size * vec2( 0.5f, -0.5f)), current_depth, bias);
+        sum += sample_shadow_map(projection_coords.xy,                                     current_depth, bias);
+        sum += sample_shadow_map(projection_coords.xy + (texel_size * vec2(-0.5f,  0.5f)), current_depth, bias);
+        sum += sample_shadow_map(projection_coords.xy + (texel_size * vec2( 0.5f,  0.5f)), current_depth, bias);
+        return 0.2f * sum;
     }
     return 0.f;
 }
@@ -150,7 +149,7 @@ void main()
     float attenuation = 1.f;
     attenuation *= getAngleAttenuation(l, u_light_angle_scale, u_light_angle_offset);
     attenuation *= getDistanceAttenuation(light_direction, u_light_inv_sqr_radius);
-    float shadow_intensity = calculate_shadow_map(position, n);
+    float shadow_intensity = calculate_shadow_map(light_direction, position, n);
     const vec3 radiance = (1.f - shadow_intensity) * attenuation * u_light_intensity;
 
     o_colour = irradiance * radiance * (4.f * PI) * lDotN;

@@ -95,7 +95,7 @@ namespace engine
         
         graphics::Spotlight mSpotlight;
         glm::vec3 mColour        { 1.f };
-        float mIntensity         { 12'000.f };
+        float mIntensity         { 120'000.f };
         float mInnerAngleDegrees { 22.5f };
         float mOuterAngleDegrees { 45.f };
         float mPitch             { -90.f };

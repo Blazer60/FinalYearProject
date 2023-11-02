@@ -291,6 +291,7 @@ namespace engine
             ImGui::SliderFloat("Inner Angle", &mInnerAngleDegrees, 0.f, 180.f);
             ImGui::SliderFloat("outer Angle", &mOuterAngleDegrees, 0.f, 180.f);
             ImGui::DragFloat("Radius", &mSpotlight.radius);
+            ImGui::DragFloat2("Shadow Bias", glm::value_ptr(mSpotlight.shadowBias));
             
             ImGui::Checkbox("Use Actor's Rotation", &mUseActorRotation);
             if (!mUseActorRotation)
@@ -314,6 +315,7 @@ namespace engine
     
     void SpotLight::calculateDirection()
     {
+        // todo: Looks like our rotation matrix doesn't match the direction of the light. One of them needs to be flipped?
         const glm::mat4 projectionMatrix = glm::perspective(2.f * mSpotlight.outerAngle, 1.f, 0.001f, mSpotlight.radius);
         if (mUseActorRotation)
         {
@@ -328,7 +330,7 @@ namespace engine
             
             const glm::mat4 rotationMatrix = glm::yawPitchRoll(yawRadians, pitchRadians, 0.f);
             mSpotlight.direction = rotationMatrix * glm::vec4(0.f, 0.f, -1.f, 0.f);
-            const glm::mat4 viewMatrix = glm::inverse(glm::translate(glm::mat4(1.f) * rotationMatrix, mActor->getWorldPosition()));
+            const glm::mat4 viewMatrix = glm::inverse(glm::translate(glm::mat4(1.f), mActor->getWorldPosition()) * rotationMatrix);
             mSpotlight.vpMatrix = projectionMatrix * viewMatrix;
         }
     }
