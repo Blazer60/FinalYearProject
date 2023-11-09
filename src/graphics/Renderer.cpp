@@ -39,6 +39,7 @@ Renderer::Renderer() :
     mCubemapToIrradianceShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "cubemap/IrradianceMap.frag");
     mPreFilterShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() /  "cubemap/PreFilter.frag");
     mIntegrateBrdfShader = std::make_unique<Shader>(file::shaderPath() /  "FullscreenTriangle.vert", file::shaderPath() / "brdf/IntegrateBrdf.frag");
+    mScreenSpaceReflectionsShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "ssr/ScreenSpaceReflections.frag");
     
     generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
     // generateSkybox("", glm::ivec2(512));
@@ -189,7 +190,7 @@ void Renderer::render()
         graphics::pushDebugGroup("Directional Lighting");
         
         mLightFramebuffer->bind();
-        mLightFramebuffer->clear(glm::vec4(glm::vec3(0.f), 1.f));
+        mLightFramebuffer->clear();
         const glm::vec3 cameraPosition = glm::inverse(camera.viewMatrix) * glm::vec4(glm::vec3(0.f), 1.f);
         
         mDirectionalLightShader->bind();
@@ -295,25 +296,47 @@ void Renderer::render()
         graphics::pushDebugGroup("IBL Distant Light Probe");
         
         // IBL ambient lighting. We already have the correct framebuffer bound.
-        mIblShader->bind();
-
-        mIblShader->set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 0);
-        mIblShader->set("u_position_texture", mPositionTextureBuffer->getId(), 1);
-        mIblShader->set("u_normal_texture", mNormalTextureBuffer->getId(), 2);
-        mIblShader->set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 3);
-        mIblShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
-
-        mIblShader->set("u_irradiance_texture", mIrradianceMap->getId(), 5);
-        mIblShader->set("u_pre_filter_texture", mPreFilterMap->getId(), 6);
-        mIblShader->set("u_brdf_lut_texture", mBrdfLutTextureBuffer->getId(), 7);
-
-        mIblShader->set("u_camera_position_ws", cameraPosition);
-
-        mIblShader->set("u_luminance_multiplier", mIblLuminanceMultiplier);
-
-        drawFullscreenTriangleNow();
+        // mIblShader->bind();
+        //
+        // mIblShader->set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 0);
+        // mIblShader->set("u_position_texture", mPositionTextureBuffer->getId(), 1);
+        // mIblShader->set("u_normal_texture", mNormalTextureBuffer->getId(), 2);
+        // mIblShader->set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 3);
+        // mIblShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
+        //
+        // mIblShader->set("u_irradiance_texture", mIrradianceMap->getId(), 5);
+        // mIblShader->set("u_pre_filter_texture", mPreFilterMap->getId(), 6);
+        // mIblShader->set("u_brdf_lut_texture", mBrdfLutTextureBuffer->getId(), 7);
+        //
+        // mIblShader->set("u_camera_position_ws", cameraPosition);
+        //
+        // mIblShader->set("u_luminance_multiplier", mIblLuminanceMultiplier);
+        //
+        // drawFullscreenTriangleNow();
         
         PROFILE_SCOPE_END(iblTimer);
+        graphics::popDebugGroup();
+        PROFILE_SCOPE_BEGIN(screenSpace, "Reflections");
+        graphics::pushDebugGroup("Reflections");
+        
+        mReflectionFramebuffer->bind();
+        mReflectionFramebuffer->clear();
+        mScreenSpaceReflectionsShader->bind();
+        
+        mScreenSpaceReflectionsShader->set("u_positionTexture", mPositionTextureBuffer->getId(), 0);
+        mScreenSpaceReflectionsShader->set("u_normalTexture", mNormalTextureBuffer->getId(), 1);
+        mScreenSpaceReflectionsShader->set("u_depthTexture", mDepthTextureBuffer->getId(), 2);
+        mScreenSpaceReflectionsShader->set("u_colourTexture", mLightTextureBuffer->getId(), 3);
+        
+        const float maxLuminance = 1.2f * glm::pow(2.f, mCurrentEV100);
+        const float exposure = 1.f / maxLuminance;
+        mScreenSpaceReflectionsShader->set("u_exposure", exposure);
+        mScreenSpaceReflectionsShader->set("u_cameraPositionWs", cameraPosition);
+        mScreenSpaceReflectionsShader->set("u_vpMatrix", vpMatrix);
+        
+        drawFullscreenTriangleNow();
+        
+        PROFILE_SCOPE_END(screenSpace);
         graphics::popDebugGroup();
         PROFILE_SCOPE_BEGIN(deferredTimer, "Skybox Pass");
         graphics::pushDebugGroup("Combine + Skybox Pass");
@@ -584,6 +607,8 @@ void Renderer::initFrameBuffers()
     // We only ever write to this framebuffer once, so it shouldn't matter.
     mDeferredLightFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ONE, GL_ALWAYS);
     
+    mReflectionFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ONE, GL_ALWAYS);
+    
     mShadowFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ZERO, GL_LESS);
 }
 
@@ -601,6 +626,7 @@ void Renderer::initTextureRenderBuffers()
     mDepthTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_DEPTH_COMPONENT32F,    GL_NEAREST, GL_NEAREST);
     mPrimaryImageBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
     mAuxiliaryImageBuffer            = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
+    mReflectionImageBuffer           = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_LINEAR,  GL_LINEAR);
     
     // Make sure that the framebuffers have been set up before calling this function.
     mGeometryFramebuffer->attach(mPositionTextureBuffer.get(),    0);
@@ -615,6 +641,9 @@ void Renderer::initTextureRenderBuffers()
     // Lighting.
     mLightFramebuffer->attach(mLightTextureBuffer.get(), 0);
     mLightFramebuffer->attach(mShadowTextureBuffer.get(), 1);
+    
+    // Reflection Buffer
+    mReflectionFramebuffer->attach(mReflectionImageBuffer.get(), 0);
     
     // Deferred Lighting.
     mDeferredLightFramebuffer->attach(mDeferredLightingTextureBuffer.get(), 0);
@@ -632,6 +661,8 @@ void Renderer::detachTextureRenderBuffersFromFrameBuffers()
     
     mLightFramebuffer->detach(0);
     mLightFramebuffer->detach(1);
+    
+    mReflectionFramebuffer->detach(0);
     
     mDeferredLightFramebuffer->detach(0);
 }
@@ -850,6 +881,11 @@ const TextureBufferObject &Renderer::getDeferredLightingBuffer()
 std::vector<graphics::DirectionalLight> &Renderer::getDirectionalLights()
 {
     return mDirectionalLightQueue;
+}
+
+const TextureBufferObject &Renderer::getReflectionBuffer()
+{
+    return *mReflectionImageBuffer;
 }
 
 float Renderer::getCurrentEV100() const

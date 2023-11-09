@@ -125,6 +125,7 @@ public:
     [[nodiscard]] const TextureBufferObject &getShadowBuffer();
     [[nodiscard]] const TextureBufferObject &getRoughnessBuffer();
     [[nodiscard]] const TextureBufferObject &getMetallicBuffer();
+    [[nodiscard]] const TextureBufferObject &getReflectionBuffer();
     
     [[nodiscard]] std::vector<graphics::DirectionalLight> &getDirectionalLights();
     
@@ -168,6 +169,7 @@ protected:
     std::unique_ptr<FramebufferObject> mGeometryFramebuffer;
     std::unique_ptr<FramebufferObject> mLightFramebuffer;
     std::unique_ptr<FramebufferObject> mShadowFramebuffer;
+    std::unique_ptr<FramebufferObject> mReflectionFramebuffer;
     
     std::unique_ptr<Shader> mDeferredLightShader;
     std::unique_ptr<Shader> mDirectionalLightShader;
@@ -181,6 +183,7 @@ protected:
     std::unique_ptr<Shader> mCubemapToIrradianceShader;
     std::unique_ptr<Shader> mPreFilterShader;
     std::unique_ptr<Shader> mIntegrateBrdfShader;
+    std::unique_ptr<Shader> mScreenSpaceReflectionsShader;
     
     SubMesh mFullscreenTriangle;
     SubMesh mUnitSphere;
@@ -194,10 +197,11 @@ protected:
     std::unique_ptr<TextureBufferObject> mMetallicTextureBuffer;
     std::unique_ptr<TextureBufferObject> mDeferredLightingTextureBuffer;
     std::unique_ptr<TextureBufferObject> mPositionTextureBuffer;
-    std::unique_ptr<TextureBufferObject> mShadowTextureBuffer;
+    std::unique_ptr<TextureBufferObject> mShadowTextureBuffer;  // todo: Remove me!
     std::unique_ptr<TextureBufferObject> mBrdfLutTextureBuffer;
     std::unique_ptr<TextureBufferObject> mPrimaryImageBuffer;
     std::unique_ptr<TextureBufferObject> mAuxiliaryImageBuffer;
+    std::unique_ptr<TextureBufferObject> mReflectionImageBuffer;
     
     glm::ivec2 mCurrentRenderBufferSize;
     

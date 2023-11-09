@@ -46,7 +46,7 @@ public:
     void detach(int bindPoint);
     void detachRenderBuffer() const;
     void detachDepthBuffer() const;
-    void clear(const glm::vec4 &clearColour);
+    void clear(const glm::vec4 &clearColour=glm::vec4(0.f, 0.f, 0.f, 1.f));
     
     /**
      * @brief Only clears the depth buffer. This exists for cpu performance. clear() = ~0.2ms and

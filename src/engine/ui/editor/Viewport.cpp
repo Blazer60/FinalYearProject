@@ -44,6 +44,7 @@ namespace engine
             ViewportImage { "Shadow",       []() -> const TextureBufferObject& { return graphics::renderer->getShadowBuffer(); } },
             ViewportImage { "Roughness",    []() -> const TextureBufferObject& { return graphics::renderer->getRoughnessBuffer(); } },
             ViewportImage { "Metallic",     []() -> const TextureBufferObject& { return graphics::renderer->getMetallicBuffer(); } },
+            ViewportImage { "Reflections",  []() -> const TextureBufferObject& { return graphics::renderer->getReflectionBuffer(); } },
         };
     }
     
