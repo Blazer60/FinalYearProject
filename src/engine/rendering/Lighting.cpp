@@ -46,7 +46,7 @@ namespace engine
         mDirectionalLight.shadowMap = std::make_shared<TextureArrayObject>(shadowMapSize, cascadeZoneCount, GL_DEPTH_COMPONENT32, graphics::filter::Linear, graphics::wrap::ClampToBorder);
         mDirectionalLight.shadowMap->setBorderColour(glm::vec4(1.f));
         mDirectionalLight.vpMatrices.reserve(cascadeZoneCount);
-        calculateDirection();
+        // calculateDirection();
     }
 
     void DirectionalLight::updateLayerCount(uint32_t cascadeCount)
