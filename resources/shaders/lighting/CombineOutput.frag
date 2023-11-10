@@ -7,9 +7,11 @@ uniform sampler2D u_emissive_texture;
 uniform sampler2D u_depth_texture;
 uniform samplerCube u_skybox_texture;
 uniform sampler2D u_reflection_texture;
+uniform sampler2D u_roughness_texture;
 
 uniform mat4 u_inverse_vp_matrix;
 uniform float u_luminance_multiplier;
+uniform float u_max_reflection_lod;
 
 out layout(location = 0) vec3 o_colour;
 
@@ -38,7 +40,9 @@ void main()
     {
         const vec3 l0  = texture(u_irradiance_texture, v_uv).rgb;
         const vec3 emissive = texture(u_emissive_texture, v_uv).rgb;
-        const vec3 reflection = texture(u_reflection_texture, v_uv).rgb;
+        const float roughness = texture(u_roughness_texture, v_uv).r;
+        const float alpha = 1.f - roughness;
+        const vec3 reflection = alpha * alpha * textureLod(u_reflection_texture, v_uv, roughness * (u_max_reflection_lod - 1.f)).rgb;
         o_colour = emissive + l0 + reflection;
     }
     else

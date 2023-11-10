@@ -40,6 +40,8 @@ public:
     [[nodiscard]] const glm::ivec2 &getSize() const;
     void setBorderColour(const glm::vec4 &colour) const;
     [[nodiscard]] GLenum getFormat() const;
+    void generateMipMaps() const;
+    [[nodiscard]] uint32_t getMipLevels() const;
 protected:
     void init(GLint minFilter, GLint magFilter, GLint wrapS, GLint wrapT);
     void deInit();

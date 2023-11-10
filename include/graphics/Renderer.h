@@ -201,7 +201,7 @@ protected:
     std::unique_ptr<TextureBufferObject> mBrdfLutTextureBuffer;
     std::unique_ptr<TextureBufferObject> mPrimaryImageBuffer;
     std::unique_ptr<TextureBufferObject> mAuxiliaryImageBuffer;
-    std::unique_ptr<TextureBufferObject> mReflectionImageBuffer;
+    std::unique_ptr<TextureBufferObject> mReflectionTextureBuffer;
     
     glm::ivec2 mCurrentRenderBufferSize;
     

@@ -32,6 +32,7 @@ namespace graphics
     };
     
     GLint toGLint(filter f);
+    GLint toMagGLint(filter f);
     GLint toGLint(wrap w);
     
     struct RenderQueueObject

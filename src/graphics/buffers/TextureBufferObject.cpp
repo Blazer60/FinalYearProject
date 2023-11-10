@@ -28,9 +28,8 @@ TextureBufferObject::TextureBufferObject(
     :
     mSize(size), mFormat(format), mMipMapLevels(mipmapLevel)
 {
-    const auto filter = toGLint(filterMode);
     const auto wrap = toGLint(wrapMode);
-    init(filter, filter, wrap, wrap);
+    init(graphics::toGLint(filterMode), graphics::toMagGLint(filterMode), wrap, wrap);
 }
 
 TextureBufferObject::~TextureBufferObject()
@@ -71,4 +70,17 @@ void TextureBufferObject::setBorderColour(const glm::vec4 &colour) const
 GLenum TextureBufferObject::getFormat() const
 {
     return mFormat;
+}
+
+void TextureBufferObject::generateMipMaps() const
+{
+    if (mMipMapLevels > 0)
+    {
+        glGenerateTextureMipmap(mId);
+    }
+}
+
+uint32_t TextureBufferObject::getMipLevels() const
+{
+    return mMipMapLevels;
 }
