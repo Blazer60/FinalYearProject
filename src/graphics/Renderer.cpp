@@ -333,6 +333,9 @@ void Renderer::render()
         mScreenSpaceReflectionsShader->set("u_exposure", exposure);
         mScreenSpaceReflectionsShader->set("u_cameraPositionWs", cameraPosition);
         mScreenSpaceReflectionsShader->set("u_vpMatrix", vpMatrix);
+        mScreenSpaceReflectionsShader->set("u_invProjectionMatrix", glm::inverse(cameraProjectionMatrix));
+        mScreenSpaceReflectionsShader->set("u_projectionMatrix", cameraProjectionMatrix);
+        mScreenSpaceReflectionsShader->set("u_viewMatrix", camera.viewMatrix);
         
         drawFullscreenTriangleNow();
         
@@ -626,7 +629,7 @@ void Renderer::initTextureRenderBuffers()
     mDepthTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_DEPTH_COMPONENT32F,    GL_NEAREST, GL_NEAREST);
     mPrimaryImageBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
     mAuxiliaryImageBuffer            = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
-    mReflectionImageBuffer           = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_LINEAR,  GL_LINEAR);
+    mReflectionImageBuffer           = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB32F,                GL_LINEAR,  GL_LINEAR);
     
     // Make sure that the framebuffers have been set up before calling this function.
     mGeometryFramebuffer->attach(mPositionTextureBuffer.get(),    0);

@@ -44,12 +44,13 @@ MyScene::MyScene() :
     auto floorMaterial = std::make_shared<engine::StandardMaterialSubComponent>();
     floorMaterial->attachShader(mStandardShader);
     floorMaterial->setDiffuseMap(file::modelPath() /  "stoneFloor/TexturesCom_TileStones_1K_albedo.png");
-    floorMaterial->setNormalMap(file::modelPath() /  "stoneFloor/TexturesCom_TileStones_1K_normal.png");
-    floorMaterial->setHeightMap(file::modelPath() /  "stoneFloor/TexturesCom_TileStones_1K_height.png");
+    // floorMaterial->setNormalMap(file::modelPath() /  "stoneFloor/TexturesCom_TileStones_1K_normal.png");
+    // floorMaterial->setHeightMap(file::modelPath() /  "stoneFloor/TexturesCom_TileStones_1K_height.png");
     floorMaterial->setRoughnessMap(file::modelPath() /  "stoneFloor/TexturesCom_TileStones_1K_roughness.png");
     floorMaterial->setMetallic(0.f);
     floorMaterial->setRoughness(0.5f);
     floorMaterial->setAmbientColour(glm::vec3(0.8f));
+    floorMaterial->setHeightScale(0.f);
     floorMesh->addMaterial(floorMaterial);
 
     std::vector<glm::vec3> positions;

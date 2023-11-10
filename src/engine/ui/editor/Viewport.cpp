@@ -46,6 +46,7 @@ namespace engine
             ViewportImage { "Metallic",     []() -> const TextureBufferObject& { return graphics::renderer->getMetallicBuffer(); } },
             ViewportImage { "Reflections",  []() -> const TextureBufferObject& { return graphics::renderer->getReflectionBuffer(); } },
         };
+        mCurrentSelectedImage = mViewportImages.size() - 1;
     }
     
     Viewport::~Viewport()
