@@ -6,6 +6,7 @@ uniform sampler2D u_irradiance_texture;
 uniform sampler2D u_emissive_texture;
 uniform sampler2D u_depth_texture;
 uniform samplerCube u_skybox_texture;
+uniform sampler2D u_reflection_texture;
 
 uniform mat4 u_inverse_vp_matrix;
 uniform float u_luminance_multiplier;
@@ -37,7 +38,8 @@ void main()
     {
         const vec3 l0  = texture(u_irradiance_texture, v_uv).rgb;
         const vec3 emissive = texture(u_emissive_texture, v_uv).rgb;
-        o_colour = emissive + l0;
+        const vec3 reflection = texture(u_reflection_texture, v_uv).rgb;
+        o_colour = emissive + l0 + reflection;
     }
     else
     {

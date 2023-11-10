@@ -337,6 +337,11 @@ void Renderer::render()
         mScreenSpaceReflectionsShader->set("u_projectionMatrix", cameraProjectionMatrix);
         mScreenSpaceReflectionsShader->set("u_viewMatrix", camera.viewMatrix);
         
+        mScreenSpaceReflectionsShader->set("u_stepSize", mReflectionStepSize);
+        mScreenSpaceReflectionsShader->set("u_maxStepCount", mReflectionMaxStepCount);
+        mScreenSpaceReflectionsShader->set("u_thicknessThreshold", mReflectionThicknessThreshold);
+        mScreenSpaceReflectionsShader->set("u_binarySearchDepth", mReflectionBinarySearchDepth);
+        
         drawFullscreenTriangleNow();
         
         PROFILE_SCOPE_END(screenSpace);
@@ -359,6 +364,7 @@ void Renderer::render()
         mDeferredLightShader->set("u_emissive_texture", mEmissiveTextureBuffer->getId(), 1);
         mDeferredLightShader->set("u_depth_texture", mDepthTextureBuffer->getId(), 2);
         mDeferredLightShader->set("u_skybox_texture", mHdrSkybox->getId(), 3);
+        mDeferredLightShader->set("u_reflection_texture", mReflectionImageBuffer->getId(), 4);
         
         mDeferredLightShader->set("u_inverse_vp_matrix", ivp);
         mDeferredLightShader->set("u_luminance_multiplier", mIblLuminanceMultiplier);

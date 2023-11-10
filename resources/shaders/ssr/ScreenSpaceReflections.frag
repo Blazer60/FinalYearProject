@@ -15,6 +15,11 @@ uniform mat4 u_invProjectionMatrix;
 uniform mat4 u_projectionMatrix;
 uniform mat4 u_viewMatrix;
 
+uniform float u_stepSize;
+uniform int u_maxStepCount;
+uniform float u_thicknessThreshold;
+uniform int u_binarySearchDepth;
+
 out layout(location = 0) vec3 o_colour;
 
 struct Prd
@@ -203,11 +208,11 @@ HitResult rayMarch(vec3 startPosition, vec3 direction, float delta, int maxItera
         
 //        if (currentDepth < sampleDepth)
         const float delta = currentDepth - sampleDepth;
-        if ((directionDelta.z - delta) < 1.2f)
+        if ((directionDelta.z - delta) < u_thicknessThreshold)
         {
             if (delta <= 0.f)
             {
-                return binarySearch(position - directionDelta, position, 10);
+                return binarySearch(position - directionDelta, position, u_binarySearchDepth);
                 // hit
                 //            HitResult result;
                 //            result.hit = true;
@@ -238,11 +243,11 @@ void main()
 //    const vec3 reflectionDirectionViewSpace = (u_viewMatrix * vec4(reflectionDirection, 0.f)).xyz;
     const vec3 reflectionDirectionViewSpace = normalize(reflect(normalize(positionViewSpace), normalViewSpace));
     
-    const HitResult hit = rayMarch(positionViewSpace, reflectionDirectionViewSpace, 0.1f, 200);
+    const HitResult hit = rayMarch(positionViewSpace, reflectionDirectionViewSpace, u_stepSize, u_maxStepCount);
     if (hit.hit)
     {
 //        o_colour.xy = hit.intersection.xy;
-        o_colour = u_exposure * texture(u_colourTexture, hit.intersection.xy).rgb;
+        o_colour = texture(u_colourTexture, hit.intersection.xy).rgb;
     }
     else
     {
