@@ -39,7 +39,7 @@ Renderer::Renderer() :
     mCubemapToIrradianceShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "cubemap/IrradianceMap.frag");
     mPreFilterShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() /  "cubemap/PreFilter.frag");
     mIntegrateBrdfShader = std::make_unique<Shader>(file::shaderPath() /  "FullscreenTriangle.vert", file::shaderPath() / "brdf/IntegrateBrdf.frag");
-    mScreenSpaceReflectionsShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "ssr/ScreenSpaceReflections.frag");
+    mScreenSpaceReflectionsShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "ssr/SsrDda.frag");
     
     generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
     // generateSkybox("", glm::ivec2(512));
@@ -323,16 +323,41 @@ void Renderer::render()
         mReflectionFramebuffer->clear();
         mScreenSpaceReflectionsShader->bind();
         
+        // mScreenSpaceReflectionsShader->set("u_positionTexture", mPositionTextureBuffer->getId(), 0);
+        // mScreenSpaceReflectionsShader->set("u_normalTexture", mNormalTextureBuffer->getId(), 1);
+        // mScreenSpaceReflectionsShader->set("u_colourTexture", mLightTextureBuffer->getId(), 2);
+        // mScreenSpaceReflectionsShader->set("u_projectionMatrix", cameraProjectionMatrix);
+        // mScreenSpaceReflectionsShader->set("u_viewMatrix", camera.viewMatrix);
+        //
+        // mScreenSpaceReflectionsShader->set("u_stepSize", mReflectionStepSize);
+        // mScreenSpaceReflectionsShader->set("u_maxStepCount", mReflectionMaxStepCount);
+        // mScreenSpaceReflectionsShader->set("u_thicknessThreshold", mReflectionThicknessThreshold);
+        // mScreenSpaceReflectionsShader->set("u_binarySearchDepth", mReflectionBinarySearchDepth);
+        
+        // Second attempt for dda.
         mScreenSpaceReflectionsShader->set("u_positionTexture", mPositionTextureBuffer->getId(), 0);
         mScreenSpaceReflectionsShader->set("u_normalTexture", mNormalTextureBuffer->getId(), 1);
-        mScreenSpaceReflectionsShader->set("u_colourTexture", mLightTextureBuffer->getId(), 2);
-        mScreenSpaceReflectionsShader->set("u_projectionMatrix", cameraProjectionMatrix);
-        mScreenSpaceReflectionsShader->set("u_viewMatrix", camera.viewMatrix);
         
-        mScreenSpaceReflectionsShader->set("u_stepSize", mReflectionStepSize);
-        mScreenSpaceReflectionsShader->set("u_maxStepCount", mReflectionMaxStepCount);
-        mScreenSpaceReflectionsShader->set("u_thicknessThreshold", mReflectionThicknessThreshold);
-        mScreenSpaceReflectionsShader->set("u_binarySearchDepth", mReflectionBinarySearchDepth);
+        mScreenSpaceReflectionsShader->set("u_viewMatrix", camera.viewMatrix);
+        mScreenSpaceReflectionsShader->set("u_projectionMatrix", cameraProjectionMatrix);
+        mScreenSpaceReflectionsShader->set("u_cameraPosition", cameraPosition);
+        
+        
+        const glm::mat4 scaleTextureSpace = glm::scale(glm::mat4(1.f), glm::vec3(0.5f, 0.5f, 1.f));
+        const glm::mat4 translateTextureSpace = glm::translate(glm::mat4(1.f), glm::vec3(0.5f, 0.5f, 0.f));
+        const glm::mat4 scaleFrameBufferSpace = glm::scale(glm::mat4(1.f), glm::vec3(mLightTextureBuffer->getSize().x, mLightTextureBuffer->getSize().y, 1));
+        
+        const glm::mat4 viewToPixelCoordMatrix = scaleFrameBufferSpace * translateTextureSpace * scaleTextureSpace * cameraProjectionMatrix;
+        mScreenSpaceReflectionsShader->set("u_proj", viewToPixelCoordMatrix);
+        
+        mScreenSpaceReflectionsShader->set("u_nearPlaneZ", camera.nearClipDistance);
+        mScreenSpaceReflectionsShader->set("u_farPlaneZ", camera.farClipDistance);
+        
+        
+        const float maxLuminance = 1.2f * glm::pow(2.f, mCurrentEV100);
+        const float exposure = 1.f / maxLuminance;
+        mScreenSpaceReflectionsShader->set("u_exposure", exposure);
+        mScreenSpaceReflectionsShader->set("u_colourTexture", mLightTextureBuffer->getId(), 2);
         
         drawFullscreenTriangleNow();
         mReflectionTextureBuffer->generateMipMaps();
