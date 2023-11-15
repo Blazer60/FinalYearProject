@@ -335,8 +335,11 @@ void Renderer::render()
         // mScreenSpaceReflectionsShader->set("u_binarySearchDepth", mReflectionBinarySearchDepth);
         
         // Second attempt for dda.
+        mDepthTextureBuffer->setBorderColour(glm::vec4(0.f, 0.f, 0.f, 1.f));
+        
         mScreenSpaceReflectionsShader->set("u_positionTexture", mPositionTextureBuffer->getId(), 0);
         mScreenSpaceReflectionsShader->set("u_normalTexture", mNormalTextureBuffer->getId(), 1);
+        mScreenSpaceReflectionsShader->set("u_depthTexture", mDepthTextureBuffer->getId(), 2);
         
         mScreenSpaceReflectionsShader->set("u_viewMatrix", camera.viewMatrix);
         mScreenSpaceReflectionsShader->set("u_projectionMatrix", cameraProjectionMatrix);
@@ -350,14 +353,14 @@ void Renderer::render()
         const glm::mat4 viewToPixelCoordMatrix = scaleFrameBufferSpace * translateTextureSpace * scaleTextureSpace * cameraProjectionMatrix;
         mScreenSpaceReflectionsShader->set("u_proj", viewToPixelCoordMatrix);
         
-        mScreenSpaceReflectionsShader->set("u_nearPlaneZ", camera.nearClipDistance);
+        mScreenSpaceReflectionsShader->set("u_nearPlaneZ", -camera.nearClipDistance);
         mScreenSpaceReflectionsShader->set("u_farPlaneZ", camera.farClipDistance);
         
         
         const float maxLuminance = 1.2f * glm::pow(2.f, mCurrentEV100);
         const float exposure = 1.f / maxLuminance;
         mScreenSpaceReflectionsShader->set("u_exposure", exposure);
-        mScreenSpaceReflectionsShader->set("u_colourTexture", mLightTextureBuffer->getId(), 2);
+        mScreenSpaceReflectionsShader->set("u_colourTexture", mLightTextureBuffer->getId(), 3);
         
         drawFullscreenTriangleNow();
         mReflectionTextureBuffer->generateMipMaps();
@@ -652,7 +655,7 @@ void Renderer::initTextureRenderBuffers()
     mLightTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
     mDeferredLightingTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
     mShadowTextureBuffer             = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_R16F,                  GL_NEAREST, GL_NEAREST);
-    mDepthTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_DEPTH_COMPONENT32F,    GL_NEAREST, GL_NEAREST);
+    mDepthTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_DEPTH_COMPONENT32F,    graphics::filter::Nearest, graphics::wrap::ClampToBorder);
     mPrimaryImageBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
     mAuxiliaryImageBuffer            = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
     mReflectionTextureBuffer         = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                graphics::filter::LinearMipmapLinear,  graphics::wrap::ClampToEdge, 8);
