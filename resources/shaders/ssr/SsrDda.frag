@@ -57,19 +57,19 @@ bool traceScreenSpaceRay(
     vec2 P1 = H1.xy * k1;
     
     // [Optional Clip function here if wanted (probs just set the border colour to be invalid)].
-//    const float xMax = csZBufferSize.x - 0.5f;
-//    const float xMin = 0.5f;
-//    const float yMax = csZBufferSize.y - 0.5f;
-//    const float yMin = 0.5f;
-//    float alpha = 0.f;
-//    // Assume P0 is in the viewport (P1 - P0 is never zero when clipping).
-//    if ((P1.y > yMax) || (P1.y < yMin))
-//        alpha = (P1.y - ((P1.y > yMax) ? yMax : yMin)) / (P1.y - P0.y);
-//    if ((P1.x > xMax) || (P1.x < xMin))
-//        alpha = max(alpha, (P1.x - ((P1.x > xMax) ? xMax : xMin)) / (P1.x - P0.x));
-//    P1 = mix(P1, P0, alpha);
-//    k1 = mix(k1, k0, alpha);
-//    Q1 = mix(Q1, Q0, alpha);
+    const float xMax = csZBufferSize.x - 0.5f;
+    const float xMin = 0.5f;
+    const float yMax = csZBufferSize.y - 0.5f;
+    const float yMin = 0.5f;
+    float alpha = 0.f;
+    // Assume P0 is in the viewport (P1 - P0 is never zero when clipping).
+    if ((P1.y > yMax) || (P1.y < yMin))
+        alpha = (P1.y - ((P1.y > yMax) ? yMax : yMin)) / (P1.y - P0.y);
+    if ((P1.x > xMax) || (P1.x < xMin))
+        alpha = max(alpha, (P1.x - ((P1.x > xMax) ? xMax : xMin)) / (P1.x - P0.x));
+    P1 = mix(P1, P0, alpha);
+    k1 = mix(k1, k0, alpha);
+    Q1 = mix(Q1, Q0, alpha);
     // [End Optional Clip function]
     
     P1 += vec2((distanceSquared(P0, P1) < 0.0001f) ? 0.01f : 0.f);
