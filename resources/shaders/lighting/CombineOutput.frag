@@ -33,6 +33,22 @@ vec3 sample_skybox_colour()
     return colour * u_luminance_multiplier;
 }
 
+vec4 sampleReflections()
+{
+    const vec2 bufferSize = textureSize(u_reflection_texture, 0);
+    const vec2 texelSize = 1.f / bufferSize;
+    
+    const vec4 sampleOne   = texture(u_reflection_texture, v_uv + vec2( 0.5f,  0.5f) * texelSize);
+    const vec4 sampleTwo   = texture(u_reflection_texture, v_uv + vec2(-0.5f,  0.5f) * texelSize);
+    const vec4 sampleThree = texture(u_reflection_texture, v_uv + vec2( 0.5f, -0.5f) * texelSize);
+    const vec4 sampleFour  = texture(u_reflection_texture, v_uv + vec2(-0.5f, -0.5f) * texelSize);
+    
+    // Look at the power point with the stochastic stuff to see what they're are doing.
+    vec4 result = 0.25f * (sampleOne + sampleTwo + sampleThree + sampleFour);
+    result.rgb *= result.a;
+    return result;
+}
+
 void main()
 {
     const float depth = texture(u_depth_texture, v_uv).r;
@@ -42,7 +58,8 @@ void main()
         const vec3 emissive = texture(u_emissive_texture, v_uv).rgb;
         const float roughness = texture(u_roughness_texture, v_uv).r;
         const float alpha = 1.f - roughness;
-        const vec3 reflection = alpha * alpha * textureLod(u_reflection_texture, v_uv, roughness * (u_max_reflection_lod - 1.f)).rgb;
+//        const vec3 reflection = alpha * alpha * textureLod(u_reflection_texture, v_uv, roughness * (u_max_reflection_lod - 1.f)).rgb;
+        const vec3 reflection = sampleReflections().rgb;
         o_colour = emissive + l0 + reflection;
     }
     else

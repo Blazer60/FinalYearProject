@@ -5,6 +5,7 @@ in vec2 v_uv;
 uniform sampler2D u_positionTexture;
 uniform sampler2D u_normalTexture;
 uniform sampler2D u_depthTexture;
+uniform sampler2D u_roughnessTexture;
 
 uniform mat4 u_viewMatrix;
 uniform mat4 u_projectionMatrix;
@@ -17,7 +18,28 @@ uniform float u_farPlaneZ;
 uniform float u_exposure;
 uniform sampler2D u_colourTexture;
 
-out layout(location = 0) vec3 o_colour;
+out layout(location = 0) vec4 o_colour;
+
+const float PI = 3.14159265359;
+
+int   seed = 1;
+int   rand(void) { seed = seed*0x343fd+0x269ec3; return (seed>>16)&32767; }
+float frand(void) { return float(rand())/32767.0; }
+void  srand( ivec2 p, int frame )
+{
+    int n = frame;
+    n = (n<<13)^n; n=n*(n*n*15731+789221)+1376312589; // by Hugo Elias
+    n += p.y;
+    n = (n<<13)^n; n=n*(n*n*15731+789221)+1376312589;
+    n += p.x;
+    n = (n<<13)^n; n=n*(n*n*15731+789221)+1376312589;
+    seed = n;
+}
+
+vec3 frand3D()
+{
+    return vec3(frand(), frand(), frand());
+}
 
 void swap(inout float a, inout float b)
 {
@@ -144,37 +166,53 @@ bool traceScreenSpaceRay(
 
 void main()
 {
+    const float depth = texture(u_depthTexture, v_uv).r;
+    if (depth >= 1.f)
+    {
+        o_colour = vec4(0.f);
+        discard;  // We've missed all geometry so don't do anything.
+    }
+    
     const vec3 position = texture(u_positionTexture, v_uv).xyz;
     const vec3 normal = normalize(texture(u_normalTexture, v_uv).xyz);
+    const float roughness = texture(u_roughnessTexture, v_uv).r;
     
     const vec3 direction = normalize(u_cameraPosition - position);
-    const vec3 reflection = reflect(-direction, normal);
     
-    const vec3 reflectionViewSpace = (u_viewMatrix * vec4(reflection, 0.f)).xyz;
-    // Slight offset to avoid self-intersection (just like ray tracing).
-    const vec3 positionViewSpace = (u_viewMatrix * vec4(position + normal * 0.1f, 1.f)).xyz;
-    
-    const float zThickness = 0.1f;  // (0-inf] Controls the 'smearing'.
-    const float stride = 1.f;  // [1-4]
-    const float maxSteps = 1500.f;
-    const float maxDistance = 1000.f;
-    const float jitter = 0.f; // [0, 1]
-    vec2 hitPixel;
-    vec3 hitPointViewSpace;
-    
-//    traceScreenSpaceRay(positionViewSpace, reflectionViewSpace, zThickness, stride, maxSteps, maxDistance, hitPixel, hitPointViewSpace);
     const vec2 csZBufferSize = textureSize(u_positionTexture, 0);
+    srand(ivec2(v_uv * csZBufferSize), 3);
     
-    if (traceScreenSpaceRay(positionViewSpace, reflectionViewSpace, zThickness, stride, maxSteps, maxDistance, jitter, hitPixel, hitPointViewSpace))
+    vec4 result = vec4(0.f);
+    const uint sampleCount = 4u;
+    for (uint i = 0; i < sampleCount; i++)
     {
-        const vec2 hitUv = hitPixel / csZBufferSize;
-        const float depthTest = texture(u_depthTexture, hitUv).r;
-        if (depthTest >= 1.f)  // Check if we've just hit the sky. Not the best way to do this.
-            o_colour = vec3(0.f);
+        const vec3 offset = 0.25f * roughness * roughness * normalize(2.f * frand3D() - vec3(1.f));
+        const vec3 reflection = reflect(-normalize(direction + offset), normal);
+        
+        const vec3 reflectionViewSpace = (u_viewMatrix * vec4(reflection, 0.f)).xyz;
+        // Slight offset to avoid self-intersection (just like ray tracing).
+        const vec3 positionViewSpace = (u_viewMatrix * vec4(position + normal * 0.1f, 1.f)).xyz;
+        
+        const float zThickness = 0.1f;  // (0-inf] Controls the 'smearing'.
+        const float stride = 1.f;  // [1-4]
+        const float maxSteps = 1500.f;
+        const float maxDistance = 1000.f;
+        const float jitter = 0.f; // [0, 1]
+        vec2 hitPixel;
+        vec3 hitPointViewSpace;
+        
+        if (traceScreenSpaceRay(positionViewSpace, reflectionViewSpace, zThickness, stride, maxSteps, maxDistance, jitter, hitPixel, hitPointViewSpace))
+        {
+            const vec2 hitUv = hitPixel / csZBufferSize;
+            const float depthTest = texture(u_depthTexture, hitUv).r;
+            if (depthTest >= 1.f)  // Check if we've just hit the sky. Not the best way to do this.
+                result += vec4(0.f);
+            else
+                result += vec4(texture(u_colourTexture, hitUv).rgb, 1.f);
+        }
         else
-        //            o_colour.xy = hitPixel / csZBufferSize;
-            o_colour = u_exposure * texture(u_colourTexture, hitUv).rgb;
+            result += vec4(0.f);
     }
-    else
-        o_colour = vec3(0.f);
+    
+    o_colour = result / float(sampleCount);
 }
