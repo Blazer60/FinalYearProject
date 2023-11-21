@@ -396,38 +396,38 @@ void Renderer::render()
         mReflectionFramebuffer->bind();
         mReflectionFramebuffer->clear(glm::vec4(0.f));
         mScreenSpaceReflectionsShader->bind();
-        
+
         mDepthTextureBuffer->setBorderColour(glm::vec4(0.f, 0.f, 0.f, 1.f));
-        
+
         mScreenSpaceReflectionsShader->set("u_positionTexture", mPositionTextureBuffer->getId(), 0);
         mScreenSpaceReflectionsShader->set("u_normalTexture", mNormalTextureBuffer->getId(), 1);
         mScreenSpaceReflectionsShader->set("u_depthTexture", mDepthTextureBuffer->getId(), 2);
         mScreenSpaceReflectionsShader->set("u_roughnessTexture", mRoughnessTextureBuffer->getId(), 3);
-        
+
         mScreenSpaceReflectionsShader->set("u_viewMatrix", camera.viewMatrix);
         mScreenSpaceReflectionsShader->set("u_projectionMatrix", cameraProjectionMatrix);
         mScreenSpaceReflectionsShader->set("u_cameraPosition", cameraPosition);
-        
-        
+
+
         const glm::mat4 scaleTextureSpace = glm::scale(glm::mat4(1.f), glm::vec3(0.5f, 0.5f, 1.f));
         const glm::mat4 translateTextureSpace = glm::translate(glm::mat4(1.f), glm::vec3(0.5f, 0.5f, 0.f));
         const glm::mat4 scaleFrameBufferSpace = glm::scale(glm::mat4(1.f), glm::vec3(mLightTextureBuffer->getSize().x, mLightTextureBuffer->getSize().y, 1));
-        
+
         const glm::mat4 viewToPixelCoordMatrix = scaleFrameBufferSpace * translateTextureSpace * scaleTextureSpace * cameraProjectionMatrix;
         mScreenSpaceReflectionsShader->set("u_proj", viewToPixelCoordMatrix);
-        
+
         mScreenSpaceReflectionsShader->set("u_nearPlaneZ", -camera.nearClipDistance);
         mScreenSpaceReflectionsShader->set("u_farPlaneZ", camera.farClipDistance);
-        
-        
+
+
         const float maxLuminance = 1.2f * glm::pow(2.f, mCurrentEV100);
         const float exposure = 1.f / maxLuminance;
         mScreenSpaceReflectionsShader->set("u_exposure", exposure);
         mScreenSpaceReflectionsShader->set("u_colourTexture", mLightTextureBuffer->getId(), 4);
-        
+
         drawFullscreenTriangleNow();
         mReflectionTextureBuffer->generateMipMaps();
-        
+
         glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
         
         PROFILE_SCOPE_END(screenSpace);
@@ -452,10 +452,15 @@ void Renderer::render()
         mDeferredLightShader->set("u_skybox_texture", mHdrSkybox->getId(), 3);
         mDeferredLightShader->set("u_reflection_texture", mReflectionTextureBuffer->getId(), 4);
         mDeferredLightShader->set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 5);
+        mDeferredLightShader->set("u_position_texture", mPositionTextureBuffer->getId(), 6);
+        mDeferredLightShader->set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 7);
+        mDeferredLightShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 8);
+        mDeferredLightShader->set("u_normal_texture", mNormalTextureBuffer->getId(), 9);
         
         mDeferredLightShader->set("u_inverse_vp_matrix", ivp);
         mDeferredLightShader->set("u_luminance_multiplier", mIblLuminanceMultiplier);
         mDeferredLightShader->set("u_max_reflection_lod", static_cast<float>(mReflectionTextureBuffer->getMipLevels()));
+        mDeferredLightShader->set("u_camera_position_ws", cameraPosition);
         
         drawFullscreenTriangleNow();
         PROFILE_SCOPE_END(deferredTimer);

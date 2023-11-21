@@ -22,23 +22,37 @@ out layout(location = 0) vec4 o_colour;
 
 const float PI = 3.14159265359;
 
-int   seed = 1;
-int   rand(void) { seed = seed*0x343fd+0x269ec3; return (seed>>16)&32767; }
-float frand(void) { return float(rand())/32767.0; }
-void  srand( ivec2 p, int frame )
+float radicalInverseVdc(uint bits)
 {
-    int n = frame;
-    n = (n<<13)^n; n=n*(n*n*15731+789221)+1376312589; // by Hugo Elias
-    n += p.y;
-    n = (n<<13)^n; n=n*(n*n*15731+789221)+1376312589;
-    n += p.x;
-    n = (n<<13)^n; n=n*(n*n*15731+789221)+1376312589;
-    seed = n;
+    bits = (bits << 16u) | (bits >> 16u);
+    bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+    bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+    bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+    bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+    return float(bits) * 2.3283064365386963e-10; // / 0x100000000
 }
 
-vec3 frand3D()
+vec2 hammersley(uint i, uint N)
 {
-    return vec3(frand(), frand(), frand());
+    return vec2(float(i) / float(N), radicalInverseVdc(i));
+}
+
+vec3 importanceSampleGgx(vec2 xI, vec3 N, float roughness)
+{
+    const float a = roughness * roughness;
+
+    const float phi = 2.f * PI * xI.x;
+    const float cosTheta = sqrt((1.f - xI.y) / (1.f + (a * a - 1.f) * xI.y));
+    const float sinTheta = sqrt(1.f - cosTheta * cosTheta);
+
+    const vec3 H = vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
+
+    const vec3 up = abs(N.z) < 0.999f ? vec3(0.f, 0.f, 1.f) : vec3(1.f, 0.f, 0.f);
+    const vec3 tangent = normalize(cross(up, N));
+    const vec3 biTangent = cross(N, tangent);
+
+    const vec3 sampleVec = tangent * H.x + biTangent * H.y + N * H.z;
+    return normalize(sampleVec);
 }
 
 void swap(inout float a, inout float b)
@@ -164,6 +178,17 @@ bool traceScreenSpaceRay(
     return all(lessThanEqual(abs(hitPixel - (csZBufferSize * 0.5f)), csZBufferSize * 0.5f)) && stepCount < maxSteps && (P.x * stepDirection <= end);
 }
 
+// Unreal's and Disney's distribution function.
+float distributionGgx(float nDotH, float roughness)
+{
+    const float alpha = roughness * roughness;
+    const float alpha2 = alpha * alpha;
+    const float nDotH2 = nDotH * nDotH;
+    const float denominator = nDotH2 * (alpha2 - 1.f) + 1.f;
+
+    return alpha2 / (PI * denominator * denominator);
+}
+
 void main()
 {
     const float depth = texture(u_depthTexture, v_uv).r;
@@ -180,15 +205,21 @@ void main()
     const vec3 direction = normalize(u_cameraPosition - position);
     
     const vec2 csZBufferSize = textureSize(u_positionTexture, 0);
-    srand(ivec2(v_uv * csZBufferSize), 3);
-    
-    vec4 result = vec4(0.f);
-    const uint sampleCount = 4u;
+
+    const uint sampleCount = 1u;
     for (uint i = 0; i < sampleCount; i++)
     {
-        const vec3 offset = 0.25f * roughness * roughness * normalize(2.f * frand3D() - vec3(1.f));
-        const vec3 reflection = reflect(-normalize(direction + offset), normal);
-        
+        const vec2 xI = hammersley(i, sampleCount);
+        const vec3 H = importanceSampleGgx(xI, normal, roughness);
+        const vec3 reflection = reflect(-direction, H);  // aka. L
+
+        const float nDotH = dot(normal, H);
+        const float vDotH = dot(direction, H);
+        const float D = distributionGgx(nDotH, roughness);
+
+        // This is the probability distribution function for both unreal and frostbite.
+        const float pdf = (D * nDotH) / (4.f * vDotH);
+
         const vec3 reflectionViewSpace = (u_viewMatrix * vec4(reflection, 0.f)).xyz;
         // Slight offset to avoid self-intersection (just like ray tracing).
         const vec3 positionViewSpace = (u_viewMatrix * vec4(position + normal * 0.1f, 1.f)).xyz;
@@ -206,13 +237,11 @@ void main()
             const vec2 hitUv = hitPixel / csZBufferSize;
             const float depthTest = texture(u_depthTexture, hitUv).r;
             if (depthTest >= 1.f)  // Check if we've just hit the sky. Not the best way to do this.
-                result += vec4(0.f);
+                o_colour = vec4(0.f);
             else
-                result += vec4(texture(u_colourTexture, hitUv).rgb, 1.f);
+                o_colour = vec4(hitUv.xy, pdf, 1.f);
         }
         else
-            result += vec4(0.f);
+            o_colour = vec4(0.f);
     }
-    
-    o_colour = result / float(sampleCount);
 }
