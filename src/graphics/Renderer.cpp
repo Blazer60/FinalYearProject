@@ -40,6 +40,7 @@ Renderer::Renderer() :
     mPreFilterShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() /  "cubemap/PreFilter.frag");
     mIntegrateBrdfShader = std::make_unique<Shader>(file::shaderPath() /  "FullscreenTriangle.vert", file::shaderPath() / "brdf/IntegrateBrdf.frag");
     mScreenSpaceReflectionsShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "ssr/SsrDda.frag");
+    mColourResolveShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "ssr/ColourResolve.frag");
     
     generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
     // generateSkybox("", glm::ivec2(512));
@@ -61,8 +62,10 @@ void Renderer::initFrameBuffers()
     // We only ever write to this framebuffer once, so it shouldn't matter.
     mDeferredLightFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ONE, GL_ALWAYS);
     
+    mSsrFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ONE, GL_ALWAYS);
+
     mReflectionFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ONE, GL_ALWAYS);
-    
+
     mShadowFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ZERO, GL_LESS);
 }
 
@@ -75,13 +78,14 @@ void Renderer::initTextureRenderBuffers()
     mEmissiveTextureBuffer           = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
     mRoughnessTextureBuffer          = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_R16,                   GL_NEAREST, GL_NEAREST);
     mMetallicTextureBuffer           = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_R16,                   GL_NEAREST, GL_NEAREST);
-    mLightTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
+    mLightTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                graphics::filter::LinearMipmapLinear, graphics::wrap::ClampToEdge, 8);
     mDeferredLightingTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
     mShadowTextureBuffer             = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_R16F,                  GL_NEAREST, GL_NEAREST);
     mDepthTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_DEPTH_COMPONENT32F,    graphics::filter::Nearest,            graphics::wrap::ClampToBorder, 2);
     mPrimaryImageBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
     mAuxiliaryImageBuffer            = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
-    mReflectionTextureBuffer         = std::make_unique<TextureBufferObject>(halfSize,             GL_RGBA16F,               graphics::filter::Linear, graphics::wrap::ClampToEdge, 8);
+    mSsrDataTextureBuffer            = std::make_unique<TextureBufferObject>(halfSize,             GL_RGBA16F,               graphics::filter::Nearest, graphics::wrap::ClampToEdge);
+    mReflectionTextureBuffer         = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F,               graphics::filter::Linear, graphics::wrap::ClampToEdge);
     
     // Make sure that the framebuffers have been set up before calling this function.
     mGeometryFramebuffer->attach(mPositionTextureBuffer.get(),    0);
@@ -98,6 +102,8 @@ void Renderer::initTextureRenderBuffers()
     mLightFramebuffer->attach(mShadowTextureBuffer.get(), 1);
     
     // Reflection Buffer
+    mSsrFramebuffer->attach(mSsrDataTextureBuffer.get(), 0);
+
     mReflectionFramebuffer->attach(mReflectionTextureBuffer.get(), 0);
     
     // Deferred Lighting.
@@ -117,8 +123,10 @@ void Renderer::detachTextureRenderBuffersFromFrameBuffers()
     mLightFramebuffer->detach(0);
     mLightFramebuffer->detach(1);
     
+    mSsrFramebuffer->detach(0);
+
     mReflectionFramebuffer->detach(0);
-    
+
     mDeferredLightFramebuffer->detach(0);
 }
 
@@ -364,37 +372,13 @@ void Renderer::render()
         
         PROFILE_SCOPE_END(spotLightTimer);
         graphics::popDebugGroup();
-        PROFILE_SCOPE_BEGIN(iblTimer, "IBL Distant Light Probe");
-        graphics::pushDebugGroup("IBL Distant Light Probe");
-        
-        // IBL ambient lighting. We already have the correct framebuffer bound.
-        mIblShader->bind();
-
-        mIblShader->set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 0);
-        mIblShader->set("u_position_texture", mPositionTextureBuffer->getId(), 1);
-        mIblShader->set("u_normal_texture", mNormalTextureBuffer->getId(), 2);
-        mIblShader->set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 3);
-        mIblShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
-
-        mIblShader->set("u_irradiance_texture", mIrradianceMap->getId(), 5);
-        mIblShader->set("u_pre_filter_texture", mPreFilterMap->getId(), 6);
-        mIblShader->set("u_brdf_lut_texture", mBrdfLutTextureBuffer->getId(), 7);
-
-        mIblShader->set("u_camera_position_ws", cameraPosition);
-
-        mIblShader->set("u_luminance_multiplier", mIblLuminanceMultiplier);
-
-        drawFullscreenTriangleNow();
-        
-        PROFILE_SCOPE_END(iblTimer);
-        graphics::popDebugGroup();
         PROFILE_SCOPE_BEGIN(screenSpace, "Reflections");
         graphics::pushDebugGroup("Reflections");
         
         // Render at half-resolution for performance.
-        glViewport(0, 0, mReflectionTextureBuffer->getSize().x, mReflectionTextureBuffer->getSize().y);
-        mReflectionFramebuffer->bind();
-        mReflectionFramebuffer->clear(glm::vec4(0.f));
+        glViewport(0, 0, mSsrDataTextureBuffer->getSize().x, mSsrDataTextureBuffer->getSize().y);
+        mSsrFramebuffer->bind();
+        mSsrFramebuffer->clear(glm::vec4(0.f));
         mScreenSpaceReflectionsShader->bind();
 
         mDepthTextureBuffer->setBorderColour(glm::vec4(0.f, 0.f, 0.f, 1.f));
@@ -426,7 +410,32 @@ void Renderer::render()
         mScreenSpaceReflectionsShader->set("u_colourTexture", mLightTextureBuffer->getId(), 4);
 
         drawFullscreenTriangleNow();
-        mReflectionTextureBuffer->generateMipMaps();
+        mLightTextureBuffer->generateMipMaps();
+
+        glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
+
+        mReflectionFramebuffer->bind();
+        mReflectionFramebuffer->clear(glm::vec4(0.f));
+        mColourResolveShader->bind();
+
+        mColourResolveShader->set("u_albedoTexture",             mAlbedoTextureBuffer->getId(),     0);
+        mColourResolveShader->set("u_positionTexture",           mPositionTextureBuffer->getId(),   1);
+        mColourResolveShader->set("u_normalTexture",             mNormalTextureBuffer->getId(),     2);
+        mColourResolveShader->set("u_roughnessTexture",          mRoughnessTextureBuffer->getId(),  3);
+        mColourResolveShader->set("u_metallicTexture",           mMetallicTextureBuffer->getId(),   4);
+        mColourResolveShader->set("u_reflectionDataTexture",     mSsrDataTextureBuffer->getId(),    5);
+        mColourResolveShader->set("u_colourTexture",             mLightTextureBuffer->getId(),      6);  // todo: This colour buffer needs to be box blurred to get nicer reflections.
+        mColourResolveShader->set("u_depthTexture",              mDepthTextureBuffer->getId(),      7);
+        mColourResolveShader->set("u_irradianceTexture", mIrradianceMap->getId(), 8);
+        mColourResolveShader->set("u_pre_filterTexture", mPreFilterMap->getId(), 9);
+        mColourResolveShader->set("u_brdfLutTexture", mBrdfLutTextureBuffer->getId(), 10);
+
+        mColourResolveShader->set("u_cameraPositionWs", cameraPosition);
+        mColourResolveShader->set("u_exposure", exposure);
+        mColourResolveShader->set("u_colour_max_lod", static_cast<int>(mLightTextureBuffer->getMipLevels()));
+        mColourResolveShader->set("u_luminance_multiplier", mIblLuminanceMultiplier);
+
+        drawFullscreenTriangleNow();
 
         glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
         
@@ -451,15 +460,9 @@ void Renderer::render()
         mDeferredLightShader->set("u_depth_texture", mDepthTextureBuffer->getId(), 2);
         mDeferredLightShader->set("u_skybox_texture", mHdrSkybox->getId(), 3);
         mDeferredLightShader->set("u_reflection_texture", mReflectionTextureBuffer->getId(), 4);
-        mDeferredLightShader->set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 5);
-        mDeferredLightShader->set("u_position_texture", mPositionTextureBuffer->getId(), 6);
-        mDeferredLightShader->set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 7);
-        mDeferredLightShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 8);
-        mDeferredLightShader->set("u_normal_texture", mNormalTextureBuffer->getId(), 9);
-        
+
         mDeferredLightShader->set("u_inverse_vp_matrix", ivp);
         mDeferredLightShader->set("u_luminance_multiplier", mIblLuminanceMultiplier);
-        mDeferredLightShader->set("u_max_reflection_lod", static_cast<float>(mReflectionTextureBuffer->getMipLevels()));
         mDeferredLightShader->set("u_camera_position_ws", cameraPosition);
         
         drawFullscreenTriangleNow();
@@ -915,7 +918,12 @@ std::vector<graphics::DirectionalLight> &Renderer::getDirectionalLights()
     return mDirectionalLightQueue;
 }
 
-const TextureBufferObject &Renderer::getReflectionBuffer()
+const TextureBufferObject &Renderer::getSsrBuffer() const
+{
+    return *mSsrDataTextureBuffer;
+}
+
+const TextureBufferObject& Renderer::getReflectionBuffer() const
 {
     return *mReflectionTextureBuffer;
 }

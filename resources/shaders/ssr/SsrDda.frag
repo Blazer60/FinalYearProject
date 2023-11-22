@@ -218,7 +218,7 @@ void main()
         const float D = distributionGgx(nDotH, roughness);
 
         // This is the probability distribution function for both unreal and frostbite.
-        const float pdf = (D * nDotH) / (4.f * vDotH);
+        const float pdf = max(0.0001f, (D * nDotH) / (4.f * vDotH));
 
         const vec3 reflectionViewSpace = (u_viewMatrix * vec4(reflection, 0.f)).xyz;
         // Slight offset to avoid self-intersection (just like ray tracing).

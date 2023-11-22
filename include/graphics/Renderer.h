@@ -26,8 +26,8 @@ class Renderer
 {
 public:
     Renderer();
-    Renderer(const Renderer &r) = delete;
-    Renderer(Renderer &&r) = delete;
+    Renderer(const Renderer &) = delete;
+    Renderer(Renderer &&) = delete;
     
     /**
      * @brief Draws an element to the geometry buffer.
@@ -125,7 +125,8 @@ public:
     [[nodiscard]] const TextureBufferObject &getShadowBuffer();
     [[nodiscard]] const TextureBufferObject &getRoughnessBuffer();
     [[nodiscard]] const TextureBufferObject &getMetallicBuffer();
-    [[nodiscard]] const TextureBufferObject &getReflectionBuffer();
+    [[nodiscard]] const TextureBufferObject &getSsrBuffer() const;
+    [[nodiscard]] const TextureBufferObject &getReflectionBuffer() const;
     
     [[nodiscard]] std::vector<graphics::DirectionalLight> &getDirectionalLights();
     
@@ -153,7 +154,6 @@ protected:
     void pointLightShadowMapping();
     void spotlightShadowMapping();
     
-protected:
     std::vector<graphics::RenderQueueObject>        mRenderQueue;
     std::vector<CameraSettings>                     mCameraQueue;
     std::vector<graphics::DirectionalLight>         mDirectionalLightQueue;
@@ -169,6 +169,7 @@ protected:
     std::unique_ptr<FramebufferObject> mGeometryFramebuffer;
     std::unique_ptr<FramebufferObject> mLightFramebuffer;
     std::unique_ptr<FramebufferObject> mShadowFramebuffer;
+    std::unique_ptr<FramebufferObject> mSsrFramebuffer;
     std::unique_ptr<FramebufferObject> mReflectionFramebuffer;
     
     std::unique_ptr<Shader> mDeferredLightShader;
@@ -184,6 +185,7 @@ protected:
     std::unique_ptr<Shader> mPreFilterShader;
     std::unique_ptr<Shader> mIntegrateBrdfShader;
     std::unique_ptr<Shader> mScreenSpaceReflectionsShader;
+    std::unique_ptr<Shader> mColourResolveShader;
     
     SubMesh mFullscreenTriangle;
     SubMesh mUnitSphere;
@@ -201,6 +203,7 @@ protected:
     std::unique_ptr<TextureBufferObject> mBrdfLutTextureBuffer;
     std::unique_ptr<TextureBufferObject> mPrimaryImageBuffer;
     std::unique_ptr<TextureBufferObject> mAuxiliaryImageBuffer;
+    std::unique_ptr<TextureBufferObject> mSsrDataTextureBuffer;
     std::unique_ptr<TextureBufferObject> mReflectionTextureBuffer;
     
     glm::ivec2 mCurrentRenderBufferSize;
