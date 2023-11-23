@@ -89,7 +89,7 @@ MyScene::MyScene() :
     auto teapot = spawnActor<engine::Actor>("Teapot");
     teapot->position = glm::vec3(0.f, 0.f, 5.f);
     teapot->scale = glm::vec3(0.3f);
-    auto teapotMesh = teapot->addComponent(load::meshRenderer<StandardVertex>(file::modelPath() / "utahTeapot/UtahTeapot.obj"));
+    auto teapotMesh = teapot->addComponent(load::meshRenderer<StandardVertex>(file::modelPath() / "utahTeapot/UtahTeapot.glb"));
     auto teapotMaterial = std::make_shared<engine::StandardMaterialSubComponent>();
     teapotMaterial->attachShader(mStandardShader);
     teapotMaterial->setAmbientColour(glm::vec3(0.f, 0.4f, 0.01f));

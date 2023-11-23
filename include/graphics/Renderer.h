@@ -153,6 +153,7 @@ protected:
     void directionalLightShadowMapping(const CameraSettings &cameraSettings);
     void pointLightShadowMapping();
     void spotlightShadowMapping();
+    void blurTexture(const TextureBufferObject &texture);
     
     std::vector<graphics::RenderQueueObject>        mRenderQueue;
     std::vector<CameraSettings>                     mCameraQueue;
@@ -171,6 +172,7 @@ protected:
     std::unique_ptr<FramebufferObject> mShadowFramebuffer;
     std::unique_ptr<FramebufferObject> mSsrFramebuffer;
     std::unique_ptr<FramebufferObject> mReflectionFramebuffer;
+    std::unique_ptr<FramebufferObject> mBlurFramebuffer;
     
     std::unique_ptr<Shader> mDeferredLightShader;
     std::unique_ptr<Shader> mDirectionalLightShader;
@@ -186,6 +188,7 @@ protected:
     std::unique_ptr<Shader> mIntegrateBrdfShader;
     std::unique_ptr<Shader> mScreenSpaceReflectionsShader;
     std::unique_ptr<Shader> mColourResolveShader;
+    std::unique_ptr<Shader> mBlurShader;
     
     SubMesh mFullscreenTriangle;
     SubMesh mUnitSphere;

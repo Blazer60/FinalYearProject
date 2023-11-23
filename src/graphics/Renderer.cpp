@@ -41,6 +41,7 @@ Renderer::Renderer() :
     mIntegrateBrdfShader = std::make_unique<Shader>(file::shaderPath() /  "FullscreenTriangle.vert", file::shaderPath() / "brdf/IntegrateBrdf.frag");
     mScreenSpaceReflectionsShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "ssr/SsrDda.frag");
     mColourResolveShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "ssr/ColourResolve.frag");
+    mBlurShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "postProcessing/bloom/BloomDownSample.frag");
     
     generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
     // generateSkybox("", glm::ivec2(512));
@@ -67,6 +68,8 @@ void Renderer::initFrameBuffers()
     mReflectionFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ONE, GL_ALWAYS);
 
     mShadowFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ZERO, GL_LESS);
+
+    mBlurFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ZERO, GL_ALWAYS);
 }
 
 void Renderer::initTextureRenderBuffers()
@@ -410,7 +413,7 @@ void Renderer::render()
         mScreenSpaceReflectionsShader->set("u_colourTexture", mLightTextureBuffer->getId(), 4);
 
         drawFullscreenTriangleNow();
-        mLightTextureBuffer->generateMipMaps();
+        blurTexture(*mLightTextureBuffer);
 
         glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
 
@@ -676,6 +679,26 @@ void Renderer::spotlightShadowMapping()
     }
     
     graphics::popDebugGroup();
+}
+
+void Renderer::blurTexture(const TextureBufferObject& texture)
+{
+    const uint32_t mipLevels = texture.getMipLevels();
+    const glm::ivec2 &size = texture.getSize();
+    mBlurFramebuffer->bind();
+    mBlurShader->bind();
+    mBlurShader->set("u_texture", texture.getId(), 0);
+
+    for (int i = 1; i < mipLevels; ++i)
+    {
+        glViewport(0, 0, size.x >> i, size.y >> i);
+        mBlurShader->set("u_mip_level", i - 1);
+        mBlurFramebuffer->attach(&texture, 0, i);
+        drawFullscreenTriangleNow();
+        mBlurFramebuffer->detach(0);
+    }
+
+    glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
 }
 
 void Renderer::clear()
