@@ -432,6 +432,7 @@ void Renderer::render()
         mColourResolveShader->set("u_irradianceTexture",         mIrradianceMap->getId(),           8);
         mColourResolveShader->set("u_pre_filterTexture",         mPreFilterMap->getId(),            9);
         mColourResolveShader->set("u_brdfLutTexture",            mBrdfLutTextureBuffer->getId(),    10);
+        mColourResolveShader->set("u_emissiveTexture", mEmissiveTextureBuffer->getId(), 11);
 
         mColourResolveShader->set("u_cameraPositionWs", cameraPosition);
         mColourResolveShader->set("u_exposure", exposure);

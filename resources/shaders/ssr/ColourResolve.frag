@@ -13,6 +13,7 @@ uniform sampler2D u_depthTexture;
 uniform samplerCube u_irradianceTexture;
 uniform samplerCube u_pre_filterTexture;
 uniform sampler2D u_brdfLutTexture;
+uniform sampler2D u_emissiveTexture;
 
 uniform vec3 u_cameraPositionWs;
 uniform int u_colour_max_lod;
@@ -120,7 +121,14 @@ vec3 brdf(vec2 hitUv)
     return irradiance;
 }
 
-vec4 colourResolve()
+struct ResolvedColours
+{
+    vec3 colour;
+    vec3 emissive;
+    float alpha;
+};
+
+ResolvedColours colourResolve()
 {
     vec2[] offsets = {
         vec2(-1.f,  0.f),
@@ -135,6 +143,9 @@ vec4 colourResolve()
     vec3 result = vec3(0.f);
     vec3 weightSum = vec3(0.f);
     float totalAlpha = 0.f;
+
+    vec3 totalEmissive = vec3(0.f);
+    float emissiveWeight = 0.f;
 
     for (int i = 0; i < 4; ++i)
     {
@@ -156,6 +167,9 @@ vec4 colourResolve()
         const vec3 weight = brdf(hitUv) / pdf;
         result += textureLod(u_colourTexture, hitUv, alpha * (1 - u_colour_max_lod)).rgb * weight;
         weightSum += weight;
+
+        totalEmissive += texture(u_emissiveTexture, hitUv).rgb;
+        emissiveWeight += 1.f;
     }
 
     result /= weightSum;
@@ -163,7 +177,13 @@ vec4 colourResolve()
 
     result = max(result, vec3(0.0001f));
 
-    return vec4(result, totalAlpha);
+    const vec3 emissive = max(vec3(0.f), totalEmissive / emissiveWeight);
+
+    ResolvedColours rc;
+    rc.colour = result;
+    rc.emissive = emissive;
+    rc.alpha = totalAlpha;
+    return rc;
 }
 
 vec4 getSkyboxColour()
@@ -204,7 +224,8 @@ void main()
         return;
     }
 
-    const vec4 colour = colourResolve();
+    const ResolvedColours colour = colourResolve();
     const vec3 skyboxColour = getSkyboxColour().rgb;
-    o_colour = vec4(mix(colour.rgb, skyboxColour, colour.a), colour.a);
+    o_colour = vec4(mix(colour.colour, skyboxColour, colour.alpha), colour.alpha);
+    o_colour.rgb += colour.emissive;
 }
