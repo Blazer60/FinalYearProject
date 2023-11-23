@@ -27,7 +27,7 @@ void main()
 
     // https://www.youtube.com/watch?v=wbn5ULLtkHs
     // Exposure is just our colour value * exposure settings.
-    const vec3 tone_map_colour = narkowicz_aces(texture_colour * u_exposure);
+    const vec3 tone_map_colour = narkowicz_aces(texture_colour);  // The texture is already multiplied by exposure.
     const vec3 gamma_colour = linearToSRgb(tone_map_colour);
 
     o_colour = gamma_colour;

@@ -24,6 +24,8 @@ uniform mat4 u_light_vp_matrix;
 uniform float u_light_angle_scale;
 uniform float u_light_angle_offset;
 
+uniform float u_exposure;
+
 out layout(location = 0) vec3 o_colour;
 
 const float PI = 3.14159265359f;
@@ -152,5 +154,5 @@ void main()
     float shadow_intensity = calculate_shadow_map(light_direction, position, n);
     const vec3 radiance = (1.f - shadow_intensity) * attenuation * u_light_intensity;
 
-    o_colour = irradiance * radiance * (4.f * PI) * lDotN;
+    o_colour = u_exposure * irradiance * radiance * (4.f * PI) * lDotN;
 }

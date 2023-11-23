@@ -35,7 +35,6 @@ protected:
     Shader mUpSample    { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "postProcessing/bloom/BloomUpSample.frag"    };
     Shader mComposite   { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "postProcessing/bloom/BloomComposite.frag"   };
     
-protected:
     std::unique_ptr<TextureBufferObject> mDownSampleTexture;
     std::unique_ptr<TextureBufferObject> mUpSampleTexture;
     

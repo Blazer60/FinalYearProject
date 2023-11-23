@@ -19,6 +19,7 @@ uniform vec3 u_cameraPositionWs;
 uniform int u_colour_max_lod;
 uniform float u_luminance_multiplier;
 uniform float u_maxDistanceFalloff;
+uniform float u_exposure;
 
 out layout(location = 0) vec4 o_colour;
 
@@ -165,7 +166,7 @@ ResolvedColours colourResolve()
         totalAlpha += alpha;
 
         const vec3 weight = brdf(hitUv) / pdf;
-        result += textureLod(u_colourTexture, hitUv, alpha * (1 - u_colour_max_lod)).rgb * weight;
+        result += (textureLod(u_colourTexture, hitUv, alpha * (1 - u_colour_max_lod)).rgb / u_exposure) * weight;
         weightSum += weight;
 
         totalEmissive += texture(u_emissiveTexture, hitUv).rgb;
@@ -228,4 +229,5 @@ void main()
     const vec3 skyboxColour = getSkyboxColour().rgb;
     o_colour = vec4(mix(colour.colour, skyboxColour, colour.alpha), colour.alpha);
     o_colour.rgb += colour.emissive;
+    o_colour.rgb *= u_exposure;
 }

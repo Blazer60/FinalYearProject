@@ -8,15 +8,10 @@ uniform sampler2D u_depthTexture;
 uniform sampler2D u_roughnessTexture;
 
 uniform mat4 u_viewMatrix;
-uniform mat4 u_projectionMatrix;
 uniform vec3 u_cameraPosition;
 uniform mat4 u_proj;
 
 uniform float u_nearPlaneZ;
-uniform float u_farPlaneZ;
-
-uniform float u_exposure;
-uniform sampler2D u_colourTexture;
 
 out layout(location = 0) vec4 o_colour;
 

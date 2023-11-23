@@ -21,6 +21,8 @@ uniform int u_cascade_count;
 
 uniform vec2 u_bias;
 
+uniform float u_exposure;
+
 out layout(location = 0) vec3 o_irradiance;
 
 const float PI = 3.14159265359f;
@@ -133,5 +135,5 @@ void main()
     const vec3 radiance = (1.f - shadow_intensity) * u_light_intensity * attenuation;
 
     // Combine the output with dot(N, L).
-    o_irradiance = irradiance * radiance * lDotN;
+    o_irradiance = u_exposure * irradiance * radiance * lDotN;
 }

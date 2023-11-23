@@ -10,7 +10,7 @@ uniform sampler2D u_reflection_texture;
 
 uniform mat4 u_inverse_vp_matrix;
 uniform float u_luminance_multiplier;
-uniform vec3 u_camera_position_ws;
+uniform float u_exposure;
 
 out layout(location = 0) vec3 o_colour;
 
@@ -40,13 +40,12 @@ void main()
     if (depth < 1.f)
     {
         const vec3 l0  = texture(u_irradiance_texture, v_uv).rgb;
-        const vec3 emissive = texture(u_emissive_texture, v_uv).rgb;
+        const vec3 emissive = texture(u_emissive_texture, v_uv).rgb * u_exposure;
         const vec4 reflections = texture(u_reflection_texture, v_uv).rgba;
-//        const vec3 colour = mix(reflections.rgb, l0, reflections.a);
         o_colour = emissive + l0 + reflections.rgb;
     }
     else
     {
-        o_colour = sample_skybox_colour();
+        o_colour = sample_skybox_colour() * u_exposure;
     }
 }

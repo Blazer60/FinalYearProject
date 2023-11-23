@@ -131,6 +131,7 @@ public:
     [[nodiscard]] std::vector<graphics::DirectionalLight> &getDirectionalLights();
     
     [[nodiscard]] float getCurrentEV100() const;
+    [[nodiscard]] float getCurrentExposure() const;
     
     void setIblMultiplier(float m);
     

@@ -235,6 +235,7 @@ void Renderer::render()
     for (CameraSettings &camera : mCameraQueue)
     {
         mCurrentEV100 = camera.eV100;
+        const float exposure = getCurrentExposure();
         
         PROFILE_SCOPE_BEGIN(geometryTimer, "Geometry Pass");
         graphics::pushDebugGroup("Geometry Pass");
@@ -287,7 +288,7 @@ void Renderer::render()
 
         mDirectionalLightShader->set("u_camera_position_ws", cameraPosition);
         mDirectionalLightShader->set("u_view_matrix", camera.viewMatrix);
-
+        mDirectionalLightShader->set("u_exposure", exposure);
 
         glBindVertexArray(mFullscreenTriangle.vao());
 
@@ -320,6 +321,7 @@ void Renderer::render()
         mPointLightShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
         
         mPointLightShader->set("u_camera_position_ws", cameraPosition);
+        mPointLightShader->set("u_exposure", exposure);
         
         glBindVertexArray(mUnitSphere.vao());
         
@@ -354,6 +356,7 @@ void Renderer::render()
         mSpotlightShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
         
         mSpotlightShader->set("u_camera_position_ws", cameraPosition);
+        mSpotlightShader->set("u_exposure", exposure);
         
         for (const graphics::Spotlight &spotLight : mSpotlightQueue)
         {
@@ -393,7 +396,6 @@ void Renderer::render()
         mScreenSpaceReflectionsShader->set("u_roughnessTexture", mRoughnessTextureBuffer->getId(), 3);
 
         mScreenSpaceReflectionsShader->set("u_viewMatrix", camera.viewMatrix);
-        mScreenSpaceReflectionsShader->set("u_projectionMatrix", cameraProjectionMatrix);
         mScreenSpaceReflectionsShader->set("u_cameraPosition", cameraPosition);
 
 
@@ -405,13 +407,6 @@ void Renderer::render()
         mScreenSpaceReflectionsShader->set("u_proj", viewToPixelCoordMatrix);
 
         mScreenSpaceReflectionsShader->set("u_nearPlaneZ", -camera.nearClipDistance);
-        mScreenSpaceReflectionsShader->set("u_farPlaneZ", camera.farClipDistance);
-
-
-        const float maxLuminance = 1.2f * glm::pow(2.f, mCurrentEV100);
-        const float exposure = 1.f / maxLuminance;
-        mScreenSpaceReflectionsShader->set("u_exposure", exposure);
-        mScreenSpaceReflectionsShader->set("u_colourTexture", mLightTextureBuffer->getId(), 4);
 
         drawFullscreenTriangleNow();
 
@@ -468,7 +463,7 @@ void Renderer::render()
 
         mDeferredLightShader->set("u_inverse_vp_matrix", ivp);
         mDeferredLightShader->set("u_luminance_multiplier", mIblLuminanceMultiplier);
-        mDeferredLightShader->set("u_camera_position_ws", cameraPosition);
+        mDeferredLightShader->set("u_exposure", exposure);
         
         drawFullscreenTriangleNow();
 
@@ -960,6 +955,12 @@ const TextureBufferObject& Renderer::getReflectionBuffer() const
 float Renderer::getCurrentEV100() const
 {
     return mCurrentEV100;
+}
+
+float Renderer::getCurrentExposure() const
+{
+    const float maxLuminance = 1.2f * glm::pow(2.f, getCurrentEV100());
+    return 1.f / maxLuminance;
 }
 
 void Renderer::setIblMultiplier(float m)

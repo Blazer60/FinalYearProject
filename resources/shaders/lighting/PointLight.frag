@@ -18,6 +18,8 @@ uniform vec2 u_bias;
 
 uniform vec3 u_camera_position_ws;
 
+uniform float u_exposure;
+
 out layout(location = 0) vec3 o_colour;
 
 const float PI = 3.14159265359f;
@@ -137,5 +139,5 @@ void main()
     const float shadow_intensity = calculate_shadow_map(light_direction);
     const vec3 radiance = attenuation * u_light_intensity * (1.f - shadow_intensity);
 
-    o_colour = irradiance * radiance * (4.f * PI) * lDotN;
+    o_colour = u_exposure * irradiance * radiance * (4.f * PI) * lDotN;
 }

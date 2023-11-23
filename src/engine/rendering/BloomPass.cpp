@@ -27,6 +27,7 @@ void BloomPass::onDraw(TextureBufferObject *imageInput, TextureBufferObject *ima
     mFramebuffer->attach(mDownSampleTexture.get(), 0, 0);
     mPreFilter.bind();
     mPreFilter.set("u_texture", imageInput->getId(), 0);
+    mPreFilter.set("u_exposure", graphics::renderer->getCurrentExposure());
     graphics::renderer->drawFullscreenTriangleNow();
     mFramebuffer->detach(0);
     
