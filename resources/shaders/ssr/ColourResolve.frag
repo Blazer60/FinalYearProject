@@ -17,6 +17,7 @@ uniform sampler2D u_brdfLutTexture;
 uniform vec3 u_cameraPositionWs;
 uniform int u_colour_max_lod;
 uniform float u_luminance_multiplier;
+uniform float u_maxDistanceFalloff;
 
 out layout(location = 0) vec4 o_colour;
 
@@ -34,7 +35,7 @@ float computeRoughness(vec2 hitUv)
 
     const float lDotV = max(0.f, dot(l, v));
 
-    const float maxDistance = 20.f;  // todo: This should be a uniform.
+    const float maxDistance = u_maxDistanceFalloff;
     const float distanceRoughness = 1.f - clamp(distance(hitPosition, position) / maxDistance, 0.f, 1.f);
 
     const float gloss = 1.f - localRoughness;
@@ -107,7 +108,7 @@ vec3 brdf(vec2 hitUv)
 
     // Calculate how the material interacts with the light.
     const vec3 fresnel = fresnelSchlick(vDotH, f0);
-    const float distribution = distributionGgx(nDotH, roughness);
+    const float distribution = max(distributionGgx(nDotH, roughness), 0.0001f);
     const float geometry = geometrySmith(vDotN, lDotN, roughness);
 
     const vec3 specular = distribution * geometry * fresnel / (4.f * vDotN * lDotN + 0.0001f);
@@ -132,7 +133,7 @@ vec4 colourResolve()
     vec2 texelSize = 1.f / bufferSize;
 
     vec3 result = vec3(0.f);
-    vec3 weightSum = vec3(0.0001f);
+    vec3 weightSum = vec3(0.f);
     float totalAlpha = 0.f;
 
     for (int i = 0; i < 4; ++i)
@@ -159,6 +160,8 @@ vec4 colourResolve()
 
     result /= weightSum;
     totalAlpha *= 0.25;
+
+    result = max(result, vec3(0.0001f));
 
     return vec4(result, totalAlpha);
 }

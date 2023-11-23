@@ -213,10 +213,13 @@ protected:
     
     float mCurrentEV100 { 10.f };
     float mIblLuminanceMultiplier { 1000.f };
+
+    bool mIsFirstPass { true };
     
 public:  // todo: Should this be a pp shader?
     float mReflectionStepSize { 0.1f };
     int mReflectionMaxStepCount { 300 };
     float mReflectionThicknessThreshold { 1.2f };
     int mReflectionBinarySearchDepth { 10 };
+    float mRoughnessFallOff { 20.f };
 };

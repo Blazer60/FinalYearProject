@@ -213,12 +213,12 @@ void main()
         const vec3 H = importanceSampleGgx(xI, normal, roughness);
         const vec3 reflection = reflect(-direction, H);  // aka. L
 
-        const float nDotH = dot(normal, H);
-        const float vDotH = dot(direction, H);
-        const float D = distributionGgx(nDotH, roughness);
+        const float nDotH = max(0.f, dot(normal, H));
+        const float vDotH = max(0.f, dot(direction, H));
+        const float D = max(distributionGgx(nDotH, roughness), 0.001f);
 
         // This is the probability distribution function for both unreal and frostbite.
-        const float pdf = max(0.0001f, (D * nDotH) / (4.f * vDotH));
+        const float pdf = (D * nDotH) / (4.f * vDotH + 0.0001f);
 
         const vec3 reflectionViewSpace = (u_viewMatrix * vec4(reflection, 0.f)).xyz;
         // Slight offset to avoid self-intersection (just like ray tracing).
@@ -239,7 +239,7 @@ void main()
             if (depthTest >= 1.f)  // Check if we've just hit the sky. Not the best way to do this.
                 o_colour = vec4(0.f);
             else
-                o_colour = vec4(hitUv.xy, pdf, 1.f);
+                o_colour = vec4(hitUv.xy, pdf, 1.f + D);
         }
         else
             o_colour = vec4(0.f);

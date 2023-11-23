@@ -92,6 +92,7 @@ void main()
     o_roughness = texture(u_roughness_texture, uv).r;
     if (o_roughness <= 0.f)
         o_roughness = u_roughness;
+    o_roughness = max(0.02f, o_roughness);
 
     o_metallic = texture(u_metallic_texture, uv).r;
     if (o_metallic <= 0.f)

@@ -82,7 +82,7 @@ void Renderer::initTextureRenderBuffers()
     mRoughnessTextureBuffer          = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_R16,                   GL_NEAREST, GL_NEAREST);
     mMetallicTextureBuffer           = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_R16,                   GL_NEAREST, GL_NEAREST);
     mLightTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                graphics::filter::LinearMipmapLinear, graphics::wrap::ClampToEdge, 8);
-    mDeferredLightingTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
+    mDeferredLightingTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                graphics::filter::LinearMipmapLinear, graphics::wrap::ClampToEdge, 8);
     mShadowTextureBuffer             = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_R16F,                  GL_NEAREST, GL_NEAREST);
     mDepthTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_DEPTH_COMPONENT32F,    graphics::filter::Nearest,            graphics::wrap::ClampToBorder, 2);
     mPrimaryImageBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
@@ -227,6 +227,7 @@ void Renderer::render()
         detachTextureRenderBuffersFromFrameBuffers();
         initTextureRenderBuffers();
         mCurrentRenderBufferSize = window::bufferSize();
+        mIsFirstPass = true;
     }
     
     glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
@@ -413,7 +414,6 @@ void Renderer::render()
         mScreenSpaceReflectionsShader->set("u_colourTexture", mLightTextureBuffer->getId(), 4);
 
         drawFullscreenTriangleNow();
-        blurTexture(*mLightTextureBuffer);
 
         glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
 
@@ -427,16 +427,17 @@ void Renderer::render()
         mColourResolveShader->set("u_roughnessTexture",          mRoughnessTextureBuffer->getId(),  3);
         mColourResolveShader->set("u_metallicTexture",           mMetallicTextureBuffer->getId(),   4);
         mColourResolveShader->set("u_reflectionDataTexture",     mSsrDataTextureBuffer->getId(),    5);
-        mColourResolveShader->set("u_colourTexture",             mLightTextureBuffer->getId(),      6);  // todo: This colour buffer needs to be box blurred to get nicer reflections.
+        mColourResolveShader->set("u_colourTexture",             mDeferredLightingTextureBuffer->getId(), 6);
         mColourResolveShader->set("u_depthTexture",              mDepthTextureBuffer->getId(),      7);
-        mColourResolveShader->set("u_irradianceTexture", mIrradianceMap->getId(), 8);
-        mColourResolveShader->set("u_pre_filterTexture", mPreFilterMap->getId(), 9);
-        mColourResolveShader->set("u_brdfLutTexture", mBrdfLutTextureBuffer->getId(), 10);
+        mColourResolveShader->set("u_irradianceTexture",         mIrradianceMap->getId(),           8);
+        mColourResolveShader->set("u_pre_filterTexture",         mPreFilterMap->getId(),            9);
+        mColourResolveShader->set("u_brdfLutTexture",            mBrdfLutTextureBuffer->getId(),    10);
 
         mColourResolveShader->set("u_cameraPositionWs", cameraPosition);
         mColourResolveShader->set("u_exposure", exposure);
-        mColourResolveShader->set("u_colour_max_lod", static_cast<int>(mLightTextureBuffer->getMipLevels()));
+        mColourResolveShader->set("u_colour_max_lod", static_cast<int>(mDeferredLightingTextureBuffer->getMipLevels()));
         mColourResolveShader->set("u_luminance_multiplier", mIblLuminanceMultiplier);
+        mColourResolveShader->set("u_maxDistanceFalloff", mRoughnessFallOff);
 
         drawFullscreenTriangleNow();
 
@@ -469,6 +470,9 @@ void Renderer::render()
         mDeferredLightShader->set("u_camera_position_ws", cameraPosition);
         
         drawFullscreenTriangleNow();
+
+        blurTexture(*mDeferredLightingTextureBuffer);
+
         PROFILE_SCOPE_END(deferredTimer);
         graphics::popDebugGroup();
         
@@ -485,7 +489,8 @@ void Renderer::render()
         PROFILE_SCOPE_END(postProcessTimer);
         graphics::popDebugGroup();
     }
-    
+
+    mIsFirstPass = false;
     graphics::popDebugGroup();
 }
 
