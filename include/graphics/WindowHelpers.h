@@ -26,4 +26,9 @@ namespace window
      * @returns - window width / widow height (useful for creating perspective matrices).
      */
     float aspectRatio();
+
+    /**
+     * @returns The maximum mip level the window can be.
+     */
+    int maximumMipLevel();
 }

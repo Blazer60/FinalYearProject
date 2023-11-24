@@ -25,4 +25,9 @@ namespace window
     {
         return static_cast<float>(bufferSize_impl.x) / static_cast<float>(bufferSize_impl.y);
     }
+
+    int maximumMipLevel()
+    {
+        return glm::floor(glm::log2(static_cast<float>(glm::max(bufferSize_impl.x, bufferSize_impl.y))));
+    }
 }

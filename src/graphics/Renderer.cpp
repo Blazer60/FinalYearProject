@@ -15,7 +15,6 @@
 #include "FileLoader.h"
 
 Renderer::Renderer() :
-    isOk(true),
     mCurrentRenderBufferSize(window::bufferSize()),
     mFullscreenTriangle(primitives::fullscreenTriangle()),
     mUnitSphere(primitives::invertedSphere())
@@ -26,30 +25,30 @@ Renderer::Renderer() :
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-    
-    mDirectionalLightShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/DirectionalLight.frag");
+
+    auto fsTriShader = file::shaderPath() / "FullscreenTriangle.vert";
+    mDirectionalLightShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "lighting/DirectionalLight.frag");
     mPointLightShader = std::make_unique<Shader>(file::shaderPath() / "lighting/PointLight.vert", file::shaderPath() / "lighting/PointLight.frag");
-    mSpotlightShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/SpotLight.frag");
-    mIblShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/IBL.frag");
-    mDeferredLightShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/CombineOutput.frag");
+    mSpotlightShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "lighting/SpotLight.frag");
+    mIblShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "lighting/IBL.frag");
+    mDeferredLightShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "lighting/CombineOutput.frag");
     mDirectionalLightShadowShader = std::make_unique<Shader>(file::shaderPath() / "shadow/Shadow.vert", file::shaderPath() / "shadow/Shadow.frag");
     mPointLightShadowShader = std::make_unique<Shader>(file::shaderPath() / "shadow/PointShadow.vert", file::shaderPath() / "shadow/PointShadow.frag");
     mSpotlightShadowShader = std::make_unique<Shader>(file::shaderPath() / "shadow/PointShadow.vert", file::shaderPath() / "shadow/PointShadow.frag");
-    mHdrToCubemapShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "cubemap/ToCubemap.frag");
-    mCubemapToIrradianceShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "cubemap/IrradianceMap.frag");
-    mPreFilterShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() /  "cubemap/PreFilter.frag");
-    mIntegrateBrdfShader = std::make_unique<Shader>(file::shaderPath() /  "FullscreenTriangle.vert", file::shaderPath() / "brdf/IntegrateBrdf.frag");
-    mScreenSpaceReflectionsShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "ssr/SsrDda.frag");
-    mColourResolveShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "ssr/ColourResolve.frag");
-    mBlurShader = std::make_unique<Shader>(file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "postProcessing/bloom/BloomDownSample.frag");
+    mHdrToCubemapShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "cubemap/ToCubemap.frag");
+    mCubemapToIrradianceShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "cubemap/IrradianceMap.frag");
+    mPreFilterShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() /  "cubemap/PreFilter.frag");
+    mIntegrateBrdfShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "brdf/IntegrateBrdf.frag");
+    mScreenSpaceReflectionsShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "ssr/SsrDda.frag");
+    mColourResolveShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "ssr/ColourResolve.frag");
+    mBlurShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "postProcessing/bloom/BloomDownSample.frag");
     
     generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
-    // generateSkybox("", glm::ivec2(512));
-    
+
     initFrameBuffers();
     initTextureRenderBuffers();
     
-    glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
+    setViewportSize();
 }
 
 void Renderer::initFrameBuffers()
@@ -81,10 +80,9 @@ void Renderer::initTextureRenderBuffers()
     mEmissiveTextureBuffer           = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
     mRoughnessTextureBuffer          = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_R16,                   GL_NEAREST, GL_NEAREST);
     mMetallicTextureBuffer           = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_R16,                   GL_NEAREST, GL_NEAREST);
-    mLightTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                graphics::filter::LinearMipmapLinear, graphics::wrap::ClampToEdge, 8);
+    mLightTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                graphics::filter::Nearest, graphics::wrap::ClampToEdge);
     mDeferredLightingTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                graphics::filter::LinearMipmapLinear, graphics::wrap::ClampToEdge, 8);
-    mShadowTextureBuffer             = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_R16F,                  GL_NEAREST, GL_NEAREST);
-    mDepthTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_DEPTH_COMPONENT32F,    graphics::filter::Nearest,            graphics::wrap::ClampToBorder, 2);
+    mDepthTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_DEPTH_COMPONENT32F,    graphics::filter::Nearest, graphics::wrap::ClampToBorder);
     mPrimaryImageBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
     mAuxiliaryImageBuffer            = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
     mSsrDataTextureBuffer            = std::make_unique<TextureBufferObject>(halfSize,             GL_RGBA16F,               graphics::filter::Nearest, graphics::wrap::ClampToEdge);
@@ -102,8 +100,7 @@ void Renderer::initTextureRenderBuffers()
     
     // Lighting.
     mLightFramebuffer->attach(mLightTextureBuffer.get(), 0);
-    mLightFramebuffer->attach(mShadowTextureBuffer.get(), 1);
-    
+
     // Reflection Buffer
     mSsrFramebuffer->attach(mSsrDataTextureBuffer.get(), 0);
 
@@ -113,7 +110,7 @@ void Renderer::initTextureRenderBuffers()
     mDeferredLightFramebuffer->attach(mDeferredLightingTextureBuffer.get(), 0);
 }
 
-void Renderer::detachTextureRenderBuffersFromFrameBuffers()
+void Renderer::detachTextureRenderBuffersFromFrameBuffers() const
 {
     mGeometryFramebuffer->detach(0);
     mGeometryFramebuffer->detach(1);
@@ -124,8 +121,7 @@ void Renderer::detachTextureRenderBuffersFromFrameBuffers()
     mGeometryFramebuffer->detachDepthBuffer();
     
     mLightFramebuffer->detach(0);
-    mLightFramebuffer->detach(1);
-    
+
     mSsrFramebuffer->detach(0);
 
     mReflectionFramebuffer->detach(0);
@@ -133,19 +129,19 @@ void Renderer::detachTextureRenderBuffersFromFrameBuffers()
     mDeferredLightFramebuffer->detach(0);
 }
 
-bool Renderer::debugMessageCallback(GLDEBUGPROC callback)
+bool Renderer::debugMessageCallback(const GLDEBUGPROC callback)
 {
     int flags { 0 };  // Check to see if OpenGL debug context was set up correctly.
     glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
     
-    if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
+    if ((flags & GL_CONTEXT_FLAG_DEBUG_BIT) != 0)
     {
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageCallback(callback, nullptr);
     }
     
-    return (flags & GL_CONTEXT_FLAG_DEBUG_BIT);
+    return (flags & GL_CONTEXT_FLAG_DEBUG_BIT) != 0;
 }
 
 std::string Renderer::getVersion()
@@ -154,7 +150,7 @@ std::string Renderer::getVersion()
 }
 
 void Renderer::drawMesh(
-    uint32_t vao, int32_t indicesCount, std::weak_ptr<Shader> shader,
+    const uint32_t vao, const int32_t indicesCount, std::weak_ptr<Shader> shader,
     graphics::drawMode renderMode, const glm::mat4 &matrix,
     const graphics::DrawCallback &onDraw)
 {
@@ -162,7 +158,7 @@ void Renderer::drawMesh(
         WARN("A mesh was submitted with no shader. Was this intentional?");
     
     static GLenum drawModeToGLenum[] { GL_TRIANGLES, GL_LINES };
-    GLenum mode = drawModeToGLenum[(int)renderMode];
+    const GLenum mode = drawModeToGLenum[static_cast<int>(renderMode)];
     mRenderQueue.emplace_back(graphics::RenderQueueObject { vao, indicesCount, std::move(shader), mode, matrix, onDraw });
 }
 
@@ -227,10 +223,9 @@ void Renderer::render()
         detachTextureRenderBuffersFromFrameBuffers();
         initTextureRenderBuffers();
         mCurrentRenderBufferSize = window::bufferSize();
-        mIsFirstPass = true;
     }
     
-    glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
+    setViewportSize(window::bufferSize());
     
     for (CameraSettings &camera : mCameraQueue)
     {
@@ -250,7 +245,7 @@ void Renderer::render()
         {
             if (rqo.shader.expired())
                 continue;
-            
+
             const auto shader = rqo.shader.lock();
             shader->bind();
             shader->set("u_mvp_matrix", vpMatrix * rqo.matrix);
@@ -486,7 +481,6 @@ void Renderer::render()
         graphics::popDebugGroup();
     }
 
-    mIsFirstPass = false;
     graphics::popDebugGroup();
 }
 
@@ -702,6 +696,11 @@ void Renderer::blurTexture(const TextureBufferObject& texture)
     glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
 }
 
+void Renderer::setViewportSize(const glm::ivec2& size)
+{
+    glViewport(0, 0, size.x, size.y);
+}
+
 void Renderer::clear()
 {
     uint64_t renderQueueCount = mRenderQueue.size();
@@ -882,57 +881,52 @@ void Renderer::drawFullscreenTriangleNow()
     glDrawElements(GL_TRIANGLES, mFullscreenTriangle.indicesCount(), GL_UNSIGNED_INT, nullptr);
 }
 
-const TextureBufferObject &Renderer::getPrimaryBuffer()
+const TextureBufferObject &Renderer::getPrimaryBuffer() const
 {
     return *mPrimaryImageBuffer;
 }
 
-const TextureBufferObject &Renderer::getAlbedoBuffer()
+const TextureBufferObject &Renderer::getAlbedoBuffer() const
 {
     return *mAlbedoTextureBuffer;
 }
 
-const TextureBufferObject &Renderer::getNormalBuffer()
+const TextureBufferObject &Renderer::getNormalBuffer() const
 {
     return *mNormalTextureBuffer;
 }
 
-const TextureBufferObject &Renderer::getPositionBuffer()
+const TextureBufferObject &Renderer::getPositionBuffer() const
 {
     return *mPositionTextureBuffer;
 }
 
-const TextureBufferObject &Renderer::getEmissiveBuffer()
+const TextureBufferObject &Renderer::getEmissiveBuffer() const
 {
     return *mEmissiveTextureBuffer;
 }
 
-const TextureBufferObject &Renderer::getLightBuffer()
+const TextureBufferObject &Renderer::getLightBuffer() const
 {
     return *mLightTextureBuffer;
 }
 
-const TextureBufferObject &Renderer::getDepthBuffer()
+const TextureBufferObject &Renderer::getDepthBuffer() const
 {
     return *mDepthTextureBuffer;
 }
 
-const TextureBufferObject &Renderer::getShadowBuffer()
-{
-    return *mShadowTextureBuffer;
-}
-
-const TextureBufferObject &Renderer::getRoughnessBuffer()
+const TextureBufferObject &Renderer::getRoughnessBuffer() const
 {
     return *mRoughnessTextureBuffer;
 }
 
-const TextureBufferObject &Renderer::getMetallicBuffer()
+const TextureBufferObject &Renderer::getMetallicBuffer() const
 {
     return *mMetallicTextureBuffer;
 }
 
-const TextureBufferObject &Renderer::getDeferredLightingBuffer()
+const TextureBufferObject &Renderer::getDeferredLightingBuffer() const
 {
     return *mDeferredLightingTextureBuffer;
 }
@@ -963,9 +957,9 @@ float Renderer::getCurrentExposure() const
     return 1.f / maxLuminance;
 }
 
-void Renderer::setIblMultiplier(float m)
+void Renderer::setIblMultiplier(float multiplier)
 {
-    mIblLuminanceMultiplier = glm::abs(m);
+    mIblLuminanceMultiplier = glm::abs(multiplier);
 }
 
 void Renderer::rendererGuiNewFrame()

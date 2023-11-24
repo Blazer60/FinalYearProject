@@ -156,7 +156,8 @@ void MyScene::onImguiUpdate()
         graphics::renderer->generateSkybox((file::texturePath() / "hdr/norway/Norway.hdr").string(), glm::ivec2(512));
     if (ImGui::DragFloat("Luminance Multiplier", &mLuminanceMultiplier))
         graphics::renderer->setIblMultiplier(mLuminanceMultiplier);
-    
+
+    // todo: Graphic settings should be its own imgui window.
     ImGui::DragFloat("Step Size", &graphics::renderer->mReflectionStepSize, 0.001f);
     ImGui::DragInt("Step Count", &graphics::renderer->mReflectionMaxStepCount);
     ImGui::DragFloat("Thickness", &graphics::renderer->mReflectionThicknessThreshold, 0.01f);

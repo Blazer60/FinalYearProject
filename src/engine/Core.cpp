@@ -66,13 +66,7 @@ namespace engine
         mEditor.init();
         
         mRenderer = std::make_unique<Renderer>();
-        if (!mRenderer->isOk)
-        {
-            mIsRunning = false;
-            LOG_MAJOR("Could not load the renderer.");
-            return;
-        }
-        
+
         graphics::renderer = mRenderer.get();
         
         if (mEnableDebugging)

@@ -6,6 +6,8 @@
 
 
 #include "TextureBufferObject.h"
+
+#include "WindowHelpers.h"
 #include "gtc/type_ptr.hpp"
 
 TextureBufferObject::TextureBufferObject(const glm::ivec2 &size)
@@ -39,6 +41,13 @@ TextureBufferObject::~TextureBufferObject()
 
 void TextureBufferObject::init(const GLint minFilter, const GLint magFilter, const GLint wrapS, const GLint wrapT)
 {
+    if (const int maximumMipLevel = window::maximumMipLevel(); mMipMapLevels > maximumMipLevel)
+    {
+        WARN("A Texture Buffer Object requested % mip levels, but could make % mip levels. "
+             "This may cause undefined behaviour.", mMipMapLevels, maximumMipLevel);
+        mMipMapLevels = maximumMipLevel;
+    }
+
     glCreateTextures(GL_TEXTURE_2D, 1, &mId);
     glTextureParameteri(mId, GL_TEXTURE_MIN_FILTER, minFilter);
     glTextureParameteri(mId, GL_TEXTURE_MAG_FILTER, magFilter);

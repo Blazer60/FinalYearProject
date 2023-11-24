@@ -7,15 +7,14 @@
 
 #pragma once
 
-#include "Pch.h"
-#include "CameraSettings.h"
-#include "Shader.h"
-#include "GraphicsDefinitions.h"
-#include "Mesh.h"
-#include "Materials.h"
-#include "PostProcessLayer.h"
 #include "Buffers.h"
+#include "CameraSettings.h"
+#include "GraphicsDefinitions.h"
 #include "GraphicsLighting.h"
+#include "Materials.h"
+#include "Mesh.h"
+#include "Shader.h"
+#include "WindowHelpers.h"
 
 
 /**
@@ -28,6 +27,9 @@ public:
     Renderer();
     Renderer(const Renderer &) = delete;
     Renderer(Renderer &&) = delete;
+    Renderer operator=(const Renderer&) = delete;
+    Renderer operator=(Renderer&&) = delete;
+    ~Renderer() = default;
     
     /**
      * @brief Draws an element to the geometry buffer.
@@ -97,7 +99,10 @@ public:
      * @see https://docs.gl/gl4/glDebugMessageCallback
      */
     static bool debugMessageCallback(GLDEBUGPROC callback);
-    
+
+    /**
+     * @brief Gets the current version of OpenGL that is being used.
+     */
     [[nodiscard]] static std::string getVersion();
     
     void generateSkybox(std::string_view path, glm::ivec2 desiredSize);
@@ -114,17 +119,17 @@ public:
      */
     static void rendererGuiNewFrame();
     
-    [[nodiscard]] const TextureBufferObject &getPrimaryBuffer();
-    [[nodiscard]] const TextureBufferObject &getDeferredLightingBuffer();
-    [[nodiscard]] const TextureBufferObject &getAlbedoBuffer();
-    [[nodiscard]] const TextureBufferObject &getNormalBuffer();
-    [[nodiscard]] const TextureBufferObject &getPositionBuffer();
-    [[nodiscard]] const TextureBufferObject &getEmissiveBuffer();
-    [[nodiscard]] const TextureBufferObject &getLightBuffer();
-    [[nodiscard]] const TextureBufferObject &getDepthBuffer();
-    [[nodiscard]] const TextureBufferObject &getShadowBuffer();
-    [[nodiscard]] const TextureBufferObject &getRoughnessBuffer();
-    [[nodiscard]] const TextureBufferObject &getMetallicBuffer();
+    [[nodiscard]] const TextureBufferObject &getPrimaryBuffer() const;
+    [[nodiscard]] const TextureBufferObject &getDeferredLightingBuffer() const;
+    [[nodiscard]] const TextureBufferObject &getAlbedoBuffer() const;
+    [[nodiscard]] const TextureBufferObject &getNormalBuffer() const;
+    [[nodiscard]] const TextureBufferObject &getPositionBuffer() const;
+    [[nodiscard]] const TextureBufferObject &getEmissiveBuffer() const;
+    [[nodiscard]] const TextureBufferObject &getLightBuffer() const;
+    [[nodiscard]] const TextureBufferObject &getDepthBuffer() const;
+
+    [[nodiscard]] const TextureBufferObject &getRoughnessBuffer() const;
+    [[nodiscard]] const TextureBufferObject &getMetallicBuffer() const;
     [[nodiscard]] const TextureBufferObject &getSsrBuffer() const;
     [[nodiscard]] const TextureBufferObject &getReflectionBuffer() const;
     
@@ -133,20 +138,12 @@ public:
     [[nodiscard]] float getCurrentEV100() const;
     [[nodiscard]] float getCurrentExposure() const;
     
-    void setIblMultiplier(float m);
-    
-    
-public:
-    /**
-     * @brief Upon initialisation, if false, then the renderer will not work properly and the application must be
-     * shutdown immediately.
-     */
-    bool isOk { true };
-    
+    void setIblMultiplier(float multiplier);
+
 protected:
     void initFrameBuffers();
     void initTextureRenderBuffers();
-    void detachTextureRenderBuffersFromFrameBuffers();
+    void detachTextureRenderBuffersFromFrameBuffers() const;
     std::unique_ptr<Cubemap> createCubemapFromHdrTexture(HdrTexture *hdrTexture, const glm::ivec2 &size);
     std::unique_ptr<Cubemap> generateIrradianceMap(Cubemap *cubemap, const glm::ivec2 &size);
     std::unique_ptr<Cubemap> generatePreFilterMap(Cubemap *cubemap, const glm::ivec2 &size);
@@ -155,6 +152,8 @@ protected:
     void pointLightShadowMapping();
     void spotlightShadowMapping();
     void blurTexture(const TextureBufferObject &texture);
+
+    static void setViewportSize(const glm::ivec2 &size=window::bufferSize());
     
     std::vector<graphics::RenderQueueObject>        mRenderQueue;
     std::vector<CameraSettings>                     mCameraQueue;
@@ -203,7 +202,6 @@ protected:
     std::unique_ptr<TextureBufferObject> mMetallicTextureBuffer;
     std::unique_ptr<TextureBufferObject> mDeferredLightingTextureBuffer;
     std::unique_ptr<TextureBufferObject> mPositionTextureBuffer;
-    std::unique_ptr<TextureBufferObject> mShadowTextureBuffer;  // todo: Remove me!
     std::unique_ptr<TextureBufferObject> mBrdfLutTextureBuffer;
     std::unique_ptr<TextureBufferObject> mPrimaryImageBuffer;
     std::unique_ptr<TextureBufferObject> mAuxiliaryImageBuffer;
@@ -215,9 +213,7 @@ protected:
     float mCurrentEV100 { 10.f };
     float mIblLuminanceMultiplier { 1000.f };
 
-    bool mIsFirstPass { true };
-    
-public:  // todo: Should this be a pp shader?
+public:
     float mReflectionStepSize { 0.1f };
     int mReflectionMaxStepCount { 300 };
     float mReflectionThicknessThreshold { 1.2f };
