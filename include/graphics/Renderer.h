@@ -112,7 +112,7 @@ public:
      * having to worry about mesh data. Make sure that a shader and fbo are already bound before
      * calling this method.
      */
-    void drawFullscreenTriangleNow();
+    void drawFullscreenTriangleNow() const;
     
     /**
      * @brief Resets some internal state so that the GUI system doesn't override anything in the renderer.
@@ -144,14 +144,14 @@ protected:
     void initFrameBuffers();
     void initTextureRenderBuffers();
     void detachTextureRenderBuffersFromFrameBuffers() const;
-    std::unique_ptr<Cubemap> createCubemapFromHdrTexture(HdrTexture *hdrTexture, const glm::ivec2 &size);
-    std::unique_ptr<Cubemap> generateIrradianceMap(Cubemap *cubemap, const glm::ivec2 &size);
-    std::unique_ptr<Cubemap> generatePreFilterMap(Cubemap *cubemap, const glm::ivec2 &size);
+    std::unique_ptr<Cubemap> createCubemapFromHdrTexture(const HdrTexture *hdrTexture, const glm::ivec2 &size) const;
+    std::unique_ptr<Cubemap> generateIrradianceMap(const Cubemap *cubemap, const glm::ivec2 &size) const;
+    std::unique_ptr<Cubemap> generatePreFilterMap(const Cubemap *cubemap, const glm::ivec2 &size) const;
     std::unique_ptr<TextureBufferObject> generateBrdfLut(const glm::ivec2 &size);
     void directionalLightShadowMapping(const CameraSettings &cameraSettings);
-    void pointLightShadowMapping();
-    void spotlightShadowMapping();
-    void blurTexture(const TextureBufferObject &texture);
+    void pointLightShadowMapping() const;
+    void spotlightShadowMapping() const;
+    void blurTexture(const TextureBufferObject &texture) const;
 
     static void setViewportSize(const glm::ivec2 &size=window::bufferSize());
     

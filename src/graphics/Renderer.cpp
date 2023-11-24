@@ -26,6 +26,8 @@ Renderer::Renderer() :
     glEnable(GL_CULL_FACE);
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
+    graphics::pushDebugGroup("Setup");
+
     auto fsTriShader = file::shaderPath() / "FullscreenTriangle.vert";
     mDirectionalLightShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "lighting/DirectionalLight.frag");
     mPointLightShader = std::make_unique<Shader>(file::shaderPath() / "lighting/PointLight.vert", file::shaderPath() / "lighting/PointLight.frag");
@@ -49,6 +51,7 @@ Renderer::Renderer() :
     initTextureRenderBuffers();
     
     setViewportSize();
+    graphics::popDebugGroup();
 }
 
 void Renderer::initFrameBuffers()
@@ -62,9 +65,9 @@ void Renderer::initFrameBuffers()
     // We only ever write to this framebuffer once, so it shouldn't matter.
     mDeferredLightFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ONE, GL_ALWAYS);
     
-    mSsrFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ONE, GL_ALWAYS);
+    mSsrFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ZERO, GL_ALWAYS);
 
-    mReflectionFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ONE, GL_ALWAYS);
+    mReflectionFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ZERO, GL_ALWAYS);
 
     mShadowFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ZERO, GL_LESS);
 
@@ -129,7 +132,7 @@ void Renderer::detachTextureRenderBuffersFromFrameBuffers() const
     mDeferredLightFramebuffer->detach(0);
 }
 
-bool Renderer::debugMessageCallback(const GLDEBUGPROC callback)
+bool Renderer::debugMessageCallback(GLDEBUGPROC callback)
 {
     int flags { 0 };  // Check to see if OpenGL debug context was set up correctly.
     glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
@@ -210,7 +213,6 @@ void Renderer::submit(const graphics::Spotlight &spotLight)
     mSpotlightQueue.emplace_back(spotLight);
 }
 
-
 void Renderer::render()
 {
     PROFILE_FUNC();
@@ -289,14 +291,14 @@ void Renderer::render()
 
         for (const graphics::DirectionalLight &directionalLight : mDirectionalLightQueue)
         {
-            mDirectionalLightShader->set("u_cascade_distances", &(directionalLight.cascadeDepths[0]), static_cast<int>(directionalLight.cascadeDepths.size()));
+            mDirectionalLightShader->set("u_cascade_distances", directionalLight.cascadeDepths.data(), static_cast<int>(directionalLight.cascadeDepths.size()));
             mDirectionalLightShader->set("u_cascade_count", static_cast<int>(directionalLight.cascadeDepths.size()));
             
             mDirectionalLightShader->set("u_bias", directionalLight.shadowBias);
             
             mDirectionalLightShader->set("u_light_direction", directionalLight.direction);
             mDirectionalLightShader->set("u_light_intensity", directionalLight.colourIntensity);
-            mDirectionalLightShader->set("u_light_vp_matrix", &(directionalLight.vpMatrices[0]), static_cast<int>(directionalLight.vpMatrices.size()));
+            mDirectionalLightShader->set("u_light_vp_matrix", directionalLight.vpMatrices.data(), static_cast<int>(directionalLight.vpMatrices.size()));
             mDirectionalLightShader->set("u_shadow_map_texture", directionalLight.shadowMap->getId(), 5);
 
             glDrawElements(GL_TRIANGLES, mFullscreenTriangle.indicesCount(), GL_UNSIGNED_INT, nullptr);
@@ -446,17 +448,16 @@ void Renderer::render()
         
         mDeferredLightShader->bind();
         
-        const glm::mat4 v = glm::mat4(glm::mat3(camera.viewMatrix));
-        const glm::mat4 vp = cameraProjectionMatrix * v;
-        const glm::mat4 ivp = glm::inverse(vp);
-        
+        const glm::mat4 viewMatrixNoPosition = glm::mat4(glm::mat3(camera.viewMatrix));
+        const glm::mat4 inverseViewProjection = glm::inverse(cameraProjectionMatrix * viewMatrixNoPosition);
+
         mDeferredLightShader->set("u_irradiance_texture", mLightTextureBuffer->getId(), 0);
         mDeferredLightShader->set("u_emissive_texture", mEmissiveTextureBuffer->getId(), 1);
         mDeferredLightShader->set("u_depth_texture", mDepthTextureBuffer->getId(), 2);
         mDeferredLightShader->set("u_skybox_texture", mHdrSkybox->getId(), 3);
         mDeferredLightShader->set("u_reflection_texture", mReflectionTextureBuffer->getId(), 4);
 
-        mDeferredLightShader->set("u_inverse_vp_matrix", ivp);
+        mDeferredLightShader->set("u_inverse_vp_matrix", inverseViewProjection);
         mDeferredLightShader->set("u_luminance_multiplier", mIblLuminanceMultiplier);
         mDeferredLightShader->set("u_exposure", exposure);
         
@@ -488,7 +489,7 @@ void Renderer::directionalLightShadowMapping(const CameraSettings &cameraSetting
 {
     PROFILE_FUNC();
     graphics::pushDebugGroup("Directional Light Shadow Mapping");
-    const auto resize = [](const glm::vec4 &v) { return v / v.w; };
+    const auto resize = [](const glm::vec4 &vec) { return vec / vec.w; };
     
     mShadowFramebuffer->bind();
     mDirectionalLightShadowShader->bind();
@@ -506,7 +507,7 @@ void Renderer::directionalLightShadowMapping(const CameraSettings &cameraSetting
         const glm::ivec2 &shadowMapSize = directionalLight.shadowMap->getSize();
         glViewport(0, 0, shadowMapSize.x, shadowMapSize.y);
         
-        std::vector<float> depths { cameraSettings.nearClipDistance };
+        std::vector depths { cameraSettings.nearClipDistance };
         for (const float &depth : directionalLight.cascadeDepths)
             depths.emplace_back(depth);
         depths.emplace_back(cameraSettings.farClipDistance);
@@ -595,7 +596,7 @@ void Renderer::directionalLightShadowMapping(const CameraSettings &cameraSetting
     graphics::popDebugGroup();
 }
 
-void Renderer::pointLightShadowMapping()
+void Renderer::pointLightShadowMapping() const
 {
     PROFILE_FUNC();
     graphics::pushDebugGroup("Point Light Shadow Mapping");
@@ -640,7 +641,7 @@ void Renderer::pointLightShadowMapping()
     graphics::popDebugGroup();
 }
 
-void Renderer::spotlightShadowMapping()
+void Renderer::spotlightShadowMapping() const
 {
     PROFILE_FUNC();
     graphics::pushDebugGroup("Spotlight Shadow Mapping");
@@ -650,7 +651,7 @@ void Renderer::spotlightShadowMapping()
     
     for (const graphics::Spotlight &spotlight : mSpotlightQueue)
     {
-        glm::ivec2 size = spotlight.shadowMap->getSize();
+        const glm::ivec2 size = spotlight.shadowMap->getSize();
         glViewport(0, 0, size.x, size.y);
         
         mShadowFramebuffer->attachDepthBuffer(spotlight.shadowMap.get());
@@ -676,8 +677,10 @@ void Renderer::spotlightShadowMapping()
     graphics::popDebugGroup();
 }
 
-void Renderer::blurTexture(const TextureBufferObject& texture)
+void Renderer::blurTexture(const TextureBufferObject& texture) const
 {
+    PROFILE_FUNC();
+    graphics::pushDebugGroup("Auxilliary Blur Pass");
     const uint32_t mipLevels = texture.getMipLevels();
     const glm::ivec2 &size = texture.getSize();
     mBlurFramebuffer->bind();
@@ -694,6 +697,7 @@ void Renderer::blurTexture(const TextureBufferObject& texture)
     }
 
     glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
+    graphics::popDebugGroup();
 }
 
 void Renderer::setViewportSize(const glm::ivec2& size)
@@ -703,29 +707,29 @@ void Renderer::setViewportSize(const glm::ivec2& size)
 
 void Renderer::clear()
 {
-    uint64_t renderQueueCount = mRenderQueue.size();
+    const uint64_t renderQueueCount = mRenderQueue.size();
     mRenderQueue.clear();
     mRenderQueue.reserve(renderQueueCount);
-    
-    uint64_t cameraCount = mCameraQueue.size();
+
+    const uint64_t cameraCount = mCameraQueue.size();
     mCameraQueue.clear();
     mCameraQueue.reserve(cameraCount);
-    
-    uint64_t directionalLightCount = mDirectionalLightQueue.size();
+
+    const uint64_t directionalLightCount = mDirectionalLightQueue.size();
     mDirectionalLightQueue.clear();
     mDirectionalLightQueue.reserve(directionalLightCount);
-    
-    uint64_t pointLightCount = mPointLightQueue.size();
+
+    const uint64_t pointLightCount = mPointLightQueue.size();
     mPointLightQueue.clear();
     mPointLightQueue.reserve(pointLightCount);
-    
-    uint64_t spotLightCount = mSpotlightQueue.size();
+
+    const uint64_t spotLightCount = mSpotlightQueue.size();
     mSpotlightQueue.clear();
     mSpotlightQueue.reserve(spotLightCount);
 }
 
 
-std::unique_ptr<Cubemap> Renderer::createCubemapFromHdrTexture(HdrTexture *hdrTexture, const glm::ivec2 &size)
+std::unique_ptr<Cubemap> Renderer::createCubemapFromHdrTexture(const HdrTexture *hdrTexture, const glm::ivec2 &size) const
 {
     auto cubemap = std::make_unique<Cubemap>(size, GL_RGB16F);
     
@@ -762,7 +766,7 @@ std::unique_ptr<Cubemap> Renderer::createCubemapFromHdrTexture(HdrTexture *hdrTe
     return cubemap;
 }
 
-std::unique_ptr<Cubemap> Renderer::generateIrradianceMap(Cubemap *cubemap, const glm::ivec2 &size)
+std::unique_ptr<Cubemap> Renderer::generateIrradianceMap(const Cubemap *cubemap, const glm::ivec2 &size) const
 {
     auto irradiance = std::make_unique<Cubemap>(size, GL_RGB16F);
     
@@ -799,9 +803,9 @@ std::unique_ptr<Cubemap> Renderer::generateIrradianceMap(Cubemap *cubemap, const
     return irradiance;
 }
 
-std::unique_ptr<Cubemap> Renderer::generatePreFilterMap(Cubemap *cubemap, const glm::ivec2 &size)
+std::unique_ptr<Cubemap> Renderer::generatePreFilterMap(const Cubemap *cubemap, const glm::ivec2 &size) const
 {
-    const int maxMipLevels = 5;
+    constexpr int maxMipLevels = 5;
     auto filter = std::make_unique<Cubemap>(size, GL_RGB16F, maxMipLevels);
     
     FramebufferObject auxiliaryFrameBuffer(GL_ONE, GL_ONE, GL_ALWAYS);
@@ -875,7 +879,7 @@ void Renderer::generateSkybox(std::string_view path, const glm::ivec2 desiredSiz
     mBrdfLutTextureBuffer = generateBrdfLut(desiredSize);
 }
 
-void Renderer::drawFullscreenTriangleNow()
+void Renderer::drawFullscreenTriangleNow() const
 {
     glBindVertexArray(mFullscreenTriangle.vao());
     glDrawElements(GL_TRIANGLES, mFullscreenTriangle.indicesCount(), GL_UNSIGNED_INT, nullptr);
@@ -957,7 +961,7 @@ float Renderer::getCurrentExposure() const
     return 1.f / maxLuminance;
 }
 
-void Renderer::setIblMultiplier(float multiplier)
+void Renderer::setIblMultiplier(const float multiplier)
 {
     mIblLuminanceMultiplier = glm::abs(multiplier);
 }
