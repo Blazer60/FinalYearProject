@@ -136,6 +136,8 @@ add_executable(${PROJECT_NAME}
         include/engine/loader/ResourcePool.h
         src/engine/loader/ShaderLoader.cpp
         include/engine/loader/ShaderLoader.h
+        src/engine/ui/editor/RendererSettings.cpp
+        src/engine/ui/editor/RendererSettings.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

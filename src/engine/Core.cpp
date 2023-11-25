@@ -120,7 +120,7 @@ namespace engine
         glfwMakeContextCurrent(mWindow);
         
         // Enable/disable V-sync. 1 = on, else off. NVIDIA honours multiple numbers whereas AMD ignores them.
-        glfwSwapInterval(1);
+        glfwSwapInterval(0);
         
         glfwSetCursorPosCallback(mWindow, [](GLFWwindow *window, double xPos, double yPos) {
             eventHandler->updateMouseDelta(xPos, yPos);

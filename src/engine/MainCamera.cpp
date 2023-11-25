@@ -15,6 +15,7 @@
 #include "EngineState.h"
 #include "EventHandler.h"
 #include "ProfileTimer.h"
+#include "ui/editor/RendererSettings.h"
 
 MainCamera::MainCamera()
 {
@@ -125,14 +126,17 @@ const glm::mat4 &MainCamera::getViewMatrix() const
 void MainCamera::onDrawUi()
 {
     PROFILE_FUNC();
+
+    drawRendererSettings();
+
     if (ImGui::CollapsingHeader("Camera Details"))
     {
         if (ImGui::TreeNode("Controls"))
         {
             ImGui::Text("Move  - WASD");
-            ImGui::Text("Ctrl  - Fly Down");
-            ImGui::Text("Space - Fly Up");
-            ImGui::Text("Look  - Mouse");
+            ImGui::Text("Fly Down - Q");
+            ImGui::Text("Fly Up - E");
+            ImGui::Text("Look  - Right Mouse");
             
             ImGui::TreePop();
         }

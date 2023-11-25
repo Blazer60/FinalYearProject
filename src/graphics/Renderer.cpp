@@ -76,7 +76,7 @@ void Renderer::initFrameBuffers()
 
 void Renderer::initTextureRenderBuffers()
 {
-    auto halfSize = glm::ivec2(glm::vec2(window::bufferSize()) * glm::vec2(0.5f));
+    auto ssrSize = glm::ivec2(glm::vec2(window::bufferSize()) * glm::vec2(1.f / mReflectionDivideSize));
     mPositionTextureBuffer           = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
     mAlbedoTextureBuffer             = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
     mNormalTextureBuffer             = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16_SNORM,           GL_NEAREST, GL_NEAREST);
@@ -88,7 +88,7 @@ void Renderer::initTextureRenderBuffers()
     mDepthTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_DEPTH_COMPONENT32F,    graphics::filter::Nearest, graphics::wrap::ClampToBorder);
     mPrimaryImageBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
     mAuxiliaryImageBuffer            = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
-    mSsrDataTextureBuffer            = std::make_unique<TextureBufferObject>(halfSize,             GL_RGBA16F,               graphics::filter::Nearest, graphics::wrap::ClampToEdge);
+    mSsrDataTextureBuffer            = std::make_unique<TextureBufferObject>(ssrSize,              GL_RGBA16F,               graphics::filter::Nearest, graphics::wrap::ClampToEdge);
     mReflectionTextureBuffer         = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F,               graphics::filter::Linear, graphics::wrap::ClampToEdge);
     
     // Make sure that the framebuffers have been set up before calling this function.
