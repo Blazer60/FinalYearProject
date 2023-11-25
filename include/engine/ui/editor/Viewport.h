@@ -56,6 +56,7 @@ namespace engine
         
         std::vector<ViewportImage> mViewportImages;
         int32_t mCurrentSelectedImage = 0;
+        bool mForce1080p { false };
     };
     
 } // engine

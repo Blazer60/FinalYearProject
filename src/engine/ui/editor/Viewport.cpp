@@ -85,6 +85,8 @@ namespace engine
         ImGui::SameLine();
         if (ImGui::RadioButton("World", mMode == ImGuizmo::MODE::WORLD))
             mMode = ImGuizmo::MODE::WORLD;
+        ImGui::SameLine();
+        ImGui::Checkbox("Force 1080p", &mForce1080p);
         
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - 100.f);
@@ -104,8 +106,8 @@ namespace engine
         }
         
         ImGui::BeginChild("ImageWindow");
-        
-        ImVec2 regionSize = ImGui::GetContentRegionAvail();
+
+        const ImVec2 regionSize = mForce1080p ? ImVec2(1920.f, 1080.f) : ImGui::GetContentRegionAvail();
         window::setBufferSize(glm::ivec2(regionSize.x, regionSize.y));
         const TextureBufferObject &texture = mViewportImages[mCurrentSelectedImage].requestTexture();
         ImGui::Image(reinterpret_cast<void *>(texture.getId()), regionSize, ImVec2(0, 1), ImVec2(1, 0));
