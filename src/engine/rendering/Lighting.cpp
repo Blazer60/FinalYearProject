@@ -27,7 +27,7 @@ namespace engine
         :
         colour(colour), yaw(yaw), pitch(pitch), intensity(intensity), Light()
     {
-        const glm::ivec2 shadowMapSize = glm::ivec2(2048);
+        const auto shadowMapSize = glm::ivec2(mShadowMapSize);
         mDirectionalLight.shadowMap = std::make_shared<TextureArrayObject>(shadowMapSize, static_cast<int32_t >(depths.size()), GL_DEPTH_COMPONENT32, graphics::filter::Linear, graphics::wrap::ClampToBorder);
         mDirectionalLight.shadowMap->setBorderColour(glm::vec4(1.f));
         mDirectionalLight.vpMatrices.reserve(depths.size());
@@ -49,11 +49,11 @@ namespace engine
         // calculateDirection();
     }
 
-    void DirectionalLight::updateLayerCount(uint32_t cascadeCount)
+    void DirectionalLight::updateShadowMap(uint32_t cascadeCount)
     {
-        if (mDirectionalLight.shadowMap->getLayerCount() != cascadeCount)
+        if (mDirectionalLight.shadowMap->getLayerCount() != cascadeCount || mShadowMapSize != mDirectionalLight.shadowMap->getSize().x)
         {
-            const glm::ivec2 size = mDirectionalLight.shadowMap->getSize();
+            const auto size = glm::ivec2(mShadowMapSize);
             mDirectionalLight.shadowMap = std::make_shared<TextureArrayObject>(size, cascadeCount, GL_DEPTH_COMPONENT32, graphics::filter::Linear, graphics::wrap::ClampToBorder);
             vpMatrices.reserve(cascadeCount);
         }
@@ -97,7 +97,8 @@ namespace engine
 
                     ImGui::TreePop();
                 }
-                
+
+                ImGui::DragInt("Shadow Map Size", &mShadowMapSize);
                 ImGui::DragFloat("Z Multiplier", &mDirectionalLight.shadowZMultiplier, 0.1f);
                 ImGui::DragFloat2("Bias", glm::value_ptr(mDirectionalLight.shadowBias), 0.001f);
                 
@@ -126,7 +127,7 @@ namespace engine
     {
         mDirectionalLight.direction = direction;
         mDirectionalLight.colourIntensity = colour * intensity;
-        updateLayerCount(mDirectionalLight.shadowCascadeZones);
+        updateShadowMap(mDirectionalLight.shadowCascadeZones);
         
         graphics::renderer->submit(mDirectionalLight);
     }

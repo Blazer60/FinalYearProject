@@ -33,7 +33,7 @@ namespace engine
         ~DirectionalLight() override = default;
         
     protected:
-        void updateLayerCount(uint32_t cascadeCount);
+        void updateShadowMap(uint32_t cascadeCount);
         void onDrawUi() override;
         void onPreRender() override;
         
@@ -52,7 +52,8 @@ namespace engine
         float pitch { 45.f };
         bool  debugShadowMaps { false };
         graphics::DirectionalLight mDirectionalLight;
-        
+        int mShadowMapSize { 2048 };
+
         void calculateDirection();
         
         ENGINE_SERIALIZABLE_COMPONENT(DirectionalLight);
