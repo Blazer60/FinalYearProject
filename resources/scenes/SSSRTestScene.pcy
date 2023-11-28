@@ -1,0 +1,183 @@
+Scene: Scene Hierarchy
+Actors:
+  - Actor: Directional Light
+    position: [0, 0, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: DirectionalLight
+        Colour: [0.930000007, 0.930000007, 0.949999988]
+        Intensity: 10000
+        Yaw: 45
+        Pitch: 45
+        CascadeDepths: [0.0399999991, 0.159999996, 0.360000014, 0.639999986]
+        ZMultiplier: 5
+        Bias: [0.00100000005, 0]
+    Children:
+      []
+  - Actor: Cube
+    position: [-11.0026884, 0.389429092, 1.3628211]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 8.13954544, 11.7361765]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\defaultObjects\DefaultCube.glb
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [0.0190366711, 0.335482836, 0.306715041]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Floor
+    position: [0, 0, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\stoneFloor\MedievalStoneFloor.obj
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: models\stoneFloor\TexturesCom_TileStones_1K_albedo.png
+            NormalMap: models\stoneFloor\TexturesCom_TileStones_1K_normal.png
+            HeightMap: models\stoneFloor\TexturesCom_TileStones_1K_height.png
+            RoughnessMap: models\stoneFloor\TexturesCom_TileStones_1K_roughness.png
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Actor
+    position: [-8.55762482, 0, 4.14020109]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      []
+    Children:
+      - Actor: Leather
+        position: [0, 0, 0]
+        rotation: [1, 0, 0, 0]
+        scale: [1, 1, 1]
+        Components:
+          - Component: MeshRenderer
+            MeshPath: models\MaterialBall.glb
+            Materials:
+              - MaterialType: StandardMaterial
+                Albedo: [1, 1, 1]
+                Roughness: 1
+                Metallic: 0
+                Emissive: [0, 0, 0]
+                HeightScale: 0.100000001
+                DiffuseMap: ..\..\..\..\Textures\Tufted Chesterfield Leather - PBR0021\png\TexturesCom_Leather_Tufted_New_1K_albedo.png
+                NormalMap: ..\..\..\..\Textures\Tufted Chesterfield Leather - PBR0021\png\TexturesCom_Leather_Tufted_New_1K_normal.png
+                HeightMap: ..\..\..\..\Textures\Tufted Chesterfield Leather - PBR0021\png\TexturesCom_Leather_Tufted_New_1K_height.png
+                RoughnessMap: ..\..\..\..\Textures\Tufted Chesterfield Leather - PBR0021\png\TexturesCom_Leather_Tufted_New_1K_roughness.png
+                MetallicMap: ""
+              - MaterialType: StandardMaterial
+                Albedo: [0.445069611, 0.445025086, 0.445025086]
+                Roughness: 0.572000027
+                Metallic: 0
+                Emissive: [0, 0, 0]
+                HeightScale: 0.100000001
+                DiffuseMap: ""
+                NormalMap: ""
+                HeightMap: ""
+                RoughnessMap: ""
+                MetallicMap: ""
+        Children:
+          []
+      - Actor: Steel
+        position: [0, 0, 3]
+        rotation: [1, 0, -0, -1.20376876e-06]
+        scale: [0.999991775, 1, 0.999991775]
+        Components:
+          - Component: MeshRenderer
+            MeshPath: models\MaterialBall.glb
+            Materials:
+              - MaterialType: StandardMaterial
+                Albedo: [1, 0.999899983, 0.999899983]
+                Roughness: 1
+                Metallic: 1
+                Emissive: [0, 0, 0]
+                HeightScale: 0
+                DiffuseMap: ..\..\..\..\Textures\Rainbow Damascus Metal - PBR0499\png\TexturesCom_Metal_RainbowDamascus_1K_albedo.png
+                NormalMap: ..\..\..\..\Textures\Rainbow Damascus Metal - PBR0499\png\TexturesCom_Metal_RainbowDamascus_1K_normal.png
+                HeightMap: ""
+                RoughnessMap: ..\..\..\..\Textures\Rainbow Damascus Metal - PBR0499\png\TexturesCom_Metal_RainbowDamascus_1K_roughness.png
+                MetallicMap: ""
+              - MaterialType: StandardMaterial
+                Albedo: [0.412757576, 0.412716299, 0.412716299]
+                Roughness: 0
+                Metallic: 0
+                Emissive: [0, 0, 0]
+                HeightScale: 0.100000001
+                DiffuseMap: ""
+                NormalMap: ""
+                HeightMap: ""
+                RoughnessMap: ""
+                MetallicMap: ""
+        Children:
+          []
+      - Actor: Wood
+        position: [0, 0, -3]
+        rotation: [1, 0, 0, 0]
+        scale: [0.99999851, 1, 0.99999851]
+        Components:
+          - Component: MeshRenderer
+            MeshPath: models\MaterialBall.glb
+            Materials:
+              - MaterialType: StandardMaterial
+                Albedo: [1, 1, 1]
+                Roughness: 1
+                Metallic: 0
+                Emissive: [0, 0, 0]
+                HeightScale: 0.100000001
+                DiffuseMap: ..\..\..\..\Textures\Painted Wood Planks - PBR0480\png\TexturesCom_Wood_PlanksPainted_1K_albedo.png
+                NormalMap: ..\..\..\..\Textures\Painted Wood Planks - PBR0480\png\TexturesCom_Wood_PlanksPainted_1K_normal.png
+                HeightMap: ..\..\..\..\Textures\Painted Wood Planks - PBR0480\png\TexturesCom_Wood_PlanksPainted_1K_height.png
+                RoughnessMap: ..\..\..\..\Textures\Painted Wood Planks - PBR0480\png\TexturesCom_Wood_PlanksPainted_1K_roughness.png
+                MetallicMap: ""
+              - MaterialType: StandardMaterial
+                Albedo: [0.464456797, 0.464410335, 0.464410335]
+                Roughness: 0
+                Metallic: 0
+                Emissive: [0, 0, 0]
+                HeightScale: 0
+                DiffuseMap: ""
+                NormalMap: ""
+                HeightMap: ""
+                RoughnessMap: ""
+                MetallicMap: ""
+        Children:
+          []
+  - Actor: Cube
+    position: [-5.63337612, -0.617168188, -3.28495693]
+    rotation: [1, 0, 0, 0]
+    scale: [20.8618698, 8.81278324, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\defaultObjects\DefaultCube.glb
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [0.373983264, 0.373945862, 0.373945862]
+            Roughness: 0.127000004
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      []
