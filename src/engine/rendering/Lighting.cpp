@@ -210,8 +210,8 @@ namespace engine
         }
     }
     
-    DistantLightProbe::DistantLightProbe(const std::filesystem::path &path, const glm::ivec2 &size)
-        : mPath(path), mSize(size), mThumbnailTexture(std::make_unique<Texture>(path))
+    DistantLightProbe::DistantLightProbe(const std::filesystem::path &path, const glm::ivec2 &size, const float radianceMultiplier)
+        : mSize(size), mRadianceMultiplier(radianceMultiplier), mPath(path), mThumbnailTexture(std::make_unique<Texture>(path))
     {
     
     }
@@ -258,14 +258,28 @@ namespace engine
                     mIsUpdated = false;
                 });
             }
-            
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(resourceImagePayload))
+                {
+                    if (const std::filesystem::path path = *reinterpret_cast<std::filesystem::path*>(payload->Data); !path.empty())
+                    {
+                        editor->addUpdateAction([this, path]() {
+                            mPath = path;
+                            mThumbnailTexture = std::make_unique<Texture>(path);
+                            mIsUpdated = false;
+                        });
+                    }
+                }
+            }
+
             ImGui::TreePop();
         }
         
         ImGui::PopID();
     }
     
-    void SpotLight::onPreRender()
+    void Spotlight::onPreRender()
     {
         calculateDirection();
         mSpotlight.colourIntensity = mColour * mIntensity;
@@ -277,7 +291,7 @@ namespace engine
         graphics::renderer->submit(mSpotlight);
     }
     
-    void SpotLight::onDrawUi()
+    void Spotlight::onDrawUi()
     {
         ImGui::PushID("Spot Light Settings");
         if (ImGui::TreeNodeEx("Spot Light Settings", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen))
@@ -314,9 +328,8 @@ namespace engine
         ImGui::PopID();
     }
     
-    void SpotLight::calculateDirection()
+    void Spotlight::calculateDirection()
     {
-        // todo: Looks like our rotation matrix doesn't match the direction of the light. One of them needs to be flipped?
         const glm::mat4 projectionMatrix = glm::perspective(2.f * mSpotlight.outerAngle, 1.f, 0.001f, mSpotlight.radius);
         if (mUseActorRotation)
         {
@@ -336,9 +349,27 @@ namespace engine
         }
     }
     
-    SpotLight::SpotLight()
+    Spotlight::Spotlight()
         : Light()
     {
+        mSpotlight.shadowMap = std::make_shared<TextureBufferObject>(
+            glm::ivec2(1024), GL_DEPTH_COMPONENT32,
+            graphics::filter::Linear, graphics::wrap::ClampToBorder);
+        mSpotlight.shadowMap->setBorderColour(glm::vec4(1.f));
+    }
+
+    Spotlight::Spotlight(
+        const glm::vec3& colour, const float intensity,
+        const float innerAngleDegrees, const float outerAngleDegrees,
+        const float pitch, const float yaw,
+        const bool useActorRotation)
+            :
+        mColour(colour), mIntensity(intensity),
+        mInnerAngleDegrees(innerAngleDegrees), mOuterAngleDegrees(outerAngleDegrees),
+        mPitch(pitch), mYaw(yaw),
+        mUseActorRotation(useActorRotation)
+    {
+        // No option to change the shadow map right now :(
         mSpotlight.shadowMap = std::make_shared<TextureBufferObject>(
             glm::ivec2(1024), GL_DEPTH_COMPONENT32,
             graphics::filter::Linear, graphics::wrap::ClampToBorder);

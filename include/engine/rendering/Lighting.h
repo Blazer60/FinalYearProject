@@ -41,10 +41,7 @@ namespace engine
         glm::vec3 direction { glm::normalize(glm::vec3(1.f, 1.f, 1.f)) };
         
         glm::vec3 colour { 1.f };
-        
-    /**
-    * @brief The colour of the light.
-    */
+
         float intensity { 10000.f };
         
         std::vector<glm::mat4> vpMatrices;
@@ -85,10 +82,15 @@ namespace engine
         ENGINE_SERIALIZABLE_COMPONENT(PointLight);
     };
     
-    struct SpotLight
+    struct Spotlight
         : Light, engine::Component
     {
-        SpotLight();
+        Spotlight();
+        Spotlight(
+            const glm::vec3 &colour, float intensity,
+            float innerAngleDegrees, float outerAngleDegrees,
+            float pitch, float yaw,
+            bool useActorRotation);
     
     protected:
         void onDrawUi() override;
@@ -105,6 +107,8 @@ namespace engine
         bool  mDebugShadowMap    { false };
         
         void calculateDirection();
+
+        ENGINE_SERIALIZABLE_COMPONENT(Spotlight);
     };
 
     struct DistantLightProbe
@@ -112,17 +116,18 @@ namespace engine
     {
     public:
         explicit DistantLightProbe(const glm::ivec2 &size);
-        DistantLightProbe(const std::filesystem::path &path, const glm::ivec2 &size);
+        DistantLightProbe(const std::filesystem::path &path, const glm::ivec2 &size, float radianceMultiplier=1.f);
         
     protected:
         void onPreRender() override;
         void onDrawUi() override;
         
-    protected:
         glm::ivec2 mSize;
         float mRadianceMultiplier { 1.f };
         std::filesystem::path mPath;
         std::unique_ptr<Texture> mThumbnailTexture;
         bool mIsUpdated { false };
+
+        ENGINE_SERIALIZABLE_COMPONENT(DistantLightProbe);
     };
 }

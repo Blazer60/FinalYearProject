@@ -16,7 +16,9 @@ namespace engine
     class MeshRenderer;
     class DirectionalLight;
     class PointLight;
-    
+    class Spotlight;
+    class DistantLightProbe;
+
     void attachComponentSerialization();
 }
 // In global namespace so that uer can override with their own functions.
@@ -24,4 +26,5 @@ namespace engine
 void serializeComponent(YAML::Emitter &, engine::MeshRenderer *);
 void serializeComponent(YAML::Emitter &, engine::DirectionalLight *);
 void serializeComponent(YAML::Emitter &, engine::PointLight *);
-
+void serializeComponent(YAML::Emitter &, engine::Spotlight *);
+void serializeComponent(YAML::Emitter &, engine::DistantLightProbe *);

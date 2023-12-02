@@ -120,7 +120,7 @@ namespace engine
                 const auto path = *reinterpret_cast<std::filesystem::path*>(payload1->Data);
                 auto newScene = std::make_unique<Scene>();
                 load::scene(path, newScene.get());
-                core->setScene(std::move(newScene));
+                core->setScene(std::move(newScene), path);
             }
         }
         

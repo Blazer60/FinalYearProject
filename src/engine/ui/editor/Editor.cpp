@@ -31,6 +31,10 @@ namespace engine
         addComponentOption<PointLight>("Point Light", [](Ref<Actor> actor) {
             actor->addComponent(makeResource<PointLight>());
         });
+
+        addComponentOption<Spotlight>("Spot Light", [](Ref<Actor> actor) {
+            actor->addComponent(makeResource<Spotlight>());
+        });
         
         addComponentOption<DistantLightProbe>("Distant Light Probe", [](Ref<Actor> actor) {
             actor->addComponent(makeResource<DistantLightProbe>(glm::ivec2(512)));

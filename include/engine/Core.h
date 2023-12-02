@@ -34,7 +34,7 @@ namespace engine
         Core(const glm::ivec2 &resolution, bool enableDebugging);
         ~Core();
         
-        void setScene(std::unique_ptr<Scene> scene);
+        void setScene(std::unique_ptr<Scene> scene, const std::filesystem::path &path);
         
         void run();
         

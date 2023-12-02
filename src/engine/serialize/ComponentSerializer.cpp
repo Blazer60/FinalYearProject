@@ -24,7 +24,9 @@ namespace engine
         serializer->pushSaveComponent<MeshRenderer>();
         serializer->pushSaveComponent<DirectionalLight>();
         serializer->pushSaveComponent<PointLight>();
-        
+        serializer->pushSaveComponent<Spotlight>();
+        serializer->pushSaveComponent<DistantLightProbe>();
+
         serializer->pushLoadComponent("MeshRenderer", [](const YAML::Node &node, Ref<Actor> actor) {
             const std::filesystem::path relativePath = node["MeshPath"].as<std::string>();
             Ref<engine::MeshRenderer> meshRenderer = actor->addComponent(
@@ -99,6 +101,26 @@ namespace engine
             
             actor->addComponent(makeResource<engine::PointLight>(colour, intensity, radius, bias, softness, resolution));
         });
+
+        serializer->pushLoadComponent("Spotlight", [](const YAML::Node &node, Ref<Actor> actor) {
+            const auto colour = node["Colour"].as<glm::vec3>();
+            const auto intensity = node["Intensity"].as<float>();
+            const auto innerAngle = node["InnerAngle"].as<float>();
+            const auto outAngle = node["OuterAngle"].as<float>();
+            const auto pitch = node["Pitch"].as<float>();
+            const auto yaw = node["Yaw"].as<float>();
+            const auto useActorRotation = node["UseActorRotation"].as<bool>();
+
+            actor->addComponent(
+                makeResource<Spotlight>(colour, intensity, innerAngle, outAngle, pitch, yaw, useActorRotation));
+        });
+
+        serializer->pushLoadComponent("DistantLightProbe", [](const YAML::Node &node, Ref<Actor> actor) {
+            const auto size = static_cast<glm::ivec2>(node["Size"].as<glm::vec2>());
+            const auto radianceMultiplier = node["RadianceMultiplier"].as<float>();
+            const auto path = file::resourcePath() / node["Path"].as<std::string>();
+            actor->addComponent(makeResource<DistantLightProbe>(path, size, radianceMultiplier));
+        });
     }
 }
 
@@ -160,4 +182,26 @@ void serializeComponent(YAML::Emitter &out, engine::PointLight *pointLight)
     out << YAML::Key << "Bias"          << YAML::Value << pointLight->mBias;
     out << YAML::Key << "Softness"      << YAML::Value << pointLight->mSoftnessRadius;
     out << YAML::Key << "Resolution"    << YAML::Value << pointLight->mResolution;
+}
+
+void serializeComponent(YAML::Emitter &out, engine::Spotlight *spotlight)
+{
+    out << YAML::Key << "Component"         << YAML::Value << "Spotlight";
+    out << YAML::Key << "Colour"            << YAML::Value << spotlight->mColour;
+    out << YAML::Key << "Intensity"         << YAML::Value << spotlight->mIntensity;
+    out << YAML::Key << "InnerAngle"        << YAML::Value << spotlight->mInnerAngleDegrees;
+    out << YAML::Key << "OuterAngle"        << YAML::Value << spotlight->mOuterAngleDegrees;
+    out << YAML::Key << "Pitch"             << YAML::Value << spotlight->mPitch;
+    out << YAML::Key << "Yaw"               << YAML::Value << spotlight->mYaw;
+    out << YAML::Key << "UseActorRotation"  << YAML::Value << spotlight->mUseActorRotation;
+}
+
+void serializeComponent(YAML::Emitter &out, engine::DistantLightProbe *distantLightProbe)
+{
+    out << YAML::Key << "Component"             << YAML::Value << "DistantLightProbe";
+    out << YAML::Key << "Size"                  << YAML::Value << distantLightProbe->mSize;
+    out << YAML::Key << "RadianceMultiplier"    << YAML::Value << distantLightProbe->mRadianceMultiplier;
+
+    const std::string path = file::makeRelativeToResourcePath(distantLightProbe->mPath).string();
+    out << YAML::Key << "Path"                  << YAML::Value << path;
 }

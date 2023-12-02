@@ -1,0 +1,554 @@
+Scene: Scene Hierarchy
+Actors:
+  - Actor: Floor
+    position: [0, 0, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\stoneFloor\MedievalStoneFloor.obj
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [0.800000012, 0.800000012, 0.800000012]
+            Roughness: 0.5
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0
+            DiffuseMap: models\stoneFloor\TexturesCom_TileStones_1K_albedo.png
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: models\stoneFloor\TexturesCom_TileStones_1K_roughness.png
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Ball 0
+    position: [-10, 1, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\blueSphere\BlueSphere.obj
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 0
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Ball 1
+    position: [-7.80000019, 1, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\blueSphere\BlueSphere.obj
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 0.100000001
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Ball 2
+    position: [-5.5999999, 1, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\blueSphere\BlueSphere.obj
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 0.200000003
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Ball 3
+    position: [-3.39999962, 1, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\blueSphere\BlueSphere.obj
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 0.300000012
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Ball 4
+    position: [-1.19999981, 1, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\blueSphere\BlueSphere.obj
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 0.400000006
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Ball 5
+    position: [1, 1, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\blueSphere\BlueSphere.obj
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 0.5
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Ball 6
+    position: [3.20000076, 1, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\blueSphere\BlueSphere.obj
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 0.600000024
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Ball 7
+    position: [5.40000057, 1, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\blueSphere\BlueSphere.obj
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 0.699999988
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Ball 8
+    position: [7.60000038, 1, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\blueSphere\BlueSphere.obj
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 0.800000012
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Ball 9
+    position: [9.80000114, 1, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\blueSphere\BlueSphere.obj
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 0.899999976
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Ball 10
+    position: [-10, 3.20000005, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\blueSphere\BlueSphere.obj
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 0
+            Metallic: 1
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Ball 11
+    position: [-7.80000019, 3.20000005, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\blueSphere\BlueSphere.obj
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 0.100000001
+            Metallic: 1
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Ball 12
+    position: [-5.5999999, 3.20000005, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\blueSphere\BlueSphere.obj
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 0.200000003
+            Metallic: 1
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Ball 13
+    position: [-3.39999962, 3.20000005, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\blueSphere\BlueSphere.obj
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 0.300000012
+            Metallic: 1
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Ball 14
+    position: [-1.19999981, 3.20000005, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\blueSphere\BlueSphere.obj
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 0.400000006
+            Metallic: 1
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Ball 15
+    position: [1, 3.20000005, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\blueSphere\BlueSphere.obj
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 0.5
+            Metallic: 1
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Ball 16
+    position: [3.20000076, 3.20000005, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\blueSphere\BlueSphere.obj
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 0.600000024
+            Metallic: 1
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Ball 17
+    position: [5.40000057, 3.20000005, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\blueSphere\BlueSphere.obj
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 0.699999988
+            Metallic: 1
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Ball 18
+    position: [7.60000038, 3.20000005, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\blueSphere\BlueSphere.obj
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 0.800000012
+            Metallic: 1
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Ball 19
+    position: [9.80000114, 3.20000005, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\blueSphere\BlueSphere.obj
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 0.899999976
+            Metallic: 1
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Directional Light
+    position: [0, 0, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: DirectionalLight
+        Colour: [0.930000007, 0.930000007, 0.949999988]
+        Intensity: 10000
+        Yaw: 45
+        Pitch: 45
+        CascadeDepths: [0.0399999991, 0.159999996, 0.360000014, 0.639999986]
+        ZMultiplier: 5
+        Bias: [0.00100000005, 0]
+    Children:
+      []
+  - Actor: Teapot
+    position: [0, 0, 5]
+    rotation: [1, 0, 0, 0]
+    scale: [0.300000012, 0.300000012, 0.300000012]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\utahTeapot\UtahTeapot.glb
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [0, 0.400000006, 0.00999999978]
+            Roughness: 0.600000024
+            Metallic: 1
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Parent
+    position: [5, 5, -12]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      []
+    Children:
+      - Actor: Child
+        position: [0, 0, 0]
+        rotation: [1, 0, 0, 0]
+        scale: [1, 1, 1]
+        Components:
+          - Component: MeshRenderer
+            MeshPath: models\defaultObjects\DefaultTorus.glb
+            Materials:
+              - MaterialType: StandardMaterial
+                Albedo: [1, 0, 0]
+                Roughness: 1
+                Metallic: 0
+                Emissive: [0, 0, 0]
+                HeightScale: 0.100000001
+                DiffuseMap: ""
+                NormalMap: ""
+                HeightMap: ""
+                RoughnessMap: ""
+                MetallicMap: ""
+        Children:
+          []
+  - Actor: Leather Ball
+    position: [0, 5, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\leatherBall\LeatherBall.obj
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: models\leatherBall\TexturesCom_Leather_Tufted_New_1K_albedo.png
+            NormalMap: models\leatherBall\TexturesCom_Leather_Tufted_New_1K_normal.png
+            HeightMap: models\leatherBall\TexturesCom_Leather_Tufted_New_1K_height.png
+            RoughnessMap: models\leatherBall\TexturesCom_Leather_Tufted_New_1K_roughness.png
+            MetallicMap: ""
+    Children:
+      []
+  - Actor: Spotlight
+    position: [0, 4.63602018, 4.35575676]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: Spotlight
+        Colour: [0.204078168, 0.959183097, 0.471885145]
+        Intensity: 120000
+        InnerAngle: 22.5
+        OuterAngle: 80.4400024
+        Pitch: -37
+        Yaw: -91.0999985
+        UseActorRotation: false
+    Children:
+      []
+  - Actor: Distant Light Probe
+    position: [0, 3, -9]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: DistantLightProbe
+        Size: [512, 512]
+        RadianceMultiplier: 1000
+        Path: textures\hdr\norway\Norway.hdr
+    Children:
+      []

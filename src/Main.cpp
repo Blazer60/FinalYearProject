@@ -12,7 +12,7 @@ int main()
         auto rotator = actor->addComponent(makeResource<Rotator>(rotation));
     });
     
-    core.setScene(std::make_unique<MyScene>());
+    core.setScene(std::make_unique<MyScene>(), "");
     core.run();
     
     return 0;

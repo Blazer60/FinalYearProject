@@ -120,7 +120,7 @@ namespace engine
         glfwMakeContextCurrent(mWindow);
         
         // Enable/disable V-sync. 1 = on, else off. NVIDIA honours multiple numbers whereas AMD ignores them.
-        glfwSwapInterval(0);
+        glfwSwapInterval(1);
         
         glfwSetCursorPosCallback(mWindow, [](GLFWwindow *window, double xPos, double yPos) {
             eventHandler->updateMouseDelta(xPos, yPos);
@@ -320,7 +320,7 @@ namespace engine
                     {
                         mScenePath = scenePath;
                         load::scene(mScenePath, newScene.get());
-                        setScene(std::move(newScene));
+                        setScene(std::move(newScene), mScenePath);
                     }
                 }
                 ImGui::EndMenu();
@@ -362,8 +362,9 @@ namespace engine
         graphics::popDebugGroup();
     }
     
-    void Core::setScene(std::unique_ptr<Scene> scene)
+    void Core::setScene(std::unique_ptr<Scene> scene, const std::filesystem::path &path)
     {
+        mScenePath = path;
         mScene.reset();
         mScene = std::move(scene);
         mScenePointer = mScene.get();
