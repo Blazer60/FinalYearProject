@@ -34,6 +34,7 @@ void Spammer::onBegin()
     // mMeshRenderer is now a dangling reference.
     
     // Should error here.
+    WARN("The next error should occur.");
     mMeshRenderer->addMaterial(std::make_shared<engine::StandardMaterialSubComponent>());
 }
 

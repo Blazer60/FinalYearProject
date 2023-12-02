@@ -24,4 +24,5 @@ public:
     void onUpdate() override;
 protected:
     float mTimer { 0 };
+    int mCount { 0 };
 };

@@ -26,8 +26,8 @@ namespace engine
         
         for (auto & actor : mActors)
             actor->update();
-        
-        auto currentDestroyBuffer = mToDestroy;
+
+        auto *const currentDestroyBuffer = mToDestroy;
         if (currentDestroyBuffer == &mDestroyBuffer0)
             mToDestroy = &mDestroyBuffer1;
         else
@@ -38,7 +38,7 @@ namespace engine
             const auto it = std::find_if(mActors.begin(), mActors.end(), [&actor](const Ref<Actor> &left) {
                 return left.get() == actor;
             });
-            
+
             onDeath.broadcast(mActors[std::distance(mActors.begin(), it)]);
             mActors.erase(it);
         }
@@ -86,8 +86,11 @@ namespace engine
     {
         PROFILE_FUNC();
         for (auto &actor : mActors)
-            recursePreRender(actor);
-        
+        {
+            for (auto &component : actor->getComponents())
+                component->preRender();
+        }
+
         onRender();
     }
     
@@ -108,35 +111,33 @@ namespace engine
                 WARN("Actor % does not exist in this scene and so it cannot be removed.", actor->getName());
                 return;
             }
+
+            mToAdd.erase(it2);  // Pretend that it didn't exist to begin with.
+            return;
         }
         
         mToDestroy->emplace(actor);
+
+        for (const UUID childId : actor->mChildren)
+            getActor(childId)->markForDeath();
     }
-    
-    void Scene::recursePreRender(Ref<Actor> actor)
+
+    Ref<Actor> Scene::getActor(const UUID actorId) const
     {
-        for (Resource<Component> &component : actor->getComponents())
-            component->preRender();
-        
-        for (Resource<Actor> &child : actor->getChildren())
-            recursePreRender(child);
-    }
-    
-    Resource<Actor> Scene::popActor(Actor *actor)
-    {
-        const auto it = std::find_if(mActors.begin(), mActors.end(), [&actor](const Resource<Actor> &child) {
-            return child.get() == actor;
-        });
-        
-        if (it == mActors.end())
+        for (const auto & actor : mActors)
         {
-            LOG_MAJOR("Failed to find serializeActor while popping");
-            return Resource<Actor>();
+            if (actor->getId() == actorId)
+                return actor;
         }
-        
-        Resource<Actor> out = std::move(*it);
-        mActors.erase(it);
-        
-        return out;
+
+        for (const auto & actor : mToAdd)
+        {
+            if (actor->getId() == actorId)
+                return actor;
+        }
+
+        WARN("Actor with ID % does not exist", actorId);
+
+        return Ref<Actor>();
     }
 }

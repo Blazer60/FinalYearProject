@@ -138,6 +138,8 @@ add_executable(${PROJECT_NAME}
         include/engine/loader/ShaderLoader.h
         src/engine/ui/editor/RendererSettings.cpp
         src/engine/ui/editor/RendererSettings.h
+        src/engine/EngineRandom.cpp
+        include/engine/EngineRandom.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

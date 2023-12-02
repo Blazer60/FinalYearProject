@@ -125,9 +125,12 @@ namespace engine
                     ImGui::EndDragDropTarget();
                 }
                 
-                for (Ref<Actor> actor : core->getScene()->getActors())
-                    drawSceneHierarchyForActor(actor);
-                
+                for (const Ref<Actor> actor : core->getScene()->getActors())
+                {
+                    if (actor->getParent() == nullptr)
+                        drawSceneHierarchyForActor(actor);
+                }
+
                 ImGui::TreePop();
             }
             
@@ -192,9 +195,9 @@ namespace engine
         }
     }
     
-    void Editor::drawSceneHierarchyForActor(Ref<Actor> &actor)
+    void Editor::drawSceneHierarchyForActor(Ref<Actor> actor)
     {
-        const std::string name = std::string(actor->getName()) + "##" + std::to_string(reinterpret_cast<int64_t>(&actor));
+        const std::string name = std::string(actor->getName()) + "##" + std::to_string(actor->getId());
         const bool isSelected = (actor.get() == mSelectedActor.get());
         int flags = actor->getChildren().empty() ? ImGuiTreeNodeFlags_Leaf : ImGuiTreeNodeFlags_DefaultOpen;
         if (isSelected)
@@ -227,8 +230,8 @@ namespace engine
                 mSelectedActor = actor;
             
             
-            for (Ref<Actor> child : actor->getChildren())
-                drawSceneHierarchyForActor(child);
+            for (UUID childId : actor->getChildren())
+                drawSceneHierarchyForActor(actor->getScene()->getActor(childId));
                 
             ImGui::TreePop();
         }
@@ -236,22 +239,13 @@ namespace engine
     
     void Editor::moveActors()
     {
-        if (mMoveDestinationActor == nullptr)
-        {
-            if (Actor* parent = mMoveSourceActor->getParent(); parent != nullptr)
-            {
-                if (mMoveDestinationActor != parent)
-                    core->getScene()->addActor(parent->popActor(mMoveSourceActor));
-            }
-        }
-        else if (Actor* parent = mMoveSourceActor->getParent(); parent != nullptr)
-        {
-            if (mMoveDestinationActor != parent)
-                mMoveDestinationActor->addChildActor(parent->popActor(mMoveSourceActor));
-        }
-        else
-            mMoveDestinationActor->addChildActor(mMoveSourceActor->getScene()->popActor(mMoveSourceActor));
-        
+        auto actorToMove = core->getScene()->getActor(mMoveSourceActor->getId());
+        if (auto *const parent = actorToMove->getParent(); parent != nullptr)
+            parent->removeChildActor(mMoveSourceActor);
+
+        if (mMoveDestinationActor != nullptr)
+            mMoveDestinationActor->addChildActor(actorToMove);
+
         mMoveSourceActor = nullptr;
         mMoveDestinationActor = nullptr;
     }

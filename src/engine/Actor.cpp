@@ -47,7 +47,10 @@ namespace engine
         ImGui::SameLine(ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("Delete Actor").x);
         if (ImGui::Button("Delete Actor"))
             markForDeath();
-        
+
+        const auto id = std::to_string(mId);
+        ImGui::TextColored(ImVec4(0.3f, 0.3f, 0.3f, 1.f), id.c_str());
+
         if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
         {
             bool changedFlag = false;
@@ -82,45 +85,30 @@ namespace engine
     
     void Actor::markForDeath()
     {
-        if (mParent)
+        if (mParent != nullptr)
             mParent->removeChildActor(this);
-        else
-            mScene->destroy(this);
+        mScene->destroy(this);
     }
     
     void Actor::update()
     {
         onUpdate();
         updateComponents();
-        
-        for (int i = 0; i < mActorsToAdd.size(); ++i)
+
+        if (!mChildrenToRemove.empty())
         {
-            mActorsToAdd[i]->begin();
-            mChildren.push_back(std::move(mActorsToAdd[i]));
+            mChildren.erase(std::remove_if(mChildren.begin(), mChildren.end(), [this](const UUID id) {
+                return mChildrenToRemove.count(id) > 0;
+            }), mChildren.end());
+            mChildrenToRemove.clear();
         }
-        mActorsToAdd.clear();
-        
-        for (auto &child : mChildren)
-            child->update();
-        
-        auto currentActorDestroyBuffer = mActorsToDestroy;
-        if (mActorsToDestroy == &mActorDestroyBuffer0)
-            mActorsToDestroy = &mActorDestroyBuffer1;
-        else
-            mActorsToDestroy = &mActorDestroyBuffer0;
-        
-        // Removing children that are marked for deletion.
-        for (const Actor *actor : *currentActorDestroyBuffer)
-        {
-            const auto it = std::find_if(mChildren.begin(), mChildren.end(), [&actor](const Resource<Actor> &left) {
-                return left.get() == actor;
-            });
-            
-            mChildren.erase(it);
-        }
-        currentActorDestroyBuffer->clear();
     }
-    
+
+    UUID Actor::getId() const
+    {
+        return mId;
+    }
+
     void Actor::updateComponents()
     {
         // Components could create more components.
@@ -192,7 +180,7 @@ namespace engine
         mComponentsToDestroy->emplace(component);
     }
     
-    void Actor::removeChildActor(const Actor* actor)
+    void Actor::removeChildActor(Actor* actor)
     {
         if (actor == nullptr)
         {
@@ -204,36 +192,31 @@ namespace engine
         if (actor->mParent == this)
         {
             const auto it = std::find_if(
-                mChildren.begin(), mChildren.end(), [&actor](const Resource<Actor> &left) {
-                    return left.get() == actor;
+                mChildren.begin(), mChildren.end(), [&actor](const UUID id) {
+                    return id == actor->getId();
                 }
             );
-            
+
             if (it == mChildren.end())
             {
-                const auto it2 = std::find_if(
-                    mActorsToAdd.begin(), mActorsToAdd.end(), [&actor](const Resource<Actor> &left) {
-                        return left.get() == actor;
-                    }
-                );
-                
-                if (it2 == mActorsToAdd.end())
-                {
-                    ERROR("Actor has this parent but is not in the child list.");
-                    return;
-                }
+                ERROR("Actor has this parent but is not in the child list.");
+                return;
             }
-            
-            mActorsToDestroy->emplace(actor);
+
+            // We reset the transform to world space since we aren't connect to anything.
+            actor->mTransform = actor->getTransform();
+            math::decompose(actor->mTransform, actor->position, actor->rotation, actor->scale);
+            actor->mParent = nullptr;
+            mChildrenToRemove.insert(actor->getId());
         }
         else
         {
-            for (Resource<Actor> &child : mChildren)
-                child->removeChildActor(actor);
+            for (const UUID childId : mChildren)
+                mScene->getActor(childId)->removeChildActor(actor);
         }
     }
     
-    std::vector<Resource<Actor>> &Actor::getChildren()
+    std::vector<UUID> &Actor::getChildren()
     {
         return mChildren;
     }
@@ -243,56 +226,19 @@ namespace engine
         return mTransform;
     }
     
-    Actor *Actor::getParent()
+    Actor *Actor::getParent() const
     {
         return mParent;
     }
     
-    glm::vec3 Actor::getWorldPosition()
+    glm::vec3 Actor::getWorldPosition() const
     {
         if (mParent != nullptr)
             return mParent->getTransform() * glm::vec4(position, 1.f);
         return position;
     }
     
-    Resource<Actor> Actor::popActor(Actor *actor)
-    {
-        auto moveOut = [](Resource<Actor> &&out) {
-            // We reset the transform to world space since we aren't connect to anything.
-            out->mTransform = out->getTransform();
-            math::decompose(out->mTransform, out->position, out->rotation, out->scale);
-            out->mParent = nullptr;
-            return out;
-        };
-        
-        const auto it = std::find_if(mChildren.begin(), mChildren.end(), [&actor](const Resource<Actor> &child) {
-            return child.get() == actor;
-        });
-        
-        if (it == mChildren.end())
-        {
-            const auto it2 = std::find_if(mActorsToAdd.begin(), mActorsToAdd.end(), [&actor](const Resource<Actor> &child) {
-                return child.get() == actor;
-            });
-            
-            if (it2 != mActorsToAdd.end())
-            {
-                Resource<Actor> out = std::move(*it2);
-                mActorsToAdd.erase(it2);
-                return moveOut(std::move(out));
-            }
-            
-            LOG_MAJOR("Failed to find Actor while popping");
-            return Resource<Actor>();
-        }
-        
-        Resource<Actor> out = std::move(*it);
-        mChildren.erase(it);
-        
-        return moveOut(std::move(out));
-    }
-    
-    Scene *Actor::getScene()
+    Scene *Actor::getScene() const
     {
         return mScene;
     }

@@ -89,7 +89,7 @@ namespace engine
     protected:
         void onDrawUi() override;
         void drawSceneHierarchyPanel();
-        void drawSceneHierarchyForActor(Ref<Actor> &actor);
+        void drawSceneHierarchyForActor(Ref<Actor> actor);
         void drawActorDetails();
         void drawAddComponentCombo();
         void moveActors();

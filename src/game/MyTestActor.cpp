@@ -7,6 +7,8 @@
 
 #include "MyTestActor.h"
 
+#include "Scene.h"
+
 
 MyTestActor::MyTestActor(std::string name)
     : engine::Actor(std::move(name))
@@ -16,7 +18,8 @@ MyTestActor::MyTestActor(std::string name)
 
 void MyTestActor::onBegin()
 {
-    Ref<engine::Actor> a = addChildActor(makeResource<engine::Actor>("Should be dead."));
+    auto spawnedActor = getScene()->spawnActor<engine::Actor>("Should be dead.");
+    Ref<engine::Actor> a = addChildActor(spawnedActor);
     a->markForDeath();
 }
 
@@ -26,9 +29,14 @@ void MyTestActor::onUpdate()
     if (mTimer > 0.001f)
     {
         mTimer -= 0.001f;
-        addChildActor(makeResource<engine::Actor>("Child"));
+        std::string name = "Child" + std::to_string(mCount++);
+        addChildActor(makeResource<Actor>(name));
 
-        if (mChildren.size() > 100)
+        if (mChildren.size() > 5)
+        {
+            for (const engine::UUID child : mChildren)
+                getScene()->getActor(child)->markForDeath();
             mChildren.clear();
+        }
     }
 }

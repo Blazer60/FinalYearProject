@@ -16,6 +16,9 @@
 #include "Serializer.h"
 #include <yaml-cpp/emitter.h>
 
+#include "EngineRandom.h"
+#include "Scene.h"
+
 namespace engine
 {
     /**
@@ -35,6 +38,11 @@ namespace engine
         
         void begin();
         void update();
+
+        /**
+         * @returns The ID of the current actor.
+         */
+        [[nodiscard]] UUID getId() const;
         
     
         /**
@@ -86,19 +94,22 @@ namespace engine
         void removeComponent(const Ref<Component> &component);
         
         template<typename TActor, std::enable_if_t<std::is_convertible_v<TActor*, Actor*>, bool> = true>
-        Ref<TActor> addChildActor(Resource<TActor> &&actor);
+        Ref<TActor> addChildActor(Ref<TActor> actor);
+
+        template<typename TActor, std::enable_if_t<std::is_convertible_v<TActor*, Actor*>, bool> = true>
+        Ref<TActor> addChildActor(Resource<TActor> actor);
+
+        void removeChildActor(Actor* actor);
         
-        void removeChildActor(const Actor* actor);
-        
-        [[nodiscard]] std::vector<Resource<Actor>> &getChildren();
-        [[nodiscard]] Actor *getParent();
-        [[nodiscard]] glm::vec3 getWorldPosition();
-        Resource<Actor> popActor(Actor *actor);
-        [[nodiscard]] Scene *getScene();
+        [[nodiscard]] std::vector<UUID> &getChildren();
+        [[nodiscard]] Actor *getParent() const;
+        [[nodiscard]] glm::vec3 getWorldPosition() const;
+        [[nodiscard]] Scene *getScene() const;
         
     protected:
         std::string mName      { "Actor" };  // I've put the name here so that the debugger shows this as the first field.
         class Scene *mScene    { nullptr };
+        UUID mId               { random::generateId() };
     public:
         glm::vec3 position     { glm::vec3(0.f) };
         glm::quat rotation     { glm::identity<glm::quat>() };
@@ -108,13 +119,9 @@ namespace engine
         std::set<const Component*>  mComponentDestroyBuffer0;
         std::set<const Component*>  mComponentDestroyBuffer1;
         std::set<const Component*> *mComponentsToDestroy { &mComponentDestroyBuffer0 };
-        
-        std::set<const Actor*>  mActorDestroyBuffer0;
-        std::set<const Actor*>  mActorDestroyBuffer1;
-        std::set<const Actor*> *mActorsToDestroy { &mActorDestroyBuffer0 };
-        
-        std::vector<Resource<Actor>> mActorsToAdd;
+
         std::vector<Resource<Component>> mComponentsToAdd;
+        std::set<UUID> mChildrenToRemove;
         
     protected:
         void onDrawUi() override;
@@ -126,7 +133,7 @@ namespace engine
         glm::mat4 mTransform    { glm::mat4(1.f) };
         
         Actor*                           mParent { nullptr };  // Nullptr means that its parent is the scene.
-        std::vector<Resource<Actor>>     mChildren;
+        std::vector<UUID>                mChildren;
         std::vector<Resource<Component>> mComponents;
     };
     
@@ -230,19 +237,24 @@ namespace engine
     
     
     template<typename TActor, std::enable_if_t<std::is_convertible_v<TActor*, Actor*>, bool>>
-    Ref<TActor> Actor::addChildActor(Resource<TActor> &&actor)
+    Ref<TActor> Actor::addChildActor(Ref<TActor> tActor)
     {
-        Ref<TActor> ref = actor;  // Getting a ref<> at the start to not lose the type.
+        Ref<Actor> actor(tActor);
+
+        actor->mParent = this;
+        actor->mScene = mScene;  // In case this wasn't created using spawnActor<>();
         
-        Resource<Actor> tempActor = std::move(actor);
-        tempActor->mParent = this;
-        tempActor->mScene = mScene;  // In case this wasn't created using spawnActor<>();
-        
-        tempActor->mTransform = glm::inverse(getTransform()) * tempActor->mTransform;
-        math::decompose(tempActor->mTransform, tempActor->position, tempActor->rotation, tempActor->scale);
-        
-        mActorsToAdd.push_back(std::move(tempActor));
-        
-        return ref;
+        actor->mTransform = glm::inverse(getTransform()) * actor->mTransform;
+        math::decompose(actor->mTransform, actor->position, actor->rotation, actor->scale);
+
+        mChildren.push_back(actor->getId());
+
+        return actor;
+    }
+
+    template<typename TActor, std::enable_if_t<std::is_convertible_v<TActor*, Actor*>, bool>>
+    Ref<TActor> Actor::addChildActor(Resource<TActor> actor)
+    {
+        return addChildActor(mScene->addActor(std::move(actor)));
     }
 } // engine

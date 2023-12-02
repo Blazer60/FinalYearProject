@@ -128,7 +128,7 @@ MyScene::MyScene() :
     
     // spawnActor<engine::Actor>("Virus")->addComponent(makeResource<Spammer>());
     
-    // spawnActor<MyTestActor>("My Test Actor");
+    spawnActor<MyTestActor>("My Test Actor");
 
     // engine::serialize::scene(file::resourcePath() / "scenes/test.pcy", static_cast<engine::Scene*>(this));
     

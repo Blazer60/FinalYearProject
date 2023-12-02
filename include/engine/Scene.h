@@ -47,16 +47,14 @@ namespace engine
         
         template<typename TActor, std::enable_if_t<std::is_convertible_v<TActor*, Actor*>, bool> = true>
         Ref<TActor> addActor(Resource<TActor> &&actor);
-        
-        Resource<Actor> popActor(Actor *actor);
+
+        Ref<Actor> getActor(UUID actorId) const;
         
     protected:
         virtual void onUpdate();
         virtual void onImguiUpdate();
-        
-        void recursePreRender(Ref<Actor> actor);
-        
-        
+
+
         std::set<const Actor*> mDestroyBuffer0;
         std::set<const Actor*> mDestroyBuffer1;
         std::set<const Actor*> *mToDestroy { &mDestroyBuffer0 };

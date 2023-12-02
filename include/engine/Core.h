@@ -24,10 +24,10 @@ namespace engine
 {
     class Scene;
     
-/**
- * @author Ryan Purse
- * @date 12/06/2023
- */
+    /**
+     * @author Ryan Purse
+     * @date 12/06/2023
+     */
     class Core
     {
     public:

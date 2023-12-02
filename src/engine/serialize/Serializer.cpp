@@ -128,7 +128,7 @@ namespace engine::serialize
         
         out << YAML::Key << "Children" << YAML::Value << YAML::BeginSeq;
         for (auto &child : actor->mChildren)
-            serialize::actor(out, child.get());
+            serialize::actor(out, actor->getScene()->getActor(child).get());
         out << YAML::EndSeq;
         
         out << YAML::EndMap;
