@@ -102,7 +102,7 @@ namespace engine::serialize
         out << YAML::Key << "Scene" << YAML::Value << "Scene Hierarchy";
         out << YAML::Key << "Actors" << YAML::Value << YAML::BeginSeq;
         for (auto &actor : scene->getActors())
-            engine::serialize::actor(out, actor.get());
+            serialize::actor(out, actor.get());
         out << YAML::EndSeq;
         out << YAML::EndMap;
         
@@ -117,6 +117,7 @@ namespace engine::serialize
     {
         out << YAML::BeginMap;
         out << YAML::Key << "Actor" << YAML::Value << actor->mName;
+        out << YAML::Key << "UUID" << YAML::Value << actor->mId;
         out << YAML::Key << "position" << YAML::Value << actor->position;
         out << YAML::Key << "rotation" << YAML::Value << actor->rotation;
         out << YAML::Key << "scale" << YAML::Value << actor->scale;
@@ -125,11 +126,11 @@ namespace engine::serialize
         for (auto &component : actor->mComponents)
             serialize::component(out, component.get());
         out << YAML::EndSeq;
-        
-        out << YAML::Key << "Children" << YAML::Value << YAML::BeginSeq;
-        for (auto &child : actor->mChildren)
-            serialize::actor(out, actor->getScene()->getActor(child).get());
-        out << YAML::EndSeq;
+
+        out << YAML::Key << "Children" << YAML::Value << actor->mChildren;
+        // for (const auto &child : actor->mChildren)
+            // out << child;
+        // out << YAML::EndSeq;
         
         out << YAML::EndMap;
     }

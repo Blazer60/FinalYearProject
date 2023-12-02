@@ -14,6 +14,11 @@
 #include "EngineMemory.h"
 #include "Callback.h"
 
+namespace load
+{
+    void scene(const std::filesystem::path &path, engine::Scene *scene);
+}
+
 namespace engine
 {
 
@@ -23,6 +28,7 @@ namespace engine
      */
     class Scene
     {
+        friend void load::scene(const std::filesystem::path &, engine::Scene *);
     public:
         Callback<Ref<Actor>> onDeath;
         

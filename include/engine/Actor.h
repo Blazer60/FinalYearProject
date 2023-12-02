@@ -19,6 +19,12 @@
 #include "EngineRandom.h"
 #include "Scene.h"
 
+namespace load
+{
+    void actor(const YAML::Node&, engine::Scene*);
+    void scene(const std::filesystem::path &path, engine::Scene *scene);
+}
+
 namespace engine
 {
     /**
@@ -30,6 +36,8 @@ namespace engine
         : public ui::Drawable
     {
         friend void serialize::actor(YAML::Emitter &out, Actor *actor);
+        friend void load::actor(const YAML::Node&, engine::Scene*);
+        friend void load::scene(const std::filesystem::path &, engine::Scene *);
     public:
         friend class Scene;
         Actor() = default;
@@ -94,7 +102,7 @@ namespace engine
         void removeComponent(const Ref<Component> &component);
         
         template<typename TActor, std::enable_if_t<std::is_convertible_v<TActor*, Actor*>, bool> = true>
-        Ref<TActor> addChildActor(Ref<TActor> actor);
+        Ref<TActor> addChildActor(Ref<TActor> actor, bool keepWorldRelative=true);
 
         template<typename TActor, std::enable_if_t<std::is_convertible_v<TActor*, Actor*>, bool> = true>
         Ref<TActor> addChildActor(Resource<TActor> actor);
@@ -237,15 +245,18 @@ namespace engine
     
     
     template<typename TActor, std::enable_if_t<std::is_convertible_v<TActor*, Actor*>, bool>>
-    Ref<TActor> Actor::addChildActor(Ref<TActor> tActor)
+    Ref<TActor> Actor::addChildActor(Ref<TActor> tActor, const bool keepWorldRelative)
     {
         Ref<Actor> actor(tActor);
 
         actor->mParent = this;
         actor->mScene = mScene;  // In case this wasn't created using spawnActor<>();
-        
-        actor->mTransform = glm::inverse(getTransform()) * actor->mTransform;
-        math::decompose(actor->mTransform, actor->position, actor->rotation, actor->scale);
+
+        if (keepWorldRelative)
+        {
+            actor->mTransform = glm::inverse(getTransform()) * actor->mTransform;
+            math::decompose(actor->mTransform, actor->position, actor->rotation, actor->scale);
+        }
 
         mChildren.push_back(actor->getId());
 

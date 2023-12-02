@@ -43,6 +43,16 @@ namespace load
         
         for (const YAML::Node &actorNode : data["Actors"])
             load::actor(actorNode, scene);
+
+        // Linking all of the children to their parents.
+        for (Ref<engine::Actor> actor : scene->mToAdd)
+        {
+            for (engine::UUID childId : actor->getChildren())
+            {
+                auto child = scene->getActor(childId);
+                child->mParent = actor.get();
+            }
+        }
     }
     
     
@@ -50,13 +60,12 @@ namespace load
     {
         const auto name = actorNode["Actor"].as<std::string>();
         auto actor = scene->spawnActor<engine::Actor>(name);
+        actor->mId = actorNode["UUID"].as<engine::UUID>();
         actor->position = actorNode["position"].as<glm::vec3>();
         actor->rotation = actorNode["rotation"].as<glm::quat>();
         actor->scale = actorNode["scale"].as<glm::vec3>();
-        
-        for (auto &childNode : actorNode["Children"])
-            load::actor(childNode, actor);
-        
+        actor->mChildren = actorNode["Children"].as<std::vector<engine::UUID>>();
+
         for (auto &componentNode : actorNode["Components"])
             engine::serializer->loadComponent(componentNode, actor);
     }

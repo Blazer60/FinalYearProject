@@ -1,6 +1,7 @@
 Scene: Scene Hierarchy
 Actors:
   - Actor: Floor
+    UUID: 13903724911023947286
     position: [0, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -13,15 +14,16 @@ Actors:
             Roughness: 0.5
             Metallic: 0
             Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
+            HeightScale: 0
             DiffuseMap: models\stoneFloor\TexturesCom_TileStones_1K_albedo.png
-            NormalMap: models\stoneFloor\TexturesCom_TileStones_1K_normal.png
-            HeightMap: models\stoneFloor\TexturesCom_TileStones_1K_height.png
+            NormalMap: ""
+            HeightMap: ""
             RoughnessMap: models\stoneFloor\TexturesCom_TileStones_1K_roughness.png
             MetallicMap: ""
     Children:
       []
   - Actor: Ball 0
+    UUID: 14986697511788107798
     position: [-10, 1, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -41,9 +43,13 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
     Children:
-      []
+      - 10606960434273836665
+      - 5621884564549526898
+      - 13095907350927216926
+      - 9622653508291509425
   - Actor: Ball 1
-    position: [-7.80000019, 1, 0]
+    UUID: 10606960434273836665
+    position: [2.19999981, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
@@ -64,7 +70,8 @@ Actors:
     Children:
       []
   - Actor: Ball 2
-    position: [-5.5999999, 1, 0]
+    UUID: 5621884564549526898
+    position: [4.4000001, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
@@ -85,7 +92,8 @@ Actors:
     Children:
       []
   - Actor: Ball 3
-    position: [-3.39999962, 1, 0]
+    UUID: 13095907350927216926
+    position: [6.60000038, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
@@ -106,7 +114,8 @@ Actors:
     Children:
       []
   - Actor: Ball 4
-    position: [-1.19999981, 1, 0]
+    UUID: 9622653508291509425
+    position: [8.80000019, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
@@ -127,6 +136,7 @@ Actors:
     Children:
       []
   - Actor: Ball 5
+    UUID: 1197635038923310665
     position: [1, 1, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -148,6 +158,7 @@ Actors:
     Children:
       []
   - Actor: Ball 6
+    UUID: 11549334024770787118
     position: [3.20000076, 1, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -169,6 +180,7 @@ Actors:
     Children:
       []
   - Actor: Ball 7
+    UUID: 13076391875761292294
     position: [5.40000057, 1, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -190,6 +202,7 @@ Actors:
     Children:
       []
   - Actor: Ball 8
+    UUID: 12910014012404914968
     position: [7.60000038, 1, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -211,6 +224,7 @@ Actors:
     Children:
       []
   - Actor: Ball 9
+    UUID: 13658366699601269637
     position: [9.80000114, 1, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -232,6 +246,7 @@ Actors:
     Children:
       []
   - Actor: Ball 10
+    UUID: 7410547973262223363
     position: [-10, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -253,6 +268,7 @@ Actors:
     Children:
       []
   - Actor: Ball 11
+    UUID: 16185050307891331693
     position: [-7.80000019, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -274,6 +290,7 @@ Actors:
     Children:
       []
   - Actor: Ball 12
+    UUID: 16473974571069440072
     position: [-5.5999999, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -295,6 +312,7 @@ Actors:
     Children:
       []
   - Actor: Ball 13
+    UUID: 14007598664609476751
     position: [-3.39999962, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -316,6 +334,7 @@ Actors:
     Children:
       []
   - Actor: Ball 14
+    UUID: 6286331091931298026
     position: [-1.19999981, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -337,6 +356,7 @@ Actors:
     Children:
       []
   - Actor: Ball 15
+    UUID: 16569271862418331402
     position: [1, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -358,6 +378,7 @@ Actors:
     Children:
       []
   - Actor: Ball 16
+    UUID: 15787874389706593752
     position: [3.20000076, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -379,6 +400,7 @@ Actors:
     Children:
       []
   - Actor: Ball 17
+    UUID: 1662587161991794231
     position: [5.40000057, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -400,6 +422,7 @@ Actors:
     Children:
       []
   - Actor: Ball 18
+    UUID: 17104831253414509245
     position: [7.60000038, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -421,6 +444,7 @@ Actors:
     Children:
       []
   - Actor: Ball 19
+    UUID: 17696146936797403525
     position: [9.80000114, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -442,6 +466,7 @@ Actors:
     Children:
       []
   - Actor: Directional Light
+    UUID: 260757208773604354
     position: [0, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -457,12 +482,13 @@ Actors:
     Children:
       []
   - Actor: Teapot
+    UUID: 8887179040177292945
     position: [0, 0, 5]
     rotation: [1, 0, 0, 0]
     scale: [0.300000012, 0.300000012, 0.300000012]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\utahTeapot\UtahTeapot.obj
+        MeshPath: models\utahTeapot\UtahTeapot.glb
         Materials:
           - MaterialType: StandardMaterial
             Albedo: [0, 0.400000006, 0.00999999978]
@@ -478,48 +504,38 @@ Actors:
     Children:
       []
   - Actor: Parent
+    UUID: 5738481724538613287
     position: [5, 5, -12]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
       []
     Children:
-      - Actor: Child
-        position: [0, 0, 0]
-        rotation: [1, 0, 0, 0]
-        scale: [1, 1, 1]
-        Components:
-          - Component: MeshRenderer
-            MeshPath: models\defaultObjects\DefaultTorus.glb
-            Materials:
-              - MaterialType: StandardMaterial
-                Albedo: [1, 0, 0]
-                Roughness: 1
-                Metallic: 0
-                Emissive: [0, 0, 0]
-                HeightScale: 0.100000001
-                DiffuseMap: ""
-                NormalMap: ""
-                HeightMap: ""
-                RoughnessMap: ""
-                MetallicMap: ""
-        Children:
-          []
-  - Actor: Point Light
-    position: [0, 6, 5]
+      - 4587781250679152112
+  - Actor: Child
+    UUID: 4587781250679152112
+    position: [0, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
-      - Component: PointLight
-        Colour: [1, 1, 1]
-        Intensity: 12000
-        Radius: 30
-        Bias: [0.00499999989, 0.150000006]
-        Softness: 0.0199999996
-        Resolution: 1024
+      - Component: MeshRenderer
+        MeshPath: models\defaultObjects\DefaultTorus.glb
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 0, 0]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
     Children:
       []
   - Actor: Leather Ball
+    UUID: 2846103518641952809
     position: [0, 5, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -540,106 +556,3 @@ Actors:
             MetallicMap: ""
     Children:
       []
-  - Actor: Material Balls
-    position: [0, 0, -12]
-    rotation: [1, 0, 0, 0]
-    scale: [1, 1, 1]
-    Components:
-      []
-    Children:
-      - Actor: Material Ball 0
-        position: [-12, 0, 0]
-        rotation: [0.923879504, 0, -0.382683456, 0]
-        scale: [0.99999398, 1, 0.99999398]
-        Components:
-          - Component: MeshRenderer
-            MeshPath: models\MaterialBall.glb
-            Materials:
-              - MaterialType: StandardMaterial
-                Albedo: [1, 0.999899983, 0.999899983]
-                Roughness: 0
-                Metallic: 0
-                Emissive: [0, 0, 0]
-                HeightScale: 0
-                DiffuseMap: ""
-                NormalMap: ""
-                HeightMap: ""
-                RoughnessMap: ""
-                MetallicMap: ""
-              - MaterialType: StandardMaterial
-                Albedo: [0.5, 0.5, 0.5]
-                Roughness: 0
-                Metallic: 0
-                Emissive: [0, 0, 0]
-                HeightScale: 0.100000001
-                DiffuseMap: ""
-                NormalMap: ""
-                HeightMap: ""
-                RoughnessMap: ""
-                MetallicMap: ""
-        Children:
-          []
-      - Actor: Material Ball 1
-        position: [-9, 0, 0]
-        rotation: [0.923879504, 0, -0.382683456, 0]
-        scale: [1, 1, 1]
-        Components:
-          - Component: MeshRenderer
-            MeshPath: models\MaterialBall.glb
-            Materials:
-              - MaterialType: StandardMaterial
-                Albedo: [1, 1, 1]
-                Roughness: 0.100000001
-                Metallic: 0
-                Emissive: [0, 0, 0]
-                HeightScale: 0.100000001
-                DiffuseMap: ""
-                NormalMap: ""
-                HeightMap: ""
-                RoughnessMap: ""
-                MetallicMap: ""
-              - MaterialType: StandardMaterial
-                Albedo: [0.5, 0.5, 0.5]
-                Roughness: 0
-                Metallic: 0
-                Emissive: [0, 0, 0]
-                HeightScale: 0.100000001
-                DiffuseMap: ""
-                NormalMap: ""
-                HeightMap: ""
-                RoughnessMap: ""
-                MetallicMap: ""
-        Children:
-          []
-      - Actor: Material Ball 2
-        position: [-6, 0, 0]
-        rotation: [0.923879504, 0, -0.382683456, 0]
-        scale: [1, 1, 1]
-        Components:
-          - Component: MeshRenderer
-            MeshPath: models\MaterialBall.glb
-            Materials:
-              - MaterialType: StandardMaterial
-                Albedo: [1, 1, 1]
-                Roughness: 0.200000003
-                Metallic: 0
-                Emissive: [0, 0, 0]
-                HeightScale: 0.100000001
-                DiffuseMap: ""
-                NormalMap: ""
-                HeightMap: ""
-                RoughnessMap: ""
-                MetallicMap: ""
-              - MaterialType: StandardMaterial
-                Albedo: [0.5, 0.5, 0.5]
-                Roughness: 0
-                Metallic: 0
-                Emissive: [0, 0, 0]
-                HeightScale: 0.100000001
-                DiffuseMap: ""
-                NormalMap: ""
-                HeightMap: ""
-                RoughnessMap: ""
-                MetallicMap: ""
-        Children:
-          []
