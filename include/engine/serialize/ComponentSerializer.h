@@ -14,10 +14,10 @@ namespace engine
 {
     // Forward declares need to appear here because of the namespace.
     class MeshRenderer;
-    class DirectionalLight;
-    class PointLight;
-    class Spotlight;
-    class DistantLightProbe;
+    struct DirectionalLight;
+    struct PointLight;
+    struct Spotlight;
+    struct DistantLightProbe;
 
     void attachComponentSerialization();
 }

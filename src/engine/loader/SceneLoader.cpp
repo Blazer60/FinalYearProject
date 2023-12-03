@@ -18,31 +18,33 @@
 
 namespace load
 {
-    void scene(const std::filesystem::path &path, engine::Scene *scene)
+    std::unique_ptr<engine::Scene> scene(const std::filesystem::path& path)
     {
-        if (!std::filesystem::exists(path))
+        if (!exists(path))
         {
             WARN("Path to scene does not exist. No scene will be loaded. (%)", path);
-            return;
+            return std::make_unique<engine::Scene>();
         }
-        
+
         std::ifstream stream(path);
         std::stringstream stringStream;
         stringStream << stream.rdbuf();
         stream.close();
-        
+
         YAML::Node data = YAML::Load(stringStream.str());
         if (!data["Scene"])
         {
             WARN("File does not contain a scene: %", path);
-            return;
+            return std::make_unique<engine::Scene>();
         }
-        
+
         const auto sceneName = data["Scene"].as<std::string>();
         MESSAGE("loading scene: %", sceneName);
-        
+
+        auto scene = engine::serializer->loadScene(data);
+
         for (const YAML::Node &actorNode : data["Actors"])
-            load::actor(actorNode, scene);
+            load::actor(actorNode, scene.get());
 
         // Linking all of the children to their parents.
         for (Ref<engine::Actor> actor : scene->mToAdd)
@@ -53,9 +55,10 @@ namespace load
                 child->mParent = actor.get();
             }
         }
+
+        return scene;
     }
-    
-    
+
     void actor(const YAML::Node &actorNode, engine::Scene *scene)
     {
         auto actor = engine::serializer->loadActor(actorNode, scene);
@@ -66,21 +69,6 @@ namespace load
         actor->scale = actorNode["scale"].as<glm::vec3>();
         actor->mChildren = actorNode["Children"].as<std::vector<engine::UUID>>();
 
-        for (auto &componentNode : actorNode["Components"])
-            engine::serializer->loadComponent(componentNode, actor);
-    }
-    
-    void actor(const YAML::Node &actorNode, Ref<engine::Actor> parent)
-    {
-        const auto name = actorNode["Actor"].as<std::string>();
-        Ref<engine::Actor> actor = parent->addChildActor(makeResource<engine::Actor>(name));
-        actor->position = actorNode["position"].as<glm::vec3>();
-        actor->rotation = actorNode["rotation"].as<glm::quat>();
-        actor->scale = actorNode["scale"].as<glm::vec3>();
-        
-        for (auto &childNode : actorNode["Children"])
-            load::actor(childNode, actor);
-        
         for (auto &componentNode : actorNode["Components"])
             engine::serializer->loadComponent(componentNode, actor);
     }

@@ -20,7 +20,7 @@ namespace engine
 
 namespace load
 {
-    void scene(const std::filesystem::path &path, engine::Scene *scene);
+    std::unique_ptr<engine::Scene> scene(const std::filesystem::path &path);
+
     void actor(const YAML::Node &actorNode, engine::Scene *scene);
-    void actor(const YAML::Node &actorNode, Ref<engine::Actor> parent);
 }

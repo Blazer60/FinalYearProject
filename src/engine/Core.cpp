@@ -315,14 +315,8 @@ namespace engine
                 }
                 if (ImGui::MenuItem("Load"))
                 {
-                    auto newScene = std::make_unique<Scene>();
-                    auto scenePath = openFileDialog();
-                    if (!scenePath.empty())
-                    {
-                        mScenePath = scenePath;
-                        load::scene(mScenePath, newScene.get());
-                        setScene(std::move(newScene), mScenePath);
-                    }
+                    if (const auto scenePath = openFileDialog(); !scenePath.empty())
+                        setScene(load::scene(scenePath), scenePath);
                 }
                 ImGui::EndMenu();
             }

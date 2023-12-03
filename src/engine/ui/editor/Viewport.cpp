@@ -117,10 +117,8 @@ namespace engine
                 editor->createModel(*reinterpret_cast<std::filesystem::path*>(payload0->Data));
             else if (const ImGuiPayload *payload1 = ImGui::AcceptDragDropPayload(resourceScenePayload))
             {
-                const auto path = *reinterpret_cast<std::filesystem::path*>(payload1->Data);
-                auto newScene = std::make_unique<Scene>();
-                load::scene(path, newScene.get());
-                core->setScene(std::move(newScene), path);
+                if (const auto path = *reinterpret_cast<std::filesystem::path*>(payload1->Data); !path.empty())
+                    core->setScene(load::scene(path), path);
             }
         }
         

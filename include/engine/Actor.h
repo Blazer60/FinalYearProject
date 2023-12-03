@@ -22,7 +22,7 @@
 namespace load
 {
     void actor(const YAML::Node&, engine::Scene*);
-    void scene(const std::filesystem::path &path, engine::Scene *scene);
+    std::unique_ptr<class engine::Scene> scene(const std::filesystem::path &path);
 }
 
 namespace engine
@@ -37,7 +37,7 @@ namespace engine
     {
         friend void serialize::actor(YAML::Emitter &out, Actor *actor);
         friend void load::actor(const YAML::Node&, engine::Scene*);
-        friend void load::scene(const std::filesystem::path &, engine::Scene *);
+        friend std::unique_ptr<Scene> load::scene(const std::filesystem::path &);
     public:
         friend class Scene;
         Actor() = default;

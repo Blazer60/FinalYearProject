@@ -23,6 +23,7 @@
 #include "Spammer.h"
 #include "MyTestActor.h"
 #include "ShaderLoader.h"
+#include "Lighting.h"
 
 MyScene::MyScene() :
     mStandardShader(load::shader(
@@ -166,7 +167,18 @@ void MyScene::onImguiMenuUpdate()
 {
 }
 
+void MyScene::setLuminanceMultiplier(const float multiplier)
+{
+    mLuminanceMultiplier = multiplier;
+}
+
 MyScene::~MyScene()
 {
+}
+
+void serializeScene(YAML::Emitter &out, MyScene *scene)
+{
+    out << YAML::Key << "Type" << YAML::Value << "MyScene";
+    out << YAML::Key << "LuminanceMultiplier" << scene->mLuminanceMultiplier;
 }
 

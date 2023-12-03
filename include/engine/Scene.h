@@ -16,7 +16,7 @@
 
 namespace load
 {
-    void scene(const std::filesystem::path &path, engine::Scene *scene);
+    std::unique_ptr<class engine::Scene> scene(const std::filesystem::path &path);
 }
 
 namespace engine
@@ -28,7 +28,7 @@ namespace engine
      */
     class Scene
     {
-        friend void load::scene(const std::filesystem::path &, engine::Scene *);
+        friend std::unique_ptr<Scene> load::scene(const std::filesystem::path &);
     public:
         Callback<Ref<Actor>> onDeath;
         

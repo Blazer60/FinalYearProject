@@ -11,11 +11,6 @@
 
 #include "Scene.h"
 #include "Shader.h"
-#include "MainCamera.h"
-#include "Mesh.h"
-#include "Materials.h"
-#include "Lighting.h"
-#include "Cubemap.h"
 
 /**
  * @author Ryan Purse
@@ -24,6 +19,7 @@
 class MyScene
     : public engine::Scene
 {
+    SERIALIZABLE_SCENE(MyScene);
 public:
     MyScene();
     ~MyScene() override;
@@ -32,6 +28,8 @@ public:
     void onRender() override;
     void onImguiUpdate() override;
     void onImguiMenuUpdate() override;
+
+    void setLuminanceMultiplier(float multiplier);
     
 protected:
     std::shared_ptr<Shader> mStandardShader;

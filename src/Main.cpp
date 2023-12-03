@@ -18,6 +18,12 @@ int main()
         const int count = node["Count"].as<int>();
         return scene->spawnActor<MyTestActor>(timer, count);
     });
+    engine::serializer->pushSaveScene<MyScene>();
+    engine::serializer->pushLoadScene("MyScene", [](const YAML::Node &node) -> std::unique_ptr<engine::Scene> {
+        auto myScene = std::make_unique<MyScene>();
+        myScene->setLuminanceMultiplier(node["LuminanceMultiplier"].as<float>());
+        return myScene;
+    });
 
     core.setScene(std::make_unique<MyScene>(), "");
     core.run();

@@ -14,6 +14,8 @@
 #include <yaml-cpp/yaml.h>
 #include <fstream>
 
+#include "FileLoader.h"
+
 YAML::Emitter &operator<<(YAML::Emitter &out, const glm::vec2 &v)
 {
     out << YAML::Flow;
@@ -53,6 +55,11 @@ namespace engine
     void Serializer::pushActorDelegate(const SerializeActorDelegate& delegate)
     {
         mActorSerializeFunctions.push_back(delegate);
+    }
+
+    void Serializer::pushSceneDelegate(const SerializeSceneDelegate& delegate)
+    {
+        mSceneSerializeFunctions.push_back(delegate);
     }
 
     void Serializer::saveComponent(YAML::Emitter &out, Component *component) const
@@ -101,6 +108,33 @@ namespace engine
         return scene->spawnActor<Actor>();
     }
 
+    void Serializer::saveScene(YAML::Emitter& out, Scene* scene) const
+    {
+        for (const auto &function : mSceneSerializeFunctions)
+        {
+            if (function(out, scene))
+                return;
+        }
+    }
+
+    std::unique_ptr<Scene> Serializer::loadScene(const YAML::Node& node)
+    {
+        if (!node["Type"].IsDefined())
+            return std::make_unique<Scene>();
+
+        const auto sceneType = node["Type"].as<std::string>();
+        if (auto it = mLoadSceneFunctions.find(sceneType); it != mLoadSceneFunctions.end())
+            return it->second(node);
+
+        WARN("Could not find a function to load scene of type: %", sceneType);
+        return std::make_unique<Scene>();
+    }
+
+    void Serializer::pushLoadScene(std::string type, const LoadSceneDelegate& loadSceneDelegate)
+    {
+        mLoadSceneFunctions.emplace(std::move(type), loadSceneDelegate);
+    }
+
     void Serializer::pushLoadActor(std::string type, const LoadActorDelegate& loadActorDelegate)
     {
         mLoadActorFunctions.emplace(std::move(type), loadActorDelegate);
@@ -114,7 +148,7 @@ namespace engine
 
 namespace engine::serialize
 {
-    void scene(const std::filesystem::path &path, struct Scene *scene)
+    void scene(const std::filesystem::path &path, Scene *scene)
     {
         if (path.empty())
             return;
@@ -131,7 +165,8 @@ namespace engine::serialize
         
         YAML::Emitter out;
         out << YAML::BeginMap;
-        out << YAML::Key << "Scene" << YAML::Value << "Scene Hierarchy";
+        out << YAML::Key << "Scene" << YAML::Value << file::makeRelativeToResourcePath(path).string();
+        serializer->saveScene(out, scene);
         out << YAML::Key << "Actors" << YAML::Value << YAML::BeginSeq;
         for (auto &actor : scene->getActors())
             serialize::actor(out, actor.get());
@@ -149,7 +184,6 @@ namespace engine::serialize
     {
         out << YAML::BeginMap;
         serializer->saveActor(out, actor);
-        // out << YAML::Key << "Actor" << YAML::Value <<
         out << YAML::Key << "Name" << YAML::Value << actor->mName;
         out << YAML::Key << "UUID" << YAML::Value << actor->mId;
         out << YAML::Key << "position" << YAML::Value << actor->position;
