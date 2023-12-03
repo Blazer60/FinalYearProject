@@ -30,17 +30,21 @@ namespace engine
      */
     class Core
     {
+        const std::string tempFilePath = "temp.pcy";
     public:
         Core(const glm::ivec2 &resolution, bool enableDebugging);
         ~Core();
         
         void setScene(std::unique_ptr<Scene> scene, const std::filesystem::path &path);
-        
         void run();
-        
-        [[nodiscard]] Scene *getScene();
-        [[nodiscard]] MainCamera *getCamera();
-    
+        void beginPlay();
+        void endPlay();
+
+        [[nodiscard]] Scene *getScene() const;
+        [[nodiscard]] MainCamera *getCamera() const;
+        [[nodiscard]] std::string getSceneName();
+        bool isInPlayMode() const;
+
     protected:
         bool initGlfw(int openGlMajorVersion, int openGlMinorVersion);
         bool initImGui();
@@ -57,6 +61,7 @@ namespace engine
         std::unique_ptr<Scene> mScene;
         Scene *mScenePointer;
         std::filesystem::path mScenePath;
+        std::string mSceneName;
         
         std::unique_ptr<ResourcePool> mResourcePool;
         std::unique_ptr<Renderer> mRenderer;
@@ -67,6 +72,7 @@ namespace engine
         
         ImGuiIO *mGuiIo { nullptr };
         bool mIsRunning { true };
+        bool mIsInPlayMode { false };
         const unsigned int mMaxLoopCount { 10 };
         const bool mEnableDebugging { false };
         

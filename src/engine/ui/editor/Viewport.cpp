@@ -67,9 +67,24 @@ namespace engine
         PROFILE_FUNC();
         ImGui::PushID("Viewport");
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
-        ImGui::Begin("Window");
-        
-        
+        std::string sceneName = core->getSceneName();
+        if (sceneName.empty())
+            sceneName = "Unsaved";
+
+        const std::string windowName = sceneName + "###ViewportWindow";
+        ImGui::Begin(windowName.c_str());
+
+        if (!core->isInPlayMode())
+        {
+            if (ImGui::Button("Play"))
+                core->beginPlay();
+        }
+        else
+        {
+            if (ImGui::Button("Stop"))
+                core->endPlay();
+        }
+
         if (ImGui::RadioButton("Move", mOperation == ImGuizmo::OPERATION::TRANSLATE))
             mOperation = ImGuizmo::OPERATION::TRANSLATE;
         ImGui::SameLine();

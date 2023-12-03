@@ -153,7 +153,7 @@ namespace engine::serialize
         if (path.empty())
             return;
         
-        if (!exists(path.parent_path()))
+        if (!exists(path.parent_path()) && !path.parent_path().empty())
         {
             const bool success = std::filesystem::create_directories(path.parent_path());
             if (!success)

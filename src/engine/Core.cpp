@@ -246,18 +246,21 @@ namespace engine
             mEventHandler.beginFrame();
             glfwPollEvents();
             mIsRunning = !glfwWindowShouldClose(mWindow);
-            
-            PROFILE_SCOPE_BEGIN(fixedTimer, "Fixed Update");
-            while (timers::getTicks<double>() > nextUpdateTick && loopAmount < mMaxLoopCount)
+
+            if (mIsInPlayMode)
             {
-                mScene->onFixedUpdate();
-                
-                
-                nextUpdateTick += timers::fixedTime<double>();
-                ++loopAmount;
+                PROFILE_SCOPE_BEGIN(fixedTimer, "Fixed Update");
+                while (timers::getTicks<double>() > nextUpdateTick && loopAmount < mMaxLoopCount)
+                {
+                    mScene->onFixedUpdate();
+
+
+                    nextUpdateTick += timers::fixedTime<double>();
+                    ++loopAmount;
+                }
+                PROFILE_SCOPE_END(fixedTimer);
             }
-            PROFILE_SCOPE_END(fixedTimer);
-            
+
             mScene->update();
             mMainCamera->update();
             mEditor.update();
@@ -359,21 +362,47 @@ namespace engine
     
     void Core::setScene(std::unique_ptr<Scene> scene, const std::filesystem::path &path)
     {
-        mScenePath = path;
+        if (!(path.empty() || path.string() == tempFilePath))
+        {
+            mScenePath = path;
+            mSceneName = file::makeRelativeToResourcePath(path).string();
+        }
+
         mScene.reset();
         mScene = std::move(scene);
         mScenePointer = mScene.get();
     }
     
-    Scene *Core::getScene()
+    Scene *Core::getScene() const
     {
         return mScenePointer;
-        // return mScene.get();
     }
     
-    MainCamera *Core::getCamera()
+    MainCamera *Core::getCamera() const
     {
         return mMainCamera.get();
     }
-    
+
+    std::string Core::getSceneName()
+    {
+        return mSceneName;
+    }
+
+    bool Core::isInPlayMode() const
+    {
+        return mIsInPlayMode;
+    }
+
+    void Core::beginPlay()
+    {
+        serialize::scene(tempFilePath, getScene());
+        setScene(load::scene(tempFilePath), tempFilePath);
+        mIsInPlayMode = true;
+    }
+
+    void Core::endPlay()
+    {
+        setScene(load::scene(tempFilePath), mScenePath);
+        mIsInPlayMode = false;
+    }
 }

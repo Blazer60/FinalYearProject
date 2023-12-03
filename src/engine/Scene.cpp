@@ -6,6 +6,9 @@
 
 
 #include "Scene.h"
+
+#include "Core.h"
+#include "EngineState.h"
 #include "imgui.h"
 #include "WindowHelpers.h"
 #include "ProfileTimer.h"
@@ -19,11 +22,12 @@ namespace engine
         
         for (int i = 0; i <mToAdd.size(); ++i)
         {
-            mToAdd[i]->begin();
+            if (core->isInPlayMode())
+                mToAdd[i]->begin();
             mActors.push_back(std::move(mToAdd[i]));
         }
         mToAdd.clear();
-        
+
         for (auto & actor : mActors)
             actor->update();
 

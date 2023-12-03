@@ -8,6 +8,9 @@
 #include "Actor.h"
 
 #include <utility>
+
+#include "Core.h"
+#include "EngineState.h"
 #include "gtc/type_ptr.hpp"
 #include "Ui.h"
 #include "Scene.h"
@@ -28,7 +31,6 @@ namespace engine
     
     void Actor::onUpdate()
     {
-        updateTransform();
     }
     
     std::string_view Actor::getName() const
@@ -92,7 +94,9 @@ namespace engine
     
     void Actor::update()
     {
-        onUpdate();
+        updateTransform();
+        if (core->isInPlayMode())
+            onUpdate();
         updateComponents();
 
         if (!mChildrenToRemove.empty())
@@ -118,10 +122,13 @@ namespace engine
             mComponents.push_back(std::move(mComponentsToAdd[i]));
         }
         mComponentsToAdd.clear();
-        
-        for (auto &component : mComponents)
-            component->update();
-        
+
+        if (core->isInPlayMode())
+        {
+            for (auto &component : mComponents)
+                component->update();
+        }
+
         auto currentComponentDestroyBuffer = mComponentsToDestroy;
         if (mComponentsToDestroy == &mComponentDestroyBuffer0)
             mComponentsToDestroy = &mComponentDestroyBuffer1;
