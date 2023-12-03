@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "AudioSource.h"
+#include "FileLoader.h"
 #include "Pch.h"
 
 #include "Scene.h"
@@ -32,4 +34,6 @@ public:
     
 protected:
     float mLuminanceMultiplier { 1000.f };
+
+    engine::AudioSource mAudioSource { file::resourcePath() / "audio/NHU05101030.ogg" };
 };

@@ -94,6 +94,8 @@ namespace engine
         
         mResourcePool = std::make_unique<ResourcePool>();
         resourcePool = mResourcePool.get();
+
+        initOpenAL();
         
         mSerializer = std::make_unique<Serializer>();
         serializer = mSerializer.get();
@@ -169,7 +171,35 @@ namespace engine
         
         return true;
     }
-    
+
+    void Core::initOpenAL()
+    {
+        mAudioDevice = alcOpenDevice(nullptr);
+        if (mAudioDevice == nullptr)
+        {
+            WARN("Failed to open audio device");
+            return;
+        }
+
+        mAudioContext = alcCreateContext(mAudioDevice, nullptr);
+
+        if (mAudioContext == nullptr)
+        {
+            WARN("Failed to create audio context");
+            alcCloseDevice(mAudioDevice);
+            return;
+        }
+
+        if (alcMakeContextCurrent(mAudioContext) == 0)
+        {
+            WARN("Failed to make audio context the current context");
+            alcDestroyContext(mAudioContext);
+            alcCloseDevice(mAudioDevice);
+        }
+
+        alListener3f(AL_POSITION, 0.f, 0.f, 0.f);
+    }
+
     void Core::configureUiThemeColours(ImGuiStyle &style)
     {
         const ImVec4 background = ImVec4(0.16f, 0.16f, 0.17f, 1.f);
@@ -228,6 +258,10 @@ namespace engine
         ImGui_ImplGlfw_Shutdown();
         ImGui_ImplOpenGL3_Shutdown();
         glfwTerminate();
+
+        alcMakeContextCurrent(nullptr);
+        alcDestroyContext(mAudioContext);
+        alcCloseDevice(mAudioDevice);
     }
     
     void Core::run()

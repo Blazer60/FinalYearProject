@@ -20,6 +20,9 @@
 #include "ProfilerViewer.h"
 #include "ResourcePool.h"
 
+#include <al.h>
+#include <alc.h>
+
 namespace engine
 {
     class Scene;
@@ -48,6 +51,7 @@ namespace engine
     protected:
         bool initGlfw(int openGlMajorVersion, int openGlMinorVersion);
         bool initImGui();
+        void initOpenAL();
         void updateImgui();
         static void configureUiThemeColours(ImGuiStyle &style) ;
     
@@ -57,7 +61,9 @@ namespace engine
         
         GLFWimage mWindowIcon{};
         GLFWwindow *mWindow { nullptr };
-        
+        ALCdevice *mAudioDevice;
+        ALCcontext *mAudioContext;
+
         std::unique_ptr<Scene> mScene;
         Scene *mScenePointer;
         std::filesystem::path mScenePath;
