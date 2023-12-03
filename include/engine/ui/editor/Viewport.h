@@ -13,6 +13,9 @@
 #include "TextureBufferObject.h"
 #include <glfw3.h>
 
+#include "FileLoader.h"
+#include "Texture.h"
+
 namespace engine
 {
     struct ViewportImage
@@ -57,6 +60,9 @@ namespace engine
         std::vector<ViewportImage> mViewportImages;
         int32_t mCurrentSelectedImage = 0;
         bool mForce1080p { false };
+
+        Texture mPlayButton { file::texturePath() / "PlayButton.png" };
+        Texture mStopButton { file::texturePath() / "PauseButton.png" };
     };
     
 } // engine

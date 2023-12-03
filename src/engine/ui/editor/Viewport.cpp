@@ -21,6 +21,7 @@
 #include "Scene.h"
 #include "MeshRenderer.h"
 #include "SceneLoader.h"
+#include "Ui.h"
 
 namespace engine
 {
@@ -74,14 +75,15 @@ namespace engine
         const std::string windowName = sceneName + "###ViewportWindow";
         ImGui::Begin(windowName.c_str());
 
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetColumnWidth() / 2) - 12.f);
         if (!core->isInPlayMode())
         {
-            if (ImGui::Button("Play"))
+            if (ui::imageButton("PlayButton", mPlayButton.id(), glm::ivec2(24)))
                 core->beginPlay();
         }
         else
         {
-            if (ImGui::Button("Stop"))
+            if (ui::imageButton("StopButton", mStopButton.id(), glm::ivec2(24)))
                 core->endPlay();
         }
 

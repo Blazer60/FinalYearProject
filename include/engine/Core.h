@@ -78,7 +78,7 @@ namespace engine
         
         std::unique_ptr<MainCamera> mMainCamera;
         
-        Editor mEditor;
+        std::unique_ptr<Editor> mEditor;
         RootEventHandler mEventHandler;
         
     };

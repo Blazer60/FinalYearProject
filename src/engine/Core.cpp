@@ -44,8 +44,7 @@ namespace engine
         mLogger->setOutputFlag(debug::OutputSourceFlag_File | debug::OutputSourceFlag_Queue);
         eventHandler = &mEventHandler;
         core = this;
-        editor = &mEditor;
-        
+
         window::setBufferSize(mResolution);
         
         file::findResourceFolder();
@@ -64,7 +63,9 @@ namespace engine
             return;
         }
         
-        mEditor.init();
+        mEditor = std::make_unique<Editor>();
+        editor = mEditor.get();
+        mEditor->init();
         
         mRenderer = std::make_unique<Renderer>();
 
@@ -263,7 +264,7 @@ namespace engine
 
             mScene->update();
             mMainCamera->update();
-            mEditor.update();
+            mEditor->update();
             mScene->render();
             mRenderer->submit(mMainCamera->toSettings());
             mRenderer->render();
