@@ -31,7 +31,7 @@
 
 namespace engine
 {
-    Core::Core(const glm::ivec2 &resolution, bool enableDebugging)
+    Core::Core(const glm::ivec2 &resolution, const bool enableDebugging)
         : mResolution(resolution), mEnableDebugging(enableDebugging)
     {
         mProfiler = std::make_unique<Profiler>();
@@ -232,8 +232,8 @@ namespace engine
     void Core::run()
     {
         if (mScene == nullptr)
-            mIsRunning = false;
-        
+            setScene(std::make_unique<Scene>(), "");
+
         double nextUpdateTick = 0.0;
         timers::update();  // To register a valid time into the system.
         timers::update();

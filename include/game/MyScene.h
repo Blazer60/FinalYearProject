@@ -10,7 +10,6 @@
 #include "Pch.h"
 
 #include "Scene.h"
-#include "Shader.h"
 
 /**
  * @author Ryan Purse
@@ -32,7 +31,5 @@ public:
     void setLuminanceMultiplier(float multiplier);
     
 protected:
-    std::shared_ptr<Shader> mStandardShader;
-    
     float mLuminanceMultiplier { 1000.f };
 };
