@@ -2,6 +2,7 @@
 #include "MyScene.h"
 #include "EngineState.h"
 #include "Rotator.h"
+#include "game/MyTestActor.h"
 
 int main()
 {
@@ -11,7 +12,13 @@ int main()
         const auto rotation = node["Rotation"].as<glm::vec3>();
         auto rotator = actor->addComponent(makeResource<Rotator>(rotation));
     });
-    
+    engine::serializer->pushSaveActor<MyTestActor>();
+    engine::serializer->pushLoadActor("MyTestActor", [](const YAML::Node &node, engine::Scene *scene) -> Ref<engine::Actor> {
+        const float timer = node["Timer"].as<float>();
+        const int count = node["Count"].as<int>();
+        return scene->spawnActor<MyTestActor>(timer, count);
+    });
+
     core.setScene(std::make_unique<MyScene>(), "");
     core.run();
     

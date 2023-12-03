@@ -49,8 +49,13 @@ namespace engine
     {
         mComponentSerializeFunctions.push_back(delegate);
     }
-    
-    void Serializer::saveComponent(YAML::Emitter &out, Component *component)
+
+    void Serializer::pushActorDelegate(const SerializeActorDelegate& delegate)
+    {
+        mActorSerializeFunctions.push_back(delegate);
+    }
+
+    void Serializer::saveComponent(YAML::Emitter &out, Component *component) const
     {
         for (const auto &function : mComponentSerializeFunctions)
         {
@@ -73,7 +78,34 @@ namespace engine
         
         WARN("Could not find a function to load component type: %", componentType);
     }
-    
+
+    void Serializer::saveActor(YAML::Emitter& out, Actor* actor) const
+    {
+        for (const auto &function : mActorSerializeFunctions)
+        {
+            if (function(out, actor))
+                    return;
+        }
+    }
+
+    Ref<Actor> Serializer::loadActor(const YAML::Node& node, Scene *scene)
+    {
+        if (!node["Type"].IsDefined())
+            return scene->spawnActor<Actor>();
+
+        const auto actorType = node["Type"].as<std::string>();
+        if (auto it = mLoadActorFunctions.find(actorType); it != mLoadActorFunctions.end())
+            return it->second(node, scene);
+
+        WARN("Could not find a fuction to load actor of type: %", actorType);
+        return scene->spawnActor<Actor>();
+    }
+
+    void Serializer::pushLoadActor(std::string type, const LoadActorDelegate& loadActorDelegate)
+    {
+        mLoadActorFunctions.emplace(std::move(type), loadActorDelegate);
+    }
+
     void Serializer::pushLoadComponent(std::string type, const LoadComponentDelegate &loadComponentDelegate)
     {
         mLoadComponentFunctions.emplace(std::move(type), loadComponentDelegate);
@@ -116,22 +148,19 @@ namespace engine::serialize
     void actor(YAML::Emitter &out, Actor *actor)
     {
         out << YAML::BeginMap;
-        out << YAML::Key << "Actor" << YAML::Value << actor->mName;
+        serializer->saveActor(out, actor);
+        // out << YAML::Key << "Actor" << YAML::Value <<
+        out << YAML::Key << "Name" << YAML::Value << actor->mName;
         out << YAML::Key << "UUID" << YAML::Value << actor->mId;
         out << YAML::Key << "position" << YAML::Value << actor->position;
         out << YAML::Key << "rotation" << YAML::Value << actor->rotation;
         out << YAML::Key << "scale" << YAML::Value << actor->scale;
-        
+
         out << YAML::Key << "Components" << YAML::Value << YAML::BeginSeq;
         for (auto &component : actor->mComponents)
             serialize::component(out, component.get());
         out << YAML::EndSeq;
-
         out << YAML::Key << "Children" << YAML::Value << actor->mChildren;
-        // for (const auto &child : actor->mChildren)
-            // out << child;
-        // out << YAML::EndSeq;
-        
         out << YAML::EndMap;
     }
     

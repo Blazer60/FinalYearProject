@@ -16,6 +16,12 @@ MyTestActor::MyTestActor(std::string name)
 
 }
 
+MyTestActor::MyTestActor(const float timer, const int count)
+    : mTimer(timer), mCount(count)
+{
+
+}
+
 void MyTestActor::onBegin()
 {
     auto spawnedActor = getScene()->spawnActor<engine::Actor>("Should be dead.");
@@ -26,9 +32,9 @@ void MyTestActor::onBegin()
 void MyTestActor::onUpdate()
 {
     mTimer += timers::deltaTime<float>();
-    if (mTimer > 0.001f)
+    if (mTimer > 5.f)
     {
-        mTimer -= 0.001f;
+        mTimer -= 5.f;
         std::string name = "Child" + std::to_string(mCount++);
         addChildActor(makeResource<Actor>(name));
 
@@ -40,3 +46,11 @@ void MyTestActor::onUpdate()
         }
     }
 }
+
+void serializeActor(YAML::Emitter &out, MyTestActor *myTestActor)
+{
+    out << YAML::Key << "Type"  << YAML::Value << "MyTestActor";
+    out << YAML::Key << "Timer" << YAML::Value << myTestActor->mTimer;
+    out << YAML::Key << "Count" << YAML::Value << myTestActor->mCount;
+}
+

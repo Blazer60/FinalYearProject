@@ -18,8 +18,10 @@
 class MyTestActor
     : public engine::Actor
 {
+    SERIALIZABLE_ACTOR(MyTestActor);
 public:
     explicit MyTestActor(std::string name);
+    MyTestActor(float timer, int count);
     void onBegin() override;
     void onUpdate() override;
 protected:

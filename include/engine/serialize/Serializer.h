@@ -27,25 +27,38 @@ namespace engine
 typedef std::function<bool(YAML::Emitter &out, class engine::Component*)> SerializeComponentDelegate;
 typedef std::function<void(const YAML::Node &, Ref<engine::Actor>)> LoadComponentDelegate;
 
+typedef std::function<bool(YAML::Emitter &out, engine::Actor *actor)> SerializeActorDelegate;
+typedef std::function<Ref<engine::Actor>(const YAML::Node &, engine::Scene *scene)> LoadActorDelegate;
+
 namespace engine
 {
     class Serializer
     {
     public:
         Serializer() = default;
-        void saveComponent(YAML::Emitter &out, Component *component);
+        void saveComponent(YAML::Emitter &out, Component *component) const;
         void loadComponent(const YAML::Node &node, const Ref<Actor> &actor);
-        
+        void saveActor(YAML::Emitter &out, Actor *actor) const;
+        Ref<Actor> loadActor(const YAML::Node &node, Scene *scene);
+
+        template<typename T>
+        void pushSaveActor();
+
+        void pushLoadActor(std::string type, const LoadActorDelegate &loadActorDelegate);
+
         template<typename T>
         void pushSaveComponent();
-        
+
         void pushLoadComponent(std::string type, const LoadComponentDelegate &loadComponentDelegate);
         
     protected:
         void pushComponentDelegate(const SerializeComponentDelegate &delegate);
+        void pushActorDelegate(const SerializeActorDelegate &delegate);
         
         std::vector<SerializeComponentDelegate> mComponentSerializeFunctions;
         std::unordered_map<std::string, LoadComponentDelegate> mLoadComponentFunctions;
+        std::vector<SerializeActorDelegate> mActorSerializeFunctions;
+        std::unordered_map<std::string, LoadActorDelegate> mLoadActorFunctions;
     };
 }
 
@@ -67,6 +80,21 @@ namespace engine::serialize
 
 // Create a serializeComponent() function and then add it using engine::serializer->pushComponent<T>();
 #define SERIALIZABLE_COMPONENT(class) friend void serializeComponent(YAML::Emitter&, class*)
+#define SERIALIZABLE_ACTOR(class)     friend void serializeActor(YAML::Emitter&, class*)
+
+template<typename T>
+void engine::Serializer::pushSaveActor()
+{
+    pushActorDelegate([](YAML::Emitter &out, Actor *actor) -> bool {
+        if (auto x = dynamic_cast<T*>(actor); x != nullptr)
+        {
+            serializeActor(out, x);
+            return true;
+        }
+
+        return false;
+    });
+}
 
 template<typename T>
 void engine::Serializer::pushSaveComponent()

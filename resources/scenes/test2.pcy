@@ -1,7 +1,7 @@
 Scene: Scene Hierarchy
 Actors:
-  - Actor: Floor
-    UUID: 13903724911023947286
+  - Name: Floor
+    UUID: 15386136731009598412
     position: [0, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -22,8 +22,8 @@ Actors:
             MetallicMap: ""
     Children:
       []
-  - Actor: Ball 0
-    UUID: 14986697511788107798
+  - Name: Ball 0
+    UUID: 9235691866103231334
     position: [-10, 1, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -43,13 +43,10 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
     Children:
-      - 10606960434273836665
-      - 5621884564549526898
-      - 13095907350927216926
-      - 9622653508291509425
-  - Actor: Ball 1
-    UUID: 10606960434273836665
-    position: [2.19999981, 0, 0]
+      []
+  - Name: Ball 1
+    UUID: 17656332329987435241
+    position: [-7.80000019, 1, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
@@ -69,9 +66,9 @@ Actors:
             MetallicMap: ""
     Children:
       []
-  - Actor: Ball 2
-    UUID: 5621884564549526898
-    position: [4.4000001, 0, 0]
+  - Name: Ball 2
+    UUID: 15059010188968840541
+    position: [-5.5999999, 1, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
@@ -91,9 +88,9 @@ Actors:
             MetallicMap: ""
     Children:
       []
-  - Actor: Ball 3
-    UUID: 13095907350927216926
-    position: [6.60000038, 0, 0]
+  - Name: Ball 3
+    UUID: 2953179722864376813
+    position: [-3.39999962, 1, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
@@ -113,9 +110,9 @@ Actors:
             MetallicMap: ""
     Children:
       []
-  - Actor: Ball 4
-    UUID: 9622653508291509425
-    position: [8.80000019, 0, 0]
+  - Name: Ball 4
+    UUID: 3305436809899311448
+    position: [-1.19999981, 1, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
@@ -135,8 +132,8 @@ Actors:
             MetallicMap: ""
     Children:
       []
-  - Actor: Ball 5
-    UUID: 1197635038923310665
+  - Name: Ball 5
+    UUID: 2215952589171259832
     position: [1, 1, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -157,8 +154,8 @@ Actors:
             MetallicMap: ""
     Children:
       []
-  - Actor: Ball 6
-    UUID: 11549334024770787118
+  - Name: Ball 6
+    UUID: 5081476570778048165
     position: [3.20000076, 1, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -179,8 +176,8 @@ Actors:
             MetallicMap: ""
     Children:
       []
-  - Actor: Ball 7
-    UUID: 13076391875761292294
+  - Name: Ball 7
+    UUID: 12622050055582911180
     position: [5.40000057, 1, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -201,8 +198,8 @@ Actors:
             MetallicMap: ""
     Children:
       []
-  - Actor: Ball 8
-    UUID: 12910014012404914968
+  - Name: Ball 8
+    UUID: 16317662475208917601
     position: [7.60000038, 1, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -223,8 +220,8 @@ Actors:
             MetallicMap: ""
     Children:
       []
-  - Actor: Ball 9
-    UUID: 13658366699601269637
+  - Name: Ball 9
+    UUID: 14695945249867301157
     position: [9.80000114, 1, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -245,8 +242,8 @@ Actors:
             MetallicMap: ""
     Children:
       []
-  - Actor: Ball 10
-    UUID: 7410547973262223363
+  - Name: Ball 10
+    UUID: 512474988472999131
     position: [-10, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -267,8 +264,8 @@ Actors:
             MetallicMap: ""
     Children:
       []
-  - Actor: Ball 11
-    UUID: 16185050307891331693
+  - Name: Ball 11
+    UUID: 4443347482756965594
     position: [-7.80000019, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -289,8 +286,8 @@ Actors:
             MetallicMap: ""
     Children:
       []
-  - Actor: Ball 12
-    UUID: 16473974571069440072
+  - Name: Ball 12
+    UUID: 10723275850643407265
     position: [-5.5999999, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -311,8 +308,8 @@ Actors:
             MetallicMap: ""
     Children:
       []
-  - Actor: Ball 13
-    UUID: 14007598664609476751
+  - Name: Ball 13
+    UUID: 4654122299614092034
     position: [-3.39999962, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -333,8 +330,8 @@ Actors:
             MetallicMap: ""
     Children:
       []
-  - Actor: Ball 14
-    UUID: 6286331091931298026
+  - Name: Ball 14
+    UUID: 2850402401034655202
     position: [-1.19999981, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -355,8 +352,8 @@ Actors:
             MetallicMap: ""
     Children:
       []
-  - Actor: Ball 15
-    UUID: 16569271862418331402
+  - Name: Ball 15
+    UUID: 16648665379810708591
     position: [1, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -377,8 +374,8 @@ Actors:
             MetallicMap: ""
     Children:
       []
-  - Actor: Ball 16
-    UUID: 15787874389706593752
+  - Name: Ball 16
+    UUID: 496619730817337587
     position: [3.20000076, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -399,8 +396,8 @@ Actors:
             MetallicMap: ""
     Children:
       []
-  - Actor: Ball 17
-    UUID: 1662587161991794231
+  - Name: Ball 17
+    UUID: 7582905100511727991
     position: [5.40000057, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -421,8 +418,8 @@ Actors:
             MetallicMap: ""
     Children:
       []
-  - Actor: Ball 18
-    UUID: 17104831253414509245
+  - Name: Ball 18
+    UUID: 2161961970670733406
     position: [7.60000038, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -443,8 +440,8 @@ Actors:
             MetallicMap: ""
     Children:
       []
-  - Actor: Ball 19
-    UUID: 17696146936797403525
+  - Name: Ball 19
+    UUID: 8852229717090644714
     position: [9.80000114, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -465,8 +462,8 @@ Actors:
             MetallicMap: ""
     Children:
       []
-  - Actor: Directional Light
-    UUID: 260757208773604354
+  - Name: Directional Light
+    UUID: 16921477793251365717
     position: [0, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -481,8 +478,8 @@ Actors:
         Bias: [0.00100000005, 0]
     Children:
       []
-  - Actor: Teapot
-    UUID: 8887179040177292945
+  - Name: Teapot
+    UUID: 11504052932492783409
     position: [0, 0, 5]
     rotation: [1, 0, 0, 0]
     scale: [0.300000012, 0.300000012, 0.300000012]
@@ -503,17 +500,17 @@ Actors:
             MetallicMap: ""
     Children:
       []
-  - Actor: Parent
-    UUID: 5738481724538613287
+  - Name: Parent
+    UUID: 7143676370010649570
     position: [5, 5, -12]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
       []
     Children:
-      - 4587781250679152112
-  - Actor: Child
-    UUID: 4587781250679152112
+      - 9083081629666496518
+  - Name: Child
+    UUID: 9083081629666496518
     position: [0, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -534,8 +531,8 @@ Actors:
             MetallicMap: ""
     Children:
       []
-  - Actor: Leather Ball
-    UUID: 2846103518641952809
+  - Name: Leather Ball
+    UUID: 815310621989773643
     position: [0, 5, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
@@ -554,5 +551,17 @@ Actors:
             HeightMap: models\leatherBall\TexturesCom_Leather_Tufted_New_1K_height.png
             RoughnessMap: models\leatherBall\TexturesCom_Leather_Tufted_New_1K_roughness.png
             MetallicMap: ""
+    Children:
+      []
+  - Type: MyTestActor
+    Timer: 2.84247136
+    Count: 0
+    Name: My Test Actor
+    UUID: 7521375485641632010
+    position: [0, 0, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      []
     Children:
       []

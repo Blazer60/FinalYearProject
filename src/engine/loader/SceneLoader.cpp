@@ -58,8 +58,8 @@ namespace load
     
     void actor(const YAML::Node &actorNode, engine::Scene *scene)
     {
-        const auto name = actorNode["Actor"].as<std::string>();
-        auto actor = scene->spawnActor<engine::Actor>(name);
+        auto actor = engine::serializer->loadActor(actorNode, scene);
+        actor->mName = actorNode["Name"].as<std::string>();
         actor->mId = actorNode["UUID"].as<engine::UUID>();
         actor->position = actorNode["position"].as<glm::vec3>();
         actor->rotation = actorNode["rotation"].as<glm::quat>();
