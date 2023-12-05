@@ -27,6 +27,11 @@ namespace engine
 
     }
 
+    void SoundComponent::onBegin()
+    {
+        mAudioSource->setVolume(mVolume);
+    }
+
     void SoundComponent::onUpdate()
     {
         // Get Camera vp matrix.
@@ -34,7 +39,6 @@ namespace engine
         const auto & modelMatrix = mActor->getTransform();
         const glm::vec4 audioPosition = viewMatrix * modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
         mAudioSource->setPosition(audioPosition);
-        mAudioSource->setVolume(mVolume * 1.f / glm::dot(audioPosition, audioPosition));
     }
 
     void SoundComponent::onDrawUi()
@@ -63,11 +67,17 @@ namespace engine
             if (ImGui::Button("Play Sound"))
                 mAudioSource->play();
 
-            ImGui::DragFloat("Volume", &mVolume);
+            if (ImGui::DragFloat("Volume", &mVolume))
+                mAudioSource->setVolume(mVolume);
             ImGui::TreePop();
         }
 
         ImGui::PopID();
+    }
+
+    void SoundComponent::setVolume(const float volume)
+    {
+        mVolume = volume;
     }
 
     void SoundComponent::playSound() const

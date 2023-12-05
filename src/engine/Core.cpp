@@ -6,6 +6,9 @@
 
 
 #include "Core.h"
+
+#include <alext.h>
+#include <AL/alext.h>
 #include "Scene.h"
 #include "WindowHelpers.h"
 #include "backends/imgui_impl_glfw.h"
@@ -181,7 +184,8 @@ namespace engine
             return;
         }
 
-        mAudioContext = alcCreateContext(mAudioDevice, nullptr);
+        const std::vector flags = { ALC_CONTEXT_FLAGS_EXT, ALC_CONTEXT_DEBUG_BIT_EXT };
+        mAudioContext = alcCreateContext(mAudioDevice, flags.data());
 
         if (mAudioContext == nullptr)
         {
@@ -196,6 +200,26 @@ namespace engine
             alcDestroyContext(mAudioContext);
             alcCloseDevice(mAudioDevice);
         }
+
+        alDebugMessageCallbackEXT([](ALenum source, ALenum type, ALuint id, ALenum severity, ALsizei length, const ALchar *message, void *userParam) {
+            switch (severity)
+            {
+                case AL_DEBUG_SEVERITY_HIGH_EXT:
+                    LOG_MAJOR(message);
+                    break;
+                case AL_DEBUG_SEVERITY_MEDIUM_EXT:
+                    LOG_MINOR(message);
+                    break;
+                case AL_DEBUG_SEVERITY_LOW_EXT:
+                    WARN(message);
+                    break;
+                case AL_DEBUG_SEVERITY_NOTIFICATION_EXT:
+                default:
+                    MESSAGE(message);
+            }
+
+            // ERROR("%", message);
+        }, nullptr);
 
         alListener3f(AL_POSITION, 0.f, 0.f, 0.f);
     }

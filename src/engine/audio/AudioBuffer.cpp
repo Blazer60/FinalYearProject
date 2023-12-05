@@ -40,6 +40,7 @@ namespace engine
             return;
         }
 
+        // todo: stereo to mono. :)
         const ALenum format = channels < 2 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
         alGenBuffers(1, &mId);
         alBufferData(mId, format, output, static_cast<ALsizei>(channels * samples * sizeof(short)), sampleRate);

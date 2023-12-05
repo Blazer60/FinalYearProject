@@ -125,8 +125,10 @@ namespace engine
         });
 
         serializer->pushLoadComponent("SoundComponent", [](const YAML::Node &node, Ref<Actor> actor) {
-            const auto path = file::resourcePath() / node["Path"].as<std::string>();
-            actor->addComponent(makeResource<SoundComponent>(path));
+            const auto relativePath = node["Path"].as<std::string>();
+            const auto fullPath = relativePath.empty() ? "" : file::resourcePath() / relativePath;
+            Ref<SoundComponent> sound = actor->addComponent(makeResource<SoundComponent>(fullPath));
+            sound->setVolume(node["Volume"].as<float>());
         });
     }
 }
@@ -218,4 +220,5 @@ void serializeComponent(YAML::Emitter &out, engine::SoundComponent *soundCompone
     out << YAML::Key << "Component" << YAML::Value << "SoundComponent";
     const std::string path = file::makeRelativeToResourcePath(soundComponent->mAudioSource->getPath()).string();
     out << YAML::Key << "Path" << YAML::Value << path;
+    out << YAML::Key << "Volume" << YAML::Value << soundComponent->mVolume;
 }

@@ -24,9 +24,11 @@ class SoundComponent
 public:
     SoundComponent();
     explicit SoundComponent(const std::filesystem::path &path);
+    void onBegin() override;
     void onUpdate() override;
     void onDrawUi() override;
 
+    void setVolume(float volume);
     void playSound() const;
 
 protected:

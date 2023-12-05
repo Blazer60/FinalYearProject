@@ -24,7 +24,7 @@ namespace engine
         explicit AudioBuffer(const std::filesystem::path &path);
         ~AudioBuffer();
 
-        ALuint id() const;
+        [[nodiscard]] ALuint id() const;
         [[nodiscard]] std::filesystem::path getPath() const;
     protected:
         ALuint mId { 0 };

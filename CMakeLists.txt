@@ -250,6 +250,9 @@ else ()
     set(LIBTYPE "STATIC")
     add_subdirectory(vendor/openal-soft)
 
+    # Probably not how you should set this but I want 'modern' debugging skills.
+    target_compile_definitions(${PROJECT_NAME} PUBLIC AL_ALEXT_PROTOTYPES)
+
     # The names listed are the names given to add_library(). CMake won't tell you if they're correct...
     target_link_libraries(${HELPER_LIBRARY} glew_s OpenGL::GL assimp)
     target_link_libraries(${GRAPHICS_LIBRARY} glew_s OpenGL::GL)

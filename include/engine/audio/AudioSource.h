@@ -36,7 +36,7 @@ namespace engine
     protected:
         ALuint mId { 0 };
         std::shared_ptr<AudioBuffer> mBuffer;
-        glm::vec3 mPosition;
+        glm::vec3 mPosition { 0 };
     };
 
 } // engine

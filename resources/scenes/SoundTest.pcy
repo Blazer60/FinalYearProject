@@ -8,6 +8,7 @@ Actors:
     Components:
       - Component: SoundComponent
         Path: audio\Tractor.ogg
+        Volume: 100
       - Component: MeshRenderer
         MeshPath: models\defaultObjects\DefaultCube.glb
         Materials:
@@ -25,12 +26,13 @@ Actors:
     Children:
       []
   - Name: No Sound
-    UUID: 7337659633097718788
+    UUID: 6714646280550592048
     position: [0, 3, -9]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
       - Component: SoundComponent
-        Path: .
+        Path: ""
+        Volume: 100
     Children:
       []
