@@ -9,11 +9,11 @@
 
 namespace engine
 {
-    AudioSource::AudioSource(const std::filesystem::path& path)
-        : mBuffer(path)
+    AudioSource::AudioSource(std::shared_ptr<AudioBuffer> audioBuffer)
+        : mBuffer(std::move(audioBuffer))
     {
         alGenSources(1, &mId);
-        alSourcei(mId, AL_BUFFER, mBuffer.id());
+        alSourcei(mId, AL_BUFFER, static_cast<ALint>(mBuffer->id()));
     }
 
     AudioSource::~AudioSource()

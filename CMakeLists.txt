@@ -134,7 +134,7 @@ add_executable(${PROJECT_NAME}
         src/engine/ui/editor/RendererSettings.cpp src/engine/ui/editor/RendererSettings.h
         src/engine/EngineRandom.cpp include/engine/EngineRandom.h
         src/game/Initialiser.cpp src/game/Initialiser.h
-        src/engine/loader/Audio.cpp src/engine/loader/Audio.h
+        src/engine/loader/Audio.cpp include/engine/loader/Audio.h
         src/engine/audio/AudioBuffer.cpp include/engine/audio/AudioBuffer.h
         src/engine/audio/AudioSource.cpp include/engine/audio/AudioSource.h
 )

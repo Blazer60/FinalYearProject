@@ -32,6 +32,7 @@ namespace engine
         internalClean(mShaders);
         internalClean(mModels);
         internalClean(mTextures);
+        internalClean(mAudioBuffers);
     }
     
     std::shared_ptr<Shader> ResourcePool::loadShader(
@@ -56,6 +57,17 @@ namespace engine
         
         auto resource = std::make_shared<Texture>(path);
         mTextures[hashName] = resource;
+        return resource;
+    }
+
+    std::shared_ptr<AudioBuffer> ResourcePool::loadAudioBuffer(const std::filesystem::path& path)
+    {
+        const std::string hashName = path.string();
+        if (auto it = mAudioBuffers.find(hashName); it != mAudioBuffers.end())
+            return it->second;
+
+        auto resource = std::make_shared<AudioBuffer>(path);
+        mAudioBuffers[hashName] = resource;
         return resource;
     }
 }

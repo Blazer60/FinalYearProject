@@ -9,9 +9,10 @@
 
 #include <filesystem>
 
-#include "Pch.h"
+#include "../audio/AudioSource.h"
+#include "../../Pch.h"
 
 namespace load
 {
-    void audio(const std::filesystem::path &path);
+    engine::AudioSource audio(const std::filesystem::path &path);
 }

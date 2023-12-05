@@ -21,14 +21,15 @@ namespace engine
     class AudioSource
     {
     public:
-        explicit AudioSource(const std::filesystem::path &path);
+        explicit AudioSource(std::shared_ptr<engine::AudioBuffer> audioBuffer);
+
         ~AudioSource();
 
         void play() const;
 
     protected:
         ALuint mId { 0 };
-        AudioBuffer mBuffer;
+        std::shared_ptr<AudioBuffer> mBuffer;
     };
 
 } // engine

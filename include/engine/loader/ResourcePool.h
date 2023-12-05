@@ -17,12 +17,14 @@
 #include <assimp/Scene.h>
 #include <assimp/postprocess.h>
 
+#include "AudioSource.h"
+
 namespace engine
 {
-/**
- * @author Ryan Purse
- * @date 01/11/2023
- */
+    /**
+     * @author Ryan Purse
+     * @date 01/11/2023
+     */
     class ResourcePool
     {
     public:
@@ -33,12 +35,15 @@ namespace engine
         [[nodiscard]] SharedMesh loadMesh(const std::filesystem::path &path);
         
         [[nodiscard]] std::shared_ptr<Texture> loadTexture(const std::filesystem::path &path);
+
+        [[nodiscard]] std::shared_ptr<AudioBuffer> loadAudioBuffer(const std::filesystem::path &path);
     
     protected:
         // If we make sharedResource class, we can kill this when it only has a single use (here).
         std::unordered_map<std::string, std::shared_ptr<Shader>> mShaders;
         std::unordered_map<std::string, SharedMesh> mModels;
         std::unordered_map<std::string, std::shared_ptr<Texture>> mTextures;
+        std::unordered_map<std::string, std::shared_ptr<AudioBuffer>> mAudioBuffers;
     };
     
     
