@@ -9,6 +9,8 @@
 
 #include "Actor.h"
 #include "Audio.h"
+#include "Core.h"
+#include "EngineState.h"
 #include "FileExplorer.h"
 #include "ResourceFolder.h"
 
@@ -23,6 +25,16 @@ namespace engine
         : mAudioSource(load::audio(path))
     {
 
+    }
+
+    void SoundComponent::onUpdate()
+    {
+        // Get Camera vp matrix.
+        const auto & viewMatrix = core->getCamera()->getViewMatrix();
+        const auto & modelMatrix = mActor->getTransform();
+        const glm::vec4 audioPosition = viewMatrix * modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+        mAudioSource->setPosition(audioPosition);
+        mAudioSource->setVolume(mVolume * 1.f / glm::dot(audioPosition, audioPosition));
     }
 
     void SoundComponent::onDrawUi()
@@ -51,6 +63,7 @@ namespace engine
             if (ImGui::Button("Play Sound"))
                 mAudioSource->play();
 
+            ImGui::DragFloat("Volume", &mVolume);
             ImGui::TreePop();
         }
 

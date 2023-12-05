@@ -29,11 +29,14 @@ namespace engine
         ~AudioSource();
 
         void play() const;
+        void setPosition(const glm::vec3 &position);
+        void setVolume(float volume) const;
         std::filesystem::path getPath() const;
 
     protected:
         ALuint mId { 0 };
         std::shared_ptr<AudioBuffer> mBuffer;
+        glm::vec3 mPosition;
     };
 
 } // engine

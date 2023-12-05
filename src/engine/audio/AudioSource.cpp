@@ -7,6 +7,8 @@
 
 #include "AudioSource.h"
 
+#include "Timers.h"
+
 namespace engine
 {
     AudioSource::AudioSource()
@@ -32,6 +34,19 @@ namespace engine
     void AudioSource::play() const
     {
         alSourcePlay(mId);
+    }
+
+    void AudioSource::setPosition(const glm::vec3 &position)
+    {
+        const glm::vec3 velocity = (position - mPosition) * timers::deltaTime<float>();
+        alSource3f(mId, AL_VELOCITY, velocity.x, velocity.y, velocity.z);
+        alSource3f(mId, AL_POSITION, position.x, position.y, position.z);
+        mPosition = position;
+    }
+
+    void AudioSource::setVolume(const float volume) const
+    {
+        alSourcef(mId, AL_GAIN, volume);
     }
 
     std::filesystem::path AudioSource::getPath() const

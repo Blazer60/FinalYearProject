@@ -7,7 +7,21 @@ Actors:
     scale: [1, 1, 1]
     Components:
       - Component: SoundComponent
-        Path: audio\dixie_horn.ogg
+        Path: audio\Tractor.ogg
+      - Component: MeshRenderer
+        MeshPath: models\defaultObjects\DefaultCube.glb
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
     Children:
       []
   - Name: No Sound
@@ -17,6 +31,6 @@ Actors:
     scale: [1, 1, 1]
     Components:
       - Component: SoundComponent
-        Path: ""
+        Path: .
     Children:
       []
