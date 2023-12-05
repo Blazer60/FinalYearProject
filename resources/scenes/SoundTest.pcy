@@ -1,0 +1,22 @@
+Scene: scenes\SoundTest.pcy
+Actors:
+  - Name: Dixie Horn
+    UUID: 18425395497203868910
+    position: [0, 3, -9]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: SoundComponent
+        Path: audio\dixie_horn.ogg
+    Children:
+      []
+  - Name: No Sound
+    UUID: 7337659633097718788
+    position: [0, 3, -9]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: SoundComponent
+        Path: ""
+    Children:
+      []

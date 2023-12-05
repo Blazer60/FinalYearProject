@@ -14,6 +14,7 @@
 #include "EngineState.h"
 #include "MeshRenderer.h"
 #include "ShaderLoader.h"
+#include "SoundComponent.h"
 #include <FileLoader.h>
 
 namespace engine
@@ -43,6 +44,10 @@ namespace engine
         addComponentOption<MeshRenderer>("Mesh Renderer", [](Ref<Actor> actor) {
             const auto path = file::modelPath() / "defaultObjects/DefaultCube.glb";
             actor->addComponent(load::meshRenderer<StandardVertex>(path));
+        });
+
+        addComponentOption<SoundComponent>("Sound", [](Ref<Actor> actor) {
+            actor->addComponent(makeResource<SoundComponent>());
         });
         
         addMenuOption("Actor", []() {

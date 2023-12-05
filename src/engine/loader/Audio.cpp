@@ -12,8 +12,8 @@
 
 namespace load
 {
-    engine::AudioSource audio(const std::filesystem::path& path)
+    std::unique_ptr<engine::AudioSource> audio(const std::filesystem::path& path)
     {
-        return engine::AudioSource(engine::resourcePool->loadAudioBuffer(path));
+        return std::make_unique<engine::AudioSource>(engine::resourcePool->loadAudioBuffer(path));
     }
 }

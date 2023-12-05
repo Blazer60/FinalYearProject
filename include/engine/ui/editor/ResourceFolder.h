@@ -26,6 +26,11 @@ namespace engine
      * @brief The name for places that accept scenes from imgui payloads.
      */
     extern const char *resourceScenePayload;
+
+    /**
+     * @brief The name for places that accept sounds from imgui payloads.
+     */
+    extern const char *resourceSoundPayload;
     
 /**
  * @author Ryan Purse

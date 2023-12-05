@@ -254,7 +254,12 @@ namespace engine
     {
         // Should be calling scene cleanup.
         mScene.reset();
+
+        // We don't clean between scene loads since we want to cache as much as possible between them.
+        mResourcePool->clean();
+
         destroy::windowIcon(mWindowIcon);
+
         ImGui_ImplGlfw_Shutdown();
         ImGui_ImplOpenGL3_Shutdown();
         glfwTerminate();

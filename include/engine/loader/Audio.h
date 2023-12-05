@@ -14,5 +14,5 @@
 
 namespace load
 {
-    engine::AudioSource audio(const std::filesystem::path &path);
+    std::unique_ptr<engine::AudioSource> audio(const std::filesystem::path &path);
 }

@@ -137,6 +137,8 @@ add_executable(${PROJECT_NAME}
         src/engine/loader/Audio.cpp include/engine/loader/Audio.h
         src/engine/audio/AudioBuffer.cpp include/engine/audio/AudioBuffer.h
         src/engine/audio/AudioSource.cpp include/engine/audio/AudioSource.h
+        src/engine/audio/SoundComponent.cpp
+        include/engine/audio/SoundComponent.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

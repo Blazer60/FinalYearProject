@@ -14,7 +14,6 @@
 
 MyScene::MyScene()
 {
-    mAudioSource.play();
 }
 
 void MyScene::onFixedUpdate()

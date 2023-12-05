@@ -16,6 +16,7 @@
 #include "Actor.h"
 #include "Core.h"
 #include "ShaderLoader.h"
+#include "../../../include/engine/audio/SoundComponent.h"
 
 namespace engine
 {
@@ -26,6 +27,7 @@ namespace engine
         serializer->pushSaveComponent<PointLight>();
         serializer->pushSaveComponent<Spotlight>();
         serializer->pushSaveComponent<DistantLightProbe>();
+        serializer->pushSaveComponent<SoundComponent>();
 
         serializer->pushLoadComponent("MeshRenderer", [](const YAML::Node &node, Ref<Actor> actor) {
             const std::filesystem::path relativePath = node["MeshPath"].as<std::string>();
@@ -121,6 +123,11 @@ namespace engine
             const auto path = file::resourcePath() / node["Path"].as<std::string>();
             actor->addComponent(makeResource<DistantLightProbe>(path, size, radianceMultiplier));
         });
+
+        serializer->pushLoadComponent("SoundComponent", [](const YAML::Node &node, Ref<Actor> actor) {
+            const auto path = file::resourcePath() / node["Path"].as<std::string>();
+            actor->addComponent(makeResource<SoundComponent>(path));
+        });
     }
 }
 
@@ -204,4 +211,11 @@ void serializeComponent(YAML::Emitter &out, engine::DistantLightProbe *distantLi
 
     const std::string path = file::makeRelativeToResourcePath(distantLightProbe->mPath).string();
     out << YAML::Key << "Path"                  << YAML::Value << path;
+}
+
+void serializeComponent(YAML::Emitter &out, engine::SoundComponent *soundComponent)
+{
+    out << YAML::Key << "Component" << YAML::Value << "SoundComponent";
+    const std::string path = file::makeRelativeToResourcePath(soundComponent->mAudioSource->getPath()).string();
+    out << YAML::Key << "Path" << YAML::Value << path;
 }

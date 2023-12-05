@@ -149,5 +149,15 @@ namespace file
     {
         return hasSceneExtension(path.extension().string());
     }
+
+    bool hasSoundExtension(const std::string& extenstion)
+    {
+        return extenstion == ".ogg";  // ogg files are the only thing that we can load right now.
+    }
+
+    bool hasSoundExtension(const std::filesystem::path& path)
+    {
+        return hasSoundExtension(path.extension().string());
+    }
 }
 

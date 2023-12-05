@@ -9,6 +9,13 @@
 
 namespace engine
 {
+    AudioSource::AudioSource()
+        : mBuffer(std::make_shared<AudioBuffer>(""))
+    {
+        alGenSources(1, &mId);
+        alSourcei(mId, AL_BUFFER, static_cast<ALint>(mBuffer->id()));
+    }
+
     AudioSource::AudioSource(std::shared_ptr<AudioBuffer> audioBuffer)
         : mBuffer(std::move(audioBuffer))
     {
@@ -25,5 +32,12 @@ namespace engine
     void AudioSource::play() const
     {
         alSourcePlay(mId);
+    }
+
+    std::filesystem::path AudioSource::getPath() const
+    {
+        if (mBuffer)
+            return mBuffer->getPath();
+        return "";
     }
 }

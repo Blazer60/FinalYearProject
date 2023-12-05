@@ -18,6 +18,7 @@
 namespace engine
 {
     AudioBuffer::AudioBuffer(const std::filesystem::path& path)
+        : mPath(path)
     {
         if (path.empty())
             return;
@@ -55,5 +56,10 @@ namespace engine
     ALuint AudioBuffer::id() const
     {
         return mId;
+    }
+
+    std::filesystem::path AudioBuffer::getPath() const
+    {
+        return mPath;
     }
 }

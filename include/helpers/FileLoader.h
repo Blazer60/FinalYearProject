@@ -29,4 +29,7 @@ namespace file
     
     bool hasSceneExtension(const std::string &extension);
     bool hasSceneExtension(const std::filesystem::path &path);
+
+    bool hasSoundExtension(const std::string &extenstion);
+    bool hasSoundExtension(const std::filesystem::path& path);
 }

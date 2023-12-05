@@ -13,7 +13,8 @@ namespace engine
     const char *resourceImagePayload = "ResourceImagePayload";
     const char *resourceModelPayload = "ResourceModelPayload";
     const char *resourceScenePayload = "ResourceScenePayload";
-    
+    const char *resourceSoundPayload = "ResourceSoundPayload";
+
     void ResourceFolder::onDrawUi()
     {
         if (ImGui::Begin("Resource Folder"))
@@ -53,6 +54,8 @@ namespace engine
                     ImGui::SetDragDropPayload(resourceModelPayload, &mDragDropPath, sizeof(mDragDropPath));
                 else if (file::hasSceneExtension(mDragDropPath))
                     ImGui::SetDragDropPayload(resourceScenePayload, &mDragDropPath, sizeof(mDragDropPath));
+                else if (file::hasSoundExtension(mDragDropPath))
+                    ImGui::SetDragDropPayload(resourceSoundPayload, &mDragDropPath, sizeof(mDragDropPath));
                 
                 ImGui::Text("%s", pathName.c_str());
                 ImGui::EndDragDropSource();

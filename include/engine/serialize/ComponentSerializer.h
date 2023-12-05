@@ -18,6 +18,7 @@ namespace engine
     struct PointLight;
     struct Spotlight;
     struct DistantLightProbe;
+    class SoundComponent;
 
     void attachComponentSerialization();
 }
@@ -28,3 +29,4 @@ void serializeComponent(YAML::Emitter &, engine::DirectionalLight *);
 void serializeComponent(YAML::Emitter &, engine::PointLight *);
 void serializeComponent(YAML::Emitter &, engine::Spotlight *);
 void serializeComponent(YAML::Emitter &, engine::DistantLightProbe *);
+void serializeComponent(YAML::Emitter &, engine::SoundComponent *);

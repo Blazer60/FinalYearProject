@@ -35,6 +35,4 @@ public:
     
 protected:
     float mLuminanceMultiplier { 1000.f };
-
-    engine::AudioSource mAudioSource { load::audio(file::resourcePath() / "audio/NHU05101030.ogg") };
 };

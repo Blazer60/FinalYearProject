@@ -25,7 +25,9 @@ namespace engine
         ~AudioBuffer();
 
         ALuint id() const;
+        [[nodiscard]] std::filesystem::path getPath() const;
     protected:
         ALuint mId { 0 };
+        std::filesystem::path mPath;
     };
 } // engine
