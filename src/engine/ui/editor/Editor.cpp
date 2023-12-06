@@ -16,6 +16,8 @@
 #include "ShaderLoader.h"
 #include "SoundComponent.h"
 #include <FileLoader.h>
+#include "Colliders.h"
+#include "Ui.h"
 
 namespace engine
 {
@@ -48,6 +50,14 @@ namespace engine
 
         addComponentOption<SoundComponent>("Sound", [](Ref<Actor> actor) {
             actor->addComponent(makeResource<SoundComponent>());
+        });
+
+        addComponentOption<BoxCollider>("Box Collider", [](Ref<Actor> actor) {
+            actor->addComponent(makeResource<BoxCollider>());
+        });
+
+        addComponentOption<SphereCollider>("Sphere Collider", [](Ref<Actor> actor) {
+            actor->addComponent(makeResource<SphereCollider>());
         });
         
         addMenuOption("Actor", []() {

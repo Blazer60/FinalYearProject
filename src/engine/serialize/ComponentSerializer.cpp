@@ -14,9 +14,10 @@
 #include "FileLoader.h"
 #include "Lighting.h"
 #include "Actor.h"
+#include "Colliders.h"
 #include "Core.h"
 #include "ShaderLoader.h"
-#include "../../../include/engine/audio/SoundComponent.h"
+#include "SoundComponent.h"
 
 namespace engine
 {
@@ -28,6 +29,8 @@ namespace engine
         serializer->pushSaveComponent<Spotlight>();
         serializer->pushSaveComponent<DistantLightProbe>();
         serializer->pushSaveComponent<SoundComponent>();
+        serializer->pushSaveComponent<BoxCollider>();
+        serializer->pushSaveComponent<SphereCollider>();
 
         serializer->pushLoadComponent("MeshRenderer", [](const YAML::Node &node, Ref<Actor> actor) {
             const std::filesystem::path relativePath = node["MeshPath"].as<std::string>();
@@ -130,6 +133,16 @@ namespace engine
             Ref<SoundComponent> sound = actor->addComponent(makeResource<SoundComponent>(fullPath));
             sound->setVolume(node["Volume"].as<float>());
         });
+
+        serializer->pushLoadComponent("BoxCollider", [](const YAML::Node &node, Ref<Actor> actor) {
+            const glm::vec3 halfExtent = node["HalfBoxExtent"].as<glm::vec3>();
+            actor->addComponent(makeResource<BoxCollider>(halfExtent));
+        });
+
+        serializer->pushLoadComponent("SphereCollider", [](const YAML::Node &node, Ref<Actor> actor) {
+            const float radius = node["Radius"].as<float>();
+            actor->addComponent(makeResource<SphereCollider>(radius));
+        });
     }
 }
 
@@ -221,4 +234,16 @@ void serializeComponent(YAML::Emitter &out, engine::SoundComponent *soundCompone
     const std::string path = file::makeRelativeToResourcePath(soundComponent->mAudioSource->getPath()).string();
     out << YAML::Key << "Path" << YAML::Value << path;
     out << YAML::Key << "Volume" << YAML::Value << soundComponent->mVolume;
+}
+
+void serializeComponent(YAML::Emitter &out, engine::BoxCollider *boxCollider)
+{
+    out << YAML::Key << "Component" << YAML::Value << "BoxCollider";
+    out << YAML::Key << "HalfBoxExtent" << YAML::Value << boxCollider->mHalfExtent;
+}
+
+void serializeComponent(YAML::Emitter &out, engine::SphereCollider *sphereCollider)
+{
+    out << YAML::Key << "Component" << YAML::Value << "SphereCollider";
+    out << YAML::Key << "Radius" << YAML::Value << sphereCollider->mRadius;
 }

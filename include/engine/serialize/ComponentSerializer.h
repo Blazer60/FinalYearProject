@@ -19,6 +19,8 @@ namespace engine
     struct Spotlight;
     struct DistantLightProbe;
     class SoundComponent;
+    class BoxCollider;
+    class SphereCollider;
 
     void attachComponentSerialization();
 }
@@ -30,3 +32,5 @@ void serializeComponent(YAML::Emitter &, engine::PointLight *);
 void serializeComponent(YAML::Emitter &, engine::Spotlight *);
 void serializeComponent(YAML::Emitter &, engine::DistantLightProbe *);
 void serializeComponent(YAML::Emitter &, engine::SoundComponent *);
+void serializeComponent(YAML::Emitter &, engine::BoxCollider *);
+void serializeComponent(YAML::Emitter &, engine::SphereCollider *);

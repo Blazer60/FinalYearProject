@@ -12,6 +12,11 @@
 #include "TextureArrayObject.h"
 #include "imgui.h"
 
+namespace engine
+{
+    class Component;
+}
+
 namespace ui
 {
     void showTextureBuffer(const std::string &name, const TextureBufferObject &texture, bool *show, bool isMainBuffer=false);

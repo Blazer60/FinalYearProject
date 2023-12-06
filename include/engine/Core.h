@@ -23,6 +23,8 @@
 #include <al.h>
 #include <alc.h>
 
+#include "PhysicsCore.h"
+
 namespace engine
 {
     class Scene;
@@ -61,11 +63,11 @@ namespace engine
         
         GLFWimage mWindowIcon{};
         GLFWwindow *mWindow { nullptr };
-        ALCdevice *mAudioDevice;
-        ALCcontext *mAudioContext;
+        ALCdevice *mAudioDevice { nullptr };
+        ALCcontext *mAudioContext { nullptr };
 
         std::unique_ptr<Scene> mScene;
-        Scene *mScenePointer;
+        Scene *mScenePointer { nullptr };
         std::filesystem::path mScenePath;
         std::string mSceneName;
         
@@ -86,7 +88,8 @@ namespace engine
         
         std::unique_ptr<Editor> mEditor;
         RootEventHandler mEventHandler;
-        
+
+        PhysicsCore mPhysics;
     };
     
 } // engine

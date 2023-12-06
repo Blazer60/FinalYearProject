@@ -139,20 +139,25 @@ add_executable(${PROJECT_NAME}
         src/engine/audio/AudioSource.cpp include/engine/audio/AudioSource.h
         src/engine/audio/SoundComponent.cpp
         include/engine/audio/SoundComponent.h
+        src/engine/physics/PhysicsCore.cpp
+        include/engine/physics/PhysicsCore.h
+        src/engine/physics/Colliders.cpp
+        include/engine/physics/Colliders.h
+        include/engine/physics/PhysicsConversions.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
         include include/engine include/graphics include/game include/engine/loader include/graphics/buffers
         include/engine/ui include/graphics/postProcessing include/engine/rendering include/helpers/logger
         include/engine/ui/editor include/helpers include/engine/event include/helpers/profiler
-        include/engine/serialize include/engine/audio
+        include/engine/serialize include/engine/audio include/engine/physics
 
         # Vendor Files
         vendor/glm/glm vendor/glew/include/GL
         vendor/glfw/include/GLFW vendor/imgui
         vendor/stb/include vendor/imguizmo
         vendor/assimp/include ${CMAKE_CURRENT_BINARY_DIR}/vendor/assimp/include  # A config file is generated that is required by assimp code.
-        vendor/yaml-cpp/include vendor/openal-soft/include
+        vendor/yaml-cpp/include vendor/openal-soft/include vendor/pellet
         )
 
 if (${USE_PSEUDO_PCH})
@@ -249,6 +254,7 @@ else ()
     add_subdirectory(vendor/yaml-cpp)
     set(LIBTYPE "STATIC")
     add_subdirectory(vendor/openal-soft)
+    add_subdirectory(vendor/pellet)
 
     # Probably not how you should set this but I want 'modern' debugging skills.
     target_compile_definitions(${PROJECT_NAME} PUBLIC AL_ALEXT_PROTOTYPES)
@@ -256,6 +262,6 @@ else ()
     # The names listed are the names given to add_library(). CMake won't tell you if they're correct...
     target_link_libraries(${HELPER_LIBRARY} glew_s OpenGL::GL assimp)
     target_link_libraries(${GRAPHICS_LIBRARY} glew_s OpenGL::GL)
-    target_link_libraries(${PROJECT_NAME} ${HELPER_LIBRARY} ${GRAPHICS_LIBRARY} glew_s glfw imgui OpenGL::GL assimp yaml-cpp OpenAL)
+    target_link_libraries(${PROJECT_NAME} ${HELPER_LIBRARY} ${GRAPHICS_LIBRARY} glew_s glfw imgui OpenGL::GL assimp yaml-cpp OpenAL pellet)
 endif ()
 
