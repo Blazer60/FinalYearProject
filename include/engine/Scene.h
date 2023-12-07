@@ -35,6 +35,7 @@ namespace engine
         virtual ~Scene() = default;
         
         void update();
+        void fixedUpdate();
         void render();
         void imguiUpdate();
         std::vector<Resource<Actor>> &getActors();

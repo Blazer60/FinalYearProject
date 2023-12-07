@@ -23,4 +23,14 @@ namespace engine::physics
     {
         return glm::vec3(other.x(), other.y(), other.z());
     }
+
+    inline btQuaternion cast(const glm::quat &other)
+    {
+        return btQuaternion(other.x, other.y, other.z, other.w);
+    }
+
+    inline glm::quat cast(const btQuaternion &other)
+    {
+        return glm::quat(other.w(), other.x(), other.y(), other.z());
+    }
 }

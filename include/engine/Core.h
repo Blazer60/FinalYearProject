@@ -48,6 +48,7 @@ namespace engine
         [[nodiscard]] Scene *getScene() const;
         [[nodiscard]] MainCamera *getCamera() const;
         [[nodiscard]] std::string getSceneName();
+        [[nodiscard]] btDiscreteDynamicsWorld *getPhysicsWorld() const;
         bool isInPlayMode() const;
 
     protected:

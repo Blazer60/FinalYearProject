@@ -46,6 +46,7 @@ namespace engine
         
         void begin();
         void update();
+        void fixedUpdate();
 
         /**
          * @returns The ID of the current actor.

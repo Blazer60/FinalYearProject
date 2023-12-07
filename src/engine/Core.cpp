@@ -297,7 +297,7 @@ namespace engine
         if (mScene == nullptr)
             setScene(std::make_unique<Scene>(), "");
 
-        double nextUpdateTick = 0.0;
+        double nextUpdateTick = timers::getTicks<double>();
         timers::update();  // To register a valid time into the system.
         timers::update();
         
@@ -310,19 +310,20 @@ namespace engine
             glfwPollEvents();
             mIsRunning = !glfwWindowShouldClose(mWindow);
 
-            if (mIsInPlayMode)
+            PROFILE_SCOPE_BEGIN(fixedTimer, "Fixed Update");
+            while (timers::getTicks<double>() > nextUpdateTick && loopAmount < mMaxLoopCount)
             {
-                PROFILE_SCOPE_BEGIN(fixedTimer, "Fixed Update");
-                while (timers::getTicks<double>() > nextUpdateTick && loopAmount < mMaxLoopCount)
+                // We want the other variables to update to avoid 'catch-up' between play mode and edit mode.
+                if (mIsInPlayMode)
                 {
-                    mScene->onFixedUpdate();
-
-
-                    nextUpdateTick += timers::fixedTime<double>();
-                    ++loopAmount;
+                    mPhysics.dynamicsWorld->stepSimulation(timers::fixedTime<float>(), 1.f, timers::fixedTime<float>());
+                    mScene->fixedUpdate();
                 }
-                PROFILE_SCOPE_END(fixedTimer);
+
+                nextUpdateTick += timers::fixedTime<double>();
+                ++loopAmount;
             }
+            PROFILE_SCOPE_END(fixedTimer);
 
             mScene->update();
             mMainCamera->update();
@@ -444,6 +445,11 @@ namespace engine
     MainCamera *Core::getCamera() const
     {
         return mMainCamera.get();
+    }
+
+    btDiscreteDynamicsWorld* Core::getPhysicsWorld() const
+    {
+        return mPhysics.dynamicsWorld.get();
     }
 
     std::string Core::getSceneName()

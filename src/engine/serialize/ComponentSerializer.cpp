@@ -16,6 +16,7 @@
 #include "Actor.h"
 #include "Colliders.h"
 #include "Core.h"
+#include "RigidBody.h"
 #include "ShaderLoader.h"
 #include "SoundComponent.h"
 
@@ -31,6 +32,7 @@ namespace engine
         serializer->pushSaveComponent<SoundComponent>();
         serializer->pushSaveComponent<BoxCollider>();
         serializer->pushSaveComponent<SphereCollider>();
+        serializer->pushSaveComponent<RigidBody>();
 
         serializer->pushLoadComponent("MeshRenderer", [](const YAML::Node &node, Ref<Actor> actor) {
             const std::filesystem::path relativePath = node["MeshPath"].as<std::string>();
@@ -143,6 +145,11 @@ namespace engine
             const float radius = node["Radius"].as<float>();
             actor->addComponent(makeResource<SphereCollider>(radius));
         });
+
+        serializer->pushLoadComponent("RigidBody", [](const YAML::Node &node, Ref<Actor> actor) {
+            const float mass = node["Mass"].as<float>();
+            actor->addComponent(makeResource<RigidBody>(mass));
+        });
     }
 }
 
@@ -246,4 +253,10 @@ void serializeComponent(YAML::Emitter &out, engine::SphereCollider *sphereCollid
 {
     out << YAML::Key << "Component" << YAML::Value << "SphereCollider";
     out << YAML::Key << "Radius" << YAML::Value << sphereCollider->mRadius;
+}
+
+void serializeComponent(YAML::Emitter &out, engine::RigidBody *rigidBody)
+{
+    out << YAML::Key << "Component" << YAML::Value << "RigidBody";
+    out << YAML::Key << "Mass" << YAML::Value << rigidBody->mMass;
 }

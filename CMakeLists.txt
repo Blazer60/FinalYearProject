@@ -144,6 +144,9 @@ add_executable(${PROJECT_NAME}
         src/engine/physics/Colliders.cpp
         include/engine/physics/Colliders.h
         include/engine/physics/PhysicsConversions.h
+        src/engine/physics/RigidBody.cpp
+        include/engine/physics/RigidBody.h
+        include/engine/physics/RigidBody.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

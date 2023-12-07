@@ -7,6 +7,9 @@
 
 #include "PhysicsCore.h"
 
+#include "Logger.h"
+#include "LoggerMacros.h"
+
 namespace engine
 {
     PhysicsCore::PhysicsCore() :
@@ -17,6 +20,10 @@ namespace engine
         dynamicsWorld(std::make_unique<btDiscreteDynamicsWorld>(dispatcher.get(), overlappingPairCache.get(), solver.get(), configuration.get()))
     {
         dynamicsWorld->setGravity(btVector3(0, -9.81f, 0.f));
+        dispatcher->setNearCallback([](btBroadphasePair& collisionPair, btCollisionDispatcher& dispatcher, const btDispatcherInfo& dispatchInfo) {
+            // todo: My callback goes here. Look at the Bullet docs on github about how to do it.
+            btCollisionDispatcher::defaultNearCallback(collisionPair, dispatcher, dispatchInfo);
+        });
     }
 
     PhysicsCore::~PhysicsCore()

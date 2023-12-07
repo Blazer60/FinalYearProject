@@ -24,6 +24,7 @@ namespace engine
         ~Component() override = default;
         void begin();
         void update();
+        void fixedUpdate();
         void preRender();
         void attachToActor(class Actor *actor);
         [[nodiscard]] class Actor *getActor() const;
@@ -31,6 +32,7 @@ namespace engine
     protected:
         virtual void onBegin();
         virtual void onUpdate();
+        virtual void onFixedUpdate();
         virtual void onPreRender();
         void onDrawUi() override;
         [[nodiscard]] glm::mat4 getWorldTransform() const;

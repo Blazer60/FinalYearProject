@@ -50,6 +50,13 @@ namespace engine
         currentDestroyBuffer->clear();
     }
 
+    void Scene::fixedUpdate()
+    {
+        for (Ref<Actor> actor : mActors)
+            actor->fixedUpdate();
+        onFixedUpdate();
+    }
+
     void Scene::onFixedUpdate()
     {
 

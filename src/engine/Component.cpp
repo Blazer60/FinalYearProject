@@ -27,12 +27,21 @@ namespace engine
     {
         onUpdate();
     }
-    
+
+    void Component::fixedUpdate()
+    {
+        onFixedUpdate();
+    }
+
     void Component::onUpdate()
     {
     
     }
-    
+
+    void Component::onFixedUpdate()
+    {
+    }
+
     void Component::onDrawUi()
     {
     }

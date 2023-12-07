@@ -20,6 +20,7 @@
 #include "AssimpLoader.h"
 #include "Scene.h"
 #include "MeshRenderer.h"
+#include "RigidBody.h"
 #include "SceneLoader.h"
 #include "Ui.h"
 
@@ -170,6 +171,11 @@ namespace engine
                     actorTransform = glm::inverse(parentTransform) * actorTransform;
                 }
                 math::decompose(actorTransform, selectedActor->position, selectedActor->rotation, selectedActor->scale);
+                Ref<RigidBody> rigidBody = selectedActor->getComponent<RigidBody>();
+                if (rigidBody.get())
+                {
+                    rigidBody->teleport();
+                }
             }
         }
         

@@ -18,6 +18,7 @@
 #include <FileLoader.h>
 #include "Colliders.h"
 #include "Ui.h"
+#include "RigidBody.h"
 
 namespace engine
 {
@@ -59,7 +60,11 @@ namespace engine
         addComponentOption<SphereCollider>("Sphere Collider", [](Ref<Actor> actor) {
             actor->addComponent(makeResource<SphereCollider>());
         });
-        
+
+        addComponentOption<RigidBody>("Rigid Body", [](Ref<Actor> acotr) {
+            acotr->addComponent(makeResource<RigidBody>());
+        });
+
         addMenuOption("Actor", []() {
             Ref<Actor> actor = core->getScene()->spawnActor<Actor>("Actor");
             actor->position = core->getCamera()->getEndOfBoomArmPosition();

@@ -21,6 +21,7 @@ namespace engine
     class SoundComponent;
     class BoxCollider;
     class SphereCollider;
+    class RigidBody;
 
     void attachComponentSerialization();
 }
@@ -34,3 +35,4 @@ void serializeComponent(YAML::Emitter &, engine::DistantLightProbe *);
 void serializeComponent(YAML::Emitter &, engine::SoundComponent *);
 void serializeComponent(YAML::Emitter &, engine::BoxCollider *);
 void serializeComponent(YAML::Emitter &, engine::SphereCollider *);
+void serializeComponent(YAML::Emitter &, engine::RigidBody *);

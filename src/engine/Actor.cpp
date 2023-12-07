@@ -108,6 +108,12 @@ namespace engine
         }
     }
 
+    void Actor::fixedUpdate()
+    {
+        for (Ref<Component> component : mComponents)
+            component->fixedUpdate();
+    }
+
     UUID Actor::getId() const
     {
         return mId;

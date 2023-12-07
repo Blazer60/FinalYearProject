@@ -1,0 +1,80 @@
+Scene: scenes\PhysicsTest.pcy
+Actors:
+  - Name: Cube
+    UUID: 15887427644234860914
+    position: [-3.13768601, 11.7771645, -9]
+    rotation: [0.974490702, 0, -0, -0.224427819]
+    scale: [0.999999881, 0.999999881, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\defaultObjects\DefaultCube.glb
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+      - Component: BoxCollider
+        HalfBoxExtent: [1, 1, 1]
+      - Component: RigidBody
+        Mass: 10
+    Children:
+      []
+  - Name: Cube
+    UUID: 5334864629118171243
+    position: [0, -5.78620529, -9]
+    rotation: [0.999924183, 0, 0, 0.0123144761]
+    scale: [10, 1, 10]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\defaultObjects\DefaultCube.glb
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+      - Component: BoxCollider
+        HalfBoxExtent: [10, 1, 10]
+      - Component: RigidBody
+        Mass: 0
+    Children:
+      []
+  - Name: Sphere
+    UUID: 5952713876831364267
+    position: [2.84374928, 10.075922, -9]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\defaultObjects\DefaultSphere.glb
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+      - Component: SphereCollider
+        Radius: 1
+      - Component: RigidBody
+        Mass: 10
+    Children:
+      []
