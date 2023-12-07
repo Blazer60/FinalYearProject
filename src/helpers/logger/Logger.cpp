@@ -82,8 +82,10 @@ namespace debug
     {
         if (blackList.find(id) != blackList.end())
             return;  // Ignore black listed elements.
-        
-        Severity level = glSeverityCastMap.at(severity);
+        if (type == GL_DEBUG_TYPE_PUSH_GROUP || type == GL_DEBUG_TYPE_POP_GROUP)
+            return;
+
+        const Severity level = glSeverityCastMap.at(severity);
         
         std::stringstream ss;
         ss << "[OpenGL | " << severityStringMap.at(level) << "]\n";
@@ -94,6 +96,7 @@ namespace debug
         const std::string output = ss.str();
         logToConsole(output);
         logToFile(output);
+        logToQueue(message, "", -1, level);
         
         if (level >= throwLevel)
             throw LogException();
