@@ -54,6 +54,7 @@ namespace engine
         btRigidBody::btRigidBodyConstructionInfo rbInfo(mMass, mMotionState.get(), collider->getCollider(), localInertia);
         mRigidBody = std::make_unique<btRigidBody>(rbInfo);
 
+        mRigidBody->setUserPointer(mActor);
         core->getPhysicsWorld()->addRigidBody(mRigidBody.get());
     }
 

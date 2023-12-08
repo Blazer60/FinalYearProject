@@ -7,8 +7,12 @@
 
 #include "PhysicsCore.h"
 
+#include "Actor.h"
+#include "Core.h"
+#include "EngineState.h"
 #include "Logger.h"
 #include "LoggerMacros.h"
+#include "PhysicsConversions.h"
 
 namespace engine
 {
@@ -21,8 +25,34 @@ namespace engine
     {
         dynamicsWorld->setGravity(btVector3(0, -9.81f, 0.f));
         dispatcher->setNearCallback([](btBroadphasePair& collisionPair, btCollisionDispatcher& dispatcher, const btDispatcherInfo& dispatchInfo) {
-            // todo: My callback goes here. Look at the Bullet docs on github about how to do it.
+            const auto object1 = static_cast<btCollisionObject*>(collisionPair.m_pProxy0->m_clientObject);
+            const auto object2 = static_cast<btCollisionObject*>(collisionPair.m_pProxy1->m_clientObject);
+
+            const auto actor1 = static_cast<Actor*>(object1->getUserPointer());
+            const auto actor2 = static_cast<Actor*>(object2->getUserPointer());
+
             btCollisionDispatcher::defaultNearCallback(collisionPair, dispatcher, dispatchInfo);
+            btManifoldArray array;
+            collisionPair.m_algorithm->getAllContactManifolds(array);
+            if (array.size() > 0)
+            {
+                MESSAGE("Hit between: % and %", actor1->getName(), actor2->getName());
+                const std::string hash = std::to_string(actor1->getId()) + std::to_string(actor2->getId());
+                mCollisions[hash] = 5;
+            }
+
+            for (int i = 0; i < array.size(); ++i)
+            {
+                btPersistentManifold* manifold = array[i];
+                const int contactCount = manifold->getNumContacts();
+                for (int j = 0; j < contactCount; ++j)
+                {
+                    auto point = manifold->getContactPoint(j);
+                    const glm::vec3 normal = physics::cast(point.m_normalWorldOnB);
+                    const glm::vec3 position = physics::cast(point.getPositionWorldOnA());
+                    MESSAGE("Hit normal: %, Hit Position: %", normal, position);
+                }
+            }
         });
     }
 

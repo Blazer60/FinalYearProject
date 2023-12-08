@@ -28,5 +28,8 @@ namespace engine
         std::unique_ptr<btBroadphaseInterface> overlappingPairCache;
         std::unique_ptr<btSequentialImpulseConstraintSolver> solver;
         std::unique_ptr<btDiscreteDynamicsWorld> dynamicsWorld;
+
+    protected:
+        std::unordered_map<std::string, int> mCollisions;
     };
 } // engine
