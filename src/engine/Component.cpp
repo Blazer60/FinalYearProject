@@ -58,7 +58,13 @@ namespace engine
     {
         mActor = actor;
     }
-    
+
+    void Component::collisionBegin(
+        Actor* otherActor, Component* myComponent, Component* otherComponent, const HitInfo& hitInfo)
+    {
+        onCollisionBegin(otherActor, myComponent, otherComponent, hitInfo);
+    }
+
     void Component::preRender()
     {
         onPreRender();
@@ -68,7 +74,12 @@ namespace engine
     {
     
     }
-    
+
+    void Component::onCollisionBegin(
+        Actor* otherActor, Component* myComponent, Component* otherComponent, const HitInfo& hitInfo)
+    {
+    }
+
     Actor *Component::getActor() const
     {
         return mActor;

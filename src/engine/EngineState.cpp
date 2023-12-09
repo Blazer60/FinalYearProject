@@ -6,6 +6,7 @@
 
 
 #include "EngineState.h"
+#include "Logger.h"
 
 namespace engine
 {
@@ -14,6 +15,7 @@ namespace engine
     RootEventHandler *eventHandler;
     Serializer *serializer;
     ResourcePool *resourcePool;
+    PhysicsCore *physicsSystem;
     
     void GLAPIENTRY forwardOpenGlCallback(
         GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,

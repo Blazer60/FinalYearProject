@@ -7,6 +7,7 @@
 
 #include "Initialiser.h"
 
+#include "CollisionInfo.h"
 #include "Core.h"
 #include "MyScene.h"
 #include "EngineState.h"
@@ -18,6 +19,10 @@ void initComponentsForEngine()
 {
     engine::editor->addComponentOption<Rotator>("Rotator", [](Ref<engine::Actor> actor) {
         actor->addComponent(makeResource<Rotator>());
+    });
+
+    engine::editor->addComponentOption<CollisionInfo>("Collision Info", [](Ref<engine::Actor> actor) {
+        actor->addComponent(makeResource<CollisionInfo>());
     });
 
     engine::editor->addMenuOption("Rotating Cube", []() {
@@ -42,5 +47,10 @@ void initComponentsForEngine()
         auto myScene = std::make_unique<MyScene>();
         myScene->setLuminanceMultiplier(node["LuminanceMultiplier"].as<float>());
         return myScene;
+    });
+
+    engine::serializer->pushSaveComponent<CollisionInfo>();
+    engine::serializer->pushLoadComponent("CollisionInfo", [](const YAML::Node &node, Ref<engine::Actor> actor) {
+        actor->addComponent(makeResource<CollisionInfo>());
     });
 }

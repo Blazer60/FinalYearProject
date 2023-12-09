@@ -114,6 +114,16 @@ namespace engine
             component->fixedUpdate();
     }
 
+    void Actor::collisionBegin(
+        Actor* otherActor, Component* myComponent,
+        Component* otherComponent, const HitInfo& hitInfo)
+    {
+        onCollisionBegin(otherActor, myComponent, otherComponent, hitInfo);
+
+        for (Ref<Component> component : mComponents)
+            component->collisionBegin(otherActor, myComponent, otherComponent, hitInfo);
+    }
+
     UUID Actor::getId() const
     {
         return mId;
@@ -265,6 +275,13 @@ namespace engine
     void Actor::onBegin()
     {
     
+    }
+
+    void Actor::onCollisionBegin(
+        Actor* otherActor, Component* myComponent,
+        Component* otherComponent, const HitInfo& hitInfo)
+    {
+
     }
 }
 

@@ -9,6 +9,7 @@
 
 #include "Pch.h"
 #include "Drawable.h"
+#include "HitInfo.h"
 #include "Serializer.h"
 
 namespace engine
@@ -27,6 +28,7 @@ namespace engine
         void fixedUpdate();
         void preRender();
         void attachToActor(class Actor *actor);
+        void collisionBegin(Actor *otherActor, Component *myComponent, Component *otherComponent, const HitInfo &hitInfo);
         [[nodiscard]] class Actor *getActor() const;
         
     protected:
@@ -34,6 +36,7 @@ namespace engine
         virtual void onUpdate();
         virtual void onFixedUpdate();
         virtual void onPreRender();
+        virtual void onCollisionBegin(Actor *otherActor, Component *myComponent, Component *otherComponent, const HitInfo &hitInfo);
         void onDrawUi() override;
         [[nodiscard]] glm::mat4 getWorldTransform() const;
         

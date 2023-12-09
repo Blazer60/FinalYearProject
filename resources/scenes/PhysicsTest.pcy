@@ -76,5 +76,6 @@ Actors:
         Radius: 1
       - Component: RigidBody
         Mass: 10
+      - Component: CollisionInfo
     Children:
       []

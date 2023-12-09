@@ -17,6 +17,7 @@
 #include <yaml-cpp/emitter.h>
 
 #include "EngineRandom.h"
+#include "HitInfo.h"
 #include "Scene.h"
 
 namespace load
@@ -47,6 +48,7 @@ namespace engine
         void begin();
         void update();
         void fixedUpdate();
+        void collisionBegin(Actor *otherActor, Component *myComponent, Component *otherComponent, const HitInfo &hitInfo);
 
         /**
          * @returns The ID of the current actor.
@@ -137,6 +139,7 @@ namespace engine
         void updateTransform();
         virtual void onUpdate();
         virtual void onBegin();
+        virtual void onCollisionBegin(Actor *otherActor, Component *myComponent, Component *otherComponent, const HitInfo &hitInfo);
         void updateComponents();
         
         glm::mat4 mTransform    { glm::mat4(1.f) };

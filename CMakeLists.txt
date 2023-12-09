@@ -147,6 +147,9 @@ add_executable(${PROJECT_NAME}
         src/engine/physics/RigidBody.cpp
         include/engine/physics/RigidBody.h
         include/engine/physics/RigidBody.h
+        include/engine/physics/HitInfo.h
+        src/game/CollisionInfo.cpp
+        src/game/CollisionInfo.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

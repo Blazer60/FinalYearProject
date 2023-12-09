@@ -102,9 +102,11 @@ namespace engine
         mSerializer = std::make_unique<Serializer>();
         serializer = mSerializer.get();
         attachComponentSerialization();
+
+        physicsSystem = &mPhysics;
     }
     
-    bool engine::Core::initGlfw(int openGlMajorVersion, int openGlMinorVersion)
+    bool Core::initGlfw(int openGlMajorVersion, int openGlMinorVersion)
     {
         if (!glfwInit())
             return false;
@@ -318,6 +320,7 @@ namespace engine
                 {
                     mPhysics.dynamicsWorld->stepSimulation(timers::fixedTime<float>(), 1.f, timers::fixedTime<float>());
                     mScene->fixedUpdate();
+                    mPhysics.resolveCollisoinCallbacks();
                 }
 
                 nextUpdateTick += timers::fixedTime<double>();
@@ -435,6 +438,7 @@ namespace engine
         mScene.reset();
         mScene = std::move(scene);
         mScenePointer = mScene.get();
+        mPhysics.reset();
     }
     
     Scene *Core::getScene() const

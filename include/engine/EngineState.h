@@ -8,7 +8,6 @@
 #pragma once
 
 #include "Pch.h"
-#include "Logger.h"
 #include "glew.h"
 
 namespace engine
@@ -18,6 +17,7 @@ namespace engine
     extern class RootEventHandler *eventHandler;
     extern class Serializer *serializer;
     extern class ResourcePool *resourcePool;
+    extern class PhysicsCore *physicsSystem;
     
     void GLAPIENTRY forwardOpenGlCallback(
         GLenum source, GLenum type, GLuint id,
