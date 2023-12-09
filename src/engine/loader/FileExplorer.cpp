@@ -7,14 +7,19 @@
 
 #include "FileExplorer.h"
 #include "FileLoader.h"
-#include <Windows.h>
-#include <shobjidl.h>
-#include <Statistics.h>
-#include <ShlGuid.h>
+
+#ifdef WIN32
+    #include <Windows.h>
+    #include <shobjidl.h>
+    #include <Statistics.h>
+    #include <ShlGuid.h>
+#endif  // WIN32
+
 
 
 std::string openFileDialog()
 {
+#ifdef WIN32
     HRESULT fSysHr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
     if (FAILED(fSysHr))
     {
@@ -69,12 +74,17 @@ std::string openFileDialog()
     fFiles->Release();
     fFileSystem->Release();
     CoUninitialize();
-    
+
     return c;
+#else
+    WARN("This function only works for windows.");
+    return "";
+#endif  // WIN32
 }
 
 std::string saveFileDialog()
 {
+#ifdef WIN32
     HRESULT fSysHr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
     if (FAILED(fSysHr))
     {
@@ -140,4 +150,8 @@ std::string saveFileDialog()
     CoUninitialize();
     
     return c;
+#else
+    WARN("This function only works for windows.");
+    return "";
+#endif  // WIN32
 }
