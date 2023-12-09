@@ -39,8 +39,6 @@ namespace engine
         mProfiler = std::make_unique<Profiler>();
         profiler = mProfiler.get();
         
-        mProfilerViewer = std::make_unique<ProfilerViewer>();
-        
         mLogger = std::make_unique<debug::Logger>();
         debug::logger = mLogger.get();
         mLogger->setOutputFlag(debug::OutputSourceFlag_File | debug::OutputSourceFlag_Queue);
@@ -363,57 +361,10 @@ namespace engine
         ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
         
         mEventHandler.update();
-        
-        if (ImGui::BeginMainMenuBar())
-        {
-            if (ImGui::BeginMenu("File"))
-            {
-                if (ImGui::MenuItem("Save"))
-                {
-                    if (mScenePath.empty())
-                        WARN("No Scene is loaded.");
-                    serialize::scene(mScenePath, getScene());
-                }
-                if (ImGui::MenuItem("Save as"))
-                {
-                    auto scenePath = saveFileDialog();
-                    if (!scenePath.empty())
-                    {
-                        mScenePath = scenePath;
-                        serialize::scene(mScenePath, getScene());
-                    }
-                }
-                if (ImGui::MenuItem("Load"))
-                {
-                    if (const auto scenePath = openFileDialog(); !scenePath.empty())
-                        setScene(load::scene(scenePath), scenePath);
-                }
-                ImGui::EndMenu();
-            }
-            mScene->onImguiMenuUpdate();
-            const std::string text = "TPS: %.0f | Frame Rate: %.3f ms/frame (%.1f FPS)";
-            ImGui::SetCursorPosX(
-                ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - ImGui::CalcTextSize(text.c_str()).x
-                - ImGui::GetScrollX() - 2 * ImGui::GetStyle().ItemSpacing.x);
-            ImGui::Text(text.c_str(), 1.f / timers::fixedTime<float>(), timers::deltaTime<float>() * 1000.f, ImGui::GetIO().Framerate);
-            ImGui::EndMainMenuBar();
-        }
-        
-        ImGui::Begin("Scene Settings");
-        mScene->imguiUpdate();
-        ImGui::End();
-        
-        ImGui::Begin("Renderer Settings");
-        ui::draw(mMainCamera);
-        ImGui::End();
-        
         ui::draw(mEditor);
-        ui::draw(mProfilerViewer);
-        
+
         ImGui::Render();
-        int display_w, display_h;
-        glfwGetFramebufferSize(mWindow, &display_w, &display_h);
-        
+
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         
         if (mGuiIo->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -461,9 +412,19 @@ namespace engine
         return mSceneName;
     }
 
+    std::filesystem::path Core::getScenePath() const
+    {
+        return mScenePath;
+    }
+
     bool Core::isInPlayMode() const
     {
         return mIsInPlayMode;
+    }
+
+    void Core::setScenePath(std::filesystem::path path)
+    {
+        mScenePath = std::move(path);
     }
 
     void Core::beginPlay()

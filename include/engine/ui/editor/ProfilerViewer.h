@@ -21,6 +21,7 @@ namespace engine
         : public ui::Drawable
     {
     public:
+        bool isShowing { true };
     protected:
         void onDrawUi() override;
         void drawNode(const debug::ProfileNode &node);

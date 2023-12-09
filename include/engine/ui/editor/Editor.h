@@ -17,6 +17,7 @@
 #include "LogWindow.h"
 #include "EngineMemory.h"
 #include "ResourceFolder.h"
+#include "ProfilerViewer.h"
 
 namespace engine
 {
@@ -77,6 +78,7 @@ namespace engine
         template<typename T>
         void addComponentOption(const std::string &name, const ComponentDetails::CreateFunc &onCreate);
         void addMenuOption(const std::string &name, const ActorDetails::CreateFunc &onCreate);
+
         static Ref<Actor> createDefaultShape(const std::string& name, std::string_view path);
         void createModel(const std::filesystem::path &path);
         
@@ -92,12 +94,17 @@ namespace engine
         void drawSceneHierarchyForActor(Ref<Actor> actor);
         void drawActorDetails();
         void drawAddComponentCombo();
+        void drawSceneSettings();
+        void drawCameraSettings();
+        void drawFileMenuDropDown();
+        void drawWindowDropDown();
+        void drawMenuBar();
         void moveActors();
     
-    protected:
         Viewport mViewport;
         LogWindow mLogWindow;
         ResourceFolder mResourceFolder;
+        ProfilerViewer mProfilerViewer;
         Ref<Actor> mSelectedActor;
         std::vector<ActorDetails> mMenuList;
         std::vector<std::unique_ptr<ComponentDetails>> mComponentList;
@@ -106,6 +113,11 @@ namespace engine
         Actor* mMoveDestinationActor { nullptr };
         
         std::vector<std::function<void()>> mOnUpdate;
+
+        bool mShowSceneHierarchy { true };
+        bool mShowDetailsPanel   { true };
+        bool mShowSceneSettings  { true };
+        bool mShowCameraSettings { true };
     };
     
     

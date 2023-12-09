@@ -39,6 +39,8 @@ namespace engine
     class ResourceFolder
         : public ui::Drawable
     {
+    public:
+        bool isShowing { true };
     protected:
         void onDrawUi() override;
         void drawDirectory(const std::filesystem::path &path);

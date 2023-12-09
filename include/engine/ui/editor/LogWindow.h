@@ -20,12 +20,14 @@ namespace engine
     class LogWindow
         : public ui::Drawable
     {
+    public:
+        bool isShowing { true };
     protected:
         void onDrawUi() override;
         void drawMessageUi(const debug::Message &message);
         const ImVec4 &getSeverityColour(debug::Severity severity);
-        
-    protected:
+
+
         bool mWrapText          { true };
         bool mShowNotifications { true };
         bool mShowWarnings      { true };

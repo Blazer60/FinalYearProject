@@ -67,6 +67,9 @@ namespace engine
     void Viewport::onDrawUi()
     {
         PROFILE_FUNC();
+        if (!isShowing)
+            return;
+
         ImGui::PushID("Viewport");
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
         std::string sceneName = core->getSceneName();
@@ -74,7 +77,7 @@ namespace engine
             sceneName = "Unsaved";
 
         const std::string windowName = sceneName + "###ViewportWindow";
-        ImGui::Begin(windowName.c_str());
+        ImGui::Begin(windowName.c_str(), &isShowing);
 
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetColumnWidth() / 2) - 12.f);
         if (!core->isInPlayMode())

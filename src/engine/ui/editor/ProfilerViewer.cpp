@@ -12,7 +12,10 @@ namespace engine
 {
     void ProfilerViewer::onDrawUi()
     {
-        if (ImGui::Begin("Profiler"))
+        if (!isShowing)
+            return;
+
+        if (ImGui::Begin("Profiler", &isShowing))
         {
 #ifndef ENABLE_PROFILING
             ImGui::TextColored(ImVec4(1.f, 1.f, 0.f, 1.f), "Profiling has been disabled in the build settings.");

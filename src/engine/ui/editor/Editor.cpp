@@ -17,6 +17,7 @@
 #include "SoundComponent.h"
 #include <FileLoader.h>
 #include "Colliders.h"
+#include "FileExplorer.h"
 #include "Ui.h"
 #include "RigidBody.h"
 
@@ -81,9 +82,13 @@ namespace engine
     void Editor::onDrawUi()
     {
         PROFILE_FUNC();
+        drawMenuBar();
         ui::draw(mViewport);
         ui::draw(mLogWindow);
         ui::draw(mResourceFolder);
+        ui::draw(mProfilerViewer);
+        drawCameraSettings();
+        drawSceneSettings();
         drawSceneHierarchyPanel();
         drawActorDetails();
         
@@ -94,7 +99,10 @@ namespace engine
     void Editor::drawActorDetails()
     {
         PROFILE_FUNC();
-        ImGui::Begin("Details");
+        if (!mShowDetailsPanel)
+            return;
+
+        ImGui::Begin("Details", &mShowDetailsPanel);
         if (mSelectedActor.isValid())
         {
             ui::draw(mSelectedActor.get());
@@ -112,7 +120,10 @@ namespace engine
     void Editor::drawSceneHierarchyPanel()
     {
         PROFILE_FUNC();
-        ImGui::Begin("Scene Hierarchy", nullptr, ImGuiWindowFlags_MenuBar);
+        if (!mShowSceneHierarchy)
+            return;
+
+        ImGui::Begin("Scene Hierarchy", &mShowSceneHierarchy, ImGuiWindowFlags_MenuBar);
         if (ImGui::BeginMenuBar())
         {
             if (ImGui::BeginMenu("Add"))
@@ -274,12 +285,96 @@ namespace engine
     {
         mMenuList.push_back(ActorDetails { name, onCreate });
     }
-    
+
+    void Editor::drawFileMenuDropDown()
+    {
+        if (ImGui::BeginMenu("File", !core->isInPlayMode()))
+        {
+            if (ImGui::MenuItem("Save"))
+            {
+                const std::filesystem::path path = core->getScenePath();
+                if (path.empty())
+                    WARN("No Scene is loaded.");
+                serialize::scene(path, core->getScene());
+            }
+            if (ImGui::MenuItem("Save as"))
+            {
+                if (const std::string scenePath = saveFileDialog(); !scenePath.empty())
+                {
+                    core->setScenePath(scenePath);
+                    serialize::scene(scenePath, core->getScene());
+                }
+            }
+            if (ImGui::MenuItem("Load"))
+            {
+                if (const auto scenePath = openFileDialog(); !scenePath.empty())
+                    core->setScene(load::scene(scenePath), scenePath);
+            }
+            ImGui::EndMenu();
+        }
+    }
+
+    void Editor::drawWindowDropDown()
+    {
+        if (ImGui::BeginMenu("Window"))
+        {
+            mLogWindow.isShowing        |= ImGui::MenuItem("Log Window");
+            mViewport.isShowing         |= ImGui::MenuItem("Viewport");
+            mResourceFolder.isShowing   |= ImGui::MenuItem("Resources");
+            mProfilerViewer.isShowing   |= ImGui::MenuItem("Profiler");
+            mShowSceneHierarchy         |= ImGui::MenuItem("Scene Hieararchy");
+            mShowDetailsPanel           |= ImGui::MenuItem("Details Panel");
+            mShowSceneSettings          |= ImGui::MenuItem("Show Scene Settings");
+            mShowCameraSettings         |= ImGui::MenuItem("Show Camera Settings");
+            ImGui::EndMenu();
+        }
+    }
+
+    void Editor::drawMenuBar()
+    {
+        if (ImGui::BeginMainMenuBar())
+        {
+            drawFileMenuDropDown();
+            drawWindowDropDown();
+            core->getScene()->onImguiMenuUpdate();
+
+            const std::string text = "TPS: %.0f | Frame Rate: %.3fms/frame (%.0fFPS)";
+            ImGui::SetCursorPosX( ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - ImGui::CalcTextSize(text.c_str()).x
+                - ImGui::GetScrollX() - 2 * ImGui::GetStyle().ItemSpacing.x);
+
+            ImGui::Text(text.c_str(), 1.f / timers::fixedTime<float>(),
+                timers::deltaTime<float>() * 1000.f, 1.f / timers::deltaTime<float>());
+            ImGui::EndMainMenuBar();
+        }
+
+
+    }
+
     void Editor::addUpdateAction(const std::function<void()> &callback)
     {
         mOnUpdate.push_back(callback);
     }
-    
+
+    void Editor::drawSceneSettings()
+    {
+        if (!mShowSceneSettings)
+            return;
+
+        ImGui::Begin("Scene Settings", &mShowSceneSettings);
+        core->getScene()->imguiUpdate();
+        ImGui::End();
+    }
+
+    void Editor::drawCameraSettings()
+    {
+        if (!mShowCameraSettings)
+            return;
+
+        ImGui::Begin("Renderer Settings", &mShowCameraSettings);
+        ui::draw(core->getCamera());
+        ImGui::End();
+    }
+
     void Editor::createModel(const std::filesystem::path &path)
     {
         Ref<engine::Actor> actor = core->getScene()->spawnActor<engine::Actor>("Model");

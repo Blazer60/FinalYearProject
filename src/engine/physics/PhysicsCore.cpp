@@ -79,6 +79,7 @@ namespace engine
 
         // Do continous collisions here.
 
+        // std::erase_if() is C++20
         for (auto first = mCurrentCollisions.begin(), last = mCurrentCollisions.end(); first != last;)
         {
             if (mCollisions.find(*first) == mCollisions.end())

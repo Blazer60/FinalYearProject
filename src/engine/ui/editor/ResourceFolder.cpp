@@ -17,9 +17,11 @@ namespace engine
 
     void ResourceFolder::onDrawUi()
     {
-        if (ImGui::Begin("Resource Folder"))
-            drawDirectory(file::resourcePath());
-        
+        if (!isShowing)
+            return;
+
+        ImGui::Begin("Resource Folder", &isShowing);
+        drawDirectory(file::resourcePath());
         ImGui::End();
     }
     

@@ -48,8 +48,10 @@ namespace engine
         [[nodiscard]] Scene *getScene() const;
         [[nodiscard]] MainCamera *getCamera() const;
         [[nodiscard]] std::string getSceneName();
+        [[nodiscard]] std::filesystem::path getScenePath() const;
         [[nodiscard]] btDiscreteDynamicsWorld *getPhysicsWorld() const;
         bool isInPlayMode() const;
+        void setScenePath(std::filesystem::path path);
 
     protected:
         bool initGlfw(int openGlMajorVersion, int openGlMinorVersion);
@@ -75,7 +77,6 @@ namespace engine
         std::unique_ptr<ResourcePool> mResourcePool;
         std::unique_ptr<Renderer> mRenderer;
         std::unique_ptr<debug::Logger> mLogger;
-        std::unique_ptr<ProfilerViewer> mProfilerViewer;
         std::unique_ptr<Profiler> mProfiler;
         std::unique_ptr<Serializer> mSerializer;
         

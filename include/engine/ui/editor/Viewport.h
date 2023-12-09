@@ -38,7 +38,8 @@ namespace engine
         [[nodiscard]] glm::vec2 getSize() const;
         [[nodiscard]] bool isHovered() const;
         GLFWwindow *getViewportContext();
-        
+
+        bool isShowing { true };
     protected:
         void onDrawUi() override;
         void toggleMouseState(bool newState);
