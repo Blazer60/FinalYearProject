@@ -90,6 +90,11 @@ namespace engine
                 const glm::mat4 modelMatrix = actorTransform * scale;
                 graphics::renderer->drawDebugMesh(mDefaultSphere, modelMatrix, glm::vec3(1.f, 0.f, 1.f));
             }
+            else if (auto meshCollider = actor->getComponent<MeshCollider>(false); meshCollider.isValid())
+            {
+                const glm::mat4 modelMatrix = actorTransform;
+                graphics::renderer->drawDebugMesh(meshCollider->getDebugMesh(), modelMatrix, glm::vec3(1.f, 0.f, 1.f));
+            }
         }
     }
 

@@ -10,6 +10,7 @@
 #include <BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h>
 
 #include "Actor.h"
+#include "AssimpLoader.h"
 #include "FileExplorer.h"
 #include "FileLoader.h"
 #include "PhysicsConversions.h"
@@ -93,14 +94,9 @@ namespace engine
 
     }
 
-    MeshCollider::MeshCollider(std::filesystem::path path)
-        : mPath(std::move(path))
+    MeshCollider::MeshCollider(const std::filesystem::path &path)
     {
-        if (!mPath.empty())
-        {
-            mMeshColliderBuffer = load::physicsMesh(mPath);
-            mMeshShape = std::make_unique<btBvhTriangleMeshShape>(&mMeshColliderBuffer->vertexArray, true);
-        }
+        initialiseBasedOnPath(path);
     }
 
     void MeshCollider::onDrawUi()
@@ -114,18 +110,14 @@ namespace engine
             if (ImGui::Button("Change Mesh"))
             {
                 const std::string meshPath = openFileDialog();
-                mPath = meshPath;
-                mMeshColliderBuffer = load::physicsMesh(meshPath);
-                mMeshShape = std::make_unique<btBvhTriangleMeshShape>(&mMeshColliderBuffer->vertexArray, true);
+                initialiseBasedOnPath(meshPath);
             }
             if (ImGui::BeginDragDropTarget())
             {
                 if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(resourceModelPayload))
                 {
                     const std::filesystem::path path = *static_cast<std::filesystem::path*>(payload->Data);
-                    mPath = path;
-                    mMeshColliderBuffer = load::physicsMesh(path);
-                    mMeshShape = std::make_unique<btBvhTriangleMeshShape>(&mMeshColliderBuffer->vertexArray, true);
+                    initialiseBasedOnPath(path);
                 }
             }
             ImGui::TreePop();
@@ -137,5 +129,21 @@ namespace engine
     btCollisionShape* MeshCollider::getCollider()
     {
         return mMeshShape.get();
+    }
+
+    const SharedMesh& MeshCollider::getDebugMesh() const
+    {
+        return mDebugShape;
+    }
+
+    void MeshCollider::initialiseBasedOnPath(std::filesystem::path path)
+    {
+        if (path.empty())
+            return;
+
+        mPath = std::move(path);
+        mMeshColliderBuffer = load::physicsMesh(mPath);
+        mMeshShape = std::make_unique<btBvhTriangleMeshShape>(&mMeshColliderBuffer->vertexArray, true);
+        mDebugShape = load::model<PositionVertex>(mPath);
     }
 }

@@ -14,6 +14,7 @@
 #include <BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h>
 
 #include "Component.h"
+#include "Mesh.h"
 #include "Pch.h"
 #include "PhysicsMeshBuffer.h"
 
@@ -71,16 +72,19 @@ namespace engine
     {
     public:
         MeshCollider();
-        explicit MeshCollider(std::filesystem::path path);
+        explicit MeshCollider(const std::filesystem::path&path);
         ~MeshCollider() override = default;
 
         void onDrawUi() override;
         btCollisionShape *getCollider() override;
+        [[nodiscard]] const SharedMesh &getDebugMesh() const;
 
     protected:
+        void initialiseBasedOnPath(std::filesystem::path path);
         std::shared_ptr<physics::MeshColliderBuffer> mMeshColliderBuffer;
         std::unique_ptr<btBvhTriangleMeshShape> mMeshShape;
         std::filesystem::path  mPath;
+        SharedMesh mDebugShape;
 
         ENGINE_SERIALIZABLE_COMPONENT(MeshCollider);
     };
