@@ -66,6 +66,10 @@ namespace engine
             acotr->addComponent(makeResource<RigidBody>());
         });
 
+        addComponentOption<MeshCollider>("Mesh Collider", [](Ref<Actor> actor) {
+            actor->addComponent(makeResource<MeshCollider>());
+        });
+
         addMenuOption("Actor", []() {
             Ref<Actor> actor = core->getScene()->spawnActor<Actor>("Actor");
             actor->position = core->getCamera()->getEndOfBoomArmPosition();

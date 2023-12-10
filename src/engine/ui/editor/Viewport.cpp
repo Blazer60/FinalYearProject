@@ -185,8 +185,7 @@ namespace engine
                     actorTransform = glm::inverse(parentTransform) * actorTransform;
                 }
                 math::decompose(actorTransform, selectedActor->position, selectedActor->rotation, selectedActor->scale);
-                Ref<RigidBody> rigidBody = selectedActor->getComponent<RigidBody>();
-                if (rigidBody.get())
+                if (Ref<RigidBody> rigidBody = selectedActor->getComponent<RigidBody>(false); rigidBody.isValid())
                 {
                     rigidBody->teleport();
                 }

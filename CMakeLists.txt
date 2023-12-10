@@ -150,6 +150,9 @@ add_executable(${PROJECT_NAME}
         include/engine/physics/HitInfo.h
         src/game/CollisionInfo.cpp
         src/game/CollisionInfo.h
+        src/engine/loader/physicsMesh.cpp
+        include/engine/loader/physicsMesh.h
+        include/engine/physics/PhysicsMeshBuffer.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

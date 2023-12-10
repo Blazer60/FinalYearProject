@@ -22,6 +22,7 @@ namespace engine
     class BoxCollider;
     class SphereCollider;
     class RigidBody;
+    class MeshCollider;
 
     void attachComponentSerialization();
 }
@@ -36,3 +37,4 @@ void serializeComponent(YAML::Emitter &, engine::SoundComponent *);
 void serializeComponent(YAML::Emitter &, engine::BoxCollider *);
 void serializeComponent(YAML::Emitter &, engine::SphereCollider *);
 void serializeComponent(YAML::Emitter &, engine::RigidBody *);
+void serializeComponent(YAML::Emitter &, engine::MeshCollider *);

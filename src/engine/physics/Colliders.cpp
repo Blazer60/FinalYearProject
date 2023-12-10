@@ -7,8 +7,14 @@
 
 #include "Colliders.h"
 
+#include <BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h>
+
 #include "Actor.h"
+#include "FileExplorer.h"
+#include "FileLoader.h"
 #include "PhysicsConversions.h"
+#include "ResourceFolder.h"
+#include "physicsMesh.h"
 
 namespace engine
 {
@@ -51,7 +57,6 @@ namespace engine
     SphereCollider::SphereCollider()
         : mSphereShape(mRadius)
     {
-
     }
 
     SphereCollider::SphereCollider(const float radius)
@@ -81,5 +86,56 @@ namespace engine
     float SphereCollider::getRadius() const
     {
         return mRadius;
+    }
+
+    MeshCollider::MeshCollider()
+    {
+
+    }
+
+    MeshCollider::MeshCollider(std::filesystem::path path)
+        : mPath(std::move(path))
+    {
+        if (!mPath.empty())
+        {
+            mMeshColliderBuffer = load::physicsMesh(mPath);
+            mMeshShape = std::make_unique<btBvhTriangleMeshShape>(&mMeshColliderBuffer->vertexArray, true);
+        }
+    }
+
+    void MeshCollider::onDrawUi()
+    {
+        ImGui::PushID("Mesh Collider");
+        if (ImGui::TreeNodeEx("Mesh Collider", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            if (ImGui::Button("Destroy Component"))
+                mActor->removeComponent(this);
+
+            if (ImGui::Button("Change Mesh"))
+            {
+                const std::string meshPath = openFileDialog();
+                mPath = meshPath;
+                mMeshColliderBuffer = load::physicsMesh(meshPath);
+                mMeshShape = std::make_unique<btBvhTriangleMeshShape>(&mMeshColliderBuffer->vertexArray, true);
+            }
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(resourceModelPayload))
+                {
+                    const std::filesystem::path path = *static_cast<std::filesystem::path*>(payload->Data);
+                    mPath = path;
+                    mMeshColliderBuffer = load::physicsMesh(path);
+                    mMeshShape = std::make_unique<btBvhTriangleMeshShape>(&mMeshColliderBuffer->vertexArray, true);
+                }
+            }
+            ImGui::TreePop();
+        }
+        ImGui::PopID();
+
+    }
+
+    btCollisionShape* MeshCollider::getCollider()
+    {
+        return mMeshShape.get();
     }
 }

@@ -33,6 +33,7 @@ namespace engine
         serializer->pushSaveComponent<BoxCollider>();
         serializer->pushSaveComponent<SphereCollider>();
         serializer->pushSaveComponent<RigidBody>();
+        serializer->pushSaveComponent<MeshCollider>();
 
         serializer->pushLoadComponent("MeshRenderer", [](const YAML::Node &node, Ref<Actor> actor) {
             const std::filesystem::path relativePath = node["MeshPath"].as<std::string>();
@@ -150,6 +151,12 @@ namespace engine
             const float mass = node["Mass"].as<float>();
             actor->addComponent(makeResource<RigidBody>(mass));
         });
+
+        serializer->pushLoadComponent("MeshCollider", [](const YAML::Node &node, Ref<Actor> actor) {
+            const auto relativePath = node["Path"].as<std::string>();
+            const auto fullPath = relativePath.empty() ? "" : file::resourcePath() / relativePath;
+            actor->addComponent(makeResource<MeshCollider>(fullPath));
+        });
     }
 }
 
@@ -259,4 +266,11 @@ void serializeComponent(YAML::Emitter &out, engine::RigidBody *rigidBody)
 {
     out << YAML::Key << "Component" << YAML::Value << "RigidBody";
     out << YAML::Key << "Mass" << YAML::Value << rigidBody->mMass;
+}
+
+void serializeComponent(YAML::Emitter &out, engine::MeshCollider *meshCollider)
+{
+    out << YAML::Key << "Component" << YAML::Value << "MeshCollider";
+    const std::string path = file::makeRelativeToResourcePath(meshCollider->mPath).string();
+    out << YAML::Key << "Path" << YAML::Value << path;
 }

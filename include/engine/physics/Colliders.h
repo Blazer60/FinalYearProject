@@ -8,11 +8,14 @@
 #pragma once
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
+#include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
+#include <BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h>
 
 #include "Component.h"
 #include "Pch.h"
+#include "PhysicsMeshBuffer.h"
 
 namespace engine
 {
@@ -61,5 +64,24 @@ namespace engine
         btSphereShape mSphereShape;
 
         ENGINE_SERIALIZABLE_COMPONENT(SphereCollider);
+    };
+
+    class MeshCollider
+        : public Collider
+    {
+    public:
+        MeshCollider();
+        explicit MeshCollider(std::filesystem::path path);
+        ~MeshCollider() override = default;
+
+        void onDrawUi() override;
+        btCollisionShape *getCollider() override;
+
+    protected:
+        std::shared_ptr<physics::MeshColliderBuffer> mMeshColliderBuffer;
+        std::unique_ptr<btBvhTriangleMeshShape> mMeshShape;
+        std::filesystem::path  mPath;
+
+        ENGINE_SERIALIZABLE_COMPONENT(MeshCollider);
     };
 }
