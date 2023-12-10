@@ -47,6 +47,7 @@ namespace engine
             ViewportImage { "Metallic",     []() -> const TextureBufferObject& { return graphics::renderer->getMetallicBuffer(); } },
             ViewportImage { "SSR",          []() -> const TextureBufferObject& { return graphics::renderer->getSsrBuffer(); } },
             ViewportImage { "Reflections",  []() -> const TextureBufferObject& { return graphics::renderer->getReflectionBuffer(); } },
+            ViewportImage { "Debug View",   []() -> const TextureBufferObject& { return graphics::renderer->getDebugBuffer(); } },
         };
     }
     
@@ -108,6 +109,8 @@ namespace engine
             mMode = ImGuizmo::MODE::WORLD;
         ImGui::SameLine();
         ImGui::Checkbox("Force 1080p", &mForce1080p);
+        ImGui::SameLine();
+        ImGui::Checkbox("Debug Overlay", &mShowDebugOverlay);
         
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - 100.f);
@@ -128,6 +131,7 @@ namespace engine
         
         ImGui::BeginChild("ImageWindow");
 
+        const ImVec2 cursorPos = ImGui::GetCursorPos();
         const ImVec2 regionSize = mForce1080p ? ImVec2(1920.f, 1080.f) : ImGui::GetContentRegionAvail();
         window::setBufferSize(glm::ivec2(regionSize.x, regionSize.y));
         const TextureBufferObject &texture = mViewportImages[mCurrentSelectedImage].requestTexture();
@@ -142,7 +146,14 @@ namespace engine
                     core->setScene(load::scene(path), path);
             }
         }
-        
+
+        if (mShowDebugOverlay)
+        {
+            ImGui::SetCursorPos(cursorPos);
+            const TextureBufferObject &debugTexture = graphics::renderer->getDebugBuffer();
+            ImGui::Image(reinterpret_cast<void *>(debugTexture.getId()), regionSize, ImVec2(0, 1), ImVec2(1, 0));
+        }
+
         mIsHovered = ImGui::IsWindowHovered();
         
         if (auto *x = reinterpret_cast<GLFWwindow*>(ImGui::GetWindowViewport()->PlatformHandle); x != nullptr)

@@ -15,9 +15,12 @@
 
 namespace engine
 {
+    class Collider;
+
     class RigidBody
         : public Component
     {
+        friend class PhysicsCore;
     public:
         RigidBody() = default;
         explicit RigidBody(float mass);
@@ -32,6 +35,7 @@ namespace engine
         float mMass { 10.f };
         std::unique_ptr<btRigidBody> mRigidBody;
         std::unique_ptr<btDefaultMotionState> mMotionState;
+        Ref<Collider> mCollider;
 
         ENGINE_SERIALIZABLE_COMPONENT(RigidBody);
     };

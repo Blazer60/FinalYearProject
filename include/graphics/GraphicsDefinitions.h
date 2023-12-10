@@ -44,4 +44,12 @@ namespace graphics
         glm::mat4 matrix;
         DrawCallback onDraw;
     };
+
+    struct DebugQueueObject
+    {
+        uint32_t    vao;
+        int32_t     indiciesCount;
+        glm::mat4   matrix;
+        glm::vec3   colour;
+    };
 }

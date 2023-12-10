@@ -29,7 +29,7 @@ namespace engine
         void preRender();
         void attachToActor(class Actor *actor);
         void collisionBegin(Actor *otherActor, Component *myComponent, Component *otherComponent, const HitInfo &hitInfo);
-        [[nodiscard]] class Actor *getActor() const;
+        [[nodiscard]] Actor *getActor() const;
         
     protected:
         virtual void onBegin();
@@ -41,7 +41,7 @@ namespace engine
         [[nodiscard]] glm::mat4 getWorldTransform() const;
         
     protected:
-        class Actor *mActor;
+        Actor *mActor;
     };
     
 } // engine

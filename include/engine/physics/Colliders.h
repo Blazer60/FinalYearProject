@@ -35,6 +35,7 @@ namespace engine
 
         void onDrawUi() override;
         btCollisionShape *getCollider() override;
+        [[nodiscard]] glm::vec3 getHalfExtent() const;
 
     protected:
         glm::vec3 mHalfExtent { 0.5f };
@@ -53,6 +54,7 @@ namespace engine
 
         void onDrawUi() override;
         btCollisionShape *getCollider() override;
+        [[nodiscard]] float getRadius() const;
 
     protected:
         float mRadius { 1.f };

@@ -37,7 +37,7 @@ public:
      * @param indicesCount - The number of indices that make up the geometry.
      * @param shader - The shader used to drawUi the element to the geometry buffer.
      * @param renderMode - What primitive to use when rendering.
-     * @param matrix - The modelAndMaterial matrix for this object (used for shadow mapping).
+     * @param matrix - The model matrix for this object (used for shadow mapping).
      * @param onDraw - An event callback that is called just before rendering.
      */
     void drawMesh(
@@ -49,18 +49,43 @@ public:
      * @brief Draws an element to the geometry buffer.
      * @param subMesh - The mesh that you want to be drawn.
      * @param material - The material (shader) used to drawUi the mesh.
-     * @param matrix - The modelAndMaterial's matrix (used for shadow mapping).
+     * @param matrix - The model's matrix (used for shadow mapping).
      */
     void drawMesh(const SubMesh &subMesh, Material &material, const glm::mat4 &matrix);
     
     /**
-     * @brief Draws a number of meshes to the geometry buffer with the same modelAndMaterial matrix.
+     * @brief Draws a number of meshes to the geometry buffer with the same model matrix.
      * @param mesh - N sub-meshes that you want to be drawn to the geometry buffer.
      * @param materials - N materials used to drawUi each mesh. If the material count is one, then only that material
      * will be used.
-     * @param matrix - the modelAndMaterial's matrix (used for shadow mapping).
+     * @param matrix - the model's matrix (used for shadow mapping).
      */
     void drawMesh(const SharedMesh &mesh, const SharedMaterials &materials, const glm::mat4 &matrix);
+
+    /**
+     * @brief Draws an element to the debug buffer.
+     * @param vao - Vertex Array Object.
+     * @param indicesCount - The number of indices that make up the geometry.
+     * @param matrix - The model matrix for this object.
+     * @param colour - The colour the mesh should be.
+     */
+    void drawDebugMesh(uint32_t vao, int32_t indicesCount, const glm::mat4 &matrix, const glm::vec3 &colour);
+
+    /**
+     * @brief Draws an element to the debug buffer.
+     * @param subMesh - The mesh that you want to be drawn.
+     * @param matrix - The model's matrix.
+     * @param colour - The colour the mesh should be.
+     */
+    void drawDebugMesh(const SubMesh &subMesh, const glm::mat4 &matrix, const glm::vec3 &colour);
+
+    /**
+     * @brief Draws a number of meshes to the debug buffer with the same model matrix.
+     * @param mesh - N sub-meshes that you want to be drawn to the debug buffer.
+     * @param matrix - The model's matrix.
+     * @param colour - The colour the mesh should be.
+     */
+    void drawDebugMesh(const SharedMesh &mesh, const glm::mat4 &matrix, const glm::vec3 &colour);
     
     /**
      * @brief Submits a camera that will be used for the render pipeline.
@@ -127,11 +152,11 @@ public:
     [[nodiscard]] const TextureBufferObject &getEmissiveBuffer() const;
     [[nodiscard]] const TextureBufferObject &getLightBuffer() const;
     [[nodiscard]] const TextureBufferObject &getDepthBuffer() const;
-
     [[nodiscard]] const TextureBufferObject &getRoughnessBuffer() const;
     [[nodiscard]] const TextureBufferObject &getMetallicBuffer() const;
     [[nodiscard]] const TextureBufferObject &getSsrBuffer() const;
     [[nodiscard]] const TextureBufferObject &getReflectionBuffer() const;
+    [[nodiscard]] const TextureBufferObject &getDebugBuffer() const;
     
     [[nodiscard]] std::vector<graphics::DirectionalLight> &getDirectionalLights();
     
@@ -160,6 +185,7 @@ protected:
     std::vector<graphics::DirectionalLight>         mDirectionalLightQueue;
     std::vector<graphics::PointLight>               mPointLightQueue;
     std::vector<graphics::Spotlight>                mSpotlightQueue;
+    std::vector<graphics::DebugQueueObject>         mDebugQueue;
     
     std::unique_ptr<HdrTexture>  mHdrImage;
     std::unique_ptr<Cubemap>     mHdrSkybox;
@@ -173,7 +199,8 @@ protected:
     std::unique_ptr<FramebufferObject> mSsrFramebuffer;
     std::unique_ptr<FramebufferObject> mReflectionFramebuffer;
     std::unique_ptr<FramebufferObject> mBlurFramebuffer;
-    
+    std::unique_ptr<FramebufferObject> mDebugFramebuffer;
+
     std::unique_ptr<Shader> mDeferredLightShader;
     std::unique_ptr<Shader> mDirectionalLightShader;
     std::unique_ptr<Shader> mPointLightShader;
@@ -189,6 +216,7 @@ protected:
     std::unique_ptr<Shader> mScreenSpaceReflectionsShader;
     std::unique_ptr<Shader> mColourResolveShader;
     std::unique_ptr<Shader> mBlurShader;
+    std::unique_ptr<Shader> mDebugShader;
     
     SubMesh mFullscreenTriangle;
     SubMesh mUnitSphere;
@@ -207,7 +235,8 @@ protected:
     std::unique_ptr<TextureBufferObject> mAuxiliaryImageBuffer;
     std::unique_ptr<TextureBufferObject> mSsrDataTextureBuffer;
     std::unique_ptr<TextureBufferObject> mReflectionTextureBuffer;
-    
+    std::unique_ptr<TextureBufferObject> mDebugTextureBuffer;
+
     glm::ivec2 mCurrentRenderBufferSize;
     
     float mCurrentEV100 { 10.f };

@@ -101,7 +101,8 @@ namespace engine
         serializer = mSerializer.get();
         attachComponentSerialization();
 
-        physicsSystem = &mPhysics;
+        mPhysics = std::make_unique<PhysicsCore>();
+        physicsSystem = mPhysics.get();
     }
     
     bool Core::initGlfw(int openGlMajorVersion, int openGlMinorVersion)
@@ -316,9 +317,9 @@ namespace engine
                 // We want the other variables to update to avoid 'catch-up' between play mode and edit mode.
                 if (mIsInPlayMode)
                 {
-                    mPhysics.dynamicsWorld->stepSimulation(timers::fixedTime<float>(), 1.f, timers::fixedTime<float>());
+                    mPhysics->dynamicsWorld->stepSimulation(timers::fixedTime<float>(), 1.f, timers::fixedTime<float>());
                     mScene->fixedUpdate();
-                    mPhysics.resolveCollisoinCallbacks();
+                    mPhysics->resolveCollisoinCallbacks();
                 }
 
                 nextUpdateTick += timers::fixedTime<double>();
@@ -330,6 +331,7 @@ namespace engine
             mMainCamera->update();
             mEditor->update();
             mScene->render();
+            mPhysics->renderDebugShapes();
             mRenderer->submit(mMainCamera->toSettings());
             mRenderer->render();
             updateImgui();
@@ -389,7 +391,7 @@ namespace engine
         mScene.reset();
         mScene = std::move(scene);
         mScenePointer = mScene.get();
-        mPhysics.reset();
+        mPhysics->clearContainers();
     }
     
     Scene *Core::getScene() const
@@ -404,7 +406,7 @@ namespace engine
 
     btDiscreteDynamicsWorld* Core::getPhysicsWorld() const
     {
-        return mPhysics.dynamicsWorld.get();
+        return mPhysics->dynamicsWorld.get();
     }
 
     std::string Core::getSceneName()

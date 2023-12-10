@@ -8,11 +8,16 @@
 #include "PhysicsCore.h"
 
 #include "Actor.h"
+#include "AssimpLoader.h"
 #include "Core.h"
 #include "EngineState.h"
 #include "Logger.h"
 #include "LoggerMacros.h"
 #include "PhysicsConversions.h"
+#include "Mesh.h"
+#include "RigidBody.h"
+#include "Colliders.h"
+#include "GraphicsState.h"
 
 namespace engine
 {
@@ -36,7 +41,9 @@ namespace engine
         dispatcher(std::make_unique<btCollisionDispatcher>(configuration.get())),
         overlappingPairCache(std::make_unique<btDbvtBroadphase>()),
         solver(std::make_unique<btSequentialImpulseConstraintSolver>()),
-        dynamicsWorld(std::make_unique<btDiscreteDynamicsWorld>(dispatcher.get(), overlappingPairCache.get(), solver.get(), configuration.get()))
+        dynamicsWorld(std::make_unique<btDiscreteDynamicsWorld>(dispatcher.get(), overlappingPairCache.get(), solver.get(), configuration.get())),
+        mDefaultCube(load::model<PositionVertex>(file::modelPath() / "defaultObjects/DefaultCube.glb")),
+        mDefaultSphere(load::model<PositionVertex>(file::modelPath() / "defaultObjects/DefaultSphere.glb"))
     {
         dynamicsWorld->setGravity(btVector3(0, -9.81f, 0.f));
         dispatcher->setNearCallback(physicsNearCallback);
@@ -51,10 +58,39 @@ namespace engine
         configuration.reset();
     }
 
-    void PhysicsCore::reset()
+    void PhysicsCore::clearContainers()
     {
         mCollisions.clear();
         mCurrentCollisions.clear();
+    }
+
+    void PhysicsCore::renderDebugShapes() const
+    {
+        PROFILE_FUNC();
+
+        const int count = dynamicsWorld->getNumCollisionObjects();
+        for (int i = 0; i < count; ++i)
+        {
+            const btCollisionObject *obj = dynamicsWorld->getCollisionObjectArray()[i];
+            auto const*const rigidBody = static_cast<RigidBody*>(obj->getUserPointer());
+            Actor* actor = rigidBody->getActor();
+            // todo: This needs to follow the hierarchy.
+            const glm::vec3 position = actor->getWorldPosition();
+            const glm::quat rotation = actor->rotation;
+            const glm::mat4 actorTransform = glm::translate(glm::mat4(1.f), position) *  glm::mat4_cast(rotation);
+            if (auto boxCollider = actor->getComponent<BoxCollider>(false); boxCollider.isValid())
+            {
+                const glm::mat4 scale = glm::scale(glm::mat4(1.f), boxCollider->getHalfExtent());
+                const glm::mat4 modelMatrix = actorTransform * scale;
+                graphics::renderer->drawDebugMesh(mDefaultCube, modelMatrix, glm::vec3(1.f, 0.f, 1.f));
+            }
+            else if (auto sphereCollider = actor->getComponent<SphereCollider>(false); sphereCollider.isValid())
+            {
+                const glm::mat4 scale = glm::scale(glm::mat4(1.f), glm::vec3(sphereCollider->getRadius()));
+                const glm::mat4 modelMatrix = actorTransform * scale;
+                graphics::renderer->drawDebugMesh(mDefaultSphere, modelMatrix, glm::vec3(1.f, 0.f, 1.f));
+            }
+        }
     }
 
     void PhysicsCore::resolveCollisoinCallbacks()

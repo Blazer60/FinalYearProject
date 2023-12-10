@@ -43,6 +43,11 @@ namespace engine
         return &mBoxCollider;
     }
 
+    glm::vec3 BoxCollider::getHalfExtent() const
+    {
+        return mHalfExtent;
+    }
+
     SphereCollider::SphereCollider()
         : mSphereShape(mRadius)
     {
@@ -71,5 +76,10 @@ namespace engine
     btCollisionShape* SphereCollider::getCollider()
     {
         return &mSphereShape;
+    }
+
+    float SphereCollider::getRadius() const
+    {
+        return mRadius;
     }
 }

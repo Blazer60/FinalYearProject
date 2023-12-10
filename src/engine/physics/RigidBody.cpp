@@ -32,8 +32,8 @@ namespace engine
         if (!core->isInPlayMode())  // Don't do anything in edit mode.
             return;
 
-        Ref<Collider> collider = mActor->getComponent<Collider>();
-        if (!collider.isValid())
+        mCollider = mActor->getComponent<Collider>();
+        if (!mCollider.isValid())
         {
             WARN("A Rigid Body is attached to an actor but no collider is present.");
             return;
@@ -41,6 +41,7 @@ namespace engine
 
         btTransform transform;
         transform.setIdentity();
+        // todo: This needs to follow the hierarchy.
         transform.setOrigin(physics::cast(mActor->getWorldPosition()));
         transform.setRotation(physics::cast(mActor->rotation));
 
@@ -48,10 +49,10 @@ namespace engine
 
         btVector3 localInertia(0.f, 0.f, 0.f);
         if (isDynamic)
-            collider->getCollider()->calculateLocalInertia(mMass, localInertia);
+            mCollider->getCollider()->calculateLocalInertia(mMass, localInertia);
 
         mMotionState = std::make_unique<btDefaultMotionState>(transform);
-        btRigidBody::btRigidBodyConstructionInfo rbInfo(mMass, mMotionState.get(), collider->getCollider(), localInertia);
+        btRigidBody::btRigidBodyConstructionInfo rbInfo(mMass, mMotionState.get(), mCollider->getCollider(), localInertia);
         mRigidBody = std::make_unique<btRigidBody>(rbInfo);
 
         mRigidBody->setUserPointer(this);
@@ -76,6 +77,7 @@ namespace engine
     {
         btTransform transform;
         mMotionState->getWorldTransform(transform);
+        // todo: This needs to follow the hierarchy.
         mActor->position = physics::cast(transform.getOrigin());
         mActor->rotation = physics::cast(transform.getRotation());
     }

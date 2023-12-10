@@ -91,7 +91,7 @@ namespace engine
         std::unique_ptr<Editor> mEditor;
         RootEventHandler mEventHandler;
 
-        PhysicsCore mPhysics;
+        std::unique_ptr<PhysicsCore> mPhysics;
     };
     
 } // engine

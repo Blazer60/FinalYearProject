@@ -44,6 +44,7 @@ Renderer::Renderer() :
     mScreenSpaceReflectionsShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "ssr/SsrDda.frag");
     mColourResolveShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "ssr/ColourResolve.frag");
     mBlurShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "postProcessing/bloom/BloomDownSample.frag");
+    mDebugShader = std::make_unique<Shader>(file::shaderPath() / "geometry/debug/Debug.vert", file::shaderPath() / "geometry/debug/Debug.frag");
     
     generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
 
@@ -72,6 +73,8 @@ void Renderer::initFrameBuffers()
     mShadowFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ZERO, GL_LESS);
 
     mBlurFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ZERO, GL_ALWAYS);
+
+    mDebugFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ZERO, GL_LESS);
 }
 
 void Renderer::initTextureRenderBuffers()
@@ -89,7 +92,8 @@ void Renderer::initTextureRenderBuffers()
     mPrimaryImageBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
     mAuxiliaryImageBuffer            = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
     mSsrDataTextureBuffer            = std::make_unique<TextureBufferObject>(ssrSize,              GL_RGBA16F,               graphics::filter::Nearest, graphics::wrap::ClampToEdge);
-    mReflectionTextureBuffer         = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F,               graphics::filter::Linear, graphics::wrap::ClampToEdge);
+    mReflectionTextureBuffer         = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F,               graphics::filter::Linear,  graphics::wrap::ClampToEdge);
+    mDebugTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16,                graphics::filter::Linear,  graphics::wrap::ClampToEdge);
     
     // Make sure that the framebuffers have been set up before calling this function.
     mGeometryFramebuffer->attach(mPositionTextureBuffer.get(),    0);
@@ -111,6 +115,9 @@ void Renderer::initTextureRenderBuffers()
     
     // Deferred Lighting.
     mDeferredLightFramebuffer->attach(mDeferredLightingTextureBuffer.get(), 0);
+
+    // Debug.
+    mDebugFramebuffer->attach(mDebugTextureBuffer.get(), 0);
 }
 
 void Renderer::detachTextureRenderBuffersFromFrameBuffers() const
@@ -130,6 +137,8 @@ void Renderer::detachTextureRenderBuffersFromFrameBuffers() const
     mReflectionFramebuffer->detach(0);
 
     mDeferredLightFramebuffer->detach(0);
+
+    mDebugFramebuffer->detach(0);
 }
 
 bool Renderer::debugMessageCallback(GLDEBUGPROC callback)
@@ -190,6 +199,25 @@ void Renderer::drawMesh(const SharedMesh &mesh, const SharedMaterials &materials
             Material& material = *materials[glm::min(i, static_cast<int>((materials.size() - 1)))];
             drawMesh(subMesh, material, matrix);
         }
+    }
+}
+
+void Renderer::drawDebugMesh(const uint32_t vao, const int32_t indicesCount, const glm::mat4& matrix, const glm::vec3& colour)
+{
+    mDebugQueue.emplace_back(graphics::DebugQueueObject { vao, indicesCount, matrix, colour });
+}
+
+void Renderer::drawDebugMesh(const SubMesh& subMesh, const glm::mat4& matrix, const glm::vec3& colour)
+{
+    drawDebugMesh(subMesh.vao(), subMesh.indicesCount(), matrix, colour);
+}
+
+void Renderer::drawDebugMesh(const SharedMesh& mesh, const glm::mat4& matrix, const glm::vec3& colour)
+{
+    for (int i = 0; i < mesh->size(); ++i)
+    {
+        SubMesh &subMesh = *(*mesh)[i];
+        drawDebugMesh(subMesh, matrix, colour);
     }
 }
 
@@ -480,6 +508,28 @@ void Renderer::render()
         
         PROFILE_SCOPE_END(postProcessTimer);
         graphics::popDebugGroup();
+
+        PROFILE_SCOPE_BEGIN(debugView, "Debug View");
+        graphics::pushDebugGroup("Debug View");
+
+        glDisable(GL_CULL_FACE);
+
+        mDebugFramebuffer->bind();
+        mDebugFramebuffer->clear(glm::vec4(0.f));
+        mDebugShader->bind();
+
+        for (const auto & [vao, count, modelMatrix, colour] : mDebugQueue)
+        {
+            mDebugShader->set("u_mvp_matrix", vpMatrix * modelMatrix);
+            mDebugShader->set("u_colour", colour);
+            glBindVertexArray(vao);
+            glDrawElements(GL_LINE_LOOP, count, GL_UNSIGNED_INT, nullptr);
+        }
+
+        glEnable(GL_CULL_FACE);
+
+        PROFILE_SCOPE_END(debugView);
+        graphics::popDebugGroup();
     }
 
     graphics::popDebugGroup();
@@ -726,6 +776,10 @@ void Renderer::clear()
     const uint64_t spotLightCount = mSpotlightQueue.size();
     mSpotlightQueue.clear();
     mSpotlightQueue.reserve(spotLightCount);
+
+    const uint64_t debugQueueCount = mDebugQueue.size();
+    mDebugQueue.clear();
+    mDebugQueue.reserve(debugQueueCount);
 }
 
 
@@ -948,6 +1002,11 @@ const TextureBufferObject &Renderer::getSsrBuffer() const
 const TextureBufferObject& Renderer::getReflectionBuffer() const
 {
     return *mReflectionTextureBuffer;
+}
+
+const TextureBufferObject& Renderer::getDebugBuffer() const
+{
+    return *mDebugTextureBuffer;
 }
 
 float Renderer::getCurrentEV100() const

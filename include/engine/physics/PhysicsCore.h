@@ -14,6 +14,7 @@
 
 #include "Component.h"
 #include "HitInfo.h"
+#include "Mesh.h"
 
 namespace engine
 {
@@ -30,7 +31,8 @@ namespace engine
         PhysicsCore();
         ~PhysicsCore();
 
-        void reset();
+        void clearContainers();
+        void renderDebugShapes() const;
         void resolveCollisoinCallbacks();
 
         std::unique_ptr<btDefaultCollisionConfiguration> configuration;
@@ -43,5 +45,8 @@ namespace engine
         void createHitInfo(const btManifoldArray &manifoldArray, Component *componentA, Component *componentB);
         std::unordered_map<std::string, HitInfoExt> mCollisions;
         std::unordered_set<std::string> mCurrentCollisions;
+
+        SharedMesh mDefaultCube;
+        SharedMesh mDefaultSphere;
     };
 } // engine

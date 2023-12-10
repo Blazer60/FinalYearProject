@@ -61,6 +61,7 @@ namespace engine
         std::vector<ViewportImage> mViewportImages;
         int32_t mCurrentSelectedImage = 0;
         bool mForce1080p { false };
+        bool mShowDebugOverlay { false };
 
         Texture mPlayButton { file::texturePath() / "PlayButton.png" };
         Texture mStopButton { file::texturePath() / "PauseButton.png" };

@@ -84,7 +84,7 @@ namespace engine
          * @returns The first serializeComponent of type T or a subclass of T, Nullptr otherwise.
          */
         template<typename T>
-        Ref<T> getComponent();
+        Ref<T> getComponent(bool warn=true);
         
         /**
          * @tparam T - the type of serializeComponent.
@@ -159,7 +159,7 @@ namespace engine
     }
     
     template<typename T>
-    Ref<T> Actor::getComponent()
+    Ref<T> Actor::getComponent(const bool warn)
     {
         const auto it = std::find_if(mComponents.begin(), mComponents.end(), [](const Resource<Component> &component) {
             const T* t = dynamic_cast<const T*>(component.get());
@@ -181,7 +181,8 @@ namespace engine
             
             if (it2 == mComponentsToAdd.end())
             {
-                WARN("Component % does not exist.", typeid(T).name());
+                if (warn)
+                    WARN("Component % does not exist.", typeid(T).name());
                 return Ref<T>();
             }
             
