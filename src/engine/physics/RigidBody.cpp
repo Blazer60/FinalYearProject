@@ -75,11 +75,14 @@ namespace engine
 
     void RigidBody::onFixedUpdate()
     {
-        btTransform transform;
-        mMotionState->getWorldTransform(transform);
-        // todo: This needs to follow the hierarchy.
-        mActor->position = physics::cast(transform.getOrigin());
-        mActor->rotation = physics::cast(transform.getRotation());
+        if (mMotionState)
+        {
+            btTransform transform;
+            mMotionState->getWorldTransform(transform);
+            // todo: This needs to follow the hierarchy.
+            mActor->position = physics::cast(transform.getOrigin());
+            mActor->rotation = physics::cast(transform.getRotation());
+        }
     }
 
     void RigidBody::teleport()

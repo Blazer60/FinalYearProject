@@ -10,6 +10,7 @@
 #include "Pch.h"
 
 #include <vec3.hpp>
+#include <btBulletCollisionCommon.h>
 
 namespace engine::physics
 {

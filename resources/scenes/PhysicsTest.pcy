@@ -79,3 +79,29 @@ Actors:
       - Component: CollisionInfo
     Children:
       []
+  - Name: Unreal Ball
+    UUID: 14175422703257766045
+    position: [3.37363553, 1.40399492, -9]
+    rotation: [0.314435512, -0.389189452, 0.0216888785, -0.865558445]
+    scale: [0.999998748, 0.999999046, 0.999999404]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\MaterialBall.glb
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+      - Component: MeshCollider
+        Path: models\MaterialBall.glb
+      - Component: RigidBody
+        Mass: 0
+    Children:
+      []

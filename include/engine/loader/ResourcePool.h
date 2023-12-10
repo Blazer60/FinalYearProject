@@ -18,6 +18,7 @@
 #include <assimp/postprocess.h>
 
 #include "AudioSource.h"
+#include "PhysicsMeshBuffer.h"
 
 namespace engine
 {
@@ -37,6 +38,8 @@ namespace engine
         [[nodiscard]] std::shared_ptr<Texture> loadTexture(const std::filesystem::path &path);
 
         [[nodiscard]] std::shared_ptr<AudioBuffer> loadAudioBuffer(const std::filesystem::path &path);
+
+        [[nodiscard]] std::shared_ptr<physics::MeshColliderBuffer> loadPhysicsMesh(const std::filesystem::path &path);
     
     protected:
         // If we make sharedResource class, we can kill this when it only has a single use (here).
@@ -44,6 +47,7 @@ namespace engine
         std::unordered_map<std::string, SharedMesh> mModels;
         std::unordered_map<std::string, std::shared_ptr<Texture>> mTextures;
         std::unordered_map<std::string, std::shared_ptr<AudioBuffer>> mAudioBuffers;
+        std::unordered_map<std::string, std::shared_ptr<physics::MeshColliderBuffer>> mMeshColliders;
     };
     
     
