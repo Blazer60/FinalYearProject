@@ -75,6 +75,7 @@ namespace engine
         explicit MeshCollider(const std::filesystem::path&path);
         ~MeshCollider() override = default;
 
+        void onBegin() override;
         void onDrawUi() override;
         btCollisionShape *getCollider() override;
         [[nodiscard]] const SharedMesh &getDebugMesh() const;

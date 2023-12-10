@@ -11,7 +11,7 @@
 void CollisionInfo::onCollisionBegin(
  engine::Actor* otherActor, Component* myComponent, Component* otherComponent, const engine::HitInfo& hitInfo)
 {
-    MESSAGE("Collision Begin has been executed");
+    MESSAGE("Collision Begin: %", hitInfo.normal);
 }
 
 void CollisionInfo::onDrawUi()

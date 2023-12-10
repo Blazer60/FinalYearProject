@@ -513,6 +513,7 @@ void Renderer::render()
         graphics::pushDebugGroup("Debug View");
 
         glDisable(GL_CULL_FACE);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         mDebugFramebuffer->bind();
         mDebugFramebuffer->clear(glm::vec4(0.f));
@@ -523,10 +524,11 @@ void Renderer::render()
             mDebugShader->set("u_mvp_matrix", vpMatrix * modelMatrix);
             mDebugShader->set("u_colour", colour);
             glBindVertexArray(vao);
-            glDrawElements(GL_LINE_LOOP, count, GL_UNSIGNED_INT, nullptr);
+            glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
         }
 
         glEnable(GL_CULL_FACE);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         PROFILE_SCOPE_END(debugView);
         graphics::popDebugGroup();

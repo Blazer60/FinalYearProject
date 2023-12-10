@@ -2,7 +2,7 @@ Scene: scenes\PhysicsTest.pcy
 Actors:
   - Name: Cube
     UUID: 15887427644234860914
-    position: [-3.13768601, 11.7771645, -9]
+    position: [5.92172241, 1.89649189, -8.52331829]
     rotation: [0.974490702, 0, -0, -0.224427819]
     scale: [0.999999881, 0.999999881, 1]
     Components:
@@ -28,16 +28,16 @@ Actors:
       []
   - Name: Cube
     UUID: 5334864629118171243
-    position: [0, -5.78620529, -9]
-    rotation: [0.999924183, 0, 0, 0.0123144761]
+    position: [-0.814951956, -2.1047647, -0.756587267]
+    rotation: [0.999924183, 0, 0, 0.0123145068]
     scale: [10, 1, 10]
     Components:
       - Component: MeshRenderer
         MeshPath: models\defaultObjects\DefaultCube.glb
         Materials:
           - MaterialType: StandardMaterial
-            Albedo: [1, 1, 1]
-            Roughness: 1
+            Albedo: [0.322284102, 0.322251856, 0.322251856]
+            Roughness: 0
             Metallic: 0
             Emissive: [0, 0, 0]
             HeightScale: 0.100000001
@@ -54,7 +54,7 @@ Actors:
       []
   - Name: Sphere
     UUID: 5952713876831364267
-    position: [2.84374928, 10.075922, -9]
+    position: [-1.0138123, 5.43917513, 0.189602256]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
@@ -79,14 +79,30 @@ Actors:
       - Component: CollisionInfo
     Children:
       []
-  - Name: Unreal Ball
-    UUID: 14175422703257766045
-    position: [3.37363553, 1.40399492, -9]
-    rotation: [0.314435512, -0.389189452, 0.0216888785, -0.865558445]
-    scale: [0.999998748, 0.999999046, 0.999999404]
+  - Name: Light
+    UUID: 17779016903016937666
+    position: [-1.49189758, 5.13793182, 12.512331]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: DirectionalLight
+        Colour: [0.930000007, 0.930000007, 0.949999988]
+        Intensity: 10000
+        Yaw: 45
+        Pitch: 45
+        CascadeDepths: [0.0399999991, 0.159999996, 0.360000014, 0.639999986]
+        ZMultiplier: 5
+        Bias: [0.00100000005, 0]
+    Children:
+      []
+  - Name: Model
+    UUID: 15534902605362897690
+    position: [-0.690536737, 1.30523038, -0.120544076]
+    rotation: [0.234578341, -0.646468699, -0.704161048, 0.176658764]
+    scale: [0.999999821, 1.00000036, 1.00000048]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\MaterialBall.glb
+        MeshPath: models\defaultObjects\DefaultCube.glb
         Materials:
           - MaterialType: StandardMaterial
             Albedo: [1, 1, 1]
@@ -100,7 +116,7 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
       - Component: MeshCollider
-        Path: models\MaterialBall.glb
+        Path: models\defaultObjects\DefaultCube.glb
       - Component: RigidBody
         Mass: 0
     Children:

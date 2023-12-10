@@ -92,7 +92,7 @@ namespace engine
             }
             else if (auto meshCollider = actor->getComponent<MeshCollider>(false); meshCollider.isValid())
             {
-                const glm::mat4 modelMatrix = actorTransform;
+                const glm::mat4 modelMatrix = actor->getLocalTransform();
                 graphics::renderer->drawDebugMesh(meshCollider->getDebugMesh(), modelMatrix, glm::vec3(1.f, 0.f, 1.f));
             }
         }

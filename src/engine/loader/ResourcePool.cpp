@@ -87,10 +87,7 @@ namespace engine
         const aiScene *scene = importer.ReadFile(
             path.string(),
             aiProcess_GlobalScale           |
-            aiProcess_Triangulate           |
-            aiProcess_JoinIdenticalVertices |
-            aiProcess_OptimizeMeshes        |
-            aiProcess_OptimizeGraph         );
+            aiProcess_Triangulate           );
 
         if (scene == nullptr)
         {

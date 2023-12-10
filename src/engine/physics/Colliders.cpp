@@ -99,6 +99,12 @@ namespace engine
         initialiseBasedOnPath(path);
     }
 
+    void MeshCollider::onBegin()
+    {
+        if (mMeshShape)
+            mMeshShape->setLocalScaling(physics::cast(mActor->scale));
+    }
+
     void MeshCollider::onDrawUi()
     {
         ImGui::PushID("Mesh Collider");
