@@ -197,6 +197,7 @@ endif ()
 add_compile_definitions(
         GLEW_STATIC
         YAML_CPP_STATIC_DEFINE  # Forces YAML to be built statically regardless of cmake settings. see yaml-cpp/dll.h
+        B3_DEBUG=0
         )
 
 if (${ENABLE_PROFILER})
@@ -255,6 +256,7 @@ else ()
     set(ASSIMP_BUILD_STL_IMPORTER ON)
     set(ASSIMP_BUILD_GLTF_IMPORTER ON)
     set(ASSIMP_BUILD_FBX_IMPORTER ON)
+    set(ASSIMP_WARNINGS_AS_ERRORS OFF)
     add_subdirectory(vendor/assimp)
     set(YAML_BUILD_SHARED_LIBS OFF)
     add_subdirectory(vendor/yaml-cpp)

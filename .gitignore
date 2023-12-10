@@ -5,3 +5,5 @@ cmake-build-release/
 /cmake-build-release-visual-studio/
 /cmake-build-release-visual-studio-x86/
 /.clang-format
+/cmake-build-debug-visual-studio-clang/
+/cmake-build-release-visual-studio-clang/
