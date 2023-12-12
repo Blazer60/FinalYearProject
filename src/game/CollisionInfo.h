@@ -17,8 +17,12 @@
 class CollisionInfo
     : public engine::Component
 {
+    void onBegin() override;
     void onCollisionBegin(engine::Actor* otherActor, Component* myComponent, Component* otherComponent, const engine::HitInfo& hitInfo) override;
     void onDrawUi() override;
+
+protected:
+    Ref<engine::SoundComponent> mSound;
 
     SERIALIZABLE_COMPONENT(CollisionInfo);
 };

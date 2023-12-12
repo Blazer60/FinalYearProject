@@ -7,11 +7,21 @@
 
 #include "CollisionInfo.h"
 #include "Actor.h"
+#include "SoundComponent.h"
+
+void CollisionInfo::onBegin()
+{
+    mSound = mActor->getComponent<engine::SoundComponent>(false);
+}
 
 void CollisionInfo::onCollisionBegin(
  engine::Actor* otherActor, Component* myComponent, Component* otherComponent, const engine::HitInfo& hitInfo)
 {
     MESSAGE("Collision Begin: %", hitInfo.normal);
+    if (mSound.isValid())
+    {
+        mSound->playSound();
+    }
 }
 
 void CollisionInfo::onDrawUi()

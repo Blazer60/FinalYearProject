@@ -28,7 +28,7 @@ Actors:
       []
   - Name: Sphere
     UUID: 5952713876831364267
-    position: [-8.89060783, 8.31267262, -14.6136904]
+    position: [2.31177211, 4.89152718, -14.6136904]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
@@ -51,6 +51,9 @@ Actors:
       - Component: RigidBody
         Mass: 10
       - Component: CollisionInfo
+      - Component: SoundComponent
+        Path: audio\MetalPipe.ogg
+        Volume: 100
     Children:
       []
   - Name: Light
@@ -79,11 +82,11 @@ Actors:
         MeshPath: models\Dust.glb
         Materials:
           - MaterialType: StandardMaterial
-            Albedo: [1, 1, 1]
-            Roughness: 1
+            Albedo: [0.490306437, 0.490257412, 0.490257412]
+            Roughness: 0.51700002
             Metallic: 0
             Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
+            HeightScale: 0
             DiffuseMap: ""
             NormalMap: ""
             HeightMap: ""

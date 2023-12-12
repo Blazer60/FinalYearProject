@@ -132,6 +132,19 @@ namespace engine
 
     void PhysicsCore::createHitInfo(const btManifoldArray& manifoldArray, Component* componentA, Component* componentB)
     {
+        const int count = manifoldArray.size();
+        bool hasAnyContact = false;
+        for (int i = 0; i < count; ++i)
+        {
+            if (auto *const manifold = manifoldArray[i]; manifold->getNumContacts() > 0)
+            {
+                hasAnyContact = true;
+                break;
+            }
+        }
+        if (!hasAnyContact)
+            return;
+
         auto *const actorA = componentA->getActor();
         auto *const actorB = componentB->getActor();
 
@@ -146,7 +159,6 @@ namespace engine
         hitInfoExt.hitPositionWorldB = glm::vec3(0.f);
         hitInfoExt.hitNormalWorldB   = glm::vec3(0.f);
 
-        const int count = manifoldArray.size();
         for (int i = 0; i < count; ++i)
         {
             auto *const manifold = manifoldArray[i];
