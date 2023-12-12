@@ -55,7 +55,7 @@ namespace engine
         template<typename TActor, std::enable_if_t<std::is_convertible_v<TActor*, Actor*>, bool> = true>
         Ref<TActor> addActor(Resource<TActor> &&actor);
 
-        Ref<Actor> getActor(UUID actorId) const;
+        Ref<Actor> getActor(UUID actorId, bool warn=true) const;
         
     protected:
         virtual void onUpdate();

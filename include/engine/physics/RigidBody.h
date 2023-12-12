@@ -30,12 +30,18 @@ namespace engine
         void onDrawUi() override;
         void onFixedUpdate() override;
         void teleport();
+        void setGroupMask(int mask);
+        void setCollisionMask(int mask);
 
     protected:
+        void addToPhysicsWorld();
+
         float mMass { 10.f };
         std::unique_ptr<btRigidBody> mRigidBody;
         std::unique_ptr<btDefaultMotionState> mMotionState;
         Ref<Collider> mCollider;
+        int mGroupMask { btBroadphaseProxy::DefaultFilter };
+        int mCollisionMask { btBroadphaseProxy::AllFilter };
 
         ENGINE_SERIALIZABLE_COMPONENT(RigidBody);
     };

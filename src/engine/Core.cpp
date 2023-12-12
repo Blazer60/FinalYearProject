@@ -392,6 +392,7 @@ namespace engine
         mScene = std::move(scene);
         mScenePointer = mScene.get();
         mPhysics->clearContainers();
+        editor->relinkSelectedActor();
     }
     
     Scene *Core::getScene() const

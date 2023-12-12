@@ -27,6 +27,12 @@ namespace engine
             core->getPhysicsWorld()->removeRigidBody(mRigidBody.get());
     }
 
+    void RigidBody::addToPhysicsWorld()
+    {
+        mRigidBody->setUserPointer(this);
+        core->getPhysicsWorld()->addRigidBody(mRigidBody.get(), mGroupMask, mCollisionMask);
+    }
+
     void RigidBody::onBegin()
     {
         if (!core->isInPlayMode())  // Don't do anything in edit mode.
@@ -55,8 +61,7 @@ namespace engine
         btRigidBody::btRigidBodyConstructionInfo rbInfo(mMass, mMotionState.get(), mCollider->getCollider(), localInertia);
         mRigidBody = std::make_unique<btRigidBody>(rbInfo);
 
-        mRigidBody->setUserPointer(this);
-        core->getPhysicsWorld()->addRigidBody(mRigidBody.get());
+        addToPhysicsWorld();
     }
 
     void RigidBody::onDrawUi()
@@ -68,6 +73,55 @@ namespace engine
                 mActor->removeComponent(this);
 
             ImGui::DragFloat("Mass", &mMass);
+            // ImGui::PushID("CollisionMaskID");
+
+            // ImGui::PushID("GroupMaskId");
+            // ImGui::Text("Group Mask");
+            // ImGui::CheckboxFlags("Default Filter",   &mGroupMask, btBroadphaseProxy::DefaultFilter);
+            // ImGui::CheckboxFlags("Static Filter",    &mGroupMask, btBroadphaseProxy::StaticFilter);
+            // ImGui::CheckboxFlags("Kinematic Filter", &mGroupMask, btBroadphaseProxy::KinematicFilter);
+            // ImGui::CheckboxFlags("Debris Filter",    &mGroupMask, btBroadphaseProxy::DebrisFilter);
+            // ImGui::CheckboxFlags("Sensor Trigger",   &mGroupMask, btBroadphaseProxy::SensorTrigger);
+            // ImGui::CheckboxFlags("Character Filter", &mGroupMask, btBroadphaseProxy::CharacterFilter);
+            // ImGui::PopID();
+            //
+            // ImGui::Text("Collision Mask");
+            // ImGui::CheckboxFlags("Default Filter",   &mCollisionMask, btBroadphaseProxy::DefaultFilter);
+            // ImGui::CheckboxFlags("Static Filter",    &mCollisionMask, btBroadphaseProxy::StaticFilter);
+            // ImGui::CheckboxFlags("Kinematic Filter", &mCollisionMask, btBroadphaseProxy::KinematicFilter);
+            // ImGui::CheckboxFlags("Debris Filter",    &mCollisionMask, btBroadphaseProxy::DebrisFilter);
+            // ImGui::CheckboxFlags("Sensor Trigger",   &mCollisionMask, btBroadphaseProxy::SensorTrigger);
+            // ImGui::CheckboxFlags("Character Filter", &mCollisionMask, btBroadphaseProxy::CharacterFilter);
+            // ImGui::PopID();
+
+            auto drawRow = [this](const std::string &name, const int flag) {
+                ImGui::PushID(name.c_str());
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::Text(name.c_str());
+                ImGui::TableNextColumn();
+                ImGui::CheckboxFlags("##GroupMask", &mGroupMask, flag);
+                ImGui::TableNextColumn();
+                ImGui::CheckboxFlags("##ColliderMask", &mCollisionMask, flag);
+                ImGui::PopID();
+            };
+
+            if (ImGui::BeginTable("Collision Mask Matrix", 3))
+            {
+                ImGui::TableSetupColumn("Name");
+                ImGui::TableSetupColumn("Group Mask");
+                ImGui::TableSetupColumn("Collision Mask");
+                ImGui::TableHeadersRow();
+                drawRow("Default Filter",    btBroadphaseProxy::DefaultFilter);
+                drawRow("Static Filer",      btBroadphaseProxy::StaticFilter);
+                drawRow("Kinematic Filter",  btBroadphaseProxy::KinematicFilter);
+                drawRow("Debris Filter",     btBroadphaseProxy::DebrisFilter);
+                drawRow("Sensor Trigger",    btBroadphaseProxy::SensorTrigger);
+                drawRow("Character Filter",  btBroadphaseProxy::CharacterFilter);
+
+                ImGui::EndTable();
+            }
+
             ImGui::TreePop();
         }
         ImGui::PopID();
@@ -101,5 +155,15 @@ namespace engine
         mRigidBody->clearForces();
         // motionState->setWorldTransform(transform);
         // mMotionState->setWorldTransform(transform);
+    }
+
+    void RigidBody::setGroupMask(const int mask)
+    {
+        mGroupMask = mask;
+    }
+
+    void RigidBody::setCollisionMask(const int mask)
+    {
+        mCollisionMask = mask;
     }
 } // engine

@@ -89,6 +89,8 @@ namespace engine
          * onUpdate function, use that instead.
          */
         void addUpdateAction(const std::function<void()> &callback);
+
+        void relinkSelectedActor();
     protected:
         void onDrawUi() override;
         void drawSceneHierarchyPanel();
@@ -101,12 +103,15 @@ namespace engine
         void drawWindowDropDown();
         void drawMenuBar();
         void moveActors();
-    
+
+        void setSelectedActor(Ref<Actor> actor);
+
         Viewport mViewport;
         LogWindow mLogWindow;
         ResourceFolder mResourceFolder;
         ProfilerViewer mProfilerViewer;
         Ref<Actor> mSelectedActor;
+        UUID mSelectedActorId { 0 };
         std::vector<ActorDetails> mMenuList;
         std::vector<std::unique_ptr<ComponentDetails>> mComponentList;
         

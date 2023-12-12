@@ -149,7 +149,17 @@ namespace engine
 
         serializer->pushLoadComponent("RigidBody", [](const YAML::Node &node, Ref<Actor> actor) {
             const float mass = node["Mass"].as<float>();
-            actor->addComponent(makeResource<RigidBody>(mass));
+            auto rb = actor->addComponent(makeResource<RigidBody>(mass));
+            if (node["GroupMask"].IsDefined())
+            {
+                const int groupMask = node["GroupMask"].as<int>();
+                rb->setGroupMask(groupMask);
+            }
+            if (node["CollisionMask"].IsDefined())
+            {
+                const int collisionMask = node["CollisionMask"].as<int>();
+                rb->setCollisionMask(collisionMask);
+            }
         });
 
         serializer->pushLoadComponent("MeshCollider", [](const YAML::Node &node, Ref<Actor> actor) {
@@ -266,6 +276,8 @@ void serializeComponent(YAML::Emitter &out, engine::RigidBody *rigidBody)
 {
     out << YAML::Key << "Component" << YAML::Value << "RigidBody";
     out << YAML::Key << "Mass" << YAML::Value << rigidBody->mMass;
+    out << YAML::Key << "GroupMask" << YAML::Value << rigidBody->mGroupMask;
+    out << YAML::Key << "CollisionMask" << YAML::Value << rigidBody->mCollisionMask;
 }
 
 void serializeComponent(YAML::Emitter &out, engine::MeshCollider *meshCollider)

@@ -234,7 +234,13 @@ namespace engine
             ImGui::EndCombo();
         }
     }
-    
+
+    void Editor::setSelectedActor(Ref<Actor> actor)
+    {
+        mSelectedActor = actor;
+        mSelectedActorId = actor->getId();
+    }
+
     void Editor::drawSceneHierarchyForActor(Ref<Actor> actor)
     {
         const std::string name = std::string(actor->getName()) + "##" + std::to_string(actor->getId());
@@ -265,10 +271,10 @@ namespace engine
                 }
                 ImGui::EndDragDropTarget();
             }
-            
+
             if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
-                mSelectedActor = actor;
-            
+                setSelectedActor(actor);
+
             
             for (UUID childId : actor->getChildren())
                 drawSceneHierarchyForActor(actor->getScene()->getActor(childId));
@@ -364,6 +370,11 @@ namespace engine
         mOnUpdate.push_back(callback);
     }
 
+    void Editor::relinkSelectedActor()
+    {
+        mSelectedActor = core->getScene()->getActor(mSelectedActorId, false);
+    }
+
     void Editor::drawSceneSettings()
     {
         if (!mShowSceneSettings)
@@ -394,7 +405,7 @@ namespace engine
             file::shaderPath() / "geometry/standard/Standard.vert",
             file::shaderPath() / "geometry/standard/Standard.frag"));
         meshRenderer->addMaterial(material);
-        
-        mSelectedActor = actor;
+
+        setSelectedActor(actor);
     }
 }

@@ -38,8 +38,8 @@ void MyScene::onImguiUpdate()
     if (ImGui::DragFloat("Luminance Multiplier", &mLuminanceMultiplier))
         graphics::renderer->setIblMultiplier(mLuminanceMultiplier);
 
-    // static bool yes = true;
-    // ImGui::ShowDemoWindow(&yes);
+    static bool yes = true;
+    ImGui::ShowDemoWindow(&yes);
 }
 
 void MyScene::onImguiMenuUpdate()

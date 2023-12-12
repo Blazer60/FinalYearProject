@@ -133,7 +133,7 @@ namespace engine
             getActor(childId)->markForDeath();
     }
 
-    Ref<Actor> Scene::getActor(const UUID actorId) const
+    Ref<Actor> Scene::getActor(const UUID actorId, const bool warn) const
     {
         for (const auto & actor : mActors)
         {
@@ -147,7 +147,8 @@ namespace engine
                 return actor;
         }
 
-        WARN("Actor with ID % does not exist", actorId);
+        if (warn)
+            WARN("Actor with ID % does not exist", actorId);
 
         return Ref<Actor>();
     }
