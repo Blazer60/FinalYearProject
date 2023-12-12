@@ -86,6 +86,14 @@ public:
      * @param colour - The colour the mesh should be.
      */
     void drawDebugMesh(const SharedMesh &mesh, const glm::mat4 &matrix, const glm::vec3 &colour);
+
+    /**
+     * @brief Draws a line in world space to the debug buffer.
+     * @param startPosition - The start position of the line.
+     * @param endPosition - The end position of the line.
+     * @param colour - The colour that the line should be.
+     */
+    void drawDebugLine(const glm::vec3 &startPosition, const glm::vec3 &endPosition, const glm::vec3 &colour);
     
     /**
      * @brief Submits a camera that will be used for the render pipeline.
@@ -186,6 +194,7 @@ protected:
     std::vector<graphics::PointLight>               mPointLightQueue;
     std::vector<graphics::Spotlight>                mSpotlightQueue;
     std::vector<graphics::DebugQueueObject>         mDebugQueue;
+    std::vector<graphics::LineQueueObject>          mLineQueue;
     
     std::unique_ptr<HdrTexture>  mHdrImage;
     std::unique_ptr<Cubemap>     mHdrSkybox;
@@ -217,9 +226,11 @@ protected:
     std::unique_ptr<Shader> mColourResolveShader;
     std::unique_ptr<Shader> mBlurShader;
     std::unique_ptr<Shader> mDebugShader;
+    std::unique_ptr<Shader> mLineShader;
     
     SubMesh mFullscreenTriangle;
     SubMesh mUnitSphere;
+    SubMesh mLine;
     
     std::unique_ptr<TextureBufferObject> mAlbedoTextureBuffer;
     std::unique_ptr<TextureBufferObject> mDepthTextureBuffer;

@@ -137,3 +137,23 @@ struct PositionVertex
         return { { GL_FLOAT, 3 } };
     }
 };
+
+/**
+ * @brief A vertex with a single id. This is mainly for simple line rendering.
+ */
+struct IdVertex
+    : public Vertex
+{
+    constexpr explicit IdVertex(unsigned short id)
+        : id(id)
+    {
+
+    }
+
+    static Instructions layout()
+    {
+        return { { GL_UNSIGNED_SHORT, 1 } };
+    }
+
+    unsigned short id;
+};

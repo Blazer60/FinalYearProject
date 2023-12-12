@@ -102,14 +102,12 @@ namespace engine
             engine::physics::MeshDataBuffer meshDataBuffer;
 
             const aiMesh *mesh = scene->mMeshes[i];
-            int localMaxIndex = 0;
 
             for (int j = 0; j < mesh->mNumFaces; ++j)
             {
                 for (int k = 0; k < mesh->mFaces[j].mNumIndices; ++k)
                 {
                     const int index = mesh->mFaces[j].mIndices[k];
-                    localMaxIndex = glm::max(index, localMaxIndex);
                     meshDataBuffer.indices.emplace_back(index);
                 }
             }
@@ -127,20 +125,22 @@ namespace engine
         // We're using assimp's logger so that the last message when collapsed is this.
         Assimp::DefaultLogger::get()->info("Load successful.");
 
-        for (const engine::physics::MeshDataBuffer &dataBuffer : meshColliderBuffer->meshDataBuffers)
+        for (const physics::MeshDataBuffer &dataBuffer : meshColliderBuffer->meshDataBuffers)
         {
             btIndexedMesh indexedMesh;
-            indexedMesh.m_numTriangles = dataBuffer.indices.size() / 3;
-            indexedMesh.m_triangleIndexBase = reinterpret_cast<const unsigned char*>(dataBuffer.indices.data());
+            // Number of triangles doesn't make sense here but it seems to be what Bullet wants?
+            indexedMesh.m_numTriangles = static_cast<int>(dataBuffer.indices.size()) - 2;
+            indexedMesh.m_triangleIndexBase = (const unsigned char*)dataBuffer.indices.data();
             indexedMesh.m_triangleIndexStride = sizeof(int);
-            indexedMesh.m_numVertices = dataBuffer.vertices.size();
-            indexedMesh.m_vertexBase = reinterpret_cast<const unsigned char*>(dataBuffer.vertices.data());
+            indexedMesh.m_numVertices = static_cast<int>(dataBuffer.vertices.size());
+            indexedMesh.m_vertexBase = (const unsigned char*)dataBuffer.vertices.data();
             indexedMesh.m_vertexStride = sizeof(float) * 3;
-            meshColliderBuffer->indexedMeshes.push_back(std::move(indexedMesh));
+            indexedMesh.m_indexType = PHY_INTEGER;
+            meshColliderBuffer->indexedMeshes.push_back(indexedMesh);
         }
 
         for (btIndexedMesh indexedMesh : meshColliderBuffer->indexedMeshes)
-            meshColliderBuffer->vertexArray.addIndexedMesh(indexedMesh);
+            meshColliderBuffer->vertexArray.addIndexedMesh(indexedMesh, PHY_INTEGER);
 
         mMeshColliders[hashName] = meshColliderBuffer;
         return meshColliderBuffer;

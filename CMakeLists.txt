@@ -153,6 +153,8 @@ add_executable(${PROJECT_NAME}
         src/engine/loader/physicsMesh.cpp
         include/engine/loader/physicsMesh.h
         include/engine/physics/PhysicsMeshBuffer.h
+        src/engine/physics/PhysicsDebugDrawer.cpp
+        include/engine/physics/PhysicsDebugDrawer.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

@@ -20,7 +20,8 @@ void setVaoLayout(unsigned int vao, const Instructions &instructions)
 {
     const std::unordered_map<GLenum, int> typeToSize {
         { GL_FLOAT, 4 },
-        { GL_DOUBLE, 8 }
+        { GL_DOUBLE, 8 },
+        { GL_UNSIGNED_SHORT, sizeof(unsigned short) },
     };
     
     const unsigned int bindingIndex = 0;

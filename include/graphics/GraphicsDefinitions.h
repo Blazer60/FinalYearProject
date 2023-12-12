@@ -52,4 +52,11 @@ namespace graphics
         glm::mat4   matrix;
         glm::vec3   colour;
     };
+
+    struct LineQueueObject
+    {
+        glm::vec3 startPosition;
+        glm::vec3 endPosition;
+        glm::vec3 colour;
+    };
 }

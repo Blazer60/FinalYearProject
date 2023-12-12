@@ -17,7 +17,8 @@
 Renderer::Renderer() :
     mCurrentRenderBufferSize(window::bufferSize()),
     mFullscreenTriangle(primitives::fullscreenTriangle()),
-    mUnitSphere(primitives::invertedSphere())
+    mUnitSphere(primitives::invertedSphere()),
+    mLine(primitives::line())
 {
     // Blending texture data / enabling lerping.
     glEnable(GL_BLEND);
@@ -45,6 +46,7 @@ Renderer::Renderer() :
     mColourResolveShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "ssr/ColourResolve.frag");
     mBlurShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "postProcessing/bloom/BloomDownSample.frag");
     mDebugShader = std::make_unique<Shader>(file::shaderPath() / "geometry/debug/Debug.vert", file::shaderPath() / "geometry/debug/Debug.frag");
+    mLineShader = std::make_unique<Shader>(file::shaderPath() / "geometry/debug/Line.vert", file::shaderPath() / "geometry/debug/Line.frag");
     
     generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
 
@@ -219,6 +221,11 @@ void Renderer::drawDebugMesh(const SharedMesh& mesh, const glm::mat4& matrix, co
         SubMesh &subMesh = *(*mesh)[i];
         drawDebugMesh(subMesh, matrix, colour);
     }
+}
+
+void Renderer::drawDebugLine(const glm::vec3& startPosition, const glm::vec3& endPosition, const glm::vec3& colour)
+{
+    mLineQueue.emplace_back(graphics::LineQueueObject { startPosition, endPosition, colour });
 }
 
 void Renderer::submit(const CameraSettings &cameraSettings)
@@ -530,6 +537,17 @@ void Renderer::render()
         glEnable(GL_CULL_FACE);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+        mLineShader->bind();
+        mLineShader->set("u_mvp_matrix", vpMatrix);
+        glBindVertexArray(mLine.vao());
+        for (const auto &[startPosition, endPosition, colour] : mLineQueue)
+        {
+            mLineShader->set("u_locationA", startPosition);
+            mLineShader->set("u_locationB", endPosition);
+            mLineShader->set("u_colour",    colour);
+            glDrawElements(GL_LINES, mLine.indicesCount(), GL_UNSIGNED_INT, nullptr);
+        }
+
         PROFILE_SCOPE_END(debugView);
         graphics::popDebugGroup();
     }
@@ -782,6 +800,10 @@ void Renderer::clear()
     const uint64_t debugQueueCount = mDebugQueue.size();
     mDebugQueue.clear();
     mDebugQueue.reserve(debugQueueCount);
+
+    const uint64_t lineQueueCount = mLineQueue.size();
+    mLineQueue.clear();
+    mLineQueue.reserve(lineQueueCount);
 }
 
 

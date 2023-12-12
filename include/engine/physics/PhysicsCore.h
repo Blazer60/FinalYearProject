@@ -15,6 +15,7 @@
 #include "Component.h"
 #include "HitInfo.h"
 #include "Mesh.h"
+#include "PhysicsDebugDrawer.h"
 
 namespace engine
 {
@@ -40,6 +41,7 @@ namespace engine
         std::unique_ptr<btBroadphaseInterface> overlappingPairCache;
         std::unique_ptr<btSequentialImpulseConstraintSolver> solver;
         std::unique_ptr<btDiscreteDynamicsWorld> dynamicsWorld;
+        std::unique_ptr<PhysicsDebugDrawer> debugDrawer;
 
     protected:
         void createHitInfo(const btManifoldArray &manifoldArray, Component *componentA, Component *componentB);

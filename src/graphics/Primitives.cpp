@@ -2968,3 +2968,10 @@ SubMesh primitives::invertedSphere()
     
     return { sphereData, indices };
 }
+
+SubMesh primitives::line()
+{
+    const std::vector vertices { IdVertex(0), IdVertex(1) };
+    const std::vector indices { 0u, 1u };
+    return { vertices, indices };
+}
