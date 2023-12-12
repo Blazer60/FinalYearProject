@@ -24,11 +24,14 @@ Actors:
         HalfBoxExtent: [1, 1, 1]
       - Component: RigidBody
         Mass: 10
+        GroupMask: 1
+        CollisionMask: -1
+        IsTrigger: false
     Children:
       []
   - Name: Sphere
     UUID: 5952713876831364267
-    position: [2.31177211, 4.89152718, -14.6136904]
+    position: [20.5616627, 4.54878426, -59.2642288]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
@@ -50,6 +53,9 @@ Actors:
         Radius: 1
       - Component: RigidBody
         Mass: 10
+        GroupMask: 1
+        CollisionMask: -1
+        IsTrigger: false
       - Component: CollisionInfo
       - Component: SoundComponent
         Path: audio\MetalPipe.ogg
@@ -96,5 +102,8 @@ Actors:
         Path: models\Dust.glb
       - Component: RigidBody
         Mass: 0
+        GroupMask: 1
+        CollisionMask: -1
+        IsTrigger: false
     Children:
       []

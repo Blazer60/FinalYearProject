@@ -19,6 +19,7 @@ class CollisionInfo
 {
     void onBegin() override;
     void onCollisionBegin(engine::Actor* otherActor, Component* myComponent, Component* otherComponent, const engine::HitInfo& hitInfo) override;
+    void onTriggerBegin(engine::Actor* otherActor, Component* myComponent, Component* otherComponent) override;
     void onDrawUi() override;
 
 protected:

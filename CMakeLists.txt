@@ -11,6 +11,7 @@ set(ENABLE_PROFILER ON)
 set(HELPER_LIBRARY Statistics)
 add_library(${HELPER_LIBRARY} STATIC
         include/helpers/logger/LoggerMacros.h
+        include/helpers/ContainerAlgorithms.h
 
         src/helpers/logger/Logger.cpp include/helpers/logger/Logger.h
         src/helpers/profiler/ProfileTimer.cpp include/helpers/profiler/ProfileTimer.h

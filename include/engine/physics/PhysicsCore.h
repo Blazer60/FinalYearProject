@@ -34,6 +34,9 @@ namespace engine
 
         void clearContainers();
         void renderDebugShapes() const;
+
+        void resolveCollisions();
+        void resolveTriggers();
         void resolveCollisoinCallbacks();
 
         std::unique_ptr<btDefaultCollisionConfiguration> configuration;
@@ -45,8 +48,11 @@ namespace engine
 
     protected:
         void createHitInfo(const btManifoldArray &manifoldArray, Component *componentA, Component *componentB);
+        void createTriggerInfo(Component *componentA, Component *componentB);
         std::unordered_map<std::string, HitInfoExt> mCollisions;
         std::unordered_set<std::string> mCurrentCollisions;
+        std::unordered_map<std::string, TriggerInfo> mTriggers;
+        std::unordered_set<std::string> mCurrentTriggers;
 
         SharedMesh mDefaultCube;
         SharedMesh mDefaultSphere;

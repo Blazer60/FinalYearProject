@@ -65,6 +65,11 @@ namespace engine
         onCollisionBegin(otherActor, myComponent, otherComponent, hitInfo);
     }
 
+    void Component::triggerBegin(Actor* otherActor, Component* myComponent, Component* otherComponent)
+    {
+        onTriggerBegin(otherActor, myComponent, otherComponent);
+    }
+
     void Component::preRender()
     {
         onPreRender();
@@ -78,6 +83,11 @@ namespace engine
     void Component::onCollisionBegin(
         Actor* otherActor, Component* myComponent, Component* otherComponent, const HitInfo& hitInfo)
     {
+    }
+
+    void Component::onTriggerBegin(Actor* otherActor, Component* myComponent, Component* otherComponent)
+    {
+
     }
 
     Actor *Component::getActor() const

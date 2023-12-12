@@ -17,6 +17,7 @@
 #include "Mesh.h"
 #include "RigidBody.h"
 #include "Colliders.h"
+#include "ContainerAlgorithms.h"
 #include "GraphicsState.h"
 
 namespace engine
@@ -26,14 +27,22 @@ namespace engine
         const auto object1 = static_cast<btCollisionObject*>(collisionPair.m_pProxy0->m_clientObject);
         const auto object2 = static_cast<btCollisionObject*>(collisionPair.m_pProxy1->m_clientObject);
 
-        const auto componentA = static_cast<Component*>(object1->getUserPointer());
-        const auto componentB = static_cast<Component*>(object2->getUserPointer());
+        const auto rigidBodyA = static_cast<RigidBody*>(object1->getUserPointer());
+        const auto rigidBodyB = static_cast<RigidBody*>(object2->getUserPointer());
 
-        btCollisionDispatcher::defaultNearCallback(collisionPair, dispatcher, dispatcherInfo);
-        btManifoldArray array;
-        collisionPair.m_algorithm->getAllContactManifolds(array);
-        if (array.size() > 0)
-            physicsSystem->createHitInfo(array, componentA, componentB);
+        if (rigidBodyA->isTrigger() || rigidBodyB->isTrigger())
+        {
+            if (object1->checkCollideWith(object2))
+                physicsSystem->createTriggerInfo(rigidBodyA, rigidBodyB);
+        }
+        else  // RigidBody Physics can only happen between two non-triggers.
+        {
+            btCollisionDispatcher::defaultNearCallback(collisionPair, dispatcher, dispatcherInfo);
+            btManifoldArray array;
+            collisionPair.m_algorithm->getAllContactManifolds(array);
+            if (array.size() > 0)
+                physicsSystem->createHitInfo(array, rigidBodyA, rigidBodyB);
+        }
     }
 
     PhysicsCore::PhysicsCore() :
@@ -65,6 +74,9 @@ namespace engine
     {
         mCollisions.clear();
         mCurrentCollisions.clear();
+
+        mTriggers.clear();
+        mCurrentTriggers.clear();
     }
 
     void PhysicsCore::renderDebugShapes() const
@@ -96,7 +108,7 @@ namespace engine
         }
     }
 
-    void PhysicsCore::resolveCollisoinCallbacks()
+    void PhysicsCore::resolveCollisions()
     {
         // Check for new hits.
         for (auto [collisionId, hitInfoExt] : mCollisions)
@@ -118,16 +130,41 @@ namespace engine
 
         // Do continous collisions here.
 
-        // std::erase_if() is C++20
-        for (auto first = mCurrentCollisions.begin(), last = mCurrentCollisions.end(); first != last;)
-        {
-            if (mCollisions.find(*first) == mCollisions.end())
-                first = mCurrentCollisions.erase(first);
-            else
-                ++first;
-        }
+        containers::erase_if(mCurrentCollisions, [this](const std::string &id) {
+            return mCollisions.find(id) == mCollisions.end();
+        });
 
         mCollisions.clear();
+    }
+
+    void PhysicsCore::resolveTriggers()
+    {
+        // Check for new hits.
+        for (auto [collisionId, triggerInfo] : mTriggers)
+        {
+            if (mCurrentTriggers.find(collisionId) == mCurrentTriggers.end())
+            {
+                // On Collision Begin.
+                triggerInfo.actorA->triggerBegin(triggerInfo.actorB, triggerInfo.componentA, triggerInfo.componentB);
+                triggerInfo.actorB->triggerBegin(triggerInfo.actorA, triggerInfo.componentB, triggerInfo.componentA);
+            }
+
+            mCurrentTriggers.insert(collisionId);  // We're using a set to avoid duplicates.
+        }
+
+        // Do continous collisions here.
+
+        containers::erase_if(mCurrentTriggers, [this](const std::string &id) {
+            return mTriggers.find(id) == mTriggers.end();
+        });
+
+        mTriggers.clear();
+    }
+
+    void PhysicsCore::resolveCollisoinCallbacks()
+    {
+        resolveCollisions();
+        resolveTriggers();
     }
 
     void PhysicsCore::createHitInfo(const btManifoldArray& manifoldArray, Component* componentA, Component* componentB)
@@ -189,5 +226,19 @@ namespace engine
         hitInfoExt.hitPositionWorldA *= oneOverCount;
         hitInfoExt.hitPositionWorldB *= oneOverCount;
         hitInfoExt.hitNormalWorldB   *= oneOverCount;
+    }
+
+    void PhysicsCore::createTriggerInfo(Component* componentA, Component* componentB)
+    {
+        auto *const actorA = componentA->getActor();
+        auto *const actorB = componentB->getActor();
+
+        const auto hitId = std::to_string(actorA->getId()) + std::to_string(actorB->getId());
+
+        TriggerInfo &triggerInfo = mTriggers[hitId];
+        triggerInfo.actorA = actorA;
+        triggerInfo.actorB = actorB;
+        triggerInfo.componentA = componentA;
+        triggerInfo.componentB = componentB;
     }
 }

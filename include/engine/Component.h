@@ -29,6 +29,7 @@ namespace engine
         void preRender();
         void attachToActor(class Actor *actor);
         void collisionBegin(Actor *otherActor, Component *myComponent, Component *otherComponent, const HitInfo &hitInfo);
+        void triggerBegin(Actor *otherActor, Component *myComponent, Component *otherComponent);
         [[nodiscard]] Actor *getActor() const;
         
     protected:
@@ -37,6 +38,7 @@ namespace engine
         virtual void onFixedUpdate();
         virtual void onPreRender();
         virtual void onCollisionBegin(Actor *otherActor, Component *myComponent, Component *otherComponent, const HitInfo &hitInfo);
+        virtual void onTriggerBegin(Actor *otherActor, Component *myComponent, Component *otherComponent);
         void onDrawUi() override;
         [[nodiscard]] glm::mat4 getWorldTransform() const;
         

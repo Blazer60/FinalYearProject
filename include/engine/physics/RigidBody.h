@@ -32,6 +32,8 @@ namespace engine
         void teleport();
         void setGroupMask(int mask);
         void setCollisionMask(int mask);
+        void setIsTrigger(bool isTrigger);
+        bool isTrigger() const;
 
     protected:
         void addToPhysicsWorld();
@@ -42,6 +44,7 @@ namespace engine
         Ref<Collider> mCollider;
         int mGroupMask { btBroadphaseProxy::DefaultFilter };
         int mCollisionMask { btBroadphaseProxy::AllFilter };
+        bool mIsTrigger { false };
 
         ENGINE_SERIALIZABLE_COMPONENT(RigidBody);
     };

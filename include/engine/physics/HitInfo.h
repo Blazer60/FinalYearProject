@@ -31,4 +31,12 @@ namespace engine
         glm::vec3 hitPositionWorldB;
         HitInfo info;
     };
+
+    struct TriggerInfo
+    {
+        Actor *actorA;
+        Actor *actorB;
+        Component *componentA;
+        Component *componentB;
+    };
 }

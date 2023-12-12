@@ -124,6 +124,14 @@ namespace engine
             component->collisionBegin(otherActor, myComponent, otherComponent, hitInfo);
     }
 
+    void Actor::triggerBegin(Actor* otherActor, Component* myComponent, Component* otherComponent)
+    {
+        onTriggerBegin(otherActor, myComponent, otherComponent);
+
+        for (Ref<Component> component : mComponents)
+            component->triggerBegin(otherActor, myComponent, otherComponent);
+    }
+
     UUID Actor::getId() const
     {
         return mId;
@@ -280,6 +288,11 @@ namespace engine
     void Actor::onCollisionBegin(
         Actor* otherActor, Component* myComponent,
         Component* otherComponent, const HitInfo& hitInfo)
+    {
+
+    }
+
+    void Actor::onTriggerBegin(Actor* otherActor, Component* myComponent, Component* otherComponent)
     {
 
     }

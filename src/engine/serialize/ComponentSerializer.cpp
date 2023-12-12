@@ -160,6 +160,11 @@ namespace engine
                 const int collisionMask = node["CollisionMask"].as<int>();
                 rb->setCollisionMask(collisionMask);
             }
+            if (node["IsTrigger"].IsDefined())
+            {
+                const bool isTrigger = node["IsTrigger"].as<bool>();
+                rb->setIsTrigger(isTrigger);
+            }
         });
 
         serializer->pushLoadComponent("MeshCollider", [](const YAML::Node &node, Ref<Actor> actor) {
@@ -278,6 +283,7 @@ void serializeComponent(YAML::Emitter &out, engine::RigidBody *rigidBody)
     out << YAML::Key << "Mass" << YAML::Value << rigidBody->mMass;
     out << YAML::Key << "GroupMask" << YAML::Value << rigidBody->mGroupMask;
     out << YAML::Key << "CollisionMask" << YAML::Value << rigidBody->mCollisionMask;
+    out << YAML::Key << "IsTrigger" << YAML::Value << rigidBody->mIsTrigger;
 }
 
 void serializeComponent(YAML::Emitter &out, engine::MeshCollider *meshCollider)

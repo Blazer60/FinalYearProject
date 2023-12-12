@@ -49,6 +49,7 @@ namespace engine
         void update();
         void fixedUpdate();
         void collisionBegin(Actor *otherActor, Component *myComponent, Component *otherComponent, const HitInfo &hitInfo);
+        void triggerBegin(Actor *otherActor, Component *myComponent, Component *otherComponent);
 
         /**
          * @returns The ID of the current actor.
@@ -140,6 +141,7 @@ namespace engine
         virtual void onUpdate();
         virtual void onBegin();
         virtual void onCollisionBegin(Actor *otherActor, Component *myComponent, Component *otherComponent, const HitInfo &hitInfo);
+        virtual void onTriggerBegin(Actor *otherActor, Component *myComponent, Component *otherComponent);
         void updateComponents();
         
         glm::mat4 mTransform    { glm::mat4(1.f) };

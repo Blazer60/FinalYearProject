@@ -106,6 +106,7 @@ namespace engine
                 ImGui::PopID();
             };
 
+            ImGui::Checkbox("Is Trigger?", &mIsTrigger);
             if (ImGui::BeginTable("Collision Mask Matrix", 3))
             {
                 ImGui::TableSetupColumn("Name");
@@ -165,5 +166,15 @@ namespace engine
     void RigidBody::setCollisionMask(const int mask)
     {
         mCollisionMask = mask;
+    }
+
+    void RigidBody::setIsTrigger(const bool isTrigger)
+    {
+        mIsTrigger = isTrigger;
+    }
+
+    bool RigidBody::isTrigger() const
+    {
+        return mIsTrigger;
     }
 } // engine

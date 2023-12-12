@@ -19,9 +19,14 @@ void CollisionInfo::onCollisionBegin(
 {
     MESSAGE("Collision Begin: %", hitInfo.normal);
     if (mSound.isValid())
-    {
         mSound->playSound();
-    }
+}
+
+void CollisionInfo::onTriggerBegin(engine::Actor* otherActor, Component* myComponent, Component* otherComponent)
+{
+    MESSAGE("Trigger Begin with: %", otherActor->getName());
+    if (mSound.isValid())
+        mSound->playSound();
 }
 
 void CollisionInfo::onDrawUi()
