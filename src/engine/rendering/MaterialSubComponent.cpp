@@ -164,6 +164,7 @@ namespace engine
                 }
             }
             ImGui::SameLine();
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("Metallic").x);
             ImGui::SliderFloat("Metallic", &mMaterial.metallic, 0.f, 1.f);
             
             ImGui::ColorEdit3("Emissive Colour", glm::value_ptr(mMaterial.emissive), ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueWheel);
@@ -193,6 +194,7 @@ namespace engine
                 }
             }
             ImGui::SameLine();
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("Height").x);
             ImGui::SliderFloat("Height", &mMaterial.heightScale, 0.f, 1.f);
             
             ImGui::TreePop();
