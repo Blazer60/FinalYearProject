@@ -40,7 +40,7 @@ namespace engine
 
     int PhysicsDebugDrawer::getDebugMode() const
     {
-        return DBG_DrawWireframe | DBG_DrawAabb | DBG_DrawFrames;
+        return DBG_DrawWireframe;
     }
 }
 

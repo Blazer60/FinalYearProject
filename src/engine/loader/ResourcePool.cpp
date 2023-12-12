@@ -87,7 +87,10 @@ namespace engine
         const aiScene *scene = importer.ReadFile(
             path.string(),
             aiProcess_GlobalScale           |
-            aiProcess_Triangulate           );
+            aiProcess_CalcTangentSpace      |
+            aiProcess_Triangulate           |
+            aiProcess_JoinIdenticalVertices |
+            aiProcess_SortByPType);
 
         if (scene == nullptr)
         {
@@ -128,10 +131,10 @@ namespace engine
         for (const physics::MeshDataBuffer &dataBuffer : meshColliderBuffer->meshDataBuffers)
         {
             btIndexedMesh indexedMesh;
-            // Number of triangles doesn't make sense here but it seems to be what Bullet wants?
-            indexedMesh.m_numTriangles = static_cast<int>(dataBuffer.indices.size()) - 2;
+            // The most annoying interface for a mesh.
+            indexedMesh.m_numTriangles = static_cast<int>(dataBuffer.indices.size()) / 3;
             indexedMesh.m_triangleIndexBase = (const unsigned char*)dataBuffer.indices.data();
-            indexedMesh.m_triangleIndexStride = sizeof(int);
+            indexedMesh.m_triangleIndexStride = 3 * sizeof(int);
             indexedMesh.m_numVertices = static_cast<int>(dataBuffer.vertices.size());
             indexedMesh.m_vertexBase = (const unsigned char*)dataBuffer.vertices.data();
             indexedMesh.m_vertexStride = sizeof(float) * 3;

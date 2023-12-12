@@ -38,6 +38,7 @@ namespace engine
         [[nodiscard]] glm::vec2 getSize() const;
         [[nodiscard]] bool isHovered() const;
         GLFWwindow *getViewportContext();
+        bool isDebugViewOn() const;
 
         bool isShowing { true };
     protected:

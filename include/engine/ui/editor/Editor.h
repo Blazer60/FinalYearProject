@@ -73,6 +73,7 @@ namespace engine
         
         [[nodiscard]] Ref<Actor> getSelectedActor();
         bool isViewportHovered();
+        bool isDebugOverlayOn() const;
         GLFWwindow *getViewportContext();
         
         template<typename T>

@@ -191,7 +191,12 @@ namespace engine
     {
         return mViewport.isHovered();
     }
-    
+
+    bool Editor::isDebugOverlayOn() const
+    {
+        return mViewport.isDebugViewOn();
+    }
+
     GLFWwindow *Editor::getViewportContext()
     {
         return mViewport.getViewportContext();

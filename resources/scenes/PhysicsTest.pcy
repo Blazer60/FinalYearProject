@@ -2,7 +2,7 @@ Scene: scenes\PhysicsTest.pcy
 Actors:
   - Name: Cube
     UUID: 15887427644234860914
-    position: [5.92172241, 1.89649189, -8.52331829]
+    position: [-5.45986509, 7.18227339, -11.1996231]
     rotation: [0.974490702, 0, -0, -0.224427819]
     scale: [0.999999881, 0.999999881, 1]
     Components:
@@ -26,35 +26,9 @@ Actors:
         Mass: 10
     Children:
       []
-  - Name: Cube
-    UUID: 5334864629118171243
-    position: [-0.814951956, -2.1047647, -0.756587267]
-    rotation: [0.999924183, 0, 0, 0.0123145068]
-    scale: [10, 1, 10]
-    Components:
-      - Component: MeshRenderer
-        MeshPath: models\defaultObjects\DefaultCube.glb
-        Materials:
-          - MaterialType: StandardMaterial
-            Albedo: [0.322284102, 0.322251856, 0.322251856]
-            Roughness: 0
-            Metallic: 0
-            Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
-            DiffuseMap: ""
-            NormalMap: ""
-            HeightMap: ""
-            RoughnessMap: ""
-            MetallicMap: ""
-      - Component: BoxCollider
-        HalfBoxExtent: [10, 1, 10]
-      - Component: RigidBody
-        Mass: 0
-    Children:
-      []
   - Name: Sphere
     UUID: 5952713876831364267
-    position: [-1.0138123, 5.43917513, 0.189602256]
+    position: [-8.89060783, 8.31267262, -14.6136904]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
@@ -95,14 +69,14 @@ Actors:
         Bias: [0.00100000005, 0]
     Children:
       []
-  - Name: Model
-    UUID: 15534902605362897690
-    position: [-0.690536737, 1.30523038, -0.120544076]
-    rotation: [0.234578341, -0.646468699, -0.704161048, 0.176658764]
-    scale: [0.999999821, 1.00000036, 1.00000048]
+  - Name: Dust
+    UUID: 14919238853589296009
+    position: [0, 0, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\defaultObjects\DefaultCube.glb
+        MeshPath: models\Dust.glb
         Materials:
           - MaterialType: StandardMaterial
             Albedo: [1, 1, 1]
@@ -116,7 +90,7 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
       - Component: MeshCollider
-        Path: models\defaultObjects\DefaultCube.glb
+        Path: models\Dust.glb
       - Component: RigidBody
         Mass: 0
     Children:

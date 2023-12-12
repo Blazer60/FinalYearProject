@@ -215,4 +215,9 @@ namespace engine
     {
         return mViewportWindow;
     }
+
+    bool Viewport::isDebugViewOn() const
+    {
+        return mShowDebugOverlay || mViewportImages[mCurrentSelectedImage].name == "Debug View";
+    }
 }
