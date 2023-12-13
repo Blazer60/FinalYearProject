@@ -56,7 +56,13 @@ namespace engine
         Ref<TActor> addActor(Resource<TActor> &&actor);
 
         Ref<Actor> getActor(UUID actorId, bool warn=true) const;
-        
+
+        /**
+         * @brief Finds all components of type T that exist within the scene. This is a slow linear search. Do not use every frame!
+         */
+        template<typename T>
+        std::vector<Ref<T>> findComponents();
+
     protected:
         virtual void onUpdate();
         virtual void onImguiUpdate();
@@ -87,5 +93,25 @@ namespace engine
         mToAdd.push_back(std::move(actor));
         
         return actorRef;
+    }
+
+    template<typename T>
+    [[nodiscard]] std::vector<Ref<T>> Scene::findComponents()
+    {
+        std::vector<Ref<T>> results;
+
+        for (Ref<Actor> actor : mActors)
+        {
+            if (Ref<T> component = actor->getComponent<T>(false); component.isValid())
+                results.push_back(component);
+        }
+
+        for (Ref<Actor> actor : mToAdd)
+        {
+            if (Ref<T> component = actor->getComponent<T>(false); component.isValid())
+                results.push_back(component);
+        }
+
+        return results;
     }
 } // engine

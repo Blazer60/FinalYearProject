@@ -23,6 +23,7 @@ namespace engine
     class SphereCollider;
     class RigidBody;
     class MeshCollider;
+    class Camera;
 
     void attachComponentSerialization();
 }
@@ -38,3 +39,4 @@ void serializeComponent(YAML::Emitter &, engine::BoxCollider *);
 void serializeComponent(YAML::Emitter &, engine::SphereCollider *);
 void serializeComponent(YAML::Emitter &, engine::RigidBody *);
 void serializeComponent(YAML::Emitter &, engine::MeshCollider *);
+void serializeComponent(YAML::Emitter &, engine::Camera *);

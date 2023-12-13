@@ -14,7 +14,7 @@
 #include "TextureBufferObject.h"
 #include "Renderer.h"
 #include "Logger.h"
-#include "MainCamera.h"
+#include "EditorCamera.h"
 #include "Viewport.h"
 #include "Editor.h"
 #include "ProfilerViewer.h"
@@ -46,7 +46,7 @@ namespace engine
         void endPlay();
 
         [[nodiscard]] Scene *getScene() const;
-        [[nodiscard]] MainCamera *getCamera() const;
+        [[nodiscard]] EditorCamera *getCamera() const;
         [[nodiscard]] std::string getSceneName();
         [[nodiscard]] std::filesystem::path getScenePath() const;
         [[nodiscard]] btDiscreteDynamicsWorld *getPhysicsWorld() const;
@@ -86,7 +86,8 @@ namespace engine
         const unsigned int mMaxLoopCount { 10 };
         const bool mEnableDebugging { false };
         
-        std::unique_ptr<MainCamera> mMainCamera;
+        std::unique_ptr<EditorCamera> mEditorCamera;
+        Ref<Camera> mPlayModeCamera;
         
         std::unique_ptr<Editor> mEditor;
         RootEventHandler mEventHandler;

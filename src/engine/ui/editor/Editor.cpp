@@ -20,6 +20,7 @@
 #include "FileExplorer.h"
 #include "Ui.h"
 #include "RigidBody.h"
+#include "Camera.h"
 
 namespace engine
 {
@@ -68,6 +69,10 @@ namespace engine
 
         addComponentOption<MeshCollider>("Mesh Collider", [](Ref<Actor> actor) {
             actor->addComponent(makeResource<MeshCollider>());
+        });
+
+        addComponentOption<Camera>("Camera", [](Ref<Actor> actor) {
+            actor->addComponent(makeResource<Camera>());
         });
 
         addMenuOption("Actor", []() {

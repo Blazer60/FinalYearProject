@@ -257,9 +257,14 @@ public:
     [[nodiscard]] T* get() const { return mPtr; }
     [[nodiscard]] uint64_t typeHash() const { return mControlBlock->typeHash(); }
     [[nodiscard]] bool isValid() const { return mControlBlock != nullptr && mControlBlock->isValid(); }
+    /**
+     * Nullifies the reference so that isValid() will return false.
+     * This will also release the control block if it is the last reference.
+     */
+    void nullify() { decrementIfAble(); }
 
 protected:
-    void incrementIfAble()
+    void incrementIfAble() const
     {
         if (mControlBlock)
             mControlBlock->incrementReference();
@@ -269,6 +274,8 @@ protected:
     {
         if (mControlBlock)
             mControlBlock->decrementReference();
+        mPtr = nullptr;
+        mControlBlock = nullptr;
     }
     
     T* mPtr { nullptr };

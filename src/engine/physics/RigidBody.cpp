@@ -73,26 +73,6 @@ namespace engine
                 mActor->removeComponent(this);
 
             ImGui::DragFloat("Mass", &mMass);
-            // ImGui::PushID("CollisionMaskID");
-
-            // ImGui::PushID("GroupMaskId");
-            // ImGui::Text("Group Mask");
-            // ImGui::CheckboxFlags("Default Filter",   &mGroupMask, btBroadphaseProxy::DefaultFilter);
-            // ImGui::CheckboxFlags("Static Filter",    &mGroupMask, btBroadphaseProxy::StaticFilter);
-            // ImGui::CheckboxFlags("Kinematic Filter", &mGroupMask, btBroadphaseProxy::KinematicFilter);
-            // ImGui::CheckboxFlags("Debris Filter",    &mGroupMask, btBroadphaseProxy::DebrisFilter);
-            // ImGui::CheckboxFlags("Sensor Trigger",   &mGroupMask, btBroadphaseProxy::SensorTrigger);
-            // ImGui::CheckboxFlags("Character Filter", &mGroupMask, btBroadphaseProxy::CharacterFilter);
-            // ImGui::PopID();
-            //
-            // ImGui::Text("Collision Mask");
-            // ImGui::CheckboxFlags("Default Filter",   &mCollisionMask, btBroadphaseProxy::DefaultFilter);
-            // ImGui::CheckboxFlags("Static Filter",    &mCollisionMask, btBroadphaseProxy::StaticFilter);
-            // ImGui::CheckboxFlags("Kinematic Filter", &mCollisionMask, btBroadphaseProxy::KinematicFilter);
-            // ImGui::CheckboxFlags("Debris Filter",    &mCollisionMask, btBroadphaseProxy::DebrisFilter);
-            // ImGui::CheckboxFlags("Sensor Trigger",   &mCollisionMask, btBroadphaseProxy::SensorTrigger);
-            // ImGui::CheckboxFlags("Character Filter", &mCollisionMask, btBroadphaseProxy::CharacterFilter);
-            // ImGui::PopID();
 
             auto drawRow = [this](const std::string &name, const int flag) {
                 ImGui::PushID(name.c_str());

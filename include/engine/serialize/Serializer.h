@@ -88,7 +88,10 @@ namespace engine::serialize
 }
 
 // Used within the engine due to the namespace. We cannot forward declare and friend at the same time in a namespace.
-#define ENGINE_SERIALIZABLE_COMPONENT(class) friend void ::serializeComponent(YAML::Emitter&, class*)
+#define ENGINE_SERIALIZABLE_COMPONENT(class) \
+    friend void ::serializeComponent(YAML::Emitter&, class*); \
+    friend void engine::attachComponentSerialization()
+
 #define FORWARD_COMPONENT(cl) class cl; void serializeComponent(YAML::Emitter &, cl *)
 
 #define SERIALIZABLE_COMPONENT(class) friend void serializeComponent(YAML::Emitter&, class*)

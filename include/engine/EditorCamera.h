@@ -19,13 +19,13 @@
  * @author Ryan Purse
  * @date 13/02/2022
  */
-class MainCamera
+class EditorCamera
     : public ui::Drawable
 {
 public:
-    explicit MainCamera(const glm::vec3 &position);
-    MainCamera();
-    ~MainCamera() override;
+    explicit EditorCamera(const glm::vec3 &position);
+    EditorCamera();
+    ~EditorCamera() override;
     
     void init();
     void update();

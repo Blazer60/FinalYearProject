@@ -5,7 +5,7 @@
  */
 
 
-#include "MainCamera.h"
+#include "EditorCamera.h"
 #include "Timers.h"
 #include "imgui.h"
 #include "WindowHelpers.h"
@@ -17,18 +17,18 @@
 #include "ProfileTimer.h"
 #include "ui/editor/RendererSettings.h"
 
-MainCamera::MainCamera()
+EditorCamera::EditorCamera()
 {
     init();
 }
 
-MainCamera::MainCamera(const glm::vec3 &position)
+EditorCamera::EditorCamera(const glm::vec3 &position)
     : mPosition(position)
 {
     init();
 }
 
-void MainCamera::init()
+void EditorCamera::init()
 {
     const glm::vec2 size = glm::ivec2(window::bufferSize());
     mProjectionMatrix = glm::perspective(mFovY, size.x / size.y, mNearClip, mFarClip);
@@ -46,7 +46,7 @@ void MainCamera::init()
     mZoomThirdPersonToken = engine::eventHandler->viewport.thirdPerson.onZoomCamera.subscribe([this](float zoomValue){ zoomCamera(engine::eventHandler->getMouseDelta().y); });
 }
 
-MainCamera::~MainCamera()
+EditorCamera::~EditorCamera()
 {
     engine::eventHandler->viewport.onFocusActor.unSubscribe(mFocusActorEventToken);
     engine::eventHandler->viewport.thirdPerson.onOrbitCamera.unSubscribe(mOrbitEventToken);
@@ -58,7 +58,7 @@ MainCamera::~MainCamera()
     engine::eventHandler->viewport.thirdPerson.onZoomCamera.unSubscribe(mZoomThirdPersonToken);
 }
 
-void MainCamera::update()
+void EditorCamera::update()
 {
     PROFILE_FUNC();
     move();
@@ -71,7 +71,7 @@ void MainCamera::update()
     mVpMatrix   = mProjectionMatrix * mViewMatrix;
 }
 
-void MainCamera::move()
+void EditorCamera::move()
 {
     if (mDoMoveAction)
         moveFirstPerson();
@@ -79,7 +79,7 @@ void MainCamera::move()
     mInputDirection = glm::vec3(0.f);
 }
 
-void MainCamera::zoomCamera(float distance)
+void EditorCamera::zoomCamera(float distance)
 {
     const float boomDistance = mCameraBoomDistance;
     mCameraBoomDistance = glm::max(mCameraBoomMin, mCameraBoomDistance + distance);
@@ -88,7 +88,7 @@ void MainCamera::zoomCamera(float distance)
     mPosition += forward * delta;
 }
 
-void MainCamera::moveFirstPerson()
+void EditorCamera::moveFirstPerson()
 {
     const auto timeStep = timers::deltaTime<float>();
     
@@ -108,22 +108,22 @@ void MainCamera::moveFirstPerson()
     mPosition += mRotation * (mSpeed * timeStep * mInputDirection);
 }
 
-const glm::mat4 &MainCamera::getVpMatrix() const
+const glm::mat4 &EditorCamera::getVpMatrix() const
 {
     return mVpMatrix;
 }
 
-void MainCamera::setProjectionMatrix(glm::vec2 viewSize)
+void EditorCamera::setProjectionMatrix(glm::vec2 viewSize)
 {
     mProjectionMatrix = glm::perspective(mFovY, viewSize.x / viewSize.y, mNearClip, mFarClip);
 }
 
-const glm::mat4 &MainCamera::getViewMatrix() const
+const glm::mat4 &EditorCamera::getViewMatrix() const
 {
     return mViewMatrix;
 }
 
-void MainCamera::onDrawUi()
+void EditorCamera::onDrawUi()
 {
     PROFILE_FUNC();
 
@@ -161,27 +161,27 @@ void MainCamera::onDrawUi()
     
 }
 
-const glm::vec3 &MainCamera::getPosition() const
+const glm::vec3 &EditorCamera::getPosition() const
 {
     return mPosition;
 }
 
-const glm::quat &MainCamera::getRotation() const
+const glm::quat &EditorCamera::getRotation() const
 {
     return mRotation;
 }
 
-glm::mat4 MainCamera::getProjectionMatrix() const
+glm::mat4 EditorCamera::getProjectionMatrix() const
 {
     return mProjectionMatrix;
 }
 
-CameraSettings MainCamera::toSettings()
+CameraSettings EditorCamera::toSettings()
 {
     return { mFovY, mNearClip, mFarClip, mViewMatrix, mEV100, mPostProcessStack };
 }
 
-void MainCamera::rotateThirdPerson()
+void EditorCamera::rotateThirdPerson()
 {
     const glm::vec2 mouseOffset = engine::eventHandler->getMouseDelta();
     
@@ -196,7 +196,7 @@ void MainCamera::rotateThirdPerson()
     mPosition += mCameraBoomDistance * -(anchorDirection - newAnchorDirection);
 }
 
-void MainCamera::gotoSelectedActor()
+void EditorCamera::gotoSelectedActor()
 {
     Ref<engine::Actor> actor = engine::editor->getSelectedActor();
     if (!actor.isValid())
@@ -207,7 +207,7 @@ void MainCamera::gotoSelectedActor()
     mPosition = actorPosition + forwardDirection * mCameraBoomDistance;
 }
 
-glm::vec3 MainCamera::getEndOfBoomArmPosition() const
+glm::vec3 EditorCamera::getEndOfBoomArmPosition() const
 {
     return mRotation * glm::vec3(0.f, 0.f, 1.f) * -mCameraBoomDistance + mPosition;
 }

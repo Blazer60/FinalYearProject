@@ -19,6 +19,7 @@
 #include "RigidBody.h"
 #include "ShaderLoader.h"
 #include "SoundComponent.h"
+#include "../../../include/engine/Camera.h"
 
 namespace engine
 {
@@ -34,6 +35,7 @@ namespace engine
         serializer->pushSaveComponent<SphereCollider>();
         serializer->pushSaveComponent<RigidBody>();
         serializer->pushSaveComponent<MeshCollider>();
+        serializer->pushSaveComponent<Camera>();
 
         serializer->pushLoadComponent("MeshRenderer", [](const YAML::Node &node, Ref<Actor> actor) {
             const std::filesystem::path relativePath = node["MeshPath"].as<std::string>();
@@ -172,6 +174,15 @@ namespace engine
             const auto fullPath = relativePath.empty() ? "" : file::resourcePath() / relativePath;
             actor->addComponent(makeResource<MeshCollider>(fullPath));
         });
+
+        serializer->pushLoadComponent("Camera", [](const YAML::Node &node, Ref<Actor> actor) {
+            auto camera = actor->addComponent(makeResource<Camera>());
+            camera->mIsMainCamera = node["IsMainCamera"].as<bool>();
+            camera->mFov      = node["Fov"].as<float>();
+            camera->mEv100    = node["Ev100"].as<float>();
+            camera->mNearClip = node["NearClip"].as<float>();
+            camera->mFarClip  = node["FarClip"].as<float>();
+        });
     }
 }
 
@@ -291,4 +302,14 @@ void serializeComponent(YAML::Emitter &out, engine::MeshCollider *meshCollider)
     out << YAML::Key << "Component" << YAML::Value << "MeshCollider";
     const std::string path = file::makeRelativeToResourcePath(meshCollider->mPath).string();
     out << YAML::Key << "Path" << YAML::Value << path;
+}
+
+void serializeComponent(YAML::Emitter &out, engine::Camera *camera)
+{
+    out << YAML::Key << "Component" << YAML::Value << "Camera";
+    out << YAML::Key << "IsMainCamera" << YAML::Value << camera->mIsMainCamera;
+    out << YAML::Key << "Fov" << YAML::Value << camera->mFov;
+    out << YAML::Key << "Ev100" << YAML::Value << camera->mEv100;
+    out << YAML::Key << "NearClip" << YAML::Value << camera->mNearClip;
+    out << YAML::Key << "FarClip" << YAML::Value << camera->mFarClip;
 }

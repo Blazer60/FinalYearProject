@@ -171,7 +171,7 @@ namespace engine
             
             glm::mat4 actorTransform = selectedActor->getTransform();
             
-            MainCamera *camera = core->getCamera();
+            EditorCamera *camera = core->getCamera();
             glm::mat4 view = camera->getViewMatrix();
             glm::mat4 projection = camera->getProjectionMatrix();
             

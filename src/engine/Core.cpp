@@ -9,6 +9,8 @@
 
 #include <alext.h>
 #include <AL/alext.h>
+
+#include "Camera.h"
 #include "Scene.h"
 #include "WindowHelpers.h"
 #include "backends/imgui_impl_glfw.h"
@@ -86,7 +88,7 @@ namespace engine
             return;
         }
         
-        mMainCamera = std::make_unique<MainCamera>(glm::vec3(0.f, 3.f, 21.f));
+        mEditorCamera = std::make_unique<EditorCamera>(glm::vec3(0.f, 3.f, 21.f));
         
         mWindowIcon = load::windowIcon((file::texturePath() / "Icon.png").string());
         if (mWindowIcon.pixels != nullptr)
@@ -328,11 +330,14 @@ namespace engine
             PROFILE_SCOPE_END(fixedTimer);
 
             mScene->update();
-            mMainCamera->update();
+            mEditorCamera->update();
             mEditor->update();
             mScene->render();
             mPhysics->renderDebugShapes();
-            mRenderer->submit(mMainCamera->toSettings());
+            if (mIsInPlayMode && mPlayModeCamera.isValid())
+                mRenderer->submit(mPlayModeCamera->toCameraSettings());
+            else
+                mRenderer->submit(mEditorCamera->toSettings());
             mRenderer->render();
             updateImgui();
             mRenderer->clear();
@@ -400,9 +405,9 @@ namespace engine
         return mScenePointer;
     }
     
-    MainCamera *Core::getCamera() const
+    EditorCamera *Core::getCamera() const
     {
-        return mMainCamera.get();
+        return mEditorCamera.get();
     }
 
     btDiscreteDynamicsWorld* Core::getPhysicsWorld() const
@@ -435,11 +440,26 @@ namespace engine
         serialize::scene(tempFilePath, getScene());
         setScene(load::scene(tempFilePath), tempFilePath);
         mIsInPlayMode = true;
+
+        mPlayModeCamera.nullify();
+        const auto cameras = mScene->findComponents<Camera>();
+        for (Ref<Camera> camera : cameras)
+        {
+            if (camera->isMainCamera())
+            {
+                mPlayModeCamera = camera;
+                return;
+            }
+        }
+
+        if (!mPlayModeCamera.isValid() && !cameras.empty())
+            mPlayModeCamera = cameras[0];  // Falback is a main camera isn't set.
     }
 
     void Core::endPlay()
     {
         setScene(load::scene(tempFilePath), mScenePath);
         mIsInPlayMode = false;
+        mPlayModeCamera.nullify();
     }
 }

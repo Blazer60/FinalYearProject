@@ -96,7 +96,7 @@ add_executable(${PROJECT_NAME}
         src/engine/Core.cpp include/engine/Core.h
         src/engine/EngineMath.cpp include/engine/EngineMath.h
         src/engine/EngineState.cpp include/engine/EngineState.h
-        src/engine/MainCamera.cpp include/engine/MainCamera.h
+        src/engine/EditorCamera.cpp include/engine/EditorCamera.h
         src/engine/Scene.cpp include/engine/Scene.h
         src/engine/event/EventHandler.cpp include/engine/event/EventHandler.h
         src/engine/event/Input.cpp include/engine/event/Input.h
@@ -156,6 +156,8 @@ add_executable(${PROJECT_NAME}
         include/engine/physics/PhysicsMeshBuffer.h
         src/engine/physics/PhysicsDebugDrawer.cpp
         include/engine/physics/PhysicsDebugDrawer.h
+        src/engine/Camera.cpp
+        include/engine/Camera.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
