@@ -13,4 +13,5 @@ void GameInput::update()
 {
     onMoveForward.doAction();
     onMoveRight.doAction();
+    onJump.doAction();
 }

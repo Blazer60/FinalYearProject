@@ -11,17 +11,20 @@
 #include "Core.h"
 #include "EngineState.h"
 #include "GameInput.h"
+#include "RigidBody.h"
 
 CameraController::CameraController()
 {
     mMoveForwardToken = gameInput->onMoveForward.subscribe([this](const float value) { mInputDirection.y = value; });
     mMoveRightToken = gameInput->onMoveRight.subscribe([this](const float value) { mInputDirection.x = value; });
+    mJumpToken = gameInput->onJump.subscribe([this] { mWantsJump = true; });
 }
 
 CameraController::~CameraController()
 {
     gameInput->onMoveForward.unSubscribe(mMoveForwardToken);
     gameInput->onMoveRight.unSubscribe(mMoveRightToken);
+    gameInput->onJump.unSubscribe(mJumpToken);
 }
 
 void CameraController::onBegin()
@@ -32,6 +35,15 @@ void CameraController::onBegin()
 
 void CameraController::onUpdate()
 {
+    if (!mRigidBody.isValid())
+    {
+        mRigidBody = mActor->getComponent<engine::RigidBody>();
+        if (mRigidBody.isValid())
+        {
+            mRigidBody->setAngularFactor(glm::vec3(0.f));
+        }
+    }
+
     const auto timestep = timers::deltaTime<float>();
 
     if (engine::eventHandler->updateUserEvents)
@@ -45,9 +57,14 @@ void CameraController::onUpdate()
     if (glm::length(mInputDirection) > 0.f)
         glm::normalize(mInputDirection);
 
-    mActor->position += mActor->rotation * (mSpeed * timestep * glm::vec3(mInputDirection.x, 0.f, mInputDirection.y));
+    mRigidBody->active();
+    glm::vec3 impulse = mActor->rotation * (mSpeed * timestep * glm::vec3(mInputDirection.x, 0.f, mInputDirection.y));
+    if (mWantsJump)
+        impulse.y += 55.f;
+    mRigidBody->addImpulse(impulse);
 
     mInputDirection = glm::vec2(0.f);
+    mWantsJump = false;
 }
 
 void CameraController::onDrawUi()

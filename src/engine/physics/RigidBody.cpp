@@ -116,11 +116,12 @@ namespace engine
             mMotionState->getWorldTransform(transform);
             // todo: This needs to follow the hierarchy.
             mActor->position = physics::cast(transform.getOrigin());
-            mActor->rotation = physics::cast(transform.getRotation());
+            if (mRigidBody->getAngularFactor().length2() > 0.f)
+                mActor->rotation = physics::cast(transform.getRotation());
         }
     }
 
-    void RigidBody::teleport()
+    void RigidBody::alignWithActorTransform()
     {
         if (!mRigidBody)
             return;
@@ -156,5 +157,27 @@ namespace engine
     bool RigidBody::isTrigger() const
     {
         return mIsTrigger;
+    }
+
+    void RigidBody::addImpulse(const glm::vec3 &impulse) const
+    {
+        mRigidBody->applyCentralImpulse(physics::cast(impulse));
+    }
+
+    void RigidBody::active() const
+    {
+        mRigidBody->activate();
+    }
+
+    void RigidBody::setAngularFactor(const glm::vec3& angularFactor) const
+    {
+        if (mRigidBody)
+            mRigidBody->setAngularFactor(physics::cast(angularFactor));
+    }
+
+    void RigidBody::setFriction(const float friction) const
+    {
+        if (mRigidBody)
+            mRigidBody->setFriction(friction);
     }
 } // engine

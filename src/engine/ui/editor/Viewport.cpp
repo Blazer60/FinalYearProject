@@ -191,7 +191,7 @@ namespace engine
                 math::decompose(actorTransform, selectedActor->position, selectedActor->rotation, selectedActor->scale);
                 if (Ref<RigidBody> rigidBody = selectedActor->getComponent<RigidBody>(false); rigidBody.isValid())
                 {
-                    rigidBody->teleport();
+                    rigidBody->alignWithActorTransform();
                 }
             }
         }

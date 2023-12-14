@@ -16,7 +16,7 @@ void Button::doAction()
 {
     for (const ImGuiKey &key : mKeys)
     {
-        if (ImGui::IsKeyPressed(key))
+        if (ImGui::IsKeyPressed(key, false))
         {
             broadcast();
             return;

@@ -24,4 +24,5 @@ public:
 
     Value onMoveForward { {  { ImGuiKey_W, -1.f }, { ImGuiKey_S, 1.f } } };
     Value onMoveRight   { {  { ImGuiKey_A, -1.f }, { ImGuiKey_D, 1.f } } };
+    Button onJump { ImGuiKey_Space };
 };

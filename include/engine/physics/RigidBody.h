@@ -29,11 +29,16 @@ namespace engine
         void onBegin() override;
         void onDrawUi() override;
         void onFixedUpdate() override;
-        void teleport();
+        void alignWithActorTransform();
         void setGroupMask(int mask);
         void setCollisionMask(int mask);
         void setIsTrigger(bool isTrigger);
         bool isTrigger() const;
+
+        void addImpulse(const glm::vec3 &impulse) const;
+        void active() const;
+        void setAngularFactor(const glm::vec3 &angularFactor) const;
+        void setFriction(float friction) const;
 
     protected:
         void addToPhysicsWorld();

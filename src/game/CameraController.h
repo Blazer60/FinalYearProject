@@ -29,10 +29,14 @@ public:
 
 protected:
     float mSpeed { 1.f };
+    Ref<engine::RigidBody> mRigidBody;
     glm::vec2 mInputDirection { 0.f };
+    bool mWantsJump { false };
     glm::dvec2 mPanAngles { 0.f };
+
     uint32_t mMoveForwardToken { 0 };
     uint32_t mMoveRightToken { 0 };
+    uint32_t mJumpToken { 0 };
 
     friend void initComponentsForEngine();
     SERIALIZABLE_COMPONENT(CameraController);
