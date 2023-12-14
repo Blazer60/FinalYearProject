@@ -64,5 +64,7 @@ void initComponentsForEngine()
         auto cc = actor->addComponent(makeResource<CameraController>());
         if (node["Speed"].IsDefined())
             cc->mSpeed = node["Speed"].as<float>();
+        if (node["JumpForce"].IsDefined())
+            cc->mJumpForce = node["JumpForce"].as<float>();
     });
 }

@@ -45,7 +45,6 @@ namespace engine
 
         btTransform transform;
         transform.setIdentity();
-        // todo: This needs to follow the hierarchy.
         transform.setOrigin(physics::cast(mActor->getWorldPosition()));
         transform.setRotation(physics::cast(mActor->getWorldRotation()));
 
@@ -133,10 +132,6 @@ namespace engine
             ImGui::TreePop();
         }
         ImGui::PopID();
-    }
-
-    void RigidBody::onFixedUpdate()
-    {
     }
 
     void RigidBody::alignWithActorTransform() const

@@ -94,10 +94,9 @@ namespace engine
             const btCollisionObject *obj = dynamicsWorld->getCollisionObjectArray()[i];
             auto const*const rigidBody = static_cast<RigidBody*>(obj->getUserPointer());
             Actor* actor = rigidBody->getActor();
-            // todo: This needs to follow the hierarchy.
             if (auto meshCollider = actor->getComponent<MeshCollider>(false); meshCollider.isValid())
             {
-                const glm::mat4 modelMatrix = actor->getLocalTransform();
+                const glm::mat4 modelMatrix = physics::cast(rigidBody->mRigidBody->getWorldTransform());
                 graphics::renderer->drawDebugMesh(meshCollider->getDebugMesh(), modelMatrix, glm::vec3(1.f, 0.f, 1.f));
             }
             else  // Use line renderer instead.

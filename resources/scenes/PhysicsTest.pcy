@@ -115,7 +115,7 @@ Actors:
       []
   - Name: Camera
     UUID: 3673741292139234074
-    position: [5.70636606, 2.25821829, -60.2234154]
+    position: [1.90734863e-06, 1.5, -1.90734863e-05]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
@@ -125,17 +125,6 @@ Actors:
         Ev100: 10
         NearClip: 0.00999999978
         FarClip: 1000
-      - Component: CameraController
-        Speed: 100
-      - Component: SphereCollider
-        Radius: 1
-      - Component: RigidBody
-        Mass: 10
-        GroupMask: 1
-        CollisionMask: -1
-        IsTrigger: false
-        Friction: 1
-        AngularFactor: [0, 0, 0]
     Children:
       []
   - Name: Cube A
@@ -196,7 +185,49 @@ Actors:
         GroupMask: 1
         CollisionMask: -1
         IsTrigger: false
-        Friction: 1
+        Friction: 0.100000001
         AngularFactor: [1, 1, 1]
+    Children:
+      []
+  - Name: Player
+    UUID: 2110975325732832104
+    position: [17.2587833, 0.204684183, -62.5301208]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: SphereCollider
+        Radius: 0.200000003
+      - Component: RigidBody
+        Mass: 70
+        GroupMask: 1
+        CollisionMask: -1
+        IsTrigger: false
+        Friction: 1
+        AngularFactor: [0, 0, 0]
+      - Component: CameraController
+        Speed: 1500
+        JumpForce: 500
+    Children:
+      - 3673741292139234074
+  - Name: Model
+    UUID: 14570150976644428612
+    position: [18.4377365, 0.019861361, -62.4585495]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\Scientist.glb
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
     Children:
       []

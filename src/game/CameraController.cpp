@@ -36,6 +36,8 @@ void CameraController::onBegin()
     {
         mRigidBody->setAngularFactor(glm::vec3(0.f));
     }
+
+    mCamera = engine::core->getScene()->getActor(mActor->getChildren()[0]);
 }
 
 void CameraController::onUpdate()
@@ -49,8 +51,8 @@ void CameraController::onUpdate()
     {
         const glm::vec2 mouseOffset = engine::eventHandler->getMouseDelta();
         mPanAngles -= glm::radians(mouseOffset) * 0.5f;
-        mActor->rotation = glm::angleAxis(static_cast<float>(mPanAngles.x), glm::vec3(0.f, 1.f, 0.f))
-                         * glm::angleAxis(static_cast<float>(mPanAngles.y), glm::vec3(1.f, 0.f, 0.f));
+        mCamera->rotation = glm::angleAxis(static_cast<float>(mPanAngles.y), glm::vec3(1.f, 0.f, 0.f));
+        mActor->rotation = glm::angleAxis(static_cast<float>(mPanAngles.x), glm::vec3(0.f, 1.f, 0.f));
     }
 
     if (glm::length(mInputDirection) > 0.f)
@@ -59,7 +61,7 @@ void CameraController::onUpdate()
     mRigidBody->active();
     glm::vec3 impulse = mActor->rotation * (mSpeed * timestep * glm::vec3(mInputDirection.x, 0.f, mInputDirection.y));
     if (mWantsJump)
-        impulse.y += 55.f;
+        impulse.y += mJumpForce;
     mRigidBody->addImpulse(impulse);
 
     mInputDirection = glm::vec2(0.f);
@@ -75,6 +77,7 @@ void CameraController::onDrawUi()
             mActor->removeComponent(this);
 
         ImGui::DragFloat("Speed", &mSpeed);
+        ImGui::DragFloat("Jump Force", &mJumpForce);
         ImGui::TreePop();
     }
 
@@ -85,5 +88,6 @@ void serializeComponent(YAML::Emitter &out, CameraController *cameraController)
 {
     out << YAML::Key << "Component" << YAML::Value << "CameraController";
     out << YAML::Key << "Speed" << YAML::Value << cameraController->mSpeed;
+    out << YAML::Key << "JumpForce" << YAML::Value << cameraController->mJumpForce;
 }
 

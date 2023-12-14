@@ -33,7 +33,7 @@ namespace engine
         void setMass(float mass);
 
         void onDrawUi() override;
-        void onFixedUpdate() override;
+
         void alignWithActorTransform() const;
         void setGroupMask(int mask);
         void setCollisionMask(int mask);
