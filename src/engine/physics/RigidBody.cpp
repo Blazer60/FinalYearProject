@@ -29,7 +29,7 @@ namespace engine
 
     void RigidBody::setupRigidBody(btCollisionShape* collisionShape)
     {
-        if (mRigidBody && !core->isInPlayMode())
+        if (mRigidBody || !core->isInPlayMode())
             return;  // We have already done setup.
 
         if (collisionShape == nullptr)
@@ -47,7 +47,7 @@ namespace engine
         transform.setIdentity();
         // todo: This needs to follow the hierarchy.
         transform.setOrigin(physics::cast(mActor->getWorldPosition()));
-        transform.setRotation(physics::cast(mActor->rotation));
+        transform.setRotation(physics::cast(mActor->getWorldRotation()));
 
         const bool isDynamic = mMass != 0.f;
 
@@ -141,10 +141,7 @@ namespace engine
         {
             btTransform transform;
             mMotionState->getWorldTransform(transform);
-            // todo: This needs to follow the hierarchy.
-            mActor->position = physics::cast(transform.getOrigin());
-            if (mRigidBody->getAngularFactor().length2() > 0.f)
-                mActor->rotation = physics::cast(transform.getRotation());
+            mActor->setWorldTransform(physics::cast(transform) * glm::scale(glm::mat4(1.f), mActor->scale));
         }
     }
 
@@ -156,7 +153,7 @@ namespace engine
         btTransform transform;
         transform.setIdentity();
         transform.setOrigin(physics::cast(mActor->getWorldPosition()));
-        transform.setRotation(physics::cast(mActor->rotation));
+        transform.setRotation(physics::cast(mActor->getWorldRotation()));
         mRigidBody->setWorldTransform(transform);
         mRigidBody->setLinearVelocity(btVector3(0.f, 0.f, 0.f));
         mRigidBody->setAngularVelocity(btVector3(0.f, 0.f, 0.f));

@@ -149,13 +149,19 @@ namespace engine
 
     void Actor::updateComponents()
     {
+        const int count = mComponentsToAdd.size();
+        for (int i = 0; i < count; ++i)
+            mComponentsToAdd[i]->awake();
+
         // Components could create more components.
-        for (int i = 0; i < mComponentsToAdd.size(); ++i)
+        for (int i = 0; i < count; ++i)
         {
             mComponentsToAdd[i]->begin();
             mComponents.push_back(std::move(mComponentsToAdd[i]));
         }
-        mComponentsToAdd.clear();
+
+        // Any components that are added from awake or begin will be processed next frame.
+        mComponentsToAdd.erase(mComponentsToAdd.begin(), mComponentsToAdd.begin() + count);
 
         if (core->isInPlayMode())
         {
@@ -271,14 +277,31 @@ namespace engine
     {
         return mParent;
     }
-    
+
+    void Actor::setWorldTransform(const glm::mat4& worldTransform)
+    {
+        if (mParent)
+            mTransform = glm::inverse(mParent->getTransform()) * worldTransform;
+        else
+            mTransform = worldTransform;
+
+        math::decompose(mTransform, position, rotation, scale);
+    }
+
     glm::vec3 Actor::getWorldPosition() const
     {
         if (mParent != nullptr)
             return mParent->getTransform() * glm::vec4(position, 1.f);
         return position;
     }
-    
+
+    glm::quat Actor::getWorldRotation() const
+    {
+        if (mParent != nullptr)
+            return mParent->getWorldRotation() * rotation;
+        return rotation;
+    }
+
     Scene *Actor::getScene() const
     {
         return mScene;

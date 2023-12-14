@@ -116,7 +116,9 @@ namespace engine
         
         [[nodiscard]] std::vector<UUID> &getChildren();
         [[nodiscard]] Actor *getParent() const;
+        void setWorldTransform(const glm::mat4 &worldTransform);
         [[nodiscard]] glm::vec3 getWorldPosition() const;
+        [[nodiscard]] glm::quat getWorldRotation() const;
         [[nodiscard]] Scene *getScene() const;
         
     protected:
@@ -158,7 +160,6 @@ namespace engine
     {
         Ref<T> ref = component;
         component->attachToActor(this);
-        component->awake();
         mComponentsToAdd.push_back(std::move(component));
         return ref;
     }
