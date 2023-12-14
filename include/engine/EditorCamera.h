@@ -87,6 +87,8 @@ protected:
     float mCameraBoomDistance { 30.f };
     float mCameraBoomDelta { 2.f };
     float mCameraBoomMin { 0.5f };
+
+    bool mShowCameraSettings { true };
     
     void moveFirstPerson();
     void rotateThirdPerson();

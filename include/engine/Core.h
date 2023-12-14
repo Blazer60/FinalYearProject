@@ -46,7 +46,6 @@ namespace engine
         void endPlay();
 
         [[nodiscard]] Scene *getScene() const;
-        [[nodiscard]] EditorCamera *getCamera() const;
         [[nodiscard]] std::string getSceneName();
         [[nodiscard]] std::filesystem::path getScenePath() const;
         [[nodiscard]] btDiscreteDynamicsWorld *getPhysicsWorld() const;
@@ -60,7 +59,6 @@ namespace engine
         void updateImgui();
         static void configureUiThemeColours(ImGuiStyle &style) ;
     
-    protected:
         const glm::ivec2 mResolution { 1920, 1080 };
         const std::string_view mWindowTitle { "Game Engine" };
         
@@ -82,12 +80,9 @@ namespace engine
         
         ImGuiIO *mGuiIo { nullptr };
         bool mIsRunning { true };
-        bool mIsInPlayMode { false };
+        bool mIsInPlayMode { false };  // todo: Is this more of an editor thing?
         const unsigned int mMaxLoopCount { 10 };
         const bool mEnableDebugging { false };
-        
-        std::unique_ptr<EditorCamera> mEditorCamera;
-        Ref<Camera> mPlayModeCamera;
         
         std::unique_ptr<Editor> mEditor;
         RootEventHandler mEventHandler;

@@ -75,15 +75,15 @@ namespace engine
             actor->addComponent(makeResource<Camera>());
         });
 
-        addMenuOption("Actor", []() {
+        addMenuOption("Actor", [this]() {
             Ref<Actor> actor = core->getScene()->spawnActor<Actor>("Actor");
-            actor->position = core->getCamera()->getEndOfBoomArmPosition();
+            actor->position = mViewport.getCamera()->getEndOfBoomArmPosition();
             return actor;
         });
         
-        addMenuOption("Cube",   []() { return Editor::createDefaultShape("Cube",   (file::modelPath() / "defaultObjects/DefaultCube.glb").string()); });
-        addMenuOption("Sphere", []() { return Editor::createDefaultShape("Sphere", (file::modelPath() / "defaultObjects/DefaultSphere.glb").string()); });
-        addMenuOption("Torus",  []() { return Editor::createDefaultShape("Torus",  (file::modelPath() / "defaultObjects/DefaultTorus.glb").string()); });
+        addMenuOption("Cube",   [this]() { return createDefaultShape("Cube",   (file::modelPath() / "defaultObjects/DefaultCube.glb").string()); });
+        addMenuOption("Sphere", [this]() { return createDefaultShape("Sphere", (file::modelPath() / "defaultObjects/DefaultSphere.glb").string()); });
+        addMenuOption("Torus",  [this]() { return createDefaultShape("Torus",  (file::modelPath() / "defaultObjects/DefaultTorus.glb").string()); });
         
         mViewport.init();
     }
@@ -96,7 +96,6 @@ namespace engine
         ui::draw(mLogWindow);
         ui::draw(mResourceFolder);
         ui::draw(mProfilerViewer);
-        drawCameraSettings();
         drawSceneSettings();
         drawSceneHierarchyPanel();
         drawActorDetails();
@@ -190,8 +189,14 @@ namespace engine
             callback();
         
         mOnUpdate.clear();
+        mViewport.update();
     }
-    
+
+    void Editor::preRender()
+    {
+        mViewport.preRender();
+    }
+
     bool Editor::isViewportHovered()
     {
         return mViewport.isHovered();
@@ -210,7 +215,7 @@ namespace engine
     Ref<Actor> Editor::createDefaultShape(const std::string& name, std::string_view path)
     {
         Ref<Actor> actor = core->getScene()->spawnActor<Actor>(name);
-        actor->position = core->getCamera()->getEndOfBoomArmPosition();
+        actor->position = mViewport.getCamera()->getEndOfBoomArmPosition();
         auto model = actor->addComponent(load::meshRenderer<StandardVertex>(path));
         auto material = std::make_shared<StandardMaterialSubComponent>();
         material->attachShader(load::shader(
@@ -390,20 +395,10 @@ namespace engine
         ImGui::End();
     }
 
-    void Editor::drawCameraSettings()
-    {
-        if (!mShowCameraSettings)
-            return;
-
-        ImGui::Begin("Renderer Settings", &mShowCameraSettings);
-        ui::draw(core->getCamera());
-        ImGui::End();
-    }
-
     void Editor::createModel(const std::filesystem::path &path)
     {
-        Ref<engine::Actor> actor = core->getScene()->spawnActor<engine::Actor>("Model");
-        actor->position = core->getCamera()->getEndOfBoomArmPosition();
+        Ref<Actor> actor = core->getScene()->spawnActor<engine::Actor>("Model");
+        actor->position = mViewport.getCamera()->getEndOfBoomArmPosition();
         Ref<MeshRenderer> meshRenderer = actor->addComponent(load::meshRenderer<StandardVertex>(path));
         auto material = std::make_shared<StandardMaterialSubComponent>();
         material->attachShader(load::shader(

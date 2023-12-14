@@ -70,6 +70,7 @@ namespace engine
     public:
         void init();
         void update();
+        void preRender();
         
         [[nodiscard]] Ref<Actor> getSelectedActor();
         bool isViewportHovered();
@@ -80,7 +81,7 @@ namespace engine
         void addComponentOption(const std::string &name, const ComponentDetails::CreateFunc &onCreate);
         void addMenuOption(const std::string &name, const ActorDetails::CreateFunc &onCreate);
 
-        static Ref<Actor> createDefaultShape(const std::string& name, std::string_view path);
+        Ref<Actor> createDefaultShape(const std::string& name, std::string_view path);
         void createModel(const std::filesystem::path &path);
         
         /**
@@ -98,7 +99,6 @@ namespace engine
         void drawActorDetails();
         void drawAddComponentCombo();
         void drawSceneSettings();
-        void drawCameraSettings();
         void drawFileMenuDropDown();
         void drawWindowDropDown();
         void drawMenuBar();

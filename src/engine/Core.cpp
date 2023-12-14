@@ -88,8 +88,6 @@ namespace engine
             return;
         }
         
-        mEditorCamera = std::make_unique<EditorCamera>(glm::vec3(0.f, 3.f, 21.f));
-        
         mWindowIcon = load::windowIcon((file::texturePath() / "Icon.png").string());
         if (mWindowIcon.pixels != nullptr)
             glfwSetWindowIcon(mWindow, 1, &mWindowIcon);
@@ -330,14 +328,11 @@ namespace engine
             PROFILE_SCOPE_END(fixedTimer);
 
             mScene->update();
-            mEditorCamera->update();
             mEditor->update();
+
+            mEditor->preRender();
             mScene->render();
             mPhysics->renderDebugShapes();
-            if (mIsInPlayMode && mPlayModeCamera.isValid())
-                mRenderer->submit(mPlayModeCamera->toCameraSettings());
-            else
-                mRenderer->submit(mEditorCamera->toSettings());
             mRenderer->render();
             updateImgui();
             mRenderer->clear();
@@ -405,11 +400,6 @@ namespace engine
         return mScenePointer;
     }
     
-    EditorCamera *Core::getCamera() const
-    {
-        return mEditorCamera.get();
-    }
-
     btDiscreteDynamicsWorld* Core::getPhysicsWorld() const
     {
         return mPhysics->dynamicsWorld.get();
@@ -440,26 +430,11 @@ namespace engine
         serialize::scene(tempFilePath, getScene());
         setScene(load::scene(tempFilePath), tempFilePath);
         mIsInPlayMode = true;
-
-        mPlayModeCamera.nullify();
-        const auto cameras = mScene->findComponents<Camera>();
-        for (Ref<Camera> camera : cameras)
-        {
-            if (camera->isMainCamera())
-            {
-                mPlayModeCamera = camera;
-                return;
-            }
-        }
-
-        if (!mPlayModeCamera.isValid() && !cameras.empty())
-            mPlayModeCamera = cameras[0];  // Falback is a main camera isn't set.
     }
 
     void Core::endPlay()
     {
         setScene(load::scene(tempFilePath), mScenePath);
         mIsInPlayMode = false;
-        mPlayModeCamera.nullify();
     }
 }

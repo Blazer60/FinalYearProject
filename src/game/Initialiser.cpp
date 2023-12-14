@@ -26,7 +26,7 @@ void initComponentsForEngine()
     });
 
     engine::editor->addMenuOption("Rotating Cube", []() {
-        Ref<engine::Actor> actor = engine::Editor::createDefaultShape("Rotating Cube", (file::modelPath() / "defaultObjects/DefaultCube.glb").string());
+        Ref<engine::Actor> actor = engine::editor->createDefaultShape("Rotating Cube", (file::modelPath() / "defaultObjects/DefaultCube.glb").string());
         actor->addComponent(makeResource<Rotator>());
         return actor;
     });

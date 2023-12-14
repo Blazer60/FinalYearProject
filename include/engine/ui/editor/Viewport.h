@@ -13,6 +13,8 @@
 #include "TextureBufferObject.h"
 #include <glfw3.h>
 
+#include "Camera.h"
+#include "EditorCamera.h"
 #include "FileLoader.h"
 #include "Texture.h"
 
@@ -32,20 +34,32 @@ namespace engine
         : public ui::Drawable
     {
     public:
-        void init();
+        Viewport();
         ~Viewport() override;
         
+        void init();
         [[nodiscard]] glm::vec2 getSize() const;
+
+        void drawTopBar();
+
+        void drawEditorView();
+
         [[nodiscard]] bool isHovered() const;
         GLFWwindow *getViewportContext();
         bool isDebugViewOn() const;
+        void preRender();
+        void update();
+        void beginPlay();
+        EditorCamera *getCamera();
 
         bool isShowing { true };
     protected:
+        void drawPlayModeView() const;
+
         void onDrawUi() override;
         void toggleMouseState(bool newState);
         
-        glm::vec2 mSize;
+        glm::vec2 mSize { 0.f };
         bool mIsHovered { false };
         glm::dvec2 mLastMousePosition { 0.0, 0.0 };
         ImGuizmo::OPERATION mOperation { ImGuizmo::OPERATION::TRANSLATE };
@@ -63,6 +77,9 @@ namespace engine
         int32_t mCurrentSelectedImage = 0;
         bool mForce1080p { false };
         bool mShowDebugOverlay { false };
+
+        EditorCamera mEditorCamera;
+        Ref<Camera> mPlayModeCamera;
 
         Texture mPlayButton { file::texturePath() / "PlayButton.png" };
         Texture mStopButton { file::texturePath() / "PauseButton.png" };

@@ -23,10 +23,12 @@ namespace engine
     {
     public:
         Camera();
+        void onUpdate() override;
         void onDrawUi() override;
 
         bool isMainCamera() const;
         [[nodiscard]] CameraSettings toCameraSettings();
+        [[nodiscard]] glm::mat4 getViewMatrix() const;
 
     protected:
         std::vector<std::unique_ptr<PostProcessLayer>> mPostProcessStack;
@@ -35,6 +37,7 @@ namespace engine
         float mEv100 { 10.f };
         float mNearClip { 0.01f };
         float mFarClip { 1000.f };
+        glm::mat4 mViewMatrix { 1.f };
 
         ENGINE_SERIALIZABLE_COMPONENT(Camera);
     };

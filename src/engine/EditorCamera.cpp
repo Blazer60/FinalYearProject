@@ -126,7 +126,10 @@ const glm::mat4 &EditorCamera::getViewMatrix() const
 void EditorCamera::onDrawUi()
 {
     PROFILE_FUNC();
+    if (!mShowCameraSettings)
+        return;
 
+    ImGui::Begin("Renderer Settings", &mShowCameraSettings);
     drawRendererSettings();
 
     if (ImGui::CollapsingHeader("Camera Details"))
@@ -158,7 +161,8 @@ void EditorCamera::onDrawUi()
         for (std::unique_ptr<PostProcessLayer> &postProcessLayer : mPostProcessStack)
             ui::draw(postProcessLayer);
     }
-    
+
+    ImGui::End();
 }
 
 const glm::vec3 &EditorCamera::getPosition() const

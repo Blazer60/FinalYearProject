@@ -26,6 +26,12 @@
 
 namespace engine
 {
+    Viewport::Viewport()
+        : mEditorCamera(glm::vec3(0.f, 5.f, 0.f))
+    {
+
+    }
+
     void Viewport::init()
     {
         mViewportWindow = glfwGetCurrentContext();
@@ -50,7 +56,7 @@ namespace engine
             ViewportImage { "Debug View",   []() -> const TextureBufferObject& { return graphics::renderer->getDebugBuffer(); } },
         };
     }
-    
+
     Viewport::~Viewport()
     {
         eventHandler->viewport.onGizmoTranslate.unSubscribe(mTranslateGizmoToken);
@@ -64,32 +70,25 @@ namespace engine
     {
         return mSize;
     }
-    
-    void Viewport::onDrawUi()
+
+    void Viewport::drawTopBar()
     {
-        PROFILE_FUNC();
-        if (!isShowing)
-            return;
-
-        ImGui::PushID("Viewport");
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
-        std::string sceneName = core->getSceneName();
-        if (sceneName.empty())
-            sceneName = "Unsaved";
-
-        const std::string windowName = sceneName + "###ViewportWindow";
-        ImGui::Begin(windowName.c_str(), &isShowing);
-
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetColumnWidth() / 2) - 12.f);
         if (!core->isInPlayMode())
         {
             if (ui::imageButton("PlayButton", mPlayButton.id(), glm::ivec2(24)))
+            {
                 core->beginPlay();
+                beginPlay();
+            }
         }
         else
         {
             if (ui::imageButton("StopButton", mStopButton.id(), glm::ivec2(24)))
+            {
                 core->endPlay();
+                mPlayModeCamera.nullify();
+            }
         }
 
         if (ImGui::RadioButton("Move", mOperation == ImGuizmo::OPERATION::TRANSLATE))
@@ -100,7 +99,7 @@ namespace engine
         ImGui::SameLine();
         if (ImGui::RadioButton("Scale", mOperation == ImGuizmo::OPERATION::SCALE))
             mOperation = ImGuizmo::OPERATION::SCALE;
-        
+
         ImGui::SameLine(0.f, ImGui::GetStyle().ItemSpacing.x * 3.f);
         if (ImGui::RadioButton("Local", mMode == ImGuizmo::MODE::LOCAL))
             mMode = ImGuizmo::MODE::LOCAL;
@@ -111,7 +110,7 @@ namespace engine
         ImGui::Checkbox("Force 1080p", &mForce1080p);
         ImGui::SameLine();
         ImGui::Checkbox("Debug Overlay", &mShowDebugOverlay);
-        
+
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - 100.f);
         ImGui::SetNextItemWidth(100.f);
@@ -122,13 +121,16 @@ namespace engine
                 const bool isSelected = (mCurrentSelectedImage == i);
                 if (ImGui::Selectable(mViewportImages[i].name.c_str(), isSelected))
                     mCurrentSelectedImage = i;
-                
+
                 if (isSelected)
                     ImGui::SetItemDefaultFocus();
             }
             ImGui::EndCombo();
         }
-        
+    }
+
+    void Viewport::drawEditorView()
+    {
         ImGui::BeginChild("ImageWindow");
 
         const ImVec2 cursorPos = ImGui::GetCursorPos();
@@ -155,10 +157,10 @@ namespace engine
         }
 
         mIsHovered = ImGui::IsWindowHovered();
-        
+
         if (auto *x = reinterpret_cast<GLFWwindow*>(ImGui::GetWindowViewport()->PlatformHandle); x != nullptr)
             mViewportWindow = x;
-        
+
         Ref<Actor> selectedActor = editor->getSelectedActor();
         if (selectedActor.isValid())
         {
@@ -168,13 +170,12 @@ namespace engine
             ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
             ImGuizmo::SetOrthographic(false);
             ImGuizmo::Enable(true);
-            
+
             glm::mat4 actorTransform = selectedActor->getTransform();
-            
-            EditorCamera *camera = core->getCamera();
-            glm::mat4 view = camera->getViewMatrix();
-            glm::mat4 projection = camera->getProjectionMatrix();
-            
+
+            glm::mat4 view = mEditorCamera.getViewMatrix();
+            glm::mat4 projection = mEditorCamera.getProjectionMatrix();
+
             if (ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection),
                                      mOperation, mMode, glm::value_ptr(actorTransform)))
             {
@@ -191,8 +192,44 @@ namespace engine
                 }
             }
         }
-        
+
         ImGui::EndChild();
+    }
+
+    void Viewport::drawPlayModeView() const
+    {
+        ImGui::BeginChild("ImageWindow");
+
+        const ImVec2 regionSize = mForce1080p ? ImVec2(1920.f, 1080.f) : ImGui::GetContentRegionAvail();
+        window::setBufferSize(glm::ivec2(regionSize.x, regionSize.y));
+
+        const TextureBufferObject &texture = graphics::renderer->getPrimaryBuffer();
+        ImGui::Image(reinterpret_cast<void *>(texture.getId()), regionSize, ImVec2(0, 1), ImVec2(1, 0));
+
+        ImGui::EndChild();
+    }
+
+    void Viewport::onDrawUi()
+    {
+        PROFILE_FUNC();
+        if (!isShowing)
+            return;
+
+        ImGui::PushID("Viewport");
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
+        std::string sceneName = core->getSceneName();
+        if (sceneName.empty())
+            sceneName = "Unsaved";
+
+        const std::string windowName = sceneName + "###ViewportWindow";
+        ImGui::Begin(windowName.c_str(), &isShowing);
+
+        drawTopBar();
+        if (core->isInPlayMode() && mPlayModeCamera.isValid())
+            drawPlayModeView();
+        else
+            drawEditorView();
+
         ImGui::End();
         ImGui::PopStyleVar();
         ImGui::PopID();
@@ -219,5 +256,40 @@ namespace engine
     bool Viewport::isDebugViewOn() const
     {
         return mShowDebugOverlay || mViewportImages[mCurrentSelectedImage].name == "Debug View";
+    }
+
+    void Viewport::preRender()
+    {
+        if (core->isInPlayMode() && mPlayModeCamera.isValid())
+            graphics::renderer->submit(mPlayModeCamera->toCameraSettings());
+        else
+            graphics::renderer->submit(mEditorCamera.toSettings());
+    }
+
+    void Viewport::update()
+    {
+        mEditorCamera.update();
+    }
+
+    void Viewport::beginPlay()
+    {
+        mPlayModeCamera.nullify();
+        const auto cameras = core->getScene()->findComponents<Camera>();
+        for (Ref<Camera> camera : cameras)
+        {
+            if (camera->isMainCamera())
+            {
+                mPlayModeCamera = camera;
+                return;
+            }
+        }
+
+        if (!mPlayModeCamera.isValid() && !cameras.empty())
+            mPlayModeCamera = cameras[0];  // Falback is a main camera isn't set.
+    }
+
+    EditorCamera* Viewport::getCamera()
+    {
+        return &mEditorCamera;
     }
 }

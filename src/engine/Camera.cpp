@@ -22,6 +22,11 @@ namespace engine
         mPostProcessStack.emplace_back(std::make_unique<ColourGrading>());
     }
 
+    void Camera::onUpdate()
+    {
+        mViewMatrix = glm::inverse(mActor->getTransform());
+    }
+
     void Camera::onDrawUi()
     {
         ImGui::PushID("CameraSettings");
@@ -53,9 +58,14 @@ namespace engine
             mFov,
             mNearClip,
             mFarClip,
-            glm::inverse(mActor->getTransform()),
+            mViewMatrix,
             mEv100,
             mPostProcessStack
         };
+    }
+
+    glm::mat4 Camera::getViewMatrix() const
+    {
+        return mViewMatrix;
     }
 }

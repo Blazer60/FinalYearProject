@@ -29,16 +29,29 @@ namespace engine
 
     void SoundComponent::onBegin()
     {
+        const auto cameras = core->getScene()->findComponents<Camera>();
+        for (Ref<Camera> camera : cameras)
+        {
+            if (camera->isMainCamera())
+                mCamera = camera;
+        }
+        if (!mCamera.isValid() && !cameras.empty())
+            mCamera = cameras[0];
+
         mAudioSource->setVolume(mVolume);
     }
 
     void SoundComponent::onUpdate()
     {
-        // Get Camera vp matrix.
-        const auto & viewMatrix = core->getCamera()->getViewMatrix();
-        const auto & modelMatrix = mActor->getTransform();
-        const glm::vec4 audioPosition = viewMatrix * modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
-        mAudioSource->setPosition(audioPosition);
+        // Sound can only move is there is a valid camera in the scene. Todo: Should update based on where the editor camera is.
+        if (mCamera.isValid())
+        {
+            // Get Camera vp matrix.
+            const auto & viewMatrix = mCamera->getViewMatrix();
+            const auto & modelMatrix = mActor->getTransform();
+            const glm::vec4 audioPosition = viewMatrix * modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+            mAudioSource->setPosition(audioPosition);
+        }
     }
 
     void SoundComponent::onDrawUi()

@@ -34,6 +34,7 @@ public:
 protected:
     std::unique_ptr<AudioSource> mAudioSource;
     float mVolume { 100.f };
+    Ref<Camera> mCamera;
 
     ENGINE_SERIALIZABLE_COMPONENT(SoundComponent);
 };
