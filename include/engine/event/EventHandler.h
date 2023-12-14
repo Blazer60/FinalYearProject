@@ -17,6 +17,7 @@ namespace engine
         class EventHandler
         {
         public:
+            virtual ~EventHandler() = default;
             virtual void update() = 0;
             bool isActive { false };
             
@@ -55,7 +56,7 @@ namespace engine
         {
         public:
             void update() override;
-        public:
+
             Button onGizmoTranslate { ImGuiKey_W };
             Button onGizmoRotate    { ImGuiKey_E };
             Button onGizmoScale     { ImGuiKey_R };
@@ -64,6 +65,17 @@ namespace engine
             
             FirstPersonCamera firstPerson { ImGuiKey_MouseRight };
             ThirdPersonCamera thirdPerson { ImGuiKey_LeftAlt };
+        };
+
+        class Editor
+            : public EventHandler
+        {
+        public:
+            void update() override;
+
+            Button onDeleteActor { ImGuiKey_Delete };
+
+            Viewport viewport;
         };
     }
     
@@ -87,8 +99,8 @@ namespace engine
          * @returns The delta from the last frame. This will be valid even if the cursor is disabled.
          */
         [[nodiscard]] glm::vec2 getMouseDelta() const;
-    public:
-        event::Viewport viewport;
+
+        event::Editor editor;
         
     protected:
         glm::dvec2 mLastMousePosition { 0.f };

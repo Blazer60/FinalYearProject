@@ -45,6 +45,7 @@ namespace engine
         void drawEditorView();
 
         [[nodiscard]] bool isHovered() const;
+        [[nodiscard]] bool isUsingPlayModeCamera() const;
         GLFWwindow *getViewportContext();
         bool isDebugViewOn() const;
         void preRender();
@@ -70,7 +71,7 @@ namespace engine
         uint32_t mTranslateGizmoToken   { 0 };
         uint32_t mRotateGizmoToken      { 0 };
         uint32_t mScaleGizmoToken       { 0 };
-        
+
         GLFWwindow *mViewportWindow { nullptr };
         
         std::vector<ViewportImage> mViewportImages;

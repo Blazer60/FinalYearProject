@@ -1,11 +1,13 @@
 /**
- * @file Keymap.cpp
+ * @file EventHandler.cpp
  * @author Ryan Purse
  * @date 23/08/2023
  */
 
 
 #include "EventHandler.h"
+
+#include "Core.h"
 #include "Editor.h"
 #include "glfw3.h"
 #include "EngineState.h"
@@ -22,7 +24,7 @@ namespace engine
         
         void FirstPersonCamera::update()
         {
-            bool temp = isActive;
+            const bool temp = isActive;
             isActive = ImGui::IsKeyDown(key);
             if (isActive != temp)
                 onStateChanged.broadcast(isActive);
@@ -37,7 +39,7 @@ namespace engine
         
         void Viewport::update()
         {
-            bool temp = isActive;
+            const bool temp = isActive;
             isActive = engine::editor->isViewportHovered() || glfwGetInputMode(engine::editor->getViewportContext(), GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
             if (isActive != temp)
                 onStateChanged.broadcast(isActive);
@@ -78,16 +80,29 @@ namespace engine
             }
         }
         
+        void Editor::update()
+        {
+            const bool temp = isActive;
+            isActive = !editor->isUsingPlayModeCamera();
+            if (isActive != temp)
+                onStateChanged.broadcast(isActive);
+
+            if (isActive)
+            {
+                viewport.update();
+                onDeleteActor.doAction();
+            }
+        }
     }
     
     void RootEventHandler::update()
     {
-        viewport.update();
+        editor.update();
     }
     
     void RootEventHandler::updateMouseDelta(double xPos, double yPos)
     {
-        glm::dvec2 mousePosition = { xPos, yPos };
+        const glm::dvec2 mousePosition = { xPos, yPos };
         mMousePositionDelta = mousePosition - mLastMousePosition;
         mLastMousePosition = mousePosition;
     }
@@ -96,7 +111,8 @@ namespace engine
     {
         return mMousePositionDelta;
     }
-    
+
+
     void RootEventHandler::beginFrame()
     {
         mMousePositionDelta = glm::vec2(0.f);

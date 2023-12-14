@@ -35,11 +35,11 @@ namespace engine
     void Viewport::init()
     {
         mViewportWindow = glfwGetCurrentContext();
-        mTranslateGizmoToken = eventHandler->viewport.onGizmoTranslate.subscribe([this]() { mOperation = ImGuizmo::OPERATION::TRANSLATE; });
-        mRotateGizmoToken = eventHandler->viewport.onGizmoRotate.subscribe([this]() { mOperation = ImGuizmo::OPERATION::ROTATE; });
-        mScaleGizmoToken = eventHandler->viewport.onGizmoScale.subscribe([this]() { mOperation = ImGuizmo::OPERATION::SCALE; });
-        mFirstPersonToken = eventHandler->viewport.firstPerson.onStateChanged.subscribe([this](bool state) { toggleMouseState(state); });
-        mThirdPersonToken = eventHandler->viewport.thirdPerson.onStateChanged.subscribe([this](bool state) { toggleMouseState(state); });
+        mTranslateGizmoToken = eventHandler->editor.viewport.onGizmoTranslate.subscribe([this]() { mOperation = ImGuizmo::OPERATION::TRANSLATE; });
+        mRotateGizmoToken = eventHandler->editor.viewport.onGizmoRotate.subscribe([this]() { mOperation = ImGuizmo::OPERATION::ROTATE; });
+        mScaleGizmoToken = eventHandler->editor.viewport.onGizmoScale.subscribe([this]() { mOperation = ImGuizmo::OPERATION::SCALE; });
+        mFirstPersonToken = eventHandler->editor.viewport.firstPerson.onStateChanged.subscribe([this](bool state) { toggleMouseState(state); });
+        mThirdPersonToken = eventHandler->editor.viewport.thirdPerson.onStateChanged.subscribe([this](bool state) { toggleMouseState(state); });
         
         mViewportImages = {
             ViewportImage { "Default",      []() -> const TextureBufferObject& { return graphics::renderer->getPrimaryBuffer(); } },
@@ -59,11 +59,11 @@ namespace engine
 
     Viewport::~Viewport()
     {
-        eventHandler->viewport.onGizmoTranslate.unSubscribe(mTranslateGizmoToken);
-        eventHandler->viewport.onGizmoRotate.unSubscribe(mRotateGizmoToken);
-        eventHandler->viewport.onGizmoScale.unSubscribe(mScaleGizmoToken);
-        eventHandler->viewport.firstPerson.onStateChanged.unSubscribe(mFirstPersonToken);
-        eventHandler->viewport.thirdPerson.onStateChanged.unSubscribe(mThirdPersonToken);
+        eventHandler->editor.viewport.onGizmoTranslate.unSubscribe(mTranslateGizmoToken);
+        eventHandler->editor.viewport.onGizmoRotate.unSubscribe(mRotateGizmoToken);
+        eventHandler->editor.viewport.onGizmoScale.unSubscribe(mScaleGizmoToken);
+        eventHandler->editor.viewport.firstPerson.onStateChanged.unSubscribe(mFirstPersonToken);
+        eventHandler->editor.viewport.thirdPerson.onStateChanged.unSubscribe(mThirdPersonToken);
     }
     
     glm::vec2 Viewport::getSize() const
@@ -225,7 +225,7 @@ namespace engine
         ImGui::Begin(windowName.c_str(), &isShowing);
 
         drawTopBar();
-        if (core->isInPlayMode() && mPlayModeCamera.isValid())
+        if (isUsingPlayModeCamera())
             drawPlayModeView();
         else
             drawEditorView();
@@ -239,7 +239,12 @@ namespace engine
     {
         return mIsHovered;
     }
-    
+
+    bool Viewport::isUsingPlayModeCamera() const
+    {
+        return core->isInPlayMode() && mPlayModeCamera.isValid();
+    }
+
     void Viewport::toggleMouseState(bool newState)
     {
         if (newState)

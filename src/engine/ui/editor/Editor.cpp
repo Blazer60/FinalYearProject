@@ -24,6 +24,11 @@
 
 namespace engine
 {
+    Editor::~Editor()
+    {
+        eventHandler->editor.onDeleteActor.unSubscribe(mDeleteActorToken);
+    }
+
     void Editor::init()
     {
         addComponentOption<DirectionalLight>("Directional Light", [](Ref<Actor> actor) {
@@ -86,6 +91,11 @@ namespace engine
         addMenuOption("Torus",  [this]() { return createDefaultShape("Torus",  (file::modelPath() / "defaultObjects/DefaultTorus.glb").string()); });
         
         mViewport.init();
+
+        mDeleteActorToken = eventHandler->editor.onDeleteActor.subscribe([this] {
+            if (mSelectedActor.isValid())
+                mSelectedActor->markForDeath();
+        });
     }
     
     void Editor::onDrawUi()
@@ -205,6 +215,11 @@ namespace engine
     bool Editor::isDebugOverlayOn() const
     {
         return mViewport.isDebugViewOn();
+    }
+
+    bool Editor::isUsingPlayModeCamera() const
+    {
+        return mViewport.isUsingPlayModeCamera();
     }
 
     GLFWwindow *Editor::getViewportContext()

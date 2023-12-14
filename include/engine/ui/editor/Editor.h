@@ -68,6 +68,7 @@ namespace engine
         : public ui::Drawable
     {
     public:
+        ~Editor() override;
         void init();
         void update();
         void preRender();
@@ -75,6 +76,7 @@ namespace engine
         [[nodiscard]] Ref<Actor> getSelectedActor();
         bool isViewportHovered();
         bool isDebugOverlayOn() const;
+        bool isUsingPlayModeCamera() const;
         GLFWwindow *getViewportContext();
         
         template<typename T>
@@ -114,6 +116,8 @@ namespace engine
         UUID mSelectedActorId { 0 };
         std::vector<ActorDetails> mMenuList;
         std::vector<std::unique_ptr<ComponentDetails>> mComponentList;
+
+        uint32_t mDeleteActorToken { 0 };
         
         Actor* mMoveSourceActor { nullptr };
         Actor* mMoveDestinationActor { nullptr };

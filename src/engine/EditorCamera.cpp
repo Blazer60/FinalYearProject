@@ -1,5 +1,5 @@
 /**
- * @file MainCamera.cpp
+ * @file EditorCamera.cpp
  * @author Ryan Purse
  * @date 13/02/2022
  */
@@ -36,26 +36,26 @@ void EditorCamera::init()
     mPostProcessStack.emplace_back(std::make_unique<BloomPass>());
     mPostProcessStack.emplace_back(std::make_unique<ColourGrading>());
     
-    mFocusActorEventToken = engine::eventHandler->viewport.onFocusActor.subscribe([this]() { gotoSelectedActor(); });
-    mOrbitEventToken = engine::eventHandler->viewport.thirdPerson.onOrbitCamera.subscribe([this](float value) { rotateThirdPerson(); });
-    mDoMoveToken = engine::eventHandler->viewport.firstPerson.onStateChanged.subscribe([this](bool isActive) { mDoMoveAction = isActive; });
-    mMoveForwardEventToken = engine::eventHandler->viewport.firstPerson.onMoveForward.subscribe([this](float value) { mInputDirection.z = value; });
-    mMoveRightEventToken = engine::eventHandler->viewport.firstPerson.onMoveRight.subscribe([this](float value) { mInputDirection.x = value; });
-    mMoveUpEventToken = engine::eventHandler->viewport.firstPerson.onMoveUp.subscribe([this](float value) { mInputDirection.y = value; });
-    mZoomViewportToken = engine::eventHandler->viewport.onZoom.subscribe([this](float zoomValue){ zoomCamera(-zoomValue * mCameraBoomDelta); });
-    mZoomThirdPersonToken = engine::eventHandler->viewport.thirdPerson.onZoomCamera.subscribe([this](float zoomValue){ zoomCamera(engine::eventHandler->getMouseDelta().y); });
+    mFocusActorEventToken = engine::eventHandler->editor.viewport.onFocusActor.subscribe([this]() { gotoSelectedActor(); });
+    mOrbitEventToken = engine::eventHandler->editor.viewport.thirdPerson.onOrbitCamera.subscribe([this](float value) { rotateThirdPerson(); });
+    mDoMoveToken = engine::eventHandler->editor.viewport.firstPerson.onStateChanged.subscribe([this](bool isActive) { mDoMoveAction = isActive; });
+    mMoveForwardEventToken = engine::eventHandler->editor.viewport.firstPerson.onMoveForward.subscribe([this](float value) { mInputDirection.z = value; });
+    mMoveRightEventToken = engine::eventHandler->editor.viewport.firstPerson.onMoveRight.subscribe([this](float value) { mInputDirection.x = value; });
+    mMoveUpEventToken = engine::eventHandler->editor.viewport.firstPerson.onMoveUp.subscribe([this](float value) { mInputDirection.y = value; });
+    mZoomViewportToken = engine::eventHandler->editor.viewport.onZoom.subscribe([this](float zoomValue){ zoomCamera(-zoomValue * mCameraBoomDelta); });
+    mZoomThirdPersonToken = engine::eventHandler->editor.viewport.thirdPerson.onZoomCamera.subscribe([this](float zoomValue){ zoomCamera(engine::eventHandler->getMouseDelta().y); });
 }
 
 EditorCamera::~EditorCamera()
 {
-    engine::eventHandler->viewport.onFocusActor.unSubscribe(mFocusActorEventToken);
-    engine::eventHandler->viewport.thirdPerson.onOrbitCamera.unSubscribe(mOrbitEventToken);
-    engine::eventHandler->viewport.firstPerson.onMoveForward.unSubscribe(mMoveForwardEventToken);
-    engine::eventHandler->viewport.firstPerson.onMoveRight.unSubscribe(mMoveRightEventToken);
-    engine::eventHandler->viewport.firstPerson.onMoveUp.unSubscribe(mMoveUpEventToken);
-    engine::eventHandler->viewport.firstPerson.onStateChanged.unSubscribe(mDoMoveToken);
-    engine::eventHandler->viewport.onZoom.unSubscribe(mZoomViewportToken);
-    engine::eventHandler->viewport.thirdPerson.onZoomCamera.unSubscribe(mZoomThirdPersonToken);
+    engine::eventHandler->editor.viewport.onFocusActor.unSubscribe(mFocusActorEventToken);
+    engine::eventHandler->editor.viewport.thirdPerson.onOrbitCamera.unSubscribe(mOrbitEventToken);
+    engine::eventHandler->editor.viewport.firstPerson.onMoveForward.unSubscribe(mMoveForwardEventToken);
+    engine::eventHandler->editor.viewport.firstPerson.onMoveRight.unSubscribe(mMoveRightEventToken);
+    engine::eventHandler->editor.viewport.firstPerson.onMoveUp.unSubscribe(mMoveUpEventToken);
+    engine::eventHandler->editor.viewport.firstPerson.onStateChanged.unSubscribe(mDoMoveToken);
+    engine::eventHandler->editor.viewport.onZoom.unSubscribe(mZoomViewportToken);
+    engine::eventHandler->editor.viewport.thirdPerson.onZoomCamera.unSubscribe(mZoomThirdPersonToken);
 }
 
 void EditorCamera::update()
