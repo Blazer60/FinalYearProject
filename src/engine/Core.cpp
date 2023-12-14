@@ -430,11 +430,13 @@ namespace engine
         serialize::scene(tempFilePath, getScene());
         setScene(load::scene(tempFilePath), tempFilePath);
         mIsInPlayMode = true;
+        mEventHandler.updateUserEvents = true;
     }
 
     void Core::endPlay()
     {
         setScene(load::scene(tempFilePath), mScenePath);
         mIsInPlayMode = false;
+        mEventHandler.updateUserEvents = false;
     }
 }

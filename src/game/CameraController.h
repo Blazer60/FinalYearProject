@@ -28,10 +28,12 @@ public:
     void onDrawUi() override;
 
 protected:
+    float mSpeed { 1.f };
     glm::vec2 mInputDirection { 0.f };
     glm::dvec2 mPanAngles { 0.f };
     uint32_t mMoveForwardToken { 0 };
     uint32_t mMoveRightToken { 0 };
 
+    friend void initComponentsForEngine();
     SERIALIZABLE_COMPONENT(CameraController);
 };

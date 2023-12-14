@@ -79,7 +79,8 @@ namespace engine
             if (ui::imageButton("PlayButton", mPlayButton.id(), glm::ivec2(24)))
             {
                 core->beginPlay();
-                beginPlay();
+                if (!mIsSimulating)
+                    beginPlay();
             }
         }
         else
@@ -90,6 +91,8 @@ namespace engine
                 mPlayModeCamera.nullify();
             }
         }
+        ImGui::SameLine();
+        ImGui::Checkbox("Simulate", &mIsSimulating);
 
         if (ImGui::RadioButton("Move", mOperation == ImGuizmo::OPERATION::TRANSLATE))
             mOperation = ImGuizmo::OPERATION::TRANSLATE;
@@ -245,7 +248,7 @@ namespace engine
         return core->isInPlayMode() && mPlayModeCamera.isValid();
     }
 
-    void Viewport::toggleMouseState(bool newState)
+    void Viewport::toggleMouseState(const bool newState) const
     {
         if (newState)
             glfwSetInputMode(mViewportWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -253,7 +256,7 @@ namespace engine
             glfwSetInputMode(mViewportWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
     
-    GLFWwindow *Viewport::getViewportContext()
+    GLFWwindow *Viewport::getViewportContext() const
     {
         return mViewportWindow;
     }
@@ -265,7 +268,7 @@ namespace engine
 
     void Viewport::preRender()
     {
-        if (core->isInPlayMode() && mPlayModeCamera.isValid())
+        if (isUsingPlayModeCamera())
             graphics::renderer->submit(mPlayModeCamera->toCameraSettings());
         else
             graphics::renderer->submit(mEditorCamera.toSettings());

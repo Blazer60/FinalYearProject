@@ -46,7 +46,7 @@ namespace engine
 
         [[nodiscard]] bool isHovered() const;
         [[nodiscard]] bool isUsingPlayModeCamera() const;
-        GLFWwindow *getViewportContext();
+        GLFWwindow *getViewportContext() const;
         bool isDebugViewOn() const;
         void preRender();
         void update();
@@ -58,7 +58,7 @@ namespace engine
         void drawPlayModeView() const;
 
         void onDrawUi() override;
-        void toggleMouseState(bool newState);
+        void toggleMouseState(bool newState) const;
         
         glm::vec2 mSize { 0.f };
         bool mIsHovered { false };
@@ -78,6 +78,7 @@ namespace engine
         int32_t mCurrentSelectedImage = 0;
         bool mForce1080p { false };
         bool mShowDebugOverlay { false };
+        bool mIsSimulating { false };
 
         EditorCamera mEditorCamera;
         Ref<Camera> mPlayModeCamera;

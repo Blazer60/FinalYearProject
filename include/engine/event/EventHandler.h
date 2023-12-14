@@ -14,6 +14,9 @@ namespace engine
 {
     namespace event
     {
+        void hideMouseCursor();
+        void showMouseCursor();
+
         class EventHandler
         {
         public:
@@ -96,18 +99,21 @@ namespace engine
         void updateMouseDelta(double xPos, double yPos);
 
         void linkUserEvents(std::shared_ptr<EventHandler> eventHandler);
-        
+
         /**
          * @returns The delta from the last frame. This will be valid even if the cursor is disabled.
          */
         [[nodiscard]] glm::vec2 getMouseDelta() const;
 
         event::Editor editor;
+        bool updateUserEvents { false };
 
     protected:
         glm::dvec2 mLastMousePosition { 0.f };
         glm::vec2  mMousePositionDelta { 0.f };
         std::shared_ptr<EventHandler> mUserEvents { nullptr };
+
+        ImGuiKey mEscapeUserEventKey { ImGuiKey_Escape };
     };
 }
 

@@ -16,6 +16,15 @@ namespace engine
 {
     namespace event
     {
+        void hideMouseCursor()
+        {
+            glfwSetInputMode(editor->getViewportContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
+
+        void showMouseCursor()
+        {
+            glfwSetInputMode(editor->getViewportContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
         FirstPersonCamera::FirstPersonCamera(ImGuiKey key)
             : key(key)
         {
@@ -60,7 +69,7 @@ namespace engine
             }
         }
         
-        ThirdPersonCamera::ThirdPersonCamera(ImGuiKey key)
+        ThirdPersonCamera::ThirdPersonCamera(const ImGuiKey key)
             : key(key)
         {
         
@@ -68,7 +77,7 @@ namespace engine
         
         void ThirdPersonCamera::update()
         {
-            bool temp = isActive;
+            const bool temp = isActive;
             isActive = ImGui::IsKeyDown(key);
             if (isActive != temp)
                 onStateChanged.broadcast(isActive);
@@ -98,8 +107,14 @@ namespace engine
     void RootEventHandler::update()
     {
         editor.update();
-        if (!editor.isActive && mUserEvents)
+        if (!editor.isActive && mUserEvents && updateUserEvents)
             mUserEvents->update();
+
+        if (ImGui::IsKeyPressed(mEscapeUserEventKey, false))
+        {
+            event::showMouseCursor();
+            updateUserEvents = false;
+        }
     }
     
     void RootEventHandler::updateMouseDelta(double xPos, double yPos)
@@ -113,6 +128,7 @@ namespace engine
     {
         mUserEvents = std::move(eventHandler);
     }
+
 
     glm::vec2 RootEventHandler::getMouseDelta() const
     {

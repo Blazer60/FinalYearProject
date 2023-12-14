@@ -61,6 +61,8 @@ void initComponentsForEngine()
 
     engine::serializer->pushSaveComponent<CameraController>();
     engine::serializer->pushLoadComponent("CameraController", [](const YAML::Node &node, Ref<engine::Actor> actor) {
-        actor->addComponent(makeResource<CameraController>());
+        auto cc = actor->addComponent(makeResource<CameraController>());
+        if (node["Speed"].IsDefined())
+            cc->mSpeed = node["Speed"].as<float>();
     });
 }
