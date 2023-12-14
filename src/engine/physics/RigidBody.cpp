@@ -57,7 +57,9 @@ namespace engine
 
         mMotionState = std::make_unique<btDefaultMotionState>(transform);
         btRigidBody::btRigidBodyConstructionInfo rbInfo(mMass, mMotionState.get(), collisionShape, localInertia);
+        rbInfo.m_friction = mFriction;
         mRigidBody = std::make_unique<btRigidBody>(rbInfo);
+        setAngularFactor(mAngularFactor);
 
         addToPhysicsWorld();
     }
@@ -77,6 +79,13 @@ namespace engine
     {
     }
 
+    void RigidBody::setMass(const float mass)
+    {
+        mMass = mass;
+        if (mRigidBody)
+            mRigidBody->setMassProps(mass, mRigidBody->getLocalInertia());
+    }
+
     void RigidBody::onDrawUi()
     {
         ImGui::PushID("RigidBody");
@@ -85,7 +94,12 @@ namespace engine
             if (ImGui::Button("Destroy Component"))
                 mActor->removeComponent(this);
 
-            ImGui::DragFloat("Mass", &mMass);
+            if (ImGui::DragFloat("Mass", &mMass))
+                setMass(mMass);
+            if (ImGui::DragFloat("Friction", &mFriction))
+                setFriction(mFriction);
+            if (ImGui::DragFloat3("Angular Factor", glm::value_ptr(mAngularFactor)))
+                setAngularFactor(mAngularFactor);
 
             auto drawRow = [this](const std::string &name, const int flag) {
                 ImGui::PushID(name.c_str());
@@ -134,7 +148,7 @@ namespace engine
         }
     }
 
-    void RigidBody::alignWithActorTransform()
+    void RigidBody::alignWithActorTransform() const
     {
         if (!mRigidBody)
             return;
@@ -148,8 +162,6 @@ namespace engine
         mRigidBody->setAngularVelocity(btVector3(0.f, 0.f, 0.f));
         mRigidBody->activate();
         mRigidBody->clearForces();
-        // motionState->setWorldTransform(transform);
-        // mMotionState->setWorldTransform(transform);
     }
 
     void RigidBody::setGroupMask(const int mask)
@@ -182,14 +194,16 @@ namespace engine
         mRigidBody->activate();
     }
 
-    void RigidBody::setAngularFactor(const glm::vec3& angularFactor) const
+    void RigidBody::setAngularFactor(const glm::vec3& angularFactor)
     {
+        mAngularFactor = angularFactor;
         if (mRigidBody)
             mRigidBody->setAngularFactor(physics::cast(angularFactor));
     }
 
-    void RigidBody::setFriction(const float friction) const
+    void RigidBody::setFriction(const float friction)
     {
+        mFriction = friction;
         if (mRigidBody)
             mRigidBody->setFriction(friction);
     }

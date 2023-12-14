@@ -29,9 +29,12 @@ namespace engine
         void setupRigidBody(btCollisionShape *collisionShape=nullptr);
         void onAwake() override;
         void onBegin() override;
+
+        void setMass(float mass);
+
         void onDrawUi() override;
         void onFixedUpdate() override;
-        void alignWithActorTransform();
+        void alignWithActorTransform() const;
         void setGroupMask(int mask);
         void setCollisionMask(int mask);
         void setIsTrigger(bool isTrigger);
@@ -39,13 +42,15 @@ namespace engine
 
         void addImpulse(const glm::vec3 &impulse) const;
         void active() const;
-        void setAngularFactor(const glm::vec3 &angularFactor) const;
-        void setFriction(float friction) const;
+        void setAngularFactor(const glm::vec3 &angularFactor);
+        void setFriction(float friction);
 
     protected:
         void addToPhysicsWorld();
 
         float mMass { 10.f };
+        float mFriction { 1.f };
+        glm::vec3 mAngularFactor { 1.f };
         std::unique_ptr<btRigidBody> mRigidBody;
         std::unique_ptr<btDefaultMotionState> mMotionState;
         int mGroupMask { btBroadphaseProxy::DefaultFilter };

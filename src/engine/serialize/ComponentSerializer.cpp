@@ -19,7 +19,7 @@
 #include "RigidBody.h"
 #include "ShaderLoader.h"
 #include "SoundComponent.h"
-#include "../../../include/engine/Camera.h"
+#include "Camera.h"
 
 namespace engine
 {
@@ -167,6 +167,10 @@ namespace engine
                 const bool isTrigger = node["IsTrigger"].as<bool>();
                 rb->setIsTrigger(isTrigger);
             }
+            if (node["Friction"].IsDefined())
+                rb->setFriction(node["Friction"].as<float>());
+            if (node["AngularFactor"].IsDefined())
+                rb->setAngularFactor(node["AngularFactor"].as<glm::vec3>());
         });
 
         serializer->pushLoadComponent("MeshCollider", [](const YAML::Node &node, Ref<Actor> actor) {
@@ -295,6 +299,8 @@ void serializeComponent(YAML::Emitter &out, engine::RigidBody *rigidBody)
     out << YAML::Key << "GroupMask" << YAML::Value << rigidBody->mGroupMask;
     out << YAML::Key << "CollisionMask" << YAML::Value << rigidBody->mCollisionMask;
     out << YAML::Key << "IsTrigger" << YAML::Value << rigidBody->mIsTrigger;
+    out << YAML::Key << "Friction" << YAML::Value << rigidBody->mFriction;
+    out << YAML::Key << "AngularFactor" << YAML::Value << rigidBody->mAngularFactor;
 }
 
 void serializeComponent(YAML::Emitter &out, engine::MeshCollider *meshCollider)
