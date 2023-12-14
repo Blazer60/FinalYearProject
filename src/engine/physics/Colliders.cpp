@@ -16,9 +16,16 @@
 #include "PhysicsConversions.h"
 #include "ResourceFolder.h"
 #include "physicsMesh.h"
+#include "RigidBody.h"
 
 namespace engine
 {
+    void Collider::onAwake()
+    {
+        if (auto rb = mActor->getComponent<RigidBody>(false); rb.isValid())
+            rb->setupRigidBody(getCollider());
+    }
+
     BoxCollider::BoxCollider()
         : mBoxCollider(physics::cast(mHalfExtent))
     {

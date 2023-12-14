@@ -90,6 +90,7 @@ namespace engine
         
         actor->mScene = this;
         actor->mParent = nullptr;
+        actor->awake();
         mToAdd.push_back(std::move(actor));
         
         return actorRef;

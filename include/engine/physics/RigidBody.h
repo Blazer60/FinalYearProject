@@ -26,6 +26,8 @@ namespace engine
         explicit RigidBody(float mass);
         ~RigidBody() override;
 
+        void setupRigidBody(btCollisionShape *collisionShape=nullptr);
+        void onAwake() override;
         void onBegin() override;
         void onDrawUi() override;
         void onFixedUpdate() override;
@@ -46,7 +48,6 @@ namespace engine
         float mMass { 10.f };
         std::unique_ptr<btRigidBody> mRigidBody;
         std::unique_ptr<btDefaultMotionState> mMotionState;
-        Ref<Collider> mCollider;
         int mGroupMask { btBroadphaseProxy::DefaultFilter };
         int mCollisionMask { btBroadphaseProxy::AllFilter };
         bool mIsTrigger { false };

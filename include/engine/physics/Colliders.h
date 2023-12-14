@@ -25,6 +25,7 @@ namespace engine
     {
     public:
         ~Collider() override = default;
+        void onAwake() override;
 
         virtual btCollisionShape *getCollider() = 0;
     };

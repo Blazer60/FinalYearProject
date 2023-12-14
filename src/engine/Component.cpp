@@ -11,6 +11,18 @@
 
 namespace engine
 {
+    void Component::awake()
+    {
+        try
+        {
+            onAwake();
+        }
+        catch (InvalidReference &e)
+        {
+            ERROR("OnAwake() error in on of %'s componenets: %", mActor->getName(), e.what());
+        }
+    }
+
     void Component::begin()
     {
         try
@@ -94,7 +106,12 @@ namespace engine
     {
         return mActor;
     }
-    
+
+    void Component::onAwake()
+    {
+
+    }
+
     void Component::onBegin()
     {
     

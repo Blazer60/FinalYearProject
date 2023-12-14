@@ -31,18 +31,17 @@ void CameraController::onBegin()
 {
     if (engine::editor->isUsingPlayModeCamera())  // todo: The user should never have to ask the editor for something.
         engine::event::hideMouseCursor();
+    mRigidBody = mActor->getComponent<engine::RigidBody>();
+    if (mRigidBody.isValid())
+    {
+        mRigidBody->setAngularFactor(glm::vec3(0.f));
+    }
 }
 
 void CameraController::onUpdate()
 {
     if (!mRigidBody.isValid())
-    {
-        mRigidBody = mActor->getComponent<engine::RigidBody>();
-        if (mRigidBody.isValid())
-        {
-            mRigidBody->setAngularFactor(glm::vec3(0.f));
-        }
-    }
+        return;
 
     const auto timestep = timers::deltaTime<float>();
 

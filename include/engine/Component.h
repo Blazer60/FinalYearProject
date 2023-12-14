@@ -23,6 +23,7 @@ namespace engine
     {
     public:
         ~Component() override = default;
+        void awake();
         void begin();
         void update();
         void fixedUpdate();
@@ -33,6 +34,7 @@ namespace engine
         [[nodiscard]] Actor *getActor() const;
         
     protected:
+        virtual void onAwake();
         virtual void onBegin();
         virtual void onUpdate();
         virtual void onFixedUpdate();

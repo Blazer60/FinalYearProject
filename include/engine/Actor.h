@@ -44,7 +44,8 @@ namespace engine
         Actor() = default;
         explicit Actor(std::string name);
         ~Actor() override = default;
-        
+
+        void awake();
         void begin();
         void update();
         void fixedUpdate();
@@ -138,6 +139,7 @@ namespace engine
     protected:
         void onDrawUi() override;
         void updateTransform();
+        virtual void onAwake();
         virtual void onUpdate();
         virtual void onBegin();
         virtual void onCollisionBegin(Actor *otherActor, Component *myComponent, Component *otherComponent, const HitInfo &hitInfo);
@@ -156,6 +158,7 @@ namespace engine
     {
         Ref<T> ref = component;
         component->attachToActor(this);
+        component->awake();
         mComponentsToAdd.push_back(std::move(component));
         return ref;
     }

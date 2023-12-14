@@ -22,7 +22,12 @@ namespace engine
     {
     
     }
-    
+
+    void Actor::awake()
+    {
+        onAwake();
+    }
+
     void Actor::begin()
     {
         onBegin();
@@ -72,7 +77,12 @@ namespace engine
     {
         mTransform = glm::translate(glm::mat4(1.f), position) *  glm::mat4_cast(rotation) * glm::scale(glm::mat4(1.f), scale);
     }
-    
+
+    void Actor::onAwake()
+    {
+
+    }
+
     std::vector<Resource<Component>> &Actor::getComponents()
     {
         return mComponents;

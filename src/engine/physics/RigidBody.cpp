@@ -27,22 +27,20 @@ namespace engine
             core->getPhysicsWorld()->removeRigidBody(mRigidBody.get());
     }
 
-    void RigidBody::addToPhysicsWorld()
+    void RigidBody::setupRigidBody(btCollisionShape* collisionShape)
     {
-        mRigidBody->setUserPointer(this);
-        core->getPhysicsWorld()->addRigidBody(mRigidBody.get(), mGroupMask, mCollisionMask);
-    }
+        if (mRigidBody && !core->isInPlayMode())
+            return;  // We have already done setup.
 
-    void RigidBody::onBegin()
-    {
-        if (!core->isInPlayMode())  // Don't do anything in edit mode.
-            return;
-
-        mCollider = mActor->getComponent<Collider>();
-        if (!mCollider.isValid())
+        if (collisionShape == nullptr)
         {
-            WARN("A Rigid Body is attached to an actor but no collider is present.");
-            return;
+            auto colliderComponent = mActor->getComponent<Collider>(false);
+            if (!colliderComponent.isValid())
+            {
+                WARN("A Rigid Body is attached to an actor but no collider is present.");
+                return;
+            }
+            collisionShape = colliderComponent->getCollider();
         }
 
         btTransform transform;
@@ -55,13 +53,28 @@ namespace engine
 
         btVector3 localInertia(0.f, 0.f, 0.f);
         if (isDynamic)
-            mCollider->getCollider()->calculateLocalInertia(mMass, localInertia);
+            collisionShape->calculateLocalInertia(mMass, localInertia);
 
         mMotionState = std::make_unique<btDefaultMotionState>(transform);
-        btRigidBody::btRigidBodyConstructionInfo rbInfo(mMass, mMotionState.get(), mCollider->getCollider(), localInertia);
+        btRigidBody::btRigidBodyConstructionInfo rbInfo(mMass, mMotionState.get(), collisionShape, localInertia);
         mRigidBody = std::make_unique<btRigidBody>(rbInfo);
 
         addToPhysicsWorld();
+    }
+
+    void RigidBody::onAwake()
+    {
+        setupRigidBody();
+    }
+
+    void RigidBody::addToPhysicsWorld()
+    {
+        mRigidBody->setUserPointer(this);
+        core->getPhysicsWorld()->addRigidBody(mRigidBody.get(), mGroupMask, mCollisionMask);
+    }
+
+    void RigidBody::onBegin()
+    {
     }
 
     void RigidBody::onDrawUi()
