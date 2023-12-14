@@ -52,6 +52,8 @@ namespace engine
         float mFriction { 1.f };
         glm::vec3 mAngularFactor { 1.f };
         std::unique_ptr<btRigidBody> mRigidBody;
+
+        // Warning: Use the btRigidBody before this. Looks like bullet doesn't keep them synced.
         std::unique_ptr<btDefaultMotionState> mMotionState;
         int mGroupMask { btBroadphaseProxy::DefaultFilter };
         int mCollisionMask { btBroadphaseProxy::AllFilter };

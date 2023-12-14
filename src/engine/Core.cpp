@@ -317,9 +317,11 @@ namespace engine
                 // We want the other variables to update to avoid 'catch-up' between play mode and edit mode.
                 if (mIsInPlayMode)
                 {
+                    mPhysics->realignPhysicsObjects();
                     mPhysics->dynamicsWorld->stepSimulation(timers::fixedTime<float>(), 1.f, timers::fixedTime<float>());
-                    mScene->fixedUpdate();
                     mPhysics->resolveCollisoinCallbacks();
+                    mPhysics->realignWorldObjects();
+                    mScene->fixedUpdate();
                 }
 
                 nextUpdateTick += timers::fixedTime<double>();

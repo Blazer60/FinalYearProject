@@ -7,6 +7,8 @@
 
 #include "PhysicsCore.h"
 
+#include <queue>
+
 #include "Actor.h"
 #include "AssimpLoader.h"
 #include "Core.h"
@@ -165,6 +167,58 @@ namespace engine
     {
         resolveCollisions();
         resolveTriggers();
+    }
+
+    void PhysicsCore::realignPhysicsObjects() const
+    {
+        const int objectCount = dynamicsWorld->getNumCollisionObjects();
+        for (int i = 0; i < objectCount; ++i)
+        {
+            const btCollisionObject* collisionObject = dynamicsWorld->getCollisionObjectArray()[i];
+            const auto *const rigidbody = static_cast<RigidBody*>(collisionObject->getUserPointer());
+
+            btTransform transform;
+            transform.setIdentity();
+            transform.setOrigin(physics::cast(rigidbody->mActor->getWorldPosition()));
+            transform.setRotation(physics::cast(rigidbody->mActor->getWorldRotation()));
+            rigidbody->mRigidBody->setWorldTransform(transform);
+        }
+    }
+
+    void PhysicsCore::realignWorldObjects() const
+    {
+        const int objectCount = dynamicsWorld->getNumCollisionObjects();
+        std::list<RigidBody*> rigidBodies;
+        for (int i = 0; i < objectCount; ++i)
+        {
+            const btCollisionObject* collisionObject = dynamicsWorld->getCollisionObjectArray()[i];
+            auto *const rigidBody = static_cast<RigidBody*>(collisionObject->getUserPointer());
+
+            if (rigidBody->mActor->getParent() == nullptr)
+            {
+                const btTransform transform = rigidBody->mRigidBody->getWorldTransform();
+                rigidBody->mActor->setWorldTransform(physics::cast(transform) * glm::scale(glm::mat4(1.f), rigidBody->mActor->scale));
+            }
+            else
+                rigidBodies.push_back(rigidBody);
+        }
+
+        while (!rigidBodies.empty())
+        {
+            RigidBody *rigidBody = *rigidBodies.begin();
+            Actor *parent = rigidBody->mActor->getParent();
+            rigidBodies.pop_front();
+            if (std::any_of(rigidBodies.begin(), rigidBodies.end(), [&parent](const RigidBody *const other) {
+                return other->mActor == parent;
+            }))
+            {
+                rigidBodies.push_back(rigidBody);
+                continue;
+            }
+
+            const btTransform transform = rigidBody->mRigidBody->getWorldTransform();
+            rigidBody->mActor->setWorldTransform(physics::cast(transform) * glm::scale(glm::mat4(1.f), rigidBody->mActor->scale));
+        }
     }
 
     void PhysicsCore::createHitInfo(const btManifoldArray& manifoldArray, Component* componentA, Component* componentB)

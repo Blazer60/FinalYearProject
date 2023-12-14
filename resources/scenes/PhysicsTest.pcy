@@ -27,6 +27,8 @@ Actors:
         GroupMask: 1
         CollisionMask: -1
         IsTrigger: false
+        Friction: 1
+        AngularFactor: [1, 1, 1]
     Children:
       []
   - Name: Sphere
@@ -56,6 +58,8 @@ Actors:
         GroupMask: 1
         CollisionMask: -1
         IsTrigger: false
+        Friction: 1
+        AngularFactor: [1, 1, 1]
       - Component: CollisionInfo
       - Component: SoundComponent
         Path: audio\MetalPipe.ogg
@@ -105,6 +109,8 @@ Actors:
         GroupMask: 1
         CollisionMask: -1
         IsTrigger: false
+        Friction: 1
+        AngularFactor: [1, 1, 1]
     Children:
       []
   - Name: Camera
@@ -128,5 +134,69 @@ Actors:
         GroupMask: 1
         CollisionMask: -1
         IsTrigger: false
+        Friction: 1
+        AngularFactor: [0, 0, 0]
+    Children:
+      []
+  - Name: Cube A
+    UUID: 16223524705248518659
+    position: [2.76622391, 1.12224054, 6.25677061]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\defaultObjects\DefaultCube.glb
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+      - Component: BoxCollider
+        HalfBoxExtent: [1, 1, 1]
+      - Component: RigidBody
+        Mass: 100
+        GroupMask: 1
+        CollisionMask: -1
+        IsTrigger: false
+        Friction: 1
+        AngularFactor: [1, 1, 1]
+    Children:
+      - 12407739879415622315
+  - Name: Cube B
+    UUID: 12407739879415622315
+    position: [-1.32563066, 2.30986214, 4.76837158e-07]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\defaultObjects\DefaultCube.glb
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+      - Component: BoxCollider
+        HalfBoxExtent: [1, 1, 1]
+      - Component: RigidBody
+        Mass: 10
+        GroupMask: 1
+        CollisionMask: -1
+        IsTrigger: false
+        Friction: 1
+        AngularFactor: [1, 1, 1]
     Children:
       []

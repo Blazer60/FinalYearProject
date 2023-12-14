@@ -137,12 +137,6 @@ namespace engine
 
     void RigidBody::onFixedUpdate()
     {
-        if (mMotionState)
-        {
-            btTransform transform;
-            mMotionState->getWorldTransform(transform);
-            mActor->setWorldTransform(physics::cast(transform) * glm::scale(glm::mat4(1.f), mActor->scale));
-        }
     }
 
     void RigidBody::alignWithActorTransform() const

@@ -1,0 +1,117 @@
+Scene: scenes\RigidBodyParenting.pcy
+Actors:
+  - Name: Ground
+    UUID: 44862132380988614
+    position: [0, 0, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [10, 1, 10]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\defaultObjects\DefaultCube.glb
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+      - Component: BoxCollider
+        HalfBoxExtent: [10, 1, 10]
+      - Component: RigidBody
+        Mass: 0
+        GroupMask: 2
+        CollisionMask: -1
+        IsTrigger: false
+        Friction: 1
+        AngularFactor: [1, 1, 1]
+    Children:
+      []
+  - Name: No RB
+    UUID: 11850849190614254836
+    position: [0.0686912537, 0.837240219, -0.0166516304]
+    rotation: [1, -1.49003313e-07, -2.04890789e-08, 8.82427642e-08]
+    scale: [0.999999642, 0.999999881, 0.999999881]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\MaterialBall.glb
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      - 9899735866057930787
+  - Name: Child A
+    UUID: 9899735866057930787
+    position: [-0.19783783, -4.68433475, 0.0213737488]
+    rotation: [0.966398001, 0.188167125, 0.0255479347, -0.173249304]
+    scale: [0.99999851, 0.999999642, 0.999999642]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\defaultObjects\DefaultCube.glb
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [0.41922003, 0.419178098, 0.419178098]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+      - Component: BoxCollider
+        HalfBoxExtent: [1, 1, 1]
+      - Component: RigidBody
+        Mass: 10
+        GroupMask: 1
+        CollisionMask: -1
+        IsTrigger: false
+        Friction: 1
+        AngularFactor: [1, 1, 1]
+    Children:
+      []
+  - Name: Root
+    UUID: 13342898831658218330
+    position: [4.81219482, 8.02034569, -4.86625385]
+    rotation: [1, 1.49011555e-07, 2.04890753e-08, -8.82427713e-08]
+    scale: [1.00000024, 1.00000012, 1]
+    Components:
+      - Component: BoxCollider
+        HalfBoxExtent: [1, 1, 1]
+      - Component: RigidBody
+        Mass: 10
+        GroupMask: 1
+        CollisionMask: -1
+        IsTrigger: false
+        Friction: 1
+        AngularFactor: [1, 1, 1]
+      - Component: MeshRenderer
+        MeshPath: models\defaultObjects\DefaultCube.glb
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [0.549111724, 0.185929939, 0.185929939]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+    Children:
+      - 11850849190614254836

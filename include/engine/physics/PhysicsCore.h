@@ -39,6 +39,10 @@ namespace engine
         void resolveTriggers();
         void resolveCollisoinCallbacks();
 
+        void realignPhysicsObjects() const;
+
+        void realignWorldObjects() const;
+
         std::unique_ptr<btDefaultCollisionConfiguration> configuration;
         std::unique_ptr<btCollisionDispatcher> dispatcher;
         std::unique_ptr<btBroadphaseInterface> overlappingPairCache;
