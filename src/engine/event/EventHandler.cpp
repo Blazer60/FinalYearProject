@@ -98,6 +98,8 @@ namespace engine
     void RootEventHandler::update()
     {
         editor.update();
+        if (!editor.isActive && mUserEvents)
+            mUserEvents->update();
     }
     
     void RootEventHandler::updateMouseDelta(double xPos, double yPos)
@@ -106,7 +108,12 @@ namespace engine
         mMousePositionDelta = mousePosition - mLastMousePosition;
         mLastMousePosition = mousePosition;
     }
-    
+
+    void RootEventHandler::linkUserEvents(std::shared_ptr<EventHandler> eventHandler)
+    {
+        mUserEvents = std::move(eventHandler);
+    }
+
     glm::vec2 RootEventHandler::getMouseDelta() const
     {
         return mMousePositionDelta;

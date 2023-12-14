@@ -94,6 +94,8 @@ namespace engine
         void update() override;
         
         void updateMouseDelta(double xPos, double yPos);
+
+        void linkUserEvents(std::shared_ptr<EventHandler> eventHandler);
         
         /**
          * @returns The delta from the last frame. This will be valid even if the cursor is disabled.
@@ -101,10 +103,11 @@ namespace engine
         [[nodiscard]] glm::vec2 getMouseDelta() const;
 
         event::Editor editor;
-        
+
     protected:
         glm::dvec2 mLastMousePosition { 0.f };
         glm::vec2  mMousePositionDelta { 0.f };
+        std::shared_ptr<EventHandler> mUserEvents { nullptr };
     };
 }
 

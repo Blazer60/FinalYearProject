@@ -7,6 +7,7 @@
 
 #include "Initialiser.h"
 
+#include "CameraController.h"
 #include "CollisionInfo.h"
 #include "Core.h"
 #include "MyScene.h"
@@ -23,6 +24,10 @@ void initComponentsForEngine()
 
     engine::editor->addComponentOption<CollisionInfo>("Collision Info", [](Ref<engine::Actor> actor) {
         actor->addComponent(makeResource<CollisionInfo>());
+    });
+
+    engine::editor->addComponentOption<CameraController>("Camera Controller", [](Ref<engine::Actor> actor) {
+        actor->addComponent(makeResource<CameraController>());
     });
 
     engine::editor->addMenuOption("Rotating Cube", []() {
@@ -52,5 +57,10 @@ void initComponentsForEngine()
     engine::serializer->pushSaveComponent<CollisionInfo>();
     engine::serializer->pushLoadComponent("CollisionInfo", [](const YAML::Node &node, Ref<engine::Actor> actor) {
         actor->addComponent(makeResource<CollisionInfo>());
+    });
+
+    engine::serializer->pushSaveComponent<CameraController>();
+    engine::serializer->pushLoadComponent("CameraController", [](const YAML::Node &node, Ref<engine::Actor> actor) {
+        actor->addComponent(makeResource<CameraController>());
     });
 }

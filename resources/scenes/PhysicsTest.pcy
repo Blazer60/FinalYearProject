@@ -107,3 +107,18 @@ Actors:
         IsTrigger: false
     Children:
       []
+  - Name: Camera
+    UUID: 3673741292139234074
+    position: [-8.8641758, 9.84856415, -36.2760353]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: Camera
+        IsMainCamera: true
+        Fov: 0.785398185
+        Ev100: 10
+        NearClip: 0.00999999978
+        FarClip: 1000
+      - Component: CameraController
+    Children:
+      []

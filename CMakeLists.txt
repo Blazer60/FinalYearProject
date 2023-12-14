@@ -158,6 +158,10 @@ add_executable(${PROJECT_NAME}
         include/engine/physics/PhysicsDebugDrawer.h
         src/engine/Camera.cpp
         include/engine/Camera.h
+        src/game/GameInput.cpp
+        include/game/GameInput.h
+        src/game/CameraController.cpp
+        src/game/CameraController.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

@@ -35,9 +35,12 @@ void Callback<TArgs...>::broadcast(const TArgs &... args)
 }
 
 template<typename... TArgs>
-void Callback<TArgs...>::unSubscribe(uint32_t token)
+void Callback<TArgs...>::unSubscribe(const uint32_t token)
 {
-    auto it = std::find(mTokens.begin(), mTokens.end(), token);
+    if (token == 0)
+        return;  // A token value of zero is always invalid.
+
+    const auto it = std::find(mTokens.begin(), mTokens.end(), token);
     if (it != mTokens.end())
     {
         auto index = std::distance(mTokens.begin(), it);
