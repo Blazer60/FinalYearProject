@@ -35,6 +35,8 @@ typedef std::vector<std::shared_ptr<Material>> SharedMaterials;
 class Material
 {
 public:
+    virtual ~Material() = default;
+
     explicit Material(graphics::drawMode drawMode=graphics::drawMode::Triangles)
         : mDrawMode(drawMode) {};
     

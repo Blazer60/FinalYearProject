@@ -7,6 +7,8 @@
 
 #include "ExampleScene.h"
 
+#include "Lava.h"
+
 void createDefaultMesh(Ref<engine::Actor> actor, const std::filesystem::path& path)
 {
     const std::shared_ptr<Shader> shader = load::shader(
@@ -56,6 +58,13 @@ ExampleScene::ExampleScene()
     // Creating an audio object.
     Ref<engine::Actor> audioActor = spawnActor<engine::Actor>("Sound Example");
     audioActor->addComponent(makeResource<engine::SoundComponent>(file::resourcePath() / "audio/dixie_horn.ogg"));
+
+    // Custom material.
+    Ref<engine::Actor> materialActor = spawnActor<engine::Actor>("Custom Material Example");
+    Ref<engine::MeshRenderer> materialMesh = materialActor->addComponent(load::meshRenderer<StandardVertex>(file::modelPath() / "MaterialBall.glb"));
+    const auto customMaterial = std::make_shared<Lava>();
+    materialMesh->addMaterial(customMaterial);
+    materialActor->position = engine::vec3(7.f, 1.f, -30.f);
 }
 
 void ExampleScene::onImguiUpdate()

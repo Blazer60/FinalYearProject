@@ -282,6 +282,8 @@ add_executable(${PROJECT_NAME}
         src/game/Spammer.cpp src/game/Spammer.h
         src/game/ExampleScene.cpp
         src/game/ExampleScene.h
+        src/game/Lava.cpp
+        src/game/Lava.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

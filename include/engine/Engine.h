@@ -30,6 +30,7 @@
 #include "RigidBody.h"
 #include "Colliders.h"
 #include "ShaderLoader.h"
+#include "TextureLoader.h"
 
 #include <GraphicsState.h>
 #include <Renderer.h>
