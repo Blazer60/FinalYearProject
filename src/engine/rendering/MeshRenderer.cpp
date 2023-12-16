@@ -58,6 +58,14 @@ namespace engine
                             file::shaderPath() / "geometry/standard/Standard.frag"));
                     mMaterials.push_back(standardMaterial);
                 }
+                if (!mMaterials.empty())
+                {
+                    ImGui::SameLine();
+                    if (ImGui::Button("Delete last Material"))
+                    {
+                        mMaterials.erase(--mMaterials.end());
+                    }
+                }
             }
             
             

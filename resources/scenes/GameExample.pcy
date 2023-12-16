@@ -42,8 +42,8 @@ Actors:
         Materials:
           - MaterialType: StandardMaterial
             Albedo: [1, 1, 1]
-            Roughness: 1
-            Metallic: 0
+            Roughness: 0
+            Metallic: 1
             Emissive: [0, 0, 0]
             HeightScale: 0.100000001
             DiffuseMap: ""
@@ -73,9 +73,9 @@ Actors:
     scale: [1, 1, 1]
     Components:
       - Component: DirectionalLight
-        Colour: [0.930000007, 0.930000007, 0.949999988]
-        Intensity: 10000
-        Yaw: 45
+        Colour: [0.685871601, 1, 0.983840644]
+        Intensity: 190
+        Yaw: 45.5
         Pitch: 45
         CascadeDepths: [0.00499999989, 0.0170000009, 0.0270000007, 0.0680000037]
         ZMultiplier: 5
@@ -92,12 +92,210 @@ Actors:
         MeshPath: models\Dust.glb
         Materials:
           - MaterialType: StandardMaterial
-            Albedo: [0.490306437, 0.490257412, 0.490257412]
-            Roughness: 0.51700002
+            Albedo: [1, 0.999899983, 0.999899983]
+            Roughness: 1
             Metallic: 0
             Emissive: [0, 0, 0]
             HeightScale: 0
-            DiffuseMap: ""
+            DiffuseMap: textures\dust\de_dust_material_3.png
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+          - MaterialType: StandardMaterial
+            Albedo: [1, 0.999899983, 0.999899983]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0
+            DiffuseMap: textures\dust\de_dust_material_2.png
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+          - MaterialType: StandardMaterial
+            Albedo: [0.999974608, 0.999899983, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0
+            DiffuseMap: textures\dust\de_dust_material_18.png
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+          - MaterialType: StandardMaterial
+            Albedo: [1, 0.999899983, 0.999997556]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0
+            DiffuseMap: textures\dust\de_dust_material_9.png
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+          - MaterialType: StandardMaterial
+            Albedo: [0.999975443, 0.999899983, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0
+            DiffuseMap: textures\dust\de_dust_material_8.png
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+          - MaterialType: StandardMaterial
+            Albedo: [0.999971688, 0.999899983, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0
+            DiffuseMap: textures\dust\de_dust_material_0.png
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+          - MaterialType: StandardMaterial
+            Albedo: [0.999968231, 0.999899983, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0
+            DiffuseMap: textures\dust\de_dust_material_14.png
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+          - MaterialType: StandardMaterial
+            Albedo: [0.999984741, 0.999899983, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0
+            DiffuseMap: textures\dust\de_dust_material_5.png
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+          - MaterialType: StandardMaterial
+            Albedo: [0.999899983, 1, 0.999998152]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0
+            DiffuseMap: textures\dust\de_dust_material_2.png
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+          - MaterialType: StandardMaterial
+            Albedo: [1, 0.999899983, 0.999899983]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0
+            DiffuseMap: textures\dust\de_dust_material_1.png
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+          - MaterialType: StandardMaterial
+            Albedo: [0.999990821, 0.999899983, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0
+            DiffuseMap: textures\dust\de_dust_material_14.png
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+          - MaterialType: StandardMaterial
+            Albedo: [0.999991119, 0.999899983, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0
+            DiffuseMap: textures\dust\de_dust_material_17.png
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+          - MaterialType: StandardMaterial
+            Albedo: [0.999974608, 0.999899983, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0
+            DiffuseMap: textures\dust\de_dust_material_16.png
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+          - MaterialType: StandardMaterial
+            Albedo: [0.999973774, 0.999899983, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0
+            DiffuseMap: textures\dust\de_dust_material_11.png
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+          - MaterialType: StandardMaterial
+            Albedo: [0.999976575, 0.999899983, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0
+            DiffuseMap: textures\dust\de_dust_material_10.png
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+          - MaterialType: StandardMaterial
+            Albedo: [0.999982774, 0.999899983, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0
+            DiffuseMap: textures\dust\de_dust_material_4.png
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+          - MaterialType: StandardMaterial
+            Albedo: [0.999973774, 0.999899983, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0
+            DiffuseMap: textures\dust\de_dust_material_15.png
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+          - MaterialType: StandardMaterial
+            Albedo: [0.999986351, 0.999899983, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0
+            DiffuseMap: textures\dust\de_dust_material_13.png
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+          - MaterialType: StandardMaterial
+            Albedo: [0.999972343, 0.999899983, 1]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0
+            DiffuseMap: textures\dust\de_dust_material_12.png
             NormalMap: ""
             HeightMap: ""
             RoughnessMap: ""
@@ -209,25 +407,46 @@ Actors:
         JumpForce: 500
     Children:
       - 3673741292139234074
-  - Name: Model
-    UUID: 14570150976644428612
-    position: [18.4377365, 0.019861361, -62.4585495]
+  - Name: Skybox
+    UUID: 1108270012031509800
+    position: [0, 5, -30]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
-      - Component: MeshRenderer
-        MeshPath: models\Scientist.glb
-        Materials:
-          - MaterialType: StandardMaterial
-            Albedo: [1, 1, 1]
-            Roughness: 1
-            Metallic: 0
-            Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
-            DiffuseMap: ""
-            NormalMap: ""
-            HeightMap: ""
-            RoughnessMap: ""
-            MetallicMap: ""
+      - Component: DistantLightProbe
+        Size: [1024, 1024]
+        RadianceMultiplier: 10
+        Path: textures\hdr\norway\Norway.hdr
+    Children:
+      []
+  - Name: Point Light
+    UUID: 1177209647445387575
+    position: [0.311842442, 3.76485419, -28.3923645]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: PointLight
+        Colour: [1, 0.719221532, 0.382854223]
+        Intensity: 12000
+        Radius: 80
+        Bias: [0.00499999989, 0.150000006]
+        Softness: 0.0199999996
+        Resolution: 2048
+    Children:
+      []
+  - Name: Spot Light
+    UUID: 7665934334760861685
+    position: [-21.265419, 5.17457104, -8.93857574]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: Spotlight
+        Colour: [1, 0.780521691, 0.591400981]
+        Intensity: 37790
+        InnerAngle: 11.3000002
+        OuterAngle: 33.901001
+        Pitch: -34.2000008
+        Yaw: 0
+        UseActorRotation: false
     Children:
       []

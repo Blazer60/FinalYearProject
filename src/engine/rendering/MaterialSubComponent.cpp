@@ -74,7 +74,15 @@ namespace engine
                     setDiffuseMap(result);
                 });
             }
-            ui::drawToolTip("Albedo Texture");
+            if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal) && ImGui::BeginTooltip())
+            {
+                const std::string albedoToolTip = "Albedo Texture - " + mDiffuseMapPath;
+                ImGui::PushTextWrapPos(ImGui::GetFontSize() * 30.f);
+                ImGui::Text("%s", albedoToolTip.c_str());
+                ImGui::PopTextWrapPos();
+                ui::image(mMaterial.diffuseMapId(), glm::vec3(300.f));
+                ImGui::EndTooltip();
+            }
             if (ImGui::BeginDragDropTarget())
             {
                 if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(resourceImagePayload))
