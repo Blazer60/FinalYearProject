@@ -10,18 +10,16 @@ set(ENABLE_PROFILER ON)
 
 set(HELPER_LIBRARY Statistics)
 add_library(${HELPER_LIBRARY} STATIC
-        include/helpers/logger/LoggerMacros.h
         include/helpers/ContainerAlgorithms.h
+        include/helpers/Format.h src/helpers/Format.cpp
+        include/helpers/Statistics.h
+        include/helpers/logger/LoggerMacros.h
 
+        src/helpers/FileLoader.cpp include/helpers/FileLoader.h
+        src/helpers/Timers.cpp include/helpers/Timers.h
         src/helpers/logger/Logger.cpp include/helpers/logger/Logger.h
         src/helpers/profiler/ProfileTimer.cpp include/helpers/profiler/ProfileTimer.h
         src/helpers/profiler/Profiler.cpp include/helpers/profiler/Profiler.h
-        src/helpers/Timers.cpp include/helpers/Timers.h
-        include/helpers/Statistics.h
-        src/helpers/FileLoader.cpp
-        include/helpers/FileLoader.h
-        include/helpers/Format.h
-        src/helpers/Format.cpp
 )
 
 target_include_directories(${HELPER_LIBRARY} PUBLIC
@@ -77,37 +75,52 @@ target_include_directories(${GRAPHICS_LIBRARY} PUBLIC
         vendor/assimp/include ${CMAKE_CURRENT_BINARY_DIR}/vendor/assimp/include  # A config file is generated that is required by assimp code.
 )
 
-add_executable(${PROJECT_NAME}
+set(ENGINE_LIBRARY PercyEngine)
+add_library(${ENGINE_LIBRARY}
         include/Pch.h
 
         include/engine/Callback.h
         include/engine/EngineMemory.h
         include/engine/loader/RawMesh.h
         include/engine/loader/SceneLoader.h
+        include/engine/physics/HitInfo.h
+        include/engine/physics/PhysicsConversions.h
+        include/engine/physics/PhysicsMeshBuffer.h
         include/engine/rendering/MaterialSubComponent.h
         include/engine/rendering/MeshRenderer.h
         include/engine/serialize/ComponentSerializer.h
         include/engine/serialize/Serializer.h
 
-        src/Main.cpp
-
         src/engine/Actor.cpp include/engine/Actor.h
+        src/engine/Camera.cpp include/engine/Camera.h
         src/engine/Component.cpp include/engine/Component.h
         src/engine/Core.cpp include/engine/Core.h
-        src/engine/EngineMath.cpp include/engine/EngineMath.h
-        src/engine/EngineState.cpp include/engine/EngineState.h
         src/engine/EditorCamera.cpp include/engine/EditorCamera.h
+        src/engine/EngineMath.cpp include/engine/EngineMath.h
+        src/engine/EngineRandom.cpp include/engine/EngineRandom.h
+        src/engine/EngineState.cpp include/engine/EngineState.h
         src/engine/Scene.cpp include/engine/Scene.h
+        src/engine/audio/AudioBuffer.cpp include/engine/audio/AudioBuffer.h
+        src/engine/audio/AudioSource.cpp include/engine/audio/AudioSource.h
+        src/engine/audio/SoundComponent.cpp include/engine/audio/SoundComponent.h
         src/engine/event/EventHandler.cpp include/engine/event/EventHandler.h
         src/engine/event/Input.cpp include/engine/event/Input.h
         src/engine/loader/AssimpLoader.cpp include/engine/loader/AssimpLoader.h
+        src/engine/loader/Audio.cpp include/engine/loader/Audio.h
         src/engine/loader/CommonLoader.cpp include/engine/loader/CommonLoader.h
         src/engine/loader/FileExplorer.cpp include/engine/loader/FileExplorer.h
         src/engine/loader/MaterialLoader.cpp include/engine/loader/MaterialLoader.h
         src/engine/loader/ModelDestroyer.cpp include/engine/loader/ModelDestroyer.h
         src/engine/loader/ModelLoader.cpp include/engine/loader/ModelLoader.h
+        src/engine/loader/ResourcePool.cpp include/engine/loader/ResourcePool.h
         src/engine/loader/SceneLoader.cpp
+        src/engine/loader/ShaderLoader.cpp include/engine/loader/ShaderLoader.h
         src/engine/loader/TextureLoader.cpp include/engine/loader/TextureLoader.h
+        src/engine/loader/physicsMesh.cpp include/engine/loader/physicsMesh.h
+        src/engine/physics/Colliders.cpp include/engine/physics/Colliders.h
+        src/engine/physics/PhysicsCore.cpp include/engine/physics/PhysicsCore.h
+        src/engine/physics/PhysicsDebugDrawer.cpp include/engine/physics/PhysicsDebugDrawer.h
+        src/engine/physics/RigidBody.cpp include/engine/physics/RigidBody.h
         src/engine/rendering/BloomPass.cpp include/engine/rendering/BloomPass.h
         src/engine/rendering/ColourGrading.cpp include/engine/rendering/ColourGrading.h
         src/engine/rendering/Lighting.cpp include/engine/rendering/Lighting.h
@@ -121,50 +134,15 @@ add_executable(${PROJECT_NAME}
         src/engine/ui/editor/Editor.cpp include/engine/ui/editor/Editor.h
         src/engine/ui/editor/LogWindow.cpp include/engine/ui/editor/LogWindow.h
         src/engine/ui/editor/ProfilerViewer.cpp include/engine/ui/editor/ProfilerViewer.h
+        src/engine/ui/editor/RendererSettings.cpp src/engine/ui/editor/RendererSettings.h
+        src/engine/ui/editor/ResourceFolder.cpp include/engine/ui/editor/ResourceFolder.h
         src/engine/ui/editor/Viewport.cpp include/engine/ui/editor/Viewport.h
 
-        src/game/MyScene.cpp include/game/MyScene.h
-        src/game/Rotator.cpp include/game/Rotator.h
 
         vendor/imguizmo/ImGuizmo.cpp vendor/imguizmo/ImGuizmo.h
-        src/engine/ui/editor/ResourceFolder.cpp include/engine/ui/editor/ResourceFolder.h
-        src/game/Spammer.cpp src/game/Spammer.h
-        src/game/MyTestActor.cpp src/game/MyTestActor.h
-        src/engine/loader/ResourcePool.cpp include/engine/loader/ResourcePool.h
-        src/engine/loader/ShaderLoader.cpp include/engine/loader/ShaderLoader.h
-        src/engine/ui/editor/RendererSettings.cpp src/engine/ui/editor/RendererSettings.h
-        src/engine/EngineRandom.cpp include/engine/EngineRandom.h
-        src/game/Initialiser.cpp src/game/Initialiser.h
-        src/engine/loader/Audio.cpp include/engine/loader/Audio.h
-        src/engine/audio/AudioBuffer.cpp include/engine/audio/AudioBuffer.h
-        src/engine/audio/AudioSource.cpp include/engine/audio/AudioSource.h
-        src/engine/audio/SoundComponent.cpp
-        include/engine/audio/SoundComponent.h
-        src/engine/physics/PhysicsCore.cpp
-        include/engine/physics/PhysicsCore.h
-        src/engine/physics/Colliders.cpp
-        include/engine/physics/Colliders.h
-        include/engine/physics/PhysicsConversions.h
-        src/engine/physics/RigidBody.cpp
-        include/engine/physics/RigidBody.h
-        include/engine/physics/RigidBody.h
-        include/engine/physics/HitInfo.h
-        src/game/CollisionInfo.cpp
-        src/game/CollisionInfo.h
-        src/engine/loader/physicsMesh.cpp
-        include/engine/loader/physicsMesh.h
-        include/engine/physics/PhysicsMeshBuffer.h
-        src/engine/physics/PhysicsDebugDrawer.cpp
-        include/engine/physics/PhysicsDebugDrawer.h
-        src/engine/Camera.cpp
-        include/engine/Camera.h
-        src/game/GameInput.cpp
-        include/game/GameInput.h
-        src/game/CameraController.cpp
-        src/game/CameraController.h
 )
 
-target_include_directories(${PROJECT_NAME} PUBLIC
+target_include_directories(${ENGINE_LIBRARY} PUBLIC
         include include/engine include/graphics include/game include/engine/loader include/graphics/buffers
         include/engine/ui include/graphics/postProcessing include/engine/rendering include/helpers/logger
         include/engine/ui/editor include/helpers include/engine/event include/helpers/profiler
@@ -183,7 +161,7 @@ if (${USE_PSEUDO_PCH})
     add_compile_definitions(GLOBAL_ENGINE_PCH=1)
 else()
     message(STATUS "Using CMake PCH")
-    target_precompile_headers(${PROJECT_NAME} PUBLIC
+    target_precompile_headers(${ENGINE_LIBRARY} PUBLIC
             <iostream> <vector> <unordered_map>
             <string> <string_view> <algorithm>
             <memory> <numeric> <cstdint> <set> <chrono>
@@ -206,7 +184,7 @@ else()
 endif ()
 
 # STB_IMAGE_IMPLEMENTATION is set within a source file (Texture Loader).
-add_compile_definitions(
+target_compile_definitions(${ENGINE_LIBRARY} PUBLIC
         GLEW_STATIC
         YAML_CPP_STATIC_DEFINE  # Forces YAML to be built statically regardless of cmake settings. see yaml-cpp/dll.h
         B3_DEBUG=0
@@ -224,7 +202,7 @@ if (${USE_PRE_BUILT_LIBS})
     # Assimp is expecting a config.h file that is generated when built from source.
     target_compile_definitions(${HELPER_LIBRARY} PUBLIC USING_PRE_BUILT_LIBS)
     target_include_directories(${HELPER_LIBRARY} PUBLIC vendor/generated/include)
-    target_include_directories(${PROJECT_NAME} PUBLIC vendor/generated/include)
+    target_include_directories(${ENGINE_LIBRARY} PUBLIC vendor/generated/include)
     target_include_directories(${GRAPHICS_LIBRARY} PUBLIC vendor/generated/include)
 
     # Getting information for machine type. Assembling compiler 'triplet' to load correct files.
@@ -254,7 +232,7 @@ if (${USE_PRE_BUILT_LIBS})
     # The logger knows how to format OpenGl and Assimp errors.
     target_link_libraries(${HELPER_LIBRARY} ${GLEW} OpenGL::GL ${ASSIMP})
     target_link_libraries(${GRAPHICS_LIBRARY} ${GLEW} OpenGL::GL)
-    target_link_libraries(${PROJECT_NAME} ${HELPER_LIBRARY} ${GRAPHICS_LIBRARY} ${GLEW} ${GLFW} ${IMGUI} OpenGL::GL ${ASSIMP} ${ZLIB} ${YAML})
+    target_link_libraries(${ENGINE_LIBRARY} ${HELPER_LIBRARY} ${GRAPHICS_LIBRARY} ${GLEW} ${GLFW} ${IMGUI} OpenGL::GL ${ASSIMP} ${ZLIB} ${YAML})
 else ()
     add_subdirectory(vendor/glm)
     add_subdirectory(vendor/glew/build/cmake)
@@ -277,11 +255,41 @@ else ()
     add_subdirectory(vendor/pellet)
 
     # Probably not how you should set this but I want 'modern' debugging skills.
-    target_compile_definitions(${PROJECT_NAME} PUBLIC AL_ALEXT_PROTOTYPES)
+    target_compile_definitions(${ENGINE_LIBRARY} PUBLIC AL_ALEXT_PROTOTYPES)
 
     # The names listed are the names given to add_library(). CMake won't tell you if they're correct...
     target_link_libraries(${HELPER_LIBRARY} glew_s OpenGL::GL assimp)
     target_link_libraries(${GRAPHICS_LIBRARY} glew_s OpenGL::GL)
-    target_link_libraries(${PROJECT_NAME} ${HELPER_LIBRARY} ${GRAPHICS_LIBRARY} glew_s glfw imgui OpenGL::GL assimp yaml-cpp OpenAL pellet)
+    target_link_libraries(${ENGINE_LIBRARY} ${HELPER_LIBRARY} ${GRAPHICS_LIBRARY} glew_s glfw imgui OpenGL::GL assimp yaml-cpp OpenAL pellet)
 endif ()
 
+add_executable(${PROJECT_NAME}
+        include/Pch.h
+
+        src/Main.cpp
+
+        src/game/CameraController.cpp src/game/CameraController.h
+        src/game/CollisionInfo.cpp src/game/CollisionInfo.h
+        src/game/GameInput.cpp include/game/GameInput.h
+        src/game/Initialiser.cpp src/game/Initialiser.h
+        src/game/MyScene.cpp include/game/MyScene.h
+        src/game/MyTestActor.cpp src/game/MyTestActor.h
+        src/game/Rotator.cpp include/game/Rotator.h
+        src/game/Spammer.cpp src/game/Spammer.h
+)
+
+target_include_directories(${PROJECT_NAME} PUBLIC
+        include include/engine include/graphics include/game include/engine/loader include/graphics/buffers
+        include/engine/ui include/graphics/postProcessing include/engine/rendering include/helpers/logger
+        include/engine/ui/editor include/helpers include/engine/event include/helpers/profiler
+        include/engine/serialize include/engine/audio include/engine/physics
+
+        # Vendor Files
+        vendor/glm/glm vendor/glew/include/GL
+        vendor/glfw/include/GLFW vendor/imgui
+        vendor/stb/include vendor/imguizmo
+        vendor/assimp/include ${CMAKE_CURRENT_BINARY_DIR}/vendor/assimp/include  # A config file is generated that is required by assimp code.
+        vendor/yaml-cpp/include vendor/openal-soft/include vendor/pellet
+)
+
+target_link_libraries(${PROJECT_NAME} ${ENGINE_LIBRARY})
