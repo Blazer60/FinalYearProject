@@ -365,7 +365,8 @@ namespace engine
             mShowSceneHierarchy         |= ImGui::MenuItem("Scene Hieararchy");
             mShowDetailsPanel           |= ImGui::MenuItem("Details Panel");
             mShowSceneSettings          |= ImGui::MenuItem("Show Scene Settings");
-            mShowCameraSettings         |= ImGui::MenuItem("Show Camera Settings");
+
+            mViewport.getCamera()->showCameraSettings |= ImGui::MenuItem("Show Camera Settings");
             ImGui::EndMenu();
         }
     }

@@ -45,6 +45,7 @@ public:
     
     glm::vec3 getEndOfBoomArmPosition() const;
 
+    bool showCameraSettings { true };
 protected:
     glm::mat4       mVpMatrix           { 1.f };
     glm::mat4       mViewMatrix         { 1.f };
@@ -88,8 +89,7 @@ protected:
     float mCameraBoomDelta { 2.f };
     float mCameraBoomMin { 0.5f };
 
-    bool mShowCameraSettings { true };
-    
+
     void moveFirstPerson();
     void rotateThirdPerson();
     

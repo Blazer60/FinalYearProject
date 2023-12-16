@@ -215,6 +215,8 @@ namespace engine
     void Viewport::onDrawUi()
     {
         PROFILE_FUNC();
+        ui::draw(mEditorCamera);
+
         if (!isShowing)
             return;
 

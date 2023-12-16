@@ -126,10 +126,10 @@ const glm::mat4 &EditorCamera::getViewMatrix() const
 void EditorCamera::onDrawUi()
 {
     PROFILE_FUNC();
-    if (!mShowCameraSettings)
+    if (!showCameraSettings)
         return;
 
-    ImGui::Begin("Renderer Settings", &mShowCameraSettings);
+    ImGui::Begin("Renderer Settings", &showCameraSettings);
     drawRendererSettings();
 
     if (ImGui::CollapsingHeader("Camera Details"))
