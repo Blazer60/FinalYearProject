@@ -10,12 +10,11 @@
 #include <BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h>
 
 #include "Actor.h"
-#include "AssimpLoader.h"
 #include "FileExplorer.h"
 #include "FileLoader.h"
+#include "Loader.h"
 #include "PhysicsConversions.h"
 #include "ResourceFolder.h"
-#include "physicsMesh.h"
 #include "RigidBody.h"
 
 namespace engine

@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "../Pch.h"
+#include "Pch.h"
 
 namespace engine
 {

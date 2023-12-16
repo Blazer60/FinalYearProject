@@ -17,11 +17,9 @@
 #include "EngineMath.h"
 #include "ProfileTimer.h"
 #include "EngineState.h"
-#include "AssimpLoader.h"
 #include "Scene.h"
 #include "MeshRenderer.h"
 #include "RigidBody.h"
-#include "SceneLoader.h"
 #include "Ui.h"
 
 namespace engine

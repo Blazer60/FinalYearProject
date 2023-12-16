@@ -29,7 +29,7 @@ namespace load
 namespace engine
 {
     /**
-     * An serializeActor is a game object that can live in a scene. Actors have components that can be attached to them.
+     * An Actor is a game object that can live in a scene. Actors have components that can be attached to them.
      * @author Ryan Purse
      * @date 07/08/2023
      */
@@ -59,26 +59,29 @@ namespace engine
         
     
         /**
-         * @returns The name of the serializeActor. This is the name that is shown in the hierarchy.
+         * @returns The name of the Acotr. This is the name that is shown in the hierarchy.
          */
         [[nodiscard]] std::string_view getName() const;
         
         /**
-         * @returns All of the components that are attached to this serializeActor.
+         * @returns All of the components that are attached to this Actor.
          */
         [[nodiscard]] std::vector<Resource<Component>> &getComponents();
         
         /**
-         * @brief Adds the serializeComponent the the list of components attached to this serializeActor.
+         * @brief Adds the component the the list of components attached to this Actor.
          */
         template<typename T>
         Ref<T> addComponent(Resource<T> &&component);
         
         /**
-         * @returns The transform of this serializeActor in world space.
+         * @returns The transform of this Actor in world space.
          */
         [[nodiscard]] glm::mat4 getTransform() const;
-        
+
+        /**
+         * @returns The transform of this actor in object space.
+         */
         [[nodiscard]] glm::mat4 getLocalTransform() const;
         
         /**
@@ -89,70 +92,130 @@ namespace engine
         Ref<T> getComponent(bool warn=true);
         
         /**
-         * @tparam T - the type of serializeComponent.
-         * @returns True if it could find a serializeComponent with type T, False otherwise.
+         * @tparam T - the type of component.
+         * @returns True if it could find a component with type T, False otherwise.
          */
         template<typename T>
         [[nodiscard]] bool hasComponent() const;
         
         /**
-         * @brief This serializeActor will be destroyed at the end of the update loop.
+         * @brief This actor will be destroyed at the end of the update loop.
          */
         void markForDeath();
-        
+
+        /**
+         * \brief Destroys a component attached to this actor.
+         * \tparam T The component type that you want to remove.
+         */
         template<typename T>
         void removeComponent();
-        
+
+        /**
+         * \brief Destroys a component attached to this actor.
+         * \param component The component that you want to remove.
+         */
         void removeComponent(const Component *component);
+
+        /**
+         * \brief Destroys a component attached to this actor.
+         * \param component The component that you want to remove.
+         */
         void removeComponent(const Ref<Component> &component);
-        
+
+        /**
+         * \brief Adds a child actor to this actor.
+         * \tparam TActor The type of actor. It must inherit from actor.
+         * \param actor The child Actor that you want to add.
+         * \param keepWorldRelative Should the child actor's transform be updated so the it's world space transform does not update
+         * \returns - The actor passed in (for chaining).
+         */
         template<typename TActor, std::enable_if_t<std::is_convertible_v<TActor*, Actor*>, bool> = true>
         Ref<TActor> addChildActor(Ref<TActor> actor, bool keepWorldRelative=true);
 
+        /**
+         * \brief Adds a child actor to this actor.
+         * \tparam TActor The type of actor. It must inheir from actor.
+         * \param actor The child actor that you want to add.
+         * \returns - The actor resource passed in but as a reference (for chainging).
+         */
         template<typename TActor, std::enable_if_t<std::is_convertible_v<TActor*, Actor*>, bool> = true>
         Ref<TActor> addChildActor(Resource<TActor> actor);
 
+        /**
+         * \brief Remvoes a child actor from this actor.
+         */
         void removeChildActor(Actor* actor);
         
         [[nodiscard]] std::vector<UUID> &getChildren();
         [[nodiscard]] Actor *getParent() const;
+
         void setWorldTransform(const glm::mat4 &worldTransform);
         [[nodiscard]] glm::vec3 getWorldPosition() const;
         [[nodiscard]] glm::quat getWorldRotation() const;
         [[nodiscard]] Scene *getScene() const;
-        
+
+    protected:
+        void onDrawUi() override;
+
+        /**
+         * \brief Uses this function to initialise any interal state within the actor. Guarenteed to be called before begin().
+         */
+        virtual void onAwake();
+
+        /**
+         * \brief Use this function to find other components that you want to attach to. Guarenteed to be called before update().
+         */
+        virtual void onBegin();
+
+        /**
+         * \brief Called every frame.
+         */
+        virtual void onUpdate();
+
+        /**
+         * \brief Called when an actor has both a rigid body and a collider and isTrigger is set to false.
+         * \param otherActor The other actor that this collided with
+         * \param myComponent The component that caused the collision event
+         * \param otherComponent The other component that we came into contact with.
+         * \param hitInfo More information about the hit.
+         */
+        virtual void onCollisionBegin(Actor *otherActor, Component *myComponent, Component *otherComponent, const HitInfo &hitInfo);
+
+        /**
+         * \brief Called when an actor has both arigid body and a collider and isTrigger is set to true.
+         * \param otherActor The other actor that this collided with
+         * \param myComponent The component that cuased the collision event
+         * \param otherComponent The other component that we came into contact with.
+         */
+        virtual void onTriggerBegin(Actor *otherActor, Component *myComponent, Component *otherComponent);
+
+    private:
+        void updateTransform();
+        void updateComponents();
+
     protected:
         std::string mName      { "Actor" };  // I've put the name here so that the debugger shows this as the first field.
-        class Scene *mScene    { nullptr };
+        Scene *mScene    { nullptr };
         UUID mId               { random::generateId() };
+
     public:
         glm::vec3 position     { glm::vec3(0.f) };
         glm::quat rotation     { glm::identity<glm::quat>() };
         glm::vec3 scale        { glm::vec3(1.f) };
-    
+
+    protected:
+        glm::mat4         mTransform    { glm::mat4(1.f) };
+        Actor*            mParent       { nullptr };  // Nullptr means that its parent is the scene.
+        std::vector<UUID> mChildren;
+
+        std::vector<Resource<Component>> mComponents;
     private:
         std::set<const Component*>  mComponentDestroyBuffer0;
         std::set<const Component*>  mComponentDestroyBuffer1;
         std::set<const Component*> *mComponentsToDestroy { &mComponentDestroyBuffer0 };
 
         std::vector<Resource<Component>> mComponentsToAdd;
-        std::set<UUID> mChildrenToRemove;
-        
-    protected:
-        void onDrawUi() override;
-        void updateTransform();
-        virtual void onAwake();
-        virtual void onUpdate();
-        virtual void onBegin();
-        virtual void onCollisionBegin(Actor *otherActor, Component *myComponent, Component *otherComponent, const HitInfo &hitInfo);
-        virtual void onTriggerBegin(Actor *otherActor, Component *myComponent, Component *otherComponent);
-        void updateComponents();
-        
-        glm::mat4 mTransform    { glm::mat4(1.f) };
-        
-        Actor*                           mParent { nullptr };  // Nullptr means that its parent is the scene.
-        std::vector<UUID>                mChildren;
-        std::vector<Resource<Component>> mComponents;
+        std::set<UUID>                   mChildrenToRemove;
     };
     
     template<typename T>
@@ -201,7 +264,7 @@ namespace engine
     template<typename T>
     bool Actor::hasComponent() const
     {
-        bool inComponentList = std::any_of(mComponents.begin(), mComponents.end(), [](const Resource<Component> &component) {
+        const bool inComponentList = std::any_of(mComponents.begin(), mComponents.end(), [](const Resource<Component> &component) {
             const T* t = dynamic_cast<const T*>(component.get());
             if (t == nullptr)
                 return false;
@@ -209,7 +272,7 @@ namespace engine
                 return typeid(const T*).hash_code() == typeid(t).hash_code();
         });
         
-        bool inAddList = std::any_of(mComponentsToAdd.begin(), mComponentsToAdd.end(), [](const Resource<Component> &component) {
+        const bool inAddList = std::any_of(mComponentsToAdd.begin(), mComponentsToAdd.end(), [](const Resource<Component> &component) {
             const T* t = dynamic_cast<const T*>(component.get());
             if (t == nullptr)
                 return false;

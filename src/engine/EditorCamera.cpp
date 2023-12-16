@@ -108,16 +108,6 @@ void EditorCamera::moveFirstPerson()
     mPosition += mRotation * (mSpeed * timeStep * mInputDirection);
 }
 
-const glm::mat4 &EditorCamera::getVpMatrix() const
-{
-    return mVpMatrix;
-}
-
-void EditorCamera::setProjectionMatrix(glm::vec2 viewSize)
-{
-    mProjectionMatrix = glm::perspective(mFovY, viewSize.x / viewSize.y, mNearClip, mFarClip);
-}
-
 const glm::mat4 &EditorCamera::getViewMatrix() const
 {
     return mViewMatrix;
@@ -163,16 +153,6 @@ void EditorCamera::onDrawUi()
     }
 
     ImGui::End();
-}
-
-const glm::vec3 &EditorCamera::getPosition() const
-{
-    return mPosition;
-}
-
-const glm::quat &EditorCamera::getRotation() const
-{
-    return mRotation;
 }
 
 glm::mat4 EditorCamera::getProjectionMatrix() const

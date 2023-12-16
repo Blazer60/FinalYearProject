@@ -24,8 +24,6 @@ class ColourGrading
 protected:
     void onDraw(TextureBufferObject *imageInput, TextureBufferObject *imageOutput) override;
     void onDrawUi() override;
-    
-    [[nodiscard]] static float covertEV100ToExposure(float eV100) ;
-    
+
     Shader mShader { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "postProcessing/colourGrading/ColourGrading.frag" };
 };

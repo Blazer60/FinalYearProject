@@ -12,6 +12,7 @@
 
 #include "Component.h"
 #include "Pch.h"
+#include "Serializer.h"
 
 namespace engine
 {

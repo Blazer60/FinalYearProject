@@ -9,6 +9,7 @@
 
 #include "Pch.h"
 #include "Component.h"
+#include "Serializer.h"
 
 
 /**

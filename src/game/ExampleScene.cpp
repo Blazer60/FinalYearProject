@@ -67,7 +67,7 @@ ExampleScene::ExampleScene()
     materialActor->position = engine::vec3(7.f, 1.f, -30.f);
 }
 
-void ExampleScene::onImguiUpdate()
+void ExampleScene::onDrawUi()
 {
     engine::ui::TextWrapped(
         "Note: Due to the components be created in the scene's constructor,"

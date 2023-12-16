@@ -6,13 +6,13 @@
 
 
 #include "MaterialSubComponent.h"
-#include "TextureLoader.h"
 #include "Ui.h"
 #include "FileExplorer.h"
 #include "EngineState.h"
 #include "Editor.h"
 #include "ResourceFolder.h"
 #include "FileLoader.h"
+#include "Loader.h"
 
 namespace engine
 {

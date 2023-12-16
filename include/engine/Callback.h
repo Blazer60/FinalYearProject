@@ -15,9 +15,25 @@ class Callback
 {
 public:
     using CallbackFunc = std::function<void(const TArgs &...)>;
-    
+    virtual ~Callback() = default;
+
+    /**
+     * \brief Adds a delegate function that will be called from broadcast();
+     * \param callback A delegate function
+     * \returns A token used to unsubscribe the correct function.
+     */
     uint32_t subscribe(const CallbackFunc & callback);
+
+    /**
+     * \brief Removes a delegate function.
+     * \param token The token obtained from subscribe()
+     */
     void unSubscribe(uint32_t token);
+
+    /**
+     * \brief Calls each delegate function in turn.
+     * \param args The arguments that you want to be passed to each subscriber
+     */
     void broadcast(const TArgs &... args);
     
 protected:

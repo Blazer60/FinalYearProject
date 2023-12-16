@@ -8,6 +8,7 @@
 #pragma once
 
 #include "AudioSource.h"
+#include "Camera.h"
 #include "Component.h"
 #include "Pch.h"
 
@@ -34,7 +35,7 @@ public:
 protected:
     std::unique_ptr<AudioSource> mAudioSource;
     float mVolume { 100.f };
-    Ref<Camera> mCamera;
+    Ref<Camera> mCamera;  // Ideally this should be an audio listener component instead.
 
     ENGINE_SERIALIZABLE_COMPONENT(SoundComponent);
 };

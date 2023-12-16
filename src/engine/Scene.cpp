@@ -43,7 +43,6 @@ namespace engine
                 return left.get() == actor;
             });
 
-            onDeath.broadcast(mActors[std::distance(mActors.begin(), it)]);
             mActors.erase(it);
         }
         
@@ -67,33 +66,22 @@ namespace engine
 
     }
 
-    void Scene::onRender()
+    void Scene::onPreRender()
     {
 
     }
 
-    void Scene::onImguiUpdate()
+    void Scene::onDrawUi()
     {
 
     }
 
-    void Scene::onImguiMenuUpdate()
-    {
-
-    }
-    
-    void Scene::imguiUpdate()
-    {
-        PROFILE_FUNC();
-        onImguiUpdate();
-    }
-    
     std::vector<Resource<Actor>> &Scene::getActors()
     {
         return mActors;
     }
     
-    void Scene::render()
+    void Scene::preRender()
     {
         PROFILE_FUNC();
         for (auto &actor : mActors)
@@ -102,7 +90,7 @@ namespace engine
                 component->preRender();
         }
 
-        onRender();
+        onPreRender();
     }
     
     void Scene::destroy(const Actor* actor)

@@ -12,7 +12,6 @@
 #include "FileExplorer.h"
 #include "GraphicsState.h"
 #include "ResourceFolder.h"
-#include "ShaderLoader.h"
 #include "FileLoader.h"
 
 #include <utility>

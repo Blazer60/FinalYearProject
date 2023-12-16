@@ -1,5 +1,5 @@
 /**
- * @file Action.h
+ * @file Input.h
  * @author Ryan Purse
  * @date 23/08/2023
  */
@@ -18,6 +18,7 @@ struct EventKeyValue
 };
 
 /**
+ * A user input from keyboard or mouse that can be acted on.
  * @author Ryan Purse
  * @date 23/08/2023
  */
@@ -28,6 +29,10 @@ class Input
     virtual void doAction() = 0;
 };
 
+/**
+ * \brief A keyboard input that has a binary state.
+ * Multiple inputs can be registered to the same event.
+ */
 class Button
     : public Input<>
 {
@@ -39,6 +44,10 @@ protected:
     std::vector<ImGuiKey> mKeys;
 };
 
+/**
+ * \brief An input that can be represent by a range of values between [0, 1].
+ * Multiple inputs can be registered to the same event.
+ */
 class Value
     : public Input<float>
 {
@@ -51,6 +60,9 @@ protected:
     std::vector<EventKeyValue> mKeyValues;
 };
 
+/**
+ * \brief An input from the scroll-wheel. The speed of the scroll-wheel is broadcasted.
+ */
 class ScrollWheel
     : public Input<float>
 {

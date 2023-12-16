@@ -17,6 +17,7 @@
 #include "Mesh.h"
 #include "Pch.h"
 #include "PhysicsMeshBuffer.h"
+#include "Serializer.h"
 
 namespace engine
 {

@@ -16,12 +16,15 @@ class InvalidReference;
 class ControlBlock
 {
 public:
+    ControlBlock() = default;
     ControlBlock(ControlBlock &rhs) = delete;
     ControlBlock& operator=(ControlBlock &rhs) = delete;
-protected:
-    ControlBlock() = default;
+    ControlBlock(ControlBlock &&rhs) = default;
+    ControlBlock& operator=(ControlBlock &&rhs) = default;
+
     virtual ~ControlBlock() = default;
-    
+protected:
+
     void incrementReference() { ++mRefCount; }
     void decrementReference()
     {
@@ -86,18 +89,12 @@ template<typename T>
 class Resource
 {
 public:
-    friend void swap(Resource &lhs, Resource &rhs);
+    friend void swap(Resource &lhs, Resource &rhs) noexcept;
     
     // Default constructor.
     explicit Resource() = default;
     
     // Default constructor
-    // template<typename ...TArgs>
-    // explicit Resource(TArgs && ...args)
-    //     : Resource(new HeapResource<T>(std::forward<TArgs>(args)...))
-    // {
-    // }
-    
     explicit Resource(HeapResource<T>* heapResource)
     {
        mControlBlock = heapResource;
@@ -140,7 +137,7 @@ public:
         return *this;
     }
     
-    friend void swap(Resource &lhs, Resource &rhs)
+    friend void swap(Resource &lhs, Resource &rhs) noexcept
     {
         using std::swap;
         
@@ -184,7 +181,7 @@ template<typename T>
 class Ref
 {
 public:
-    friend void swap(Ref &lhs, Ref &rhs);
+    friend void swap(Ref &lhs, Ref &rhs) noexcept;
     
     explicit Ref() = default;  // Default constructor.
     
@@ -232,7 +229,7 @@ public:
         return *this;
     }
     
-    friend void swap(Ref &lhs, Ref &rhs)
+    friend void swap(Ref &lhs, Ref &rhs) noexcept
     {
         using std::swap;
         
@@ -296,7 +293,7 @@ public:
     
     }
     
-    [[nodiscard]] const char *what() const override
+    [[nodiscard]] const char *what() const noexcept override
     {
         return mMessage.c_str();
     }

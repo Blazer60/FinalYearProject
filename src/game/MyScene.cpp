@@ -21,11 +21,11 @@ void MyScene::onUpdate()
 {
 }
 
-void MyScene::onRender()
+void MyScene::onPreRender()
 {
 }
 
-void MyScene::onImguiUpdate()
+void MyScene::onDrawUi()
 {
     if (engine::ui::Button("Skybox 1"))
         graphics::renderer->generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
@@ -37,10 +37,6 @@ void MyScene::onImguiUpdate()
 
     static bool yes = true;
     engine::ui::ShowDemoWindow(&yes);
-}
-
-void MyScene::onImguiMenuUpdate()
-{
 }
 
 void MyScene::setLuminanceMultiplier(const float multiplier)

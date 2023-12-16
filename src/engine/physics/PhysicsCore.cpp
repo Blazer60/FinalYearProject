@@ -10,7 +10,6 @@
 #include <queue>
 
 #include "Actor.h"
-#include "AssimpLoader.h"
 #include "Core.h"
 #include "EngineState.h"
 #include "Logger.h"
@@ -21,6 +20,7 @@
 #include "Colliders.h"
 #include "ContainerAlgorithms.h"
 #include "GraphicsState.h"
+#include "Loader.h"
 
 namespace engine
 {

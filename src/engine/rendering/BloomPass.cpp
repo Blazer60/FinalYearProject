@@ -12,6 +12,8 @@
 #include "ProfileTimer.h"
 #include "GraphicsFunctions.h"
 
+// todo: Something is causing a visual bug in the bloom pass.
+
 void BloomPass::onDraw(TextureBufferObject *imageInput, TextureBufferObject *imageOutput)
 {
     PROFILE_FUNC();

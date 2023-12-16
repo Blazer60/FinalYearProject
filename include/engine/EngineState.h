@@ -12,12 +12,12 @@
 
 namespace engine
 {
-    extern class Core *core;
-    extern class Editor *editor;
-    extern class RootEventHandler *eventHandler;
-    extern class Serializer *serializer;
-    extern class ResourcePool *resourcePool;
-    extern class PhysicsCore *physicsSystem;
+    extern class Core               *core;
+    extern class Editor             *editor;
+    extern class RootEventHandler   *eventHandler;
+    extern class Serializer         *serializer;
+    extern class ResourcePool       *resourcePool;
+    extern class PhysicsCore        *physicsSystem;
     
     void GLAPIENTRY forwardOpenGlCallback(
         GLenum source, GLenum type, GLuint id,

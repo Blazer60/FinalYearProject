@@ -17,7 +17,6 @@
 #include "Colliders.h"
 #include "Core.h"
 #include "RigidBody.h"
-#include "ShaderLoader.h"
 #include "SoundComponent.h"
 #include "Camera.h"
 

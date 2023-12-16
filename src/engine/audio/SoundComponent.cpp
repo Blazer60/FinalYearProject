@@ -8,10 +8,10 @@
 #include "SoundComponent.h"
 
 #include "Actor.h"
-#include "Audio.h"
 #include "Core.h"
 #include "EngineState.h"
 #include "FileExplorer.h"
+#include "Loader.h"
 #include "ResourceFolder.h"
 
 namespace engine

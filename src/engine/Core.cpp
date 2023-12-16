@@ -22,16 +22,14 @@
 #include "EngineState.h"
 #include "LoggerMacros.h"
 #include "ImGuizmo.h"
-#include "TextureLoader.h"
 #include "ModelDestroyer.h"
 #include "Profiler.h"
 #include "ProfileTimer.h"
 #include "GraphicsFunctions.h"
 #include "FileLoader.h"
 #include "ComponentSerializer.h"
-#include "SceneLoader.h"
 #include "FileExplorer.h"
-#include "ShaderLoader.h"
+#include "Loader.h"
 
 namespace engine
 {
@@ -333,7 +331,7 @@ namespace engine
             mEditor->update();
 
             mEditor->preRender();
-            mScene->render();
+            mScene->preRender();
             mPhysics->renderDebugShapes();
             mRenderer->render();
             updateImgui();

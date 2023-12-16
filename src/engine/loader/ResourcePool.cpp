@@ -9,8 +9,6 @@
 #include <Statistics.h>
 #include <FileLoader.h>
 
-#include "physicsMesh.h"
-
 namespace engine
 {
     template<typename T>

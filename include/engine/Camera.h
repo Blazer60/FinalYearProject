@@ -11,6 +11,7 @@
 #include "Component.h"
 #include "Pch.h"
 #include "PostProcessLayer.h"
+#include "Serializer.h"
 
 namespace engine
 {

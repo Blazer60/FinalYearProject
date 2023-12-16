@@ -14,6 +14,7 @@
 #endif
 
 #include "Actor.h"
+#include "Colliders.h"
 #include "Component.h"
 #include "Core.h"
 #include "Drawable.h"
@@ -22,15 +23,12 @@
 #include "EngineState.h"
 #include "EventHandler.h"
 #include "Input.h"
+#include "MeshRenderer.h"
+#include "RigidBody.h"
 #include "Scene.h"
 #include "Serializer.h"
 #include "SoundComponent.h"
 #include "Ui.h"
-#include "MeshRenderer.h"
-#include "RigidBody.h"
-#include "Colliders.h"
-#include "ShaderLoader.h"
-#include "TextureLoader.h"
 
 #include <GraphicsState.h>
 #include <Renderer.h>

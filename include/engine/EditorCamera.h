@@ -29,73 +29,59 @@ public:
     
     void init();
     void update();
-    void move();
-    
-    void setProjectionMatrix(glm::vec2 viewSize);
-    
-    [[nodiscard]] const glm::mat4 &getVpMatrix() const;
-    
+
     [[nodiscard]] const glm::mat4 &getViewMatrix() const;
-    
-    [[nodiscard]] const glm::vec3 &getPosition() const;
-    
     [[nodiscard]] glm::mat4 getProjectionMatrix() const;
-    
     [[nodiscard]] CameraSettings toSettings();
-    
     glm::vec3 getEndOfBoomArmPosition() const;
 
-    bool showCameraSettings { true };
 protected:
-    glm::mat4       mVpMatrix           { 1.f };
-    glm::mat4       mViewMatrix         { 1.f };
-    glm::mat4       mProjectionMatrix   { 1.f };
-    
-    glm::vec3       mPosition           { 0.f, 0.f, 3.f };
-    glm::quat       mRotation           { glm::vec3(0.f) };
-    
+    void move();
     void onDrawUi() override;
-
-public:
-    [[nodiscard]] const glm::quat &getRotation() const;
-
-protected:
-    glm::dvec2      mPanAngles          { 0.f };
-    
-    float           mSpeed              { 30.f };
-    float           mMouseSpeed         { 0.5f };
-    
-    float           mFovY               { glm::radians(45.f) };
-    float           mNearClip           { 0.01f };
-    float           mFarClip            { 1000.f };
-    float           mEV100              { 10.f };
-    
-    std::vector<std::unique_ptr<PostProcessLayer>> mPostProcessStack;
-    
-    uint32_t mFocusActorEventToken { 0 };
-    uint32_t mOrbitEventToken { 0 };
-    uint32_t mMoveForwardEventToken { 0 };
-    uint32_t mMoveRightEventToken { 0 };
-    uint32_t mMoveUpEventToken { 0 };
-    uint32_t mDoMoveToken { 0 };
-    uint32_t mZoomViewportToken { 0 };
-    uint32_t mZoomThirdPersonToken { 0 };
-    
-    glm::vec3 mInputDirection { 0.f };
-    bool mDoMoveAction { false };
-    
-    float mRotationSpeed { 0.1f };
-    float mCameraBoomDistance { 30.f };
-    float mCameraBoomDelta { 2.f };
-    float mCameraBoomMin { 0.5f };
-
-
     void moveFirstPerson();
     void rotateThirdPerson();
-    
     void gotoSelectedActor();
-    
     void zoomCamera(float zoomDistance);
+
+public:
+    bool showCameraSettings { true };
+
+protected:
+    std::vector<std::unique_ptr<PostProcessLayer>> mPostProcessStack;
+
+    // Rendering.
+    float       mEV100                  { 10.f };
+    float       mFarClip                { 1000.f };
+    float       mFovY                   { glm::radians(45.f) };
+    float       mNearClip               { 0.01f };
+    glm::mat4   mProjectionMatrix       { 1.f };
+    glm::mat4   mViewMatrix             { 1.f };
+    glm::mat4   mVpMatrix               { 1.f };
+
+    // Positioning.
+    glm::quat   mRotation               { glm::vec3(0.f) };
+    glm::vec3   mPosition               { 0.f, 0.f, 3.f };
+
+    // Settings.
+    float       mCameraBoomDelta        { 2.f };
+    float       mCameraBoomDistance     { 30.f };
+    float       mCameraBoomMin          { 0.5f };
+    float       mMouseSpeed             { 0.5f };
+    float       mRotationSpeed          { 0.1f };
+    float       mSpeed                  { 30.f };
+    glm::dvec2  mPanAngles              { 0.f };
+
+    // Input linkage.
+    bool        mDoMoveAction           { false };
+    glm::vec3   mInputDirection         { 0.f };
+    uint32_t    mDoMoveToken            { 0 };
+    uint32_t    mFocusActorEventToken   { 0 };
+    uint32_t    mMoveForwardEventToken  { 0 };
+    uint32_t    mMoveRightEventToken    { 0 };
+    uint32_t    mMoveUpEventToken       { 0 };
+    uint32_t    mOrbitEventToken        { 0 };
+    uint32_t    mZoomThirdPersonToken   { 0 };
+    uint32_t    mZoomViewportToken      { 0 };
 };
 
 

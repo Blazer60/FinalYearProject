@@ -7,9 +7,6 @@
 
 #pragma once
 
-#include "Audio.h"
-#include "AudioSource.h"
-#include "FileLoader.h"
 #include "Pch.h"
 
 #include "Scene.h"
@@ -27,9 +24,8 @@ public:
     ~MyScene() override;
     void onFixedUpdate() override;
     void onUpdate() override;
-    void onRender() override;
-    void onImguiUpdate() override;
-    void onImguiMenuUpdate() override;
+    void onPreRender() override;
+    void onDrawUi() override;
 
     void setLuminanceMultiplier(float multiplier);
     

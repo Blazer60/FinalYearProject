@@ -13,6 +13,7 @@
 #include "Buffers.h"
 #include "Component.h"
 #include "GraphicsLighting.h"
+#include "Serializer.h"
 
 namespace engine
 {

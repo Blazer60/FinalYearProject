@@ -8,15 +8,13 @@
 #pragma once
 
 #include "Pch.h"
-#include "TextureBufferObject.h"
-#include "Renderer.h"
 #include "Actor.h"
 #include "EngineMemory.h"
 #include "Callback.h"
 
 namespace load
 {
-    std::unique_ptr<class engine::Scene> scene(const std::filesystem::path &path);
+    std::unique_ptr<engine::Scene> scene(const std::filesystem::path &path);
 }
 
 namespace engine
@@ -27,34 +25,51 @@ namespace engine
      * @date 13/06/2023
      */
     class Scene
+        : public ui::Drawable
     {
         friend std::unique_ptr<Scene> load::scene(const std::filesystem::path &);
     public:
-        Callback<Ref<Actor>> onDeath;
-        
-        virtual ~Scene() = default;
+        ~Scene() override = default;
         
         void update();
         void fixedUpdate();
-        void render();
-        void imguiUpdate();
+        void preRender();
+
+        /**
+         * \returns A list of actors that can be iterated over.
+         */
         std::vector<Resource<Actor>> &getActors();
         
         /**
          * @brief Actors are destroyed at the end of the update loop.
          */
         void destroy(const Actor* actor);
-        
-        virtual void onFixedUpdate();
-        virtual void onRender();
-        virtual void onImguiMenuUpdate();
-        
+
+        /**
+         * \briefs Spawns an actor into the world.
+         * \tparam TActor The type of actor that you want to spawn.
+         * \tparam TArgs The type of arguments to forwrd to the actor's constructor.
+         * \param args The arguments you want to forward to the actor's constructor.
+         * \return
+         */
         template<typename TActor, typename ...TArgs>
         Ref<TActor> spawnActor(TArgs &&... args);
-        
+
+        /**
+         * \brief Adds an actor the scene.
+         * \tparam TActor The type of actor that you want to add.
+         * \param actor The actor you want to add.
+         * \returns A reference to the actor.
+         */
         template<typename TActor, std::enable_if_t<std::is_convertible_v<TActor*, Actor*>, bool> = true>
         Ref<TActor> addActor(Resource<TActor> &&actor);
 
+        /**
+         * \brief Finds the actor via the given id.
+         * \param actorId The ID of the actor that you want to find.
+         * \param warn Should a warning message be printed to the console if it can't find the specified actor
+         * \returns A reference to the actor. A nullreference if it could not find anything.
+         */
         Ref<Actor> getActor(UUID actorId, bool warn=true) const;
 
         /**
@@ -65,16 +80,19 @@ namespace engine
 
     protected:
         virtual void onUpdate();
-        virtual void onImguiUpdate();
+        virtual void onFixedUpdate();
+        virtual void onPreRender();
+        void onDrawUi() override;
 
+    public:
+        std::vector<Resource<Actor>> mActors;
 
+    private:
         std::set<const Actor*> mDestroyBuffer0;
         std::set<const Actor*> mDestroyBuffer1;
         std::set<const Actor*> *mToDestroy { &mDestroyBuffer0 };
         
         std::vector<Resource<Actor>> mToAdd;
-        
-        std::vector<Resource<Actor>> mActors;
     };
     
     template<typename TActor, typename... TArgs>

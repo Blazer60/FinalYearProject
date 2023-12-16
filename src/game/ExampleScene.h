@@ -21,5 +21,5 @@ class ExampleScene
 {
 public:
     ExampleScene();
-    void onImguiUpdate() override;
+    void onDrawUi() override;
 };

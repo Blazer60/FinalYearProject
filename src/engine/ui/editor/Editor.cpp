@@ -8,12 +8,10 @@
 #include "Editor.h"
 #include "Core.h"
 #include "Scene.h"
-#include "AssimpLoader.h"
 #include "ProfileTimer.h"
 #include "Lighting.h"
 #include "EngineState.h"
 #include "MeshRenderer.h"
-#include "ShaderLoader.h"
 #include "SoundComponent.h"
 #include <FileLoader.h>
 #include "Colliders.h"
@@ -377,7 +375,6 @@ namespace engine
         {
             drawFileMenuDropDown();
             drawWindowDropDown();
-            core->getScene()->onImguiMenuUpdate();
 
             const std::string text = "TPS: %.0f | Frame Rate: %.3fms/frame (%.0fFPS)";
             ImGui::SetCursorPosX( ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - ImGui::CalcTextSize(text.c_str()).x
@@ -407,7 +404,7 @@ namespace engine
             return;
 
         ImGui::Begin("Scene Settings", &mShowSceneSettings);
-        core->getScene()->imguiUpdate();
+        ui::draw(core->getScene());
         ImGui::End();
     }
 

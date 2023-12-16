@@ -19,6 +19,7 @@
 
 #include "AudioSource.h"
 #include "PhysicsMeshBuffer.h"
+#include "Texture.h"
 
 namespace engine
 {

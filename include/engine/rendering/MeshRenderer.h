@@ -11,10 +11,10 @@
 #include "Component.h"
 #include "Mesh.h"
 #include "Materials.h"
-#include "AssimpLoader.h"
 #include "MaterialSubComponent.h"
 #include "EngineMemory.h"
 #include "ComponentSerializer.h"
+#include "Loader.h"
 
 namespace engine
 {

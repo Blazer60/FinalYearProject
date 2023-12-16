@@ -1,5 +1,5 @@
 /**
- * @file PropertyDrawer.h
+ * @file Drawable.h
  * @author Ryan Purse
  * @date 15/07/2023
  */
@@ -34,8 +34,7 @@ namespace ui
     {
         try
         {
-            auto* drawable = dynamic_cast<Drawable*>(&property);
-            if (drawable)
+            if (auto* drawable = dynamic_cast<Drawable*>(&property))
                 drawable->drawUi();
         }
         catch (const std::bad_cast &badCast)

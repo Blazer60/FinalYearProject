@@ -81,8 +81,6 @@ add_library(${ENGINE_LIBRARY}
 
         include/engine/Callback.h
         include/engine/EngineMemory.h
-        include/engine/loader/RawMesh.h
-        include/engine/loader/SceneLoader.h
         include/engine/physics/HitInfo.h
         include/engine/physics/PhysicsConversions.h
         include/engine/physics/PhysicsMeshBuffer.h
@@ -105,18 +103,10 @@ add_library(${ENGINE_LIBRARY}
         src/engine/audio/SoundComponent.cpp include/engine/audio/SoundComponent.h
         src/engine/event/EventHandler.cpp include/engine/event/EventHandler.h
         src/engine/event/Input.cpp include/engine/event/Input.h
-        src/engine/loader/AssimpLoader.cpp include/engine/loader/AssimpLoader.h
-        src/engine/loader/Audio.cpp include/engine/loader/Audio.h
         src/engine/loader/CommonLoader.cpp include/engine/loader/CommonLoader.h
         src/engine/loader/FileExplorer.cpp include/engine/loader/FileExplorer.h
-        src/engine/loader/MaterialLoader.cpp include/engine/loader/MaterialLoader.h
         src/engine/loader/ModelDestroyer.cpp include/engine/loader/ModelDestroyer.h
-        src/engine/loader/ModelLoader.cpp include/engine/loader/ModelLoader.h
         src/engine/loader/ResourcePool.cpp include/engine/loader/ResourcePool.h
-        src/engine/loader/SceneLoader.cpp
-        src/engine/loader/ShaderLoader.cpp include/engine/loader/ShaderLoader.h
-        src/engine/loader/TextureLoader.cpp include/engine/loader/TextureLoader.h
-        src/engine/loader/physicsMesh.cpp include/engine/loader/physicsMesh.h
         src/engine/physics/Colliders.cpp include/engine/physics/Colliders.h
         src/engine/physics/PhysicsCore.cpp include/engine/physics/PhysicsCore.h
         src/engine/physics/PhysicsDebugDrawer.cpp include/engine/physics/PhysicsDebugDrawer.h
@@ -141,6 +131,8 @@ add_library(${ENGINE_LIBRARY}
 
         vendor/imguizmo/ImGuizmo.cpp vendor/imguizmo/ImGuizmo.h
         include/engine/Engine.h
+        src/engine/loader/Loader.cpp
+        include/engine/loader/Loader.h
 )
 
 target_include_directories(${ENGINE_LIBRARY} PUBLIC
