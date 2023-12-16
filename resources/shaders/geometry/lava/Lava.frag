@@ -97,5 +97,9 @@ void main()
 
     o_albedo = sRgbToLinear(texture_colour);
     o_position = v_position_ws;
-    o_emissive = 1000.f * texture(u_emissive_texture, uv).rgb;
+    vec3 emissive = texture(u_emissive_texture, uv).rgb;
+    if (dot(emissive, emissive) > 0.2)
+        o_emissive = 1000.f * emissive;
+    else
+        o_emissive = vec3(0.f);
 }
