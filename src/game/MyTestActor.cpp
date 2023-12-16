@@ -7,7 +7,7 @@
 
 #include "MyTestActor.h"
 
-#include "Scene.h"
+#include <Engine.h>
 
 
 MyTestActor::MyTestActor(std::string name)

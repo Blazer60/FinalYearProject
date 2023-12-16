@@ -7,11 +7,8 @@
 
 #include "CameraController.h"
 
-#include "Actor.h"
-#include "Core.h"
-#include "EngineState.h"
 #include "GameInput.h"
-#include "RigidBody.h"
+#include <Engine.h>
 
 CameraController::CameraController()
 {

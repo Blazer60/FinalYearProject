@@ -7,10 +7,7 @@
 
 #pragma once
 
-#include "Component.h"
-#include "Pch.h"
-
-
+#include <Engine.h>
 
 /**
  * @author Ryan Purse

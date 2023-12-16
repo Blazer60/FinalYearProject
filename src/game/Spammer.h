@@ -7,8 +7,7 @@
 
 #pragma once
 
-#include "Pch.h"
-#include "Component.h"
+#include <Engine.h>
 
 
 /**

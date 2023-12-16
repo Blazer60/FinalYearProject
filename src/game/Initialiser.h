@@ -7,6 +7,4 @@
 
 #pragma once
 
-#include "Pch.h"
-
 void initComponentsForEngine();

@@ -6,8 +6,8 @@
 
 
 #include "CollisionInfo.h"
-#include "Actor.h"
-#include "SoundComponent.h"
+
+#include <Engine.h>
 
 void CollisionInfo::onBegin()
 {

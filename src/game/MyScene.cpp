@@ -6,11 +6,8 @@
 
 
 #include "MyScene.h"
-#include "imgui.h"
-#include "GraphicsState.h"
-#include "Editor.h"
-#include "SceneLoader.h"
-#include <FileLoader.h>
+
+#include <Engine.h>
 
 MyScene::MyScene()
 {

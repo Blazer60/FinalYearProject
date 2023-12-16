@@ -6,12 +6,7 @@
 
 
 #include "Spammer.h"
-#include "MeshRenderer.h"
-#include <Statistics.h>
-#include <EngineState.h>
-#include <Core.h>
-#include <Scene.h>
-#include <MaterialSubComponent.h>
+#include <Engine.h>
 
 void Spammer::onBegin()
 {

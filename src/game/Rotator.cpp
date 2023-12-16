@@ -6,8 +6,7 @@
 
 
 #include "Rotator.h"
-#include "Actor.h"
-#include "Timers.h"
+#include <Engine.h>
 
 Rotator::Rotator(const glm::vec3 &rotation)
     : mRotation(rotation)

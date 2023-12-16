@@ -140,6 +140,7 @@ add_library(${ENGINE_LIBRARY}
 
 
         vendor/imguizmo/ImGuizmo.cpp vendor/imguizmo/ImGuizmo.h
+        include/engine/Engine.h
 )
 
 target_include_directories(${ENGINE_LIBRARY} PUBLIC
