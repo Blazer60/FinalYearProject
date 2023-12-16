@@ -28,9 +28,9 @@ protected:
     float mSpeed { 1.f };
     float mJumpForce { 100.f };
     Ref<engine::RigidBody> mRigidBody;
-    glm::vec2 mInputDirection { 0.f };
+    engine::vec2 mInputDirection { 0.f };
     bool mWantsJump { false };
-    glm::dvec2 mPanAngles { 0.f };
+    engine::dvec2 mPanAngles { 0.f };
 
     uint32_t mMoveForwardToken { 0 };
     uint32_t mMoveRightToken { 0 };

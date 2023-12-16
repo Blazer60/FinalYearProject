@@ -27,16 +27,16 @@ void MyScene::onRender()
 
 void MyScene::onImguiUpdate()
 {
-    if (ImGui::Button("Skybox 1"))
+    if (engine::ui::Button("Skybox 1"))
         graphics::renderer->generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
-    ImGui::SameLine();
-    if (ImGui::Button("Skybox 2"))
+    engine::ui::SameLine();
+    if (engine::ui::Button("Skybox 2"))
         graphics::renderer->generateSkybox((file::texturePath() / "hdr/norway/Norway.hdr").string(), glm::ivec2(512));
-    if (ImGui::DragFloat("Luminance Multiplier", &mLuminanceMultiplier))
+    if (engine::ui::DragFloat("Luminance Multiplier", &mLuminanceMultiplier))
         graphics::renderer->setIblMultiplier(mLuminanceMultiplier);
 
     static bool yes = true;
-    ImGui::ShowDemoWindow(&yes);
+    engine::ui::ShowDemoWindow(&yes);
 }
 
 void MyScene::onImguiMenuUpdate()
@@ -52,9 +52,9 @@ MyScene::~MyScene()
 {
 }
 
-void serializeScene(YAML::Emitter &out, MyScene *const scene)
+void serializeScene(engine::serialize::Emitter &out, MyScene *const scene)
 {
-    out << YAML::Key << "Type" << YAML::Value << "MyScene";
-    out << YAML::Key << "LuminanceMultiplier" << scene->mLuminanceMultiplier;
+    out << engine::serialize::Key << "Type" << engine::serialize::Value << "MyScene";
+    out << engine::serialize::Key << "LuminanceMultiplier" << scene->mLuminanceMultiplier;
 }
 

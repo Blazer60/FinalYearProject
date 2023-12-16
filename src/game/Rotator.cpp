@@ -16,27 +16,27 @@ Rotator::Rotator(const glm::vec3 &rotation)
 
 void Rotator::onUpdate()
 {
-    mActor->rotation = mActor->rotation * glm::quat(mRotation * timers::deltaTime<float>());
+    mActor->rotation = mActor->rotation * engine::quat(mRotation * timers::deltaTime<float>());
 }
 
 void Rotator::onDrawUi()
 {
-    ImGui::PushID("Rotator");
-    if (ImGui::TreeNodeEx("Rotator Settings", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen))
+    engine::ui::PushID("Rotator");
+    if (engine::ui::TreeNodeEx("Rotator Settings", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen))
     {
-        if (ImGui::Button("Destroy Component"))
+        if (engine::ui::Button("Destroy Component"))
             mActor->removeComponent(this);
         
-        ImGui::DragFloat3("Angle Speed", glm::value_ptr(mRotation), 0.01f);
+        engine::ui::DragFloat3("Angle Speed", engine::value_ptr(mRotation), 0.01f);
         
-        ImGui::TreePop();
+        engine::ui::TreePop();
     }
     
-    ImGui::PopID();
+    engine::ui::PopID();
 }
 
-void serializeComponent(YAML::Emitter &out, Rotator *rotator)
+void serializeComponent(engine::serialize::Emitter &out, Rotator *rotator)
 {
-    out << YAML::Key << "Component" << YAML::Value << "Rotator";
-    out << YAML::Key << "Rotation" << YAML::Value << rotator->mRotation;
+    out << engine::serialize::Key << "Component" << engine::serialize::Value << "Rotator";
+    out << engine::serialize::Key << "Rotation" << engine::serialize::Value << rotator->mRotation;
 }

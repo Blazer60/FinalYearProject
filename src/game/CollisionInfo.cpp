@@ -31,20 +31,20 @@ void CollisionInfo::onTriggerBegin(engine::Actor* otherActor, Component* myCompo
 
 void CollisionInfo::onDrawUi()
 {
-    ImGui::PushID("Collision Info");
-    if (ImGui::TreeNodeEx("Collision Info Settings", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen))
+    engine::ui::PushID("Collision Info");
+    if (engine::ui::TreeNodeEx("Collision Info Settings", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen))
     {
-        if (ImGui::Button("Destroy Component"))
+        if (engine::ui::Button("Destroy Component"))
             mActor->removeComponent(this);
 
-        ImGui::TreePop();
+        engine::ui::TreePop();
     }
 
-    ImGui::PopID();
+    engine::ui::PopID();
 }
 
-void serializeComponent(YAML::Emitter &out, CollisionInfo *collisionInfo)
+void serializeComponent(engine::serialize::Emitter &out, CollisionInfo *collisionInfo)
 {
-    out << YAML::Key << "Component" << YAML::Value << "CollisionInfo";
+    out << engine::serialize::Key << "Component" << engine::serialize::Value << "CollisionInfo";
 }
 

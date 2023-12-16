@@ -46,45 +46,45 @@ void CameraController::onUpdate()
 
     if (engine::eventHandler->updateUserEvents)
     {
-        const glm::vec2 mouseOffset = engine::eventHandler->getMouseDelta();
-        mPanAngles -= glm::radians(mouseOffset) * 0.5f;
-        mCamera->rotation = glm::angleAxis(static_cast<float>(mPanAngles.y), glm::vec3(1.f, 0.f, 0.f));
-        mActor->rotation = glm::angleAxis(static_cast<float>(mPanAngles.x), glm::vec3(0.f, 1.f, 0.f));
+        const engine::vec2 mouseOffset = engine::eventHandler->getMouseDelta();
+        mPanAngles -= engine::radians(mouseOffset) * 0.5f;
+        mCamera->rotation = engine::angleAxis(static_cast<float>(mPanAngles.y), engine::vec3(1.f, 0.f, 0.f));
+        mActor->rotation = engine::angleAxis(static_cast<float>(mPanAngles.x), engine::vec3(0.f, 1.f, 0.f));
     }
 
-    if (glm::length(mInputDirection) > 0.f)
-        glm::normalize(mInputDirection);
+    if (engine::length(mInputDirection) > 0.f)
+        engine::normalize(mInputDirection);
 
     mRigidBody->active();
-    glm::vec3 impulse = mActor->rotation * (mSpeed * timestep * glm::vec3(mInputDirection.x, 0.f, mInputDirection.y));
+    engine::vec3 impulse = mActor->rotation * (mSpeed * timestep * engine::vec3(mInputDirection.x, 0.f, mInputDirection.y));
     if (mWantsJump)
         impulse.y += mJumpForce;
     mRigidBody->addImpulse(impulse);
 
-    mInputDirection = glm::vec2(0.f);
+    mInputDirection = engine::vec2(0.f);
     mWantsJump = false;
 }
 
 void CameraController::onDrawUi()
 {
-    ImGui::PushID("CameraController");
-    if (ImGui::TreeNodeEx("Camera Controller", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen))
+    engine::ui::PushID("CameraController");
+    if (engine::ui::TreeNodeEx("Camera Controller", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen))
     {
-        if (ImGui::Button("Destroy Component"))
+        if (engine::ui::Button("Destroy Component"))
             mActor->removeComponent(this);
 
-        ImGui::DragFloat("Speed", &mSpeed);
-        ImGui::DragFloat("Jump Force", &mJumpForce);
-        ImGui::TreePop();
+        engine::ui::DragFloat("Speed", &mSpeed);
+        engine::ui::DragFloat("Jump Force", &mJumpForce);
+        engine::ui::TreePop();
     }
 
-    ImGui::PopID();
+    engine::ui::PopID();
 }
 
-void serializeComponent(YAML::Emitter &out, CameraController *cameraController)
+void serializeComponent(engine::serialize::Emitter &out, CameraController *const cameraController)
 {
-    out << YAML::Key << "Component" << YAML::Value << "CameraController";
-    out << YAML::Key << "Speed" << YAML::Value << cameraController->mSpeed;
-    out << YAML::Key << "JumpForce" << YAML::Value << cameraController->mJumpForce;
+    out << engine::serialize::Key << "Component" << engine::serialize::Value << "CameraController";
+    out << engine::serialize::Key << "Speed" << engine::serialize::Value << cameraController->mSpeed;
+    out << engine::serialize::Key << "JumpForce" << engine::serialize::Value << cameraController->mJumpForce;
 }
 

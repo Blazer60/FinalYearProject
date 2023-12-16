@@ -12,7 +12,7 @@ void Spammer::onBegin()
 {
     for (int i = 0; i < 30; ++i)
     {
-        Ref<engine::Actor> rootActor = engine::core->getScene()->spawnActor<engine::Actor>("E" + std::to_string(i));
+        const Ref<engine::Actor> rootActor = engine::core->getScene()->spawnActor<engine::Actor>("E" + std::to_string(i));
         mActors.push_back(rootActor);
         
         auto childActor = getActor()->addChildActor(makeResource<engine::Actor>("F" + std::to_string(i)));
@@ -51,15 +51,15 @@ Spammer::~Spammer()
 
 void Spammer::onDrawUi()
 {
-    ImGui::PushID("Spammer Settings");
-    if (ImGui::TreeNodeEx("Spammer Settings", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen))
+    engine::ui::PushID("Spammer Settings");
+    if (engine::ui::TreeNodeEx("Spammer Settings", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen))
     {
-        if (ImGui::Button("Destroy Component"))
+        if (engine::ui::Button("Destroy Component"))
             mActor->removeComponent(this);
         
-        ImGui::TreePop();
+        engine::ui::TreePop();
     }
-    ImGui::PopID();
+    engine::ui::PopID();
 }
 
 

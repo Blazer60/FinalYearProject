@@ -43,4 +43,8 @@ namespace engine
         using namespace ImGui;
         using namespace ImGuizmo;
     }
+    namespace serialize
+    {
+        using namespace YAML;
+    }
 }

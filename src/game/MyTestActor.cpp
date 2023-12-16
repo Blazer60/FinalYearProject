@@ -11,7 +11,7 @@
 
 
 MyTestActor::MyTestActor(std::string name)
-    : engine::Actor(std::move(name))
+    : Actor(std::move(name))
 {
 
 }
@@ -24,8 +24,8 @@ MyTestActor::MyTestActor(const float timer, const int count)
 
 void MyTestActor::onBegin()
 {
-    auto spawnedActor = getScene()->spawnActor<engine::Actor>("Should be dead.");
-    Ref<engine::Actor> a = addChildActor(spawnedActor);
+    const Ref<Actor> spawnedActor = getScene()->spawnActor<Actor>("Should be dead.");
+    Ref<Actor> a = addChildActor(spawnedActor);
     a->markForDeath();
 }
 
@@ -47,10 +47,10 @@ void MyTestActor::onUpdate()
     }
 }
 
-void serializeActor(YAML::Emitter &out, MyTestActor *myTestActor)
+void serializeActor(engine::serialize::Emitter &out, MyTestActor *const myTestActor)
 {
-    out << YAML::Key << "Type"  << YAML::Value << "MyTestActor";
-    out << YAML::Key << "Timer" << YAML::Value << myTestActor->mTimer;
-    out << YAML::Key << "Count" << YAML::Value << myTestActor->mCount;
+    out << engine::serialize::Key << "Type"  << engine::serialize::Value << "MyTestActor";
+    out << engine::serialize::Key << "Timer" << engine::serialize::Value << myTestActor->mTimer;
+    out << engine::serialize::Key << "Count" << engine::serialize::Value << myTestActor->mCount;
 }
 
