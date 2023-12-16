@@ -190,6 +190,9 @@ target_compile_definitions(${ENGINE_LIBRARY} PUBLIC
         YAML_CPP_STATIC_DEFINE  # Forces YAML to be built statically regardless of cmake settings. see yaml-cpp/dll.h
         B3_DEBUG=0
         )
+target_compile_definitions(${ENGINE_LIBRARY} PRIVATE
+        ENGINE_BUILD
+)
 
 if (${ENABLE_PROFILER})
     message(STATUS "Profiling Enabled")
@@ -277,6 +280,8 @@ add_executable(${PROJECT_NAME}
         src/game/MyTestActor.cpp src/game/MyTestActor.h
         src/game/Rotator.cpp include/game/Rotator.h
         src/game/Spammer.cpp src/game/Spammer.h
+        src/game/ExampleScene.cpp
+        src/game/ExampleScene.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

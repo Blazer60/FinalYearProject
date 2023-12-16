@@ -1,6 +1,7 @@
 #include <Engine.h>
 
 #include "GameInput.h"
+#include "game/ExampleScene.h"
 #include "game/Initialiser.h"
 
 int main()
@@ -12,6 +13,9 @@ int main()
     engine::eventHandler->linkUserEvents(input);
 
     initComponentsForEngine();
+
+    core.setScene(std::make_unique<ExampleScene>());
+
     core.run();
     
     return 0;
