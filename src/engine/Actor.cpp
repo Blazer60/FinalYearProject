@@ -25,12 +25,26 @@ namespace engine
 
     void Actor::awake()
     {
-        onAwake();
+        try
+        {
+            onAwake();
+        }
+        catch (InvalidReference &e)
+        {
+            ERROR("OnAwake() error in actor %: %", getName(), e.what());
+        }
     }
 
     void Actor::begin()
     {
-        onBegin();
+        try
+        {
+            onBegin();
+        }
+        catch (InvalidReference &e)
+        {
+            ERROR("OnBegin() error in actor %: %", getName(), e.what());
+        }
     }
     
     
@@ -106,7 +120,16 @@ namespace engine
     {
         updateTransform();
         if (core->isInPlayMode())
-            onUpdate();
+        {
+            try
+            {
+                onUpdate();
+            }
+            catch (InvalidReference &e)
+            {
+                ERROR("OnUpdate() error in actor %: %", getName(), e.what());
+            }
+        }
         updateComponents();
 
         if (!mChildrenToRemove.empty())
@@ -128,7 +151,14 @@ namespace engine
         Actor* otherActor, Component* myComponent,
         Component* otherComponent, const HitInfo& hitInfo)
     {
-        onCollisionBegin(otherActor, myComponent, otherComponent, hitInfo);
+        try
+        {
+            onCollisionBegin(otherActor, myComponent, otherComponent, hitInfo);
+        }
+        catch (InvalidReference &e)
+        {
+            ERROR("OnCollisionBegin() error in actor %: %", getName(), e.what());
+        }
 
         for (Ref<Component> component : mComponents)
             component->collisionBegin(otherActor, myComponent, otherComponent, hitInfo);
@@ -136,7 +166,14 @@ namespace engine
 
     void Actor::triggerBegin(Actor* otherActor, Component* myComponent, Component* otherComponent)
     {
-        onTriggerBegin(otherActor, myComponent, otherComponent);
+        try
+        {
+            onTriggerBegin(otherActor, myComponent, otherComponent);
+        }
+        catch (InvalidReference &e)
+        {
+            ERROR("OnTriggerBegin() error in actor %: %", getName(), e.what());
+        }
 
         for (Ref<Component> component : mComponents)
             component->triggerBegin(otherActor, myComponent, otherComponent);

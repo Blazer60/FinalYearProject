@@ -62,7 +62,7 @@ namespace engine
     {
         if (mActor)
             return mActor->getTransform();
-        WARN("The serializeComponent has not been attached to an serializeActor yet.");
+        WARN("The component has not been attached to an actor yet.");
         return glm::mat4(1.f);
     }
     
@@ -74,17 +74,38 @@ namespace engine
     void Component::collisionBegin(
         Actor* otherActor, Component* myComponent, Component* otherComponent, const HitInfo& hitInfo)
     {
-        onCollisionBegin(otherActor, myComponent, otherComponent, hitInfo);
+        try
+        {
+            onCollisionBegin(otherActor, myComponent, otherComponent, hitInfo);
+        }
+        catch (InvalidReference &e)
+        {
+            ERROR("OnCollisionBegin() error in one of %'s components: %", mActor->getName(), e.what());
+        }
     }
 
     void Component::triggerBegin(Actor* otherActor, Component* myComponent, Component* otherComponent)
     {
-        onTriggerBegin(otherActor, myComponent, otherComponent);
+        try
+        {
+            onTriggerBegin(otherActor, myComponent, otherComponent);
+        }
+        catch (InvalidReference &e)
+        {
+            ERROR("OnTriggerBegin() error in one of %'s components: %", mActor->getName(), e.what());
+        }
     }
 
     void Component::preRender()
     {
-        onPreRender();
+        try
+        {
+            onPreRender();
+        }
+        catch (InvalidReference &e)
+        {
+            ERROR("OnPreRender() error in one of %'s components: %", mActor->getName(), e.what());
+        }
     }
     
     void Component::onPreRender()
