@@ -40,9 +40,15 @@ namespace engine
             const std::filesystem::path relativePath = node["MeshPath"].as<std::string>();
             Ref<engine::MeshRenderer> meshRenderer = actor->addComponent(
                 load::meshRenderer<StandardVertex>(file::resourcePath() / relativePath));
+
+            if (!node["Materials"].IsDefined())
+                return;
             
             for (const auto &materialNode : node["Materials"])
             {
+                if (!materialNode["MaterialType"].IsDefined())
+                    continue;
+
                 const auto materialType = materialNode["MaterialType"].as<std::string>();
                 
                 if (materialType == "StandardMaterial")
