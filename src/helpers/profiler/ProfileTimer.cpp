@@ -9,6 +9,7 @@
 #include "Profiler.h"
 
 #include <utility>
+#include <thread>
 
 namespace debug
 {
@@ -31,7 +32,8 @@ namespace debug
         const long long end = std::chrono::time_point_cast<std::chrono::nanoseconds>(endTimePoint).time_since_epoch().count();
         
         mStopped = true;
-        
-        profiler->addResult({ mId, mName, start, end });
+
+        const uint32_t threadId = std::hash<std::thread::id>{}(std::this_thread::get_id());
+        profiler->addResult({ mId, mName, start, end, threadId });
     }
 }

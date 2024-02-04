@@ -27,6 +27,8 @@ namespace engine
         void drawNode(const debug::ProfileNode &node);
         
         float mUpdateRate { 0.01f };
+        bool mIsRecordingSnapshot { false };
+        const std::string mFilePath { "results.json" };
     };
 }
 

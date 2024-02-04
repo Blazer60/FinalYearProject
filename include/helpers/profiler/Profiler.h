@@ -1,5 +1,5 @@
 /**
- * @file ProfileResults.h
+ * @file Profiler.h
  * @author Ryan Purse
  * @date 07/10/2023
  */
@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <fstream>
 #include "Pch.h"
 
 
@@ -18,8 +19,9 @@ namespace debug
     {
         uint64_t id;
         std::string_view name;
-        long long startMicroSeconds;
-        long long stopMicroSeconds;
+        long long startNanoSeconds;
+        long long stopNanoSeconds;
+        uint32_t threadId;
     };
     
     struct ProfileNode
@@ -41,6 +43,7 @@ namespace debug
 class Profiler
 {
 public:
+    ~Profiler();
     void addResult(const debug::ProfileResult &result);
     uint64_t getNewId();
     void updateAndClear();
@@ -50,15 +53,23 @@ public:
     void setUpdateRate(float updateRate);
     [[nodiscard]] const std::vector<debug::ProfileNode> &getTree() const;
 
-protected:
-    void createTree();
+    void beginSnapshot(const std::string &filePath);
+    void endSnapshot();
 
 protected:
-    std::vector<debug::ProfileResult> mResults;
-    std::vector<debug::ProfileNode> mTree;
+    void writeProfile(const debug::ProfileResult &result);
+    void createTree();
+
+    std::vector<debug::ProfileResult> mResults { };
+    std::vector<debug::ProfileResult> mSnapshotResults { };
+    std::vector<debug::ProfileNode> mTree { };
+    std::ofstream mOutputSteam;
     float mUpdateRate { 0.1f };
     float mTimer { 0.f };
     bool mIsFrozen { false };
+    uint64_t mProfileCount { 0 };
+    std::string mSnapshotFilePath;
+    bool mIsRecordingSnapshot { false };
     
     uint64_t mId { 0 };
 };

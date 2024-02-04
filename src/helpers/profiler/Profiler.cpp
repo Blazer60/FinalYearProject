@@ -14,14 +14,14 @@ namespace debug
 {
     bool ProfileNode::tryInsert(ProfileResult result)
     {
-        if (result.startMicroSeconds >= startNanoSeconds && result.stopMicroSeconds <= stopNanoSeconds)
+        if (result.startNanoSeconds >= startNanoSeconds && result.stopNanoSeconds <= stopNanoSeconds)
         {
             bool isInserted = false;
             for (ProfileNode &child : children)
                 isInserted |= child.tryInsert(result);
             
             if (!isInserted)
-                children.push_back({ result.id, result.name, result.startMicroSeconds, result.stopMicroSeconds, { } });
+                children.push_back({ result.id, result.name, result.startNanoSeconds, result.stopNanoSeconds, { } });
             
             return true;
         }
@@ -29,8 +29,16 @@ namespace debug
     }
 }
 
+Profiler::~Profiler()
+{
+    if (mIsRecordingSnapshot)
+        endSnapshot();
+}
+
 void Profiler::addResult(const debug::ProfileResult &result)
 {
+    if (mIsRecordingSnapshot)
+        mSnapshotResults.push_back(result);
     mResults.push_back(result);
 }
 
@@ -47,7 +55,7 @@ void Profiler::createTree()
             isInserted |= node.tryInsert(item);
         
         if (!isInserted)
-            mTree.push_back({ item.id, item.name, item.startMicroSeconds, item.stopMicroSeconds, {} });
+            mTree.push_back({ item.id, item.name, item.startNanoSeconds, item.stopNanoSeconds, {} });
     }
 }
 
@@ -91,6 +99,52 @@ void Profiler::setUpdateRate(float updateRate)
 const std::vector<debug::ProfileNode> &Profiler::getTree() const
 {
     return mTree;
+}
+
+void Profiler::beginSnapshot(const std::string& filePath)
+{
+    mSnapshotFilePath = filePath;
+    mIsRecordingSnapshot = true;
+    mProfileCount = 0;
+}
+
+void Profiler::endSnapshot()
+{
+    mOutputSteam.open(mSnapshotFilePath);
+    mOutputSteam << "{\"otherData\": {},\"traceEvents\":[";
+
+    for (const auto & snapshot : mSnapshotResults)
+        writeProfile(snapshot);
+
+    mOutputSteam << "]}";
+    mOutputSteam.flush();
+    mOutputSteam.close();
+
+    mSnapshotResults.clear();
+    mIsRecordingSnapshot = false;
+}
+
+void Profiler::writeProfile(const debug::ProfileResult& result)
+{
+    if (mProfileCount++ > 0)
+        mOutputSteam << ",";
+
+    std::string name = std::string(result.name);
+    std::replace(name.begin(), name.end(), '"', '\'');
+
+    mOutputSteam << "{";
+    mOutputSteam << "\"cat\":\"function\",";
+    const auto time = static_cast<long long>((result.stopNanoSeconds - result.startNanoSeconds) * 0.001);
+    mOutputSteam << "\"dur\":" << time << ",";
+    mOutputSteam << "\"name\":\"" << name << "\",";
+    mOutputSteam << "\"ph\":\"X\",";
+    mOutputSteam << "\"pid\":0,";
+    mOutputSteam << "\"tid\":" << result.threadId << ",";
+    const auto startTime = static_cast<long long>(result.startNanoSeconds * 0.001);
+    mOutputSteam << "\"ts\":" << startTime;
+    mOutputSteam << "}";
+
+    mOutputSteam.flush();
 }
 
 uint64_t Profiler::getNewId()

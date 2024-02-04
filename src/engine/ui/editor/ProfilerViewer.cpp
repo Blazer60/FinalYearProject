@@ -20,6 +20,24 @@ namespace engine
 #ifndef ENABLE_PROFILING
             ImGui::TextColored(ImVec4(1.f, 1.f, 0.f, 1.f), "Profiling has been disabled in the build settings.");
 #else
+            if (mIsRecordingSnapshot)
+            {
+                if (ImGui::Button("End Snapshot"))
+                {
+                    mIsRecordingSnapshot = false;
+                    profiler->endSnapshot();
+                    MESSAGE("Snapshot saved to: %", mFilePath);
+                }
+            }
+            else
+            {
+                if (ImGui::Button("Begin Snapshot"))
+                {
+                    mIsRecordingSnapshot = true;
+                    profiler->beginSnapshot(mFilePath);
+                }
+            }
+
             bool isFrozen = profiler->isFrozen();
             ImGui::Checkbox("Freeze", &isFrozen);
             profiler->setFreeze(isFrozen);
