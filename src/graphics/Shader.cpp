@@ -99,34 +99,34 @@ int Shader::getLocation(const std::string &name)
     return location;
 }
 
-void Shader::set(const std::string &uniformName, int value)
+void Shader::set(const std::string &uniformName, const int value)
 {
-    glUniform1i(getLocation(uniformName), value);
+    glProgramUniform1i(mId, getLocation(uniformName), value);
 }
 
-void Shader::set(const std::string &uniformName, float value)
+void Shader::set(const std::string &uniformName, const float value)
 {
-    glUniform1f(getLocation(uniformName), value);
+    glProgramUniform1f(mId, getLocation(uniformName), value);
 }
 
 void Shader::set(const std::string &uniformName, const glm::mat4 &value)
 {
-    glUniformMatrix4fv(getLocation(uniformName), 1, GL_FALSE, glm::value_ptr(value));
+    glProgramUniformMatrix4fv(mId, getLocation(uniformName), 1, GL_FALSE, glm::value_ptr(value));
 }
 
 void Shader::set(const std::string &uniformName, const glm::vec4 &value)
 {
-    glUniform4fv(getLocation(uniformName), 1, glm::value_ptr(value));
+    glProgramUniform4fv(mId, getLocation(uniformName), 1, glm::value_ptr(value));
 }
 
 void Shader::set(const std::string &uniformName, const glm::vec3 &value)
 {
-    glUniform3fv(getLocation(uniformName), 1, glm::value_ptr(value));
+    glProgramUniform3fv(mId, getLocation(uniformName), 1, glm::value_ptr(value));
 }
 
 void Shader::set(const std::string &uniformName, const glm::vec2 &value)
 {
-    glUniform2fv(getLocation(uniformName), 1, glm::value_ptr(value));
+    glProgramUniform2fv(mId, getLocation(uniformName), 1, glm::value_ptr(value));
 }
 
 void Shader::set(const std::string &uniformName, const uint32_t textureId, const int bindPoint)
@@ -135,17 +135,17 @@ void Shader::set(const std::string &uniformName, const uint32_t textureId, const
     set(uniformName, bindPoint);
 }
 
-void Shader::set(const std::string &uniformName, const float *values, int count)
+void Shader::set(const std::string &uniformName, const float *values, const int count)
 {
-    glUniform1fv(getLocation(uniformName), count, values);
+    glProgramUniform1fv(mId, getLocation(uniformName), count, values);
 }
 
-void Shader::set(const std::string &uniformName, const glm::mat4 *values, int count)
+void Shader::set(const std::string &uniformName, const glm::mat4 *values, const int count)
 {
-    glUniformMatrix4fv(getLocation(uniformName), count, GL_FALSE, glm::value_ptr(values[0]));
+    glProgramUniformMatrix4fv(mId, getLocation(uniformName), count, GL_FALSE, glm::value_ptr(values[0]));
 }
 
-void Shader::setDebugName(std::string_view name) const
+void Shader::setDebugName(const std::string_view name) const
 {
     glObjectLabel(GL_PROGRAM, mId, -1, name.data());
 }
