@@ -56,6 +56,8 @@ add_library(${GRAPHICS_LIBRARY} STATIC
         src/graphics/buffers/TextureArrayObject.cpp include/graphics/buffers/TextureArrayObject.h
         src/graphics/buffers/TextureBufferObject.cpp include/graphics/buffers/TextureBufferObject.h
         src/graphics/postProcessing/PostProcessLayer.cpp include/graphics/postProcessing/PostProcessLayer.h
+        src/graphics/shader/ShaderCompilation.cpp
+        src/graphics/shader/ShaderCompilation.h
 )
 
 target_include_directories(${GRAPHICS_LIBRARY} PUBLIC

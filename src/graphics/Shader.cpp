@@ -11,69 +11,32 @@
 #include <fstream>
 #include <sstream>
 
-Shader::Shader(const std::filesystem::path &vertexPath, const std::filesystem::path &fragmentPath)
-    : mDebugName(vertexPath.filename().string() + " | " + fragmentPath.filename().string())
+#include "shader/ShaderCompilation.h"
+
+
+Shader::Shader(const std::initializer_list<std::filesystem::path> paths)
+    : mId(glCreateProgram())
 {
-    mId = glCreateProgram();
-    unsigned int vs = compile(GL_VERTEX_SHADER, vertexPath.string());
-    unsigned int fs = compile(GL_FRAGMENT_SHADER, fragmentPath.string());
-    
-    glAttachShader(mId, vs);
-    glAttachShader(mId, fs);
-    glLinkProgram(mId);
-    glValidateProgram(mId);
-    
-    glDeleteShader(vs);
-    glDeleteShader(fs);
-    
+    if (paths.size() != 0)
+    {
+        mDebugName = std::prev(paths.end())->filename().string();
+        setDebugName(mDebugName);
+    }
+
+    CreateShaderSource(paths);
+}
+
+Shader::Shader(const std::filesystem::path &vertexPath, const std::filesystem::path &fragmentPath)
+    : mDebugName(vertexPath.filename().string() + " | " + fragmentPath.filename().string()), mId(glCreateProgram())
+{
+    CreateShaderSource({ vertexPath, fragmentPath });
     setDebugName(mDebugName);
 }
 
 Shader::~Shader()
 {
-    glDeleteProgram(mId);
-}
-
-unsigned int Shader::compile(unsigned int type, std::string_view path)
-{
-    std::ifstream file(path.data());
-    if (file.bad() || file.fail())
-        LOG_MAJOR("Failed to open file at: " + std::string(path));
-    
-    std::stringstream buffer;
-    std::string line;
-    
-    while (std::getline(file, line))
-        buffer << line << '\n';
-    
-    const std::string data(buffer.str());
-    const char *dataPtr = data.c_str();
-    
-    unsigned int id = glCreateShader(type);
-    glShaderSource(id, 1, &dataPtr, nullptr);
-    glCompileShader(id);
-    
-    int result;
-    glGetShaderiv(id, GL_COMPILE_STATUS, &result);  // OpenGL fails silently, so we need to check it ourselves.
-    if (GL_TRUE == result)
-        return id;
-    
-    const std::unordered_map<unsigned int, std::string> shaderTypes {
-        { GL_VERTEX_SHADER, "Vertex" },
-        { GL_FRAGMENT_SHADER, "Fragment" },
-        { GL_GEOMETRY_SHADER, "Geometry" },
-        { GL_COMPUTE_SHADER, "Fragment" },
-    };
-    
-    // Failed to compile shader.
-    int length;
-    glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-    char *message = (char*)alloca(length * sizeof(char));  // No point doing a heap allocation.
-    glGetShaderInfoLog(id, length, &length, message);
-    glDeleteShader(id);
-    
-    LOG_MAJOR("Failed to compile " + shaderTypes.at(type) + " shader:\n" + message);
-    return 0;
+    if (mId != 0)
+        glDeleteProgram(mId);
 }
 
 void Shader::bind() const
@@ -91,7 +54,7 @@ int Shader::getLocation(const std::string &name)
     if (mCache.count(name) > 0)
         return mCache.at(name);
     
-    int location = glGetUniformLocation(mId, name.data());
+    const int location = glGetUniformLocation(mId, name.data());
     if (location == -1)
         WARN("Uniform '%' does not exist! (%)", name, mDebugName);
     
@@ -148,4 +111,37 @@ void Shader::set(const std::string &uniformName, const glm::mat4 *values, const 
 void Shader::setDebugName(const std::string_view name) const
 {
     glObjectLabel(GL_PROGRAM, mId, -1, name.data());
+}
+
+void Shader::validateProgram() const
+{
+    glValidateProgram(mId);
+    int result { 0 };
+    if (glGetProgramiv(mId, GL_VALIDATE_STATUS, &result); result == GL_TRUE)
+        return;
+
+    // Program stage failed.
+    int length { 0 };
+    glGetProgramiv(mId, GL_INFO_LOG_LENGTH, &length);
+    char *message = static_cast<char*>(alloca(length * sizeof(char)));
+    glGetProgramInfoLog(mId, length, &length, message);
+    glDeleteProgram(mId);
+
+    ERROR("Failed to validate program (%): \n%\n(Make sure that samplers have layout(binding = x) in front of them.)", mDebugName, message);
+}
+
+void Shader::CreateShaderSource(const std::initializer_list<std::filesystem::path> paths) const
+{
+    std::vector<unsigned int> shaderIds;
+    for (const std::filesystem::path &path : paths)
+        shaderIds.push_back(graphics::compileShader(path));
+
+    for (const unsigned int shaderId : shaderIds)
+        glAttachShader(mId, shaderId);
+
+    glLinkProgram(mId);
+    validateProgram();
+
+    for (const unsigned int shaderId : shaderIds)
+        glDeleteShader(shaderId);
 }

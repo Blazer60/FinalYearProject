@@ -18,6 +18,7 @@
 class Shader
 {
 public:
+    Shader(std::initializer_list<std::filesystem::path> paths);
     Shader(const std::filesystem::path &vertexPath, const std::filesystem::path &fragmentPath);
     virtual ~Shader();
     
@@ -86,14 +87,17 @@ public:
     
     void setDebugName(std::string_view name) const;
 
+    void validateProgram() const;
+
 protected:
-    std::string mDebugName { "" };
+
+    std::string mDebugName;
     unsigned int mId { 0 };
     std::unordered_map<std::string , int> mCache;
     
     int getLocation(const std::string &name);
-    
-    static unsigned int compile(unsigned int type, std::string_view path);
+
+    void CreateShaderSource(std::initializer_list<std::filesystem::path> paths) const;
 };
 
 

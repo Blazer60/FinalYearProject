@@ -1,13 +1,15 @@
-#version 460
+#version 460 core
+
+#include "Brdf.glsl"
 
 in vec2 v_uv;
 
-uniform sampler2D u_albedo_texture;
-uniform sampler2D u_position_texture;
-uniform sampler2D u_normal_texture;
-uniform sampler2DArray u_shadow_map_texture;
-uniform sampler2D u_roughness_texture;
-uniform sampler2D u_metallic_texture;
+layout(binding = 0) uniform sampler2D u_albedo_texture;
+layout(binding = 1) uniform sampler2D u_position_texture;
+layout(binding = 2) uniform sampler2D u_normal_texture;
+layout(binding = 3) uniform sampler2DArray u_shadow_map_texture;
+layout(binding = 4) uniform sampler2D u_roughness_texture;
+layout(binding = 5) uniform sampler2D u_metallic_texture;
 
 uniform vec3 u_light_direction;
 uniform vec3 u_light_intensity;
@@ -24,8 +26,6 @@ uniform vec2 u_bias;
 uniform float u_exposure;
 
 out layout(location = 0) vec3 o_irradiance;
-
-const float PI = 3.14159265359f;
 
 float sample_shadow_map(vec2 uv, float depth, float bias, int layer)
 {
@@ -65,37 +65,6 @@ float calculate_shadow_map(vec3 position, vec3 normal)
     return 0.f;
 }
 
-// Unreal's fresnel function using spherical gaussian approximation.
-vec3 fresnelSchlick(float vDotH, vec3 f0)
-{
-    return f0 + (1.f - f0) * pow(2.f, (-5.55473f * vDotH - 6.98316f) * vDotH);
-}
-
-// Unreal's and Disney's distribution function.
-float distributionGgx(float nDotH, float roughness)
-{
-    const float alpha = roughness * roughness;
-    const float alpha2 = alpha * alpha;
-    const float nDotH2 = nDotH * nDotH;
-    const float denominator = nDotH2 * (alpha2 - 1.f) + 1.f;
-
-    return alpha2 / (PI * denominator * denominator);
-}
-
-// Unreal's geometry schlick function.
-float geometrySchlick(float vDotN, float k)
-{
-    return vDotN / (vDotN * (1.f - k) + k);
-}
-
-// Unreal's geometry smith function. Note the remapping of roughness before squaring
-// should only be done on analytical lights. Remap function: (R + 1) / 2
-float geometrySmith(float vDotN, float lDotN, float roughness)
-{
-    const float r = roughness + 1.f;
-    const float k = r * r / 8.f;
-    return geometrySchlick(vDotN, k) * geometrySchlick(lDotN, k);
-}
 
 void main()
 {

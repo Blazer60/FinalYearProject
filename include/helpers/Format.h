@@ -47,6 +47,9 @@ namespace format
     
     template<typename TIterator>
     std::string value(const TIterator &start, const TIterator &end);
+
+    template<typename TIterator, typename TPred>
+    std::string value(const TIterator &start, const TIterator &end, TPred pred);
     
     template<typename T>
     std::string type(const T &value);
@@ -126,13 +129,21 @@ namespace format
     template<typename TIterator>
     std::string value(const TIterator &start, const TIterator &end)
     {
+        return value(start, end, [](const auto &elem){ return value(elem); });
+    }
+
+    template<typename TIterator, typename TPred>
+    std::string value(const TIterator& start, const TIterator& end, TPred pred)
+    {
+#ifdef _MSC_VER
         std::_Adl_verify_range(start, end);
+#endif
 
         std::string output = "[";
         TIterator element = start;
         while (true)
         {
-            output += value(*element);
+            output += pred(*element);
             ++element;
             if (element != end)
                 output += ", ";
@@ -143,7 +154,7 @@ namespace format
         output += "]";
         return output;
     }
-    
+
     template<typename T>
     std::string type(const T &value)
     {

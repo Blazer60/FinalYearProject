@@ -211,7 +211,7 @@ protected:
     std::unique_ptr<FramebufferObject> mDebugFramebuffer;
 
     std::unique_ptr<Shader> mDeferredLightShader;
-    std::unique_ptr<Shader> mDirectionalLightShader;
+    Shader mDirectionalLightShader;
     std::unique_ptr<Shader> mPointLightShader;
     std::unique_ptr<Shader> mSpotlightShader;
     std::unique_ptr<Shader> mIblShader;

@@ -2,11 +2,11 @@
 
 in vec2 v_uv;
 
-uniform sampler2D u_irradiance_texture;
-uniform sampler2D u_emissive_texture;
-uniform sampler2D u_depth_texture;
-uniform samplerCube u_skybox_texture;
-uniform sampler2D u_reflection_texture;
+layout(binding = 0) uniform sampler2D u_irradiance_texture;
+layout(binding = 1) uniform sampler2D u_emissive_texture;
+layout(binding = 2) uniform sampler2D u_depth_texture;
+layout(binding = 3) uniform samplerCube u_skybox_texture;
+layout(binding = 4) uniform sampler2D u_reflection_texture;
 
 uniform mat4 u_inverse_vp_matrix;
 uniform float u_luminance_multiplier;

@@ -2,12 +2,12 @@
 
 in vec2 v_uv;
 
-uniform sampler2D u_albedo_texture;
-uniform sampler2D u_position_texture;
-uniform sampler2D u_normal_texture;
-uniform sampler2D u_roughness_texture;
-uniform sampler2D u_metallic_texture;
-uniform samplerCube u_shadow_map_texture;
+layout(binding = 0) uniform sampler2D u_albedo_texture;
+layout(binding = 1) uniform sampler2D u_position_texture;
+layout(binding = 2) uniform sampler2D u_normal_texture;
+layout(binding = 3) uniform sampler2D u_roughness_texture;
+layout(binding = 4) uniform sampler2D u_metallic_texture;
+layout(binding = 5) uniform samplerCube u_shadow_map_texture;
 
 uniform vec3 u_light_position;
 uniform vec3 u_light_intensity;

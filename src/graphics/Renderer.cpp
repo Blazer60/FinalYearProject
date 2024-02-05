@@ -18,7 +18,8 @@ Renderer::Renderer() :
     mCurrentRenderBufferSize(window::bufferSize()),
     mFullscreenTriangle(primitives::fullscreenTriangle()),
     mUnitSphere(primitives::invertedSphere()),
-    mLine(primitives::line())
+    mLine(primitives::line()),
+    mDirectionalLightShader { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/DirectionalLight.frag" }
 {
     // Blending texture data / enabling lerping.
     glEnable(GL_BLEND);
@@ -30,7 +31,8 @@ Renderer::Renderer() :
     graphics::pushDebugGroup("Setup");
 
     auto fsTriShader = file::shaderPath() / "FullscreenTriangle.vert";
-    mDirectionalLightShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "lighting/DirectionalLight.frag");
+    // mDirectionalLightShader = std::make_unique<Shader>({ fsTriShader, file::shaderPath() / "lighting/DirectionalLight.frag" });
+    mDirectionalLightShader.setDebugName("Directional Lighting Shader");
     mPointLightShader = std::make_unique<Shader>(file::shaderPath() / "lighting/PointLight.vert", file::shaderPath() / "lighting/PointLight.frag");
     mSpotlightShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "lighting/SpotLight.frag");
     mIblShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "lighting/IBL.frag");
@@ -310,31 +312,31 @@ void Renderer::render()
         mLightFramebuffer->clear();
         const glm::vec3 cameraPosition = glm::inverse(camera.viewMatrix) * glm::vec4(glm::vec3(0.f), 1.f);
         
-        mDirectionalLightShader->bind();
+        mDirectionalLightShader.bind();
 
-        mDirectionalLightShader->set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 0);
-        mDirectionalLightShader->set("u_position_texture", mPositionTextureBuffer->getId(), 1);
-        mDirectionalLightShader->set("u_normal_texture", mNormalTextureBuffer->getId(), 2);
-        mDirectionalLightShader->set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 3);
-        mDirectionalLightShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
+        mDirectionalLightShader.set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 0);
+        mDirectionalLightShader.set("u_position_texture", mPositionTextureBuffer->getId(), 1);
+        mDirectionalLightShader.set("u_normal_texture", mNormalTextureBuffer->getId(), 2);
+        mDirectionalLightShader.set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 3);
+        mDirectionalLightShader.set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
 
-        mDirectionalLightShader->set("u_camera_position_ws", cameraPosition);
-        mDirectionalLightShader->set("u_view_matrix", camera.viewMatrix);
-        mDirectionalLightShader->set("u_exposure", exposure);
+        mDirectionalLightShader.set("u_camera_position_ws", cameraPosition);
+        mDirectionalLightShader.set("u_view_matrix", camera.viewMatrix);
+        mDirectionalLightShader.set("u_exposure", exposure);
 
         glBindVertexArray(mFullscreenTriangle.vao());
 
         for (const graphics::DirectionalLight &directionalLight : mDirectionalLightQueue)
         {
-            mDirectionalLightShader->set("u_cascade_distances", directionalLight.cascadeDepths.data(), static_cast<int>(directionalLight.cascadeDepths.size()));
-            mDirectionalLightShader->set("u_cascade_count", static_cast<int>(directionalLight.cascadeDepths.size()));
+            mDirectionalLightShader.set("u_cascade_distances", directionalLight.cascadeDepths.data(), static_cast<int>(directionalLight.cascadeDepths.size()));
+            mDirectionalLightShader.set("u_cascade_count", static_cast<int>(directionalLight.cascadeDepths.size()));
             
-            mDirectionalLightShader->set("u_bias", directionalLight.shadowBias);
+            mDirectionalLightShader.set("u_bias", directionalLight.shadowBias);
             
-            mDirectionalLightShader->set("u_light_direction", directionalLight.direction);
-            mDirectionalLightShader->set("u_light_intensity", directionalLight.colourIntensity);
-            mDirectionalLightShader->set("u_light_vp_matrix", directionalLight.vpMatrices.data(), static_cast<int>(directionalLight.vpMatrices.size()));
-            mDirectionalLightShader->set("u_shadow_map_texture", directionalLight.shadowMap->getId(), 5);
+            mDirectionalLightShader.set("u_light_direction", directionalLight.direction);
+            mDirectionalLightShader.set("u_light_intensity", directionalLight.colourIntensity);
+            mDirectionalLightShader.set("u_light_vp_matrix", directionalLight.vpMatrices.data(), static_cast<int>(directionalLight.vpMatrices.size()));
+            mDirectionalLightShader.set("u_shadow_map_texture", directionalLight.shadowMap->getId(), 5);
 
             glDrawElements(GL_TRIANGLES, mFullscreenTriangle.indicesCount(), GL_UNSIGNED_INT, nullptr);
         }

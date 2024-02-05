@@ -68,7 +68,7 @@ namespace file
         MESSAGE("cwd: %", currentWorkingDirectory.string());
         for (const auto &relativePaths : searchPaths)
         {
-            auto path = currentWorkingDirectory / relativePaths / "resources";
+            auto path = (currentWorkingDirectory / relativePaths / "resources").lexically_normal();
             MESSAGE("Trying Path: %", path.string());
             if (exists(path))
             {

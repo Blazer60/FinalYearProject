@@ -2,18 +2,18 @@
 
 in vec2 v_uv;
 
-uniform sampler2D u_albedoTexture;
-uniform sampler2D u_positionTexture;
-uniform sampler2D u_normalTexture;
-uniform sampler2D u_roughnessTexture;
-uniform sampler2D u_metallicTexture;
-uniform sampler2D u_reflectionDataTexture;
-uniform sampler2D u_colourTexture;
-uniform sampler2D u_depthTexture;
-uniform samplerCube u_irradianceTexture;
-uniform samplerCube u_pre_filterTexture;
-uniform sampler2D u_brdfLutTexture;
-uniform sampler2D u_emissiveTexture;
+layout(binding =  0) uniform sampler2D u_albedoTexture;
+layout(binding =  1) uniform sampler2D u_positionTexture;
+layout(binding =  2) uniform sampler2D u_normalTexture;
+layout(binding =  3) uniform sampler2D u_roughnessTexture;
+layout(binding =  4) uniform sampler2D u_metallicTexture;
+layout(binding =  5) uniform sampler2D u_reflectionDataTexture;
+layout(binding =  6) uniform sampler2D u_colourTexture;
+layout(binding =  7) uniform sampler2D u_depthTexture;
+layout(binding =  8) uniform samplerCube u_irradianceTexture;
+layout(binding =  9) uniform samplerCube u_pre_filterTexture;
+layout(binding = 10) uniform sampler2D u_brdfLutTexture;
+layout(binding = 11) uniform sampler2D u_emissiveTexture;
 
 uniform vec3 u_cameraPositionWs;
 uniform int u_colour_max_lod;
