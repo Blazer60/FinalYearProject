@@ -108,6 +108,12 @@ void Shader::set(const std::string &uniformName, const glm::mat4 *values, const 
     glProgramUniformMatrix4fv(mId, getLocation(uniformName), count, GL_FALSE, glm::value_ptr(values[0]));
 }
 
+void Shader::block(const std::string& blockName, const unsigned int blockBindPoint)
+{
+    const auto blockIndex = glGetUniformBlockIndex(mId, blockName.c_str());
+    glUniformBlockBinding(mId, blockIndex, blockBindPoint);
+}
+
 void Shader::setDebugName(const std::string_view name) const
 {
     glObjectLabel(GL_PROGRAM, mId, -1, name.data());
@@ -127,7 +133,7 @@ void Shader::validateProgram() const
     glGetProgramInfoLog(mId, length, &length, message);
     glDeleteProgram(mId);
 
-    ERROR("Failed to validate program (%): \n%\n(Make sure that samplers have layout(binding = x) in front of them.)", mDebugName, message);
+    CRASH("Failed to validate program (%): \n%\n(Make sure that samplers have layout(binding = x) in front of them.)", mDebugName, message);
 }
 
 void Shader::CreateShaderSource(const std::initializer_list<std::filesystem::path> paths) const

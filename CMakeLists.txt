@@ -58,6 +58,8 @@ add_library(${GRAPHICS_LIBRARY} STATIC
         src/graphics/postProcessing/PostProcessLayer.cpp include/graphics/postProcessing/PostProcessLayer.h
         src/graphics/shader/ShaderCompilation.cpp
         src/graphics/shader/ShaderCompilation.h
+        include/graphics/buffers/UniformBufferObject.h
+        resources/shaders/interfaces/CameraBlock.h
 )
 
 target_include_directories(${GRAPHICS_LIBRARY} PUBLIC
@@ -69,6 +71,8 @@ target_include_directories(${GRAPHICS_LIBRARY} PUBLIC
         include/helpers
         include/helpers/profiler
         include/helpers/logger
+
+        resources/shaders/interfaces
 
         # Vendor Files
         vendor/glm/glm vendor/glew/include/GL
@@ -187,6 +191,8 @@ target_compile_definitions(${ENGINE_LIBRARY} PUBLIC
 target_compile_definitions(${ENGINE_LIBRARY} PRIVATE
         ENGINE_BUILD
 )
+
+target_compile_definitions(${GRAPHICS_LIBRARY} PUBLIC GRAPHICS_INTERFACE)
 
 if (${ENABLE_PROFILER})
     message(STATUS "Profiling Enabled")

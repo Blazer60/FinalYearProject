@@ -75,7 +75,7 @@ namespace debug
         if ((sources & OutputSourceFlag_Queue))
             messages.emplace_back(Message { line, severity, std::string(file), std::string(message) });
     }
-    
+
     void Logger::openglCallBack(
         GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,
         const void *userParam)
@@ -99,7 +99,10 @@ namespace debug
         logToQueue(message, "", -1, level);
         
         if (level >= throwLevel)
+        {
+            std::cout << output;
             throw LogException();
+        }
     }
     
     const std::vector<Message> &Logger::getLogs() const

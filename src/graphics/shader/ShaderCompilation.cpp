@@ -30,27 +30,182 @@ namespace graphics
     unsigned int compileShader(const std::filesystem::path &path)
     {
         const unsigned int shaderType = getGlslType(path);
-        std::list<ShaderData> shaderData;
-        std::deque<std::filesystem::path> disassembledShaders { path };
+        ShaderPreprocessor preprocessor(path);
+        preprocessor.start();
+        preprocessor.orderByInclude();
+        return compileShaderSource(shaderType, preprocessor.getSources());
+    }
 
-        while (!disassembledShaders.empty())
-        {
-            const std::filesystem::path currentShader = disassembledShaders.front();
-            disassembledShaders.pop_front();
+    std::vector<std::string> tokenise(const std::string& str, const char delim)
+    {
+        std::vector<std::string> out;
+        auto startIt = str.begin();
+        auto endIt = std::next(startIt);
 
-            const auto data = passShader(currentShader);
-            shaderData.push_front(data);
-            for (const auto &includePath : data.includePaths)
+        const auto addIfNonZeroLength = [&] {
+            if (std::distance(startIt, endIt) > 1)
             {
-                const auto it = std::find_if(shaderData.begin(), shaderData.end(), [&includePath](const ShaderData &lhs) { return lhs.path == includePath; });
-                if (it == shaderData.end())
-                    disassembledShaders.push_back(includePath);
-                else
-                    shaderData.splice(shaderData.begin(), shaderData, it, std::next(it));
+                out.emplace_back(++startIt, endIt);
+                startIt = endIt;
+            }
+        };
+
+        while (endIt != str.end())
+        {
+            if (*endIt == delim)
+                addIfNonZeroLength();
+            ++endIt;
+        }
+        addIfNonZeroLength();
+
+        return out;
+    }
+
+    ShaderPreprocessor::ShaderPreprocessor(const std::filesystem::path& path)
+        : mInvokingPath(path)
+    {
+    }
+
+    void ShaderPreprocessor::start()
+    {
+        walk(mInvokingPath);
+    }
+
+    void ShaderPreprocessor::orderByInclude()
+    {
+        std::set<ShaderData*> sorted;
+        std::set<ShaderData*> toSort { &*mInformation.begin() };
+        while (!toSort.empty())
+        {
+            const auto currentIt = toSort.begin();
+            const ShaderData &currentShader = **currentIt;
+            sorted.emplace(*currentIt);
+            toSort.erase(currentIt);
+
+            for (const auto &includePath : currentShader.includePaths)
+            {
+                const auto it = std::find_if(mInformation.begin(), mInformation.end(), [&includePath](const ShaderData &lhs) { return lhs.path == includePath; });
+                mInformation.splice(mInformation.begin(), mInformation, it, std::next(it));
+                if (sorted.count(&*it) == 0)
+                    toSort.emplace(&*it);
             }
         }
+    }
 
-        return compileShaderSource(shaderType, shaderData);
+    void ShaderPreprocessor::preprocessInclude(std::string token, ShaderData& shaderData)
+    {
+        if (!shaderData.evaluationStack.top())
+            return;
+
+        if (token.empty() || token.size() < 2)
+            crash(format::string("Expected a path after #include on line %", shaderData.lineCount));
+        if (*token.begin() != '"' || *(std::prev(token.end())) != '"')
+            crash(format::string("% must be surrounded by \"\" to be evaluated on line %.", token, shaderData.lineCount));
+
+        const std::string relativePath(std::next(token.begin()), std::prev(token.end()));
+        const std::filesystem::path absolutePath = absolute(shaderData.path.parent_path() / relativePath).lexically_normal();
+        // todo: What should we do if the user trys to include a path twice?
+        shaderData.includePaths.push_back(absolutePath);
+
+        walk(absolutePath);
+        shaderData.sourceBuffer << "#line " << shaderData.lineCount << "\n";
+        mCurrentPath = shaderData.path;
+    }
+
+    void ShaderPreprocessor::preprocessIfdef(const std::string& token, ShaderData& shaderData)
+    {
+        shaderData.evaluationStack.emplace(mDefinitions[token] != 0 && shaderData.evaluationStack.top());
+        shaderData.sourceBuffer << "#ifdef " << token << "\n";
+    }
+
+    void ShaderPreprocessor::preprocessEndif(ShaderData& shaderData)
+    {
+        shaderData.evaluationStack.pop();
+        shaderData.sourceBuffer << "#endif\n";
+    }
+
+    void ShaderPreprocessor::preprocessElifdef(const std::string &token, ShaderData& shaderData)
+    {
+        const bool top = shaderData.evaluationStack.top();
+        shaderData.evaluationStack.pop();
+        shaderData.evaluationStack.emplace(mDefinitions[token] != 0 && !top && shaderData.evaluationStack.top());
+        shaderData.sourceBuffer << "#elifdef " << token << "\n";
+    }
+
+    void ShaderPreprocessor::preprocessDelete(ShaderData& shaderData)
+    {
+        shaderData.sourceBuffer << "#line " << shaderData.lineCount << "\n";
+    }
+
+    void ShaderPreprocessor::preprocessDefine(const std::vector<std::string>& tokens, ShaderData &shaderData, const std::string &line)
+    {
+        if (tokens.size() == 2)
+            mDefinitions[tokens[1]] = 1;
+        else
+            mDefinitions[tokens[1]] = std::stoi(tokens[2]);
+        shaderData.sourceBuffer << line << "\n";
+    }
+
+    void ShaderPreprocessor::preprocessElse(ShaderData& shaderData)
+    {
+        const bool top = shaderData.evaluationStack.top();
+        shaderData.evaluationStack.pop();
+        shaderData.evaluationStack.emplace(!top && shaderData.evaluationStack.top());
+        shaderData.sourceBuffer << "#else\n";
+    }
+
+
+    void ShaderPreprocessor::walk(const std::filesystem::path& path)
+    {
+        if (mAllPaths.count(path) > 0)  // todo: How do we also crash on a cyclic dependancy?
+            return;  // We've already processed this file.
+
+        std::ifstream file(path);
+        if (file.bad() || file.fail())
+            crash(format::string("Could not find file: %", path));
+
+        mCurrentPath = path;
+
+        std::string line;
+        ShaderData shaderData;
+        shaderData.evaluationStack.emplace(true);
+        shaderData.path = path;
+        while (std::getline(file, line))
+        {
+            const auto characterOffset = line.find_first_not_of(' ');
+            if (characterOffset != std::string::npos && line[characterOffset] == '#')
+            {
+                std::vector<std::string> tokens = tokenise(line);
+
+                // todo: Refactor this into map[](). Some of these functions should probs be members of the shader data at this point.
+                // todo: pure pass the line too so it doesn't look weird for whoever wrote the shader.
+                const std::string &command = tokens[0];
+                if (command == "include")
+                    preprocessInclude(tokens[1], shaderData);
+                else if (command == "ifdef")
+                    preprocessIfdef(tokens[1], shaderData);
+                else if (command == "elifdef")
+                    preprocessElifdef(tokens[1], shaderData);
+                else if (command == "else")
+                    preprocessElse(shaderData);
+                else if (command == "endif")
+                    preprocessEndif(shaderData);
+                else if (command == "version" || command == "pragma")
+                    preprocessDelete(shaderData);
+                else if (command == "define")
+                    preprocessDefine(tokens, shaderData, line);
+            }
+            else
+                shaderData.sourceBuffer << line << "\n";
+            ++shaderData.lineCount;
+        }
+        mInformation.emplace_front(std::move(shaderData));
+        mAllPaths.emplace(path);
+    }
+
+    void ShaderPreprocessor::crash(const std::string& message) const
+    {
+        CRASH("Failed to compile shader %\nError while preprocessing file %.\n%", mInvokingPath, mCurrentPath, message);
     }
 
     unsigned int compileShaderSource(const unsigned int shaderType, const std::list<ShaderData> &data)
@@ -58,11 +213,12 @@ namespace graphics
         const char *prependShader = "#version 460 core\n";
 
         const unsigned shaderId = glCreateShader(shaderType);
+        std::vector<std::string> sourceStrings;
         std::vector<const char *> dataPtrs;
         dataPtrs.reserve(data.size() + 1);
         dataPtrs.push_back(prependShader);
-        for (const auto & [_, __, source] : data)
-            dataPtrs.push_back(source.c_str());
+        for (const auto &shader : data)
+            dataPtrs.push_back(sourceStrings.emplace_back(shader.sourceBuffer.str()).c_str());
 
         glShaderSource(shaderId, static_cast<int>(dataPtrs.size()), dataPtrs.data(), nullptr);
         glCompileShader(shaderId);
@@ -86,60 +242,10 @@ namespace graphics
         glGetShaderInfoLog(shaderId, length, &length, message);
         glDeleteShader(shaderId);
 
+        // todo: This MUST tell us what shader we're from. We can do this with the line pragma. So I guess there may be a way of retreiving this?
+        // Check the wiki.
         const std::string shaderNames = format::value(data.begin(), data.end(), [](const ShaderData &shaderData) { return shaderData.path.filename().string(); });
-        ERROR("Failed to compile % shader %: \n%", shaderTypes.at(shaderType), shaderNames, message);
+        CRASH("Failed to compile % shader %: \n%", shaderTypes.at(shaderType), shaderNames, message);
         return 0;
-    }
-
-    ShaderData passShader(const std::filesystem::path& path)
-    {
-        std::ifstream file(path);
-        if (file.bad() || file.fail())
-        {
-            ERROR("Failed to open file at: %", path);
-            return { };
-        }
-
-        ShaderData data;
-        std::stringstream buffer;
-        std::string line;
-
-        int lineCount = 2;
-        while (std::getline(file, line))
-        {
-            if (line.find("#include ") != std::string::npos)
-            {
-                auto startOffset = line.find_first_of('"');
-                const auto endOffset = line.find_last_of('"');
-                if (startOffset == std::string::npos || endOffset == std::string::npos)
-                {
-                    ERROR("Invalid #include statement on line %. The path must be surrounded by \"\". \n Path: %", lineCount, path);
-                }
-                else
-                {
-                    startOffset += 1;
-                    const std::string relativePath(&line[startOffset], endOffset - startOffset);
-                    const std::filesystem::path absolutePath = (std::filesystem::absolute(path.parent_path() / relativePath)).lexically_normal();
-                    data.includePaths.push_back(absolutePath);
-                }
-
-                buffer << "#line " << lineCount << '\n';  // So that debug messages are still point to the correct place.
-            }
-            else if (line.find("#version ") != std::string::npos)
-            {
-                buffer << "#line " << lineCount << '\n';  // So that debug messages are still point to the correct place.
-            }
-            else
-            {
-                buffer << line << '\n';
-            }
-
-            ++lineCount;
-        }
-
-        data.path = path;
-        data.source = buffer.str();
-
-        return data;
     }
 }

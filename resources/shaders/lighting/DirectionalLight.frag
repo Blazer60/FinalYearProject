@@ -1,5 +1,6 @@
 #version 460 core
 
+#include "../interfaces/CameraBlock.h"
 #include "Brdf.glsl"
 
 in vec2 v_uv;
@@ -76,7 +77,7 @@ void main()
 
     const vec3 l = normalize(u_light_direction);
     const vec3 n = normalize(texture(u_normal_texture, v_uv).rgb);
-    const vec3 v = normalize(u_camera_position_ws - position);
+    const vec3 v = normalize(camera.position - position);
     const vec3 h = normalize(l + v);
 
     const float vDotN = max(dot(v, n), 0.f);

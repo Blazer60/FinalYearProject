@@ -141,10 +141,6 @@ namespace debug
         void logToConsole(std::string_view message) const;
         void logToFile(std::string_view message) const;
         void logToQueue(std::string_view message, const char file[], int line, Severity severity);
-        
-        template<typename T, typename ...TArgs>
-        std::string formatString(std::string_view form, const T &arg, const TArgs & ...args);
-        
     protected:
         Severity throwLevel { Severity_Major };
         OutputSourceFlag sources { OutputSourceFlag_File | OutputSourceFlag_IoStream | OutputSourceFlag_Queue };
@@ -216,7 +212,7 @@ namespace debug
     template<typename... TArgs>
     void Logger::log(const char file[], int line, Severity severity, std::string_view form, const TArgs &... args)
     {
-        log(file, line, severity, formatString(form, args...));
+        log(file, line, severity, format::string(form, args...));
     }
     
     template<typename T, glm::qualifier Q>
@@ -245,25 +241,6 @@ namespace debug
         output += "]";
         
         log(file, line, severity, output);
-    }
-    
-    template<typename T, typename... TArgs>
-    std::string Logger::formatString(std::string_view form, const T &arg, const TArgs &... args)
-    {
-        std::string output;
-        for (int i = 0; i < form.length(); ++i)
-        {
-            if (form[i] == '%')
-            {
-                output += format::value(arg);
-                if constexpr (sizeof...(args) != 0)  // The last argument will be used if there are too many %.
-                    return output + formatString(std::string_view(form.data() + i + 1, form.size() - i), args...);
-            }
-            else
-                output += form[i];
-        }
-        
-        return output;
     }
 }
 

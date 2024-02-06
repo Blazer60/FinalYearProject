@@ -279,6 +279,10 @@ void Renderer::render()
         
         const glm::mat4 cameraProjectionMatrix = glm::perspective(camera.fovY, window::aspectRatio(), camera.nearClipDistance, camera.farClipDistance);
         const glm::mat4 vpMatrix = cameraProjectionMatrix * camera.viewMatrix;
+
+        mCamera->position = glm::vec3(glm::inverse(camera.viewMatrix) * glm::vec4(glm::vec3(0.f), 1.f));
+        mCamera->viewMatrix = camera.viewMatrix;
+        mCamera.updateGlsl();
         
         for (const auto &rqo : mRenderQueue)
         {
@@ -313,6 +317,9 @@ void Renderer::render()
         const glm::vec3 cameraPosition = glm::inverse(camera.viewMatrix) * glm::vec4(glm::vec3(0.f), 1.f);
         
         mDirectionalLightShader.bind();
+        // todo: How tf? It worked!
+        mCamera.bindToSlot(3);
+        mDirectionalLightShader.block("CameraBlock", mCamera.getBindPoint());
 
         mDirectionalLightShader.set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 0);
         mDirectionalLightShader.set("u_position_texture", mPositionTextureBuffer->getId(), 1);

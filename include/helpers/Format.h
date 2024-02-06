@@ -23,6 +23,9 @@ namespace format
     {
         return static_cast<int>(lhs) == static_cast<int>(rhs);
     }
+
+    template<typename T, typename... TArgs>
+    std::string string(std::string_view form, const T &arg, const TArgs &... args);
     
     template<typename T>
     std::string value(const T &value);
@@ -66,7 +69,26 @@ namespace format
     
     
     // Definitions
-    
+
+    template<typename T, typename ... TArgs>
+    std::string string(const std::string_view form, const T& arg, const TArgs&... args)
+    {
+        std::string output;
+        for (int i = 0; i < form.length(); ++i)
+        {
+            if (form[i] == '%')
+            {
+                output += format::value(arg);
+                if constexpr (sizeof...(args) != 0)  // The last argument will be used if there are too many %.
+                    return output + format::string(std::string_view(form.data() + i + 1, form.size() - i), args...);
+            }
+            else
+                output += form[i];
+        }
+
+        return output;
+    }
+
     template<typename T>
     std::string value(const T &value)
     {

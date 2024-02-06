@@ -14,7 +14,9 @@
 #include "Materials.h"
 #include "Mesh.h"
 #include "Shader.h"
+#include "UniformBufferObject.h"
 #include "WindowHelpers.h"
+#include "CameraBlock.h"
 
 
 /**
@@ -247,6 +249,8 @@ protected:
     std::unique_ptr<TextureBufferObject> mSsrDataTextureBuffer;
     std::unique_ptr<TextureBufferObject> mReflectionTextureBuffer;
     std::unique_ptr<TextureBufferObject> mDebugTextureBuffer;
+
+    graphics::UniformBufferObject<CameraBlock> mCamera;
 
     glm::ivec2 mCurrentRenderBufferSize;
     
