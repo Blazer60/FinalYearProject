@@ -12,9 +12,8 @@
 
 struct CameraBlock
 {
-    glm::vec3 position;
-    float _padding;
     glm::mat4 viewMatrix;
+    glm::vec3 position;
     float exposure;
 };
 
@@ -22,8 +21,8 @@ struct CameraBlock
 
 layout(std140) uniform CameraBlock
 {
-    vec3 position;
     mat4 viewMatrix;
+    vec3 position;
     float exposure;
 } camera;
 

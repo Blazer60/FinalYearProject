@@ -1,17 +1,14 @@
 #version 460
 
+#include "../interfaces/CameraBlock.h"
+#include "../interfaces/ScreenSpaceReflectionsBlock.h"
+
 in vec2 v_uv;
 
 uniform sampler2D u_positionTexture;
 uniform sampler2D u_normalTexture;
 uniform sampler2D u_depthTexture;
 uniform sampler2D u_roughnessTexture;
-
-uniform mat4 u_viewMatrix;
-uniform vec3 u_cameraPosition;
-uniform mat4 u_proj;
-
-uniform float u_nearPlaneZ;
 
 out layout(location = 0) vec4 o_colour;
 
@@ -71,13 +68,13 @@ bool traceScreenSpaceRay(
     const vec2 csZBufferSize = textureSize(u_positionTexture, 0);
     
     // Clip to the near plane.
-    const float rayLength = ((csOrigin.z + csDirection.z * maxDistance) > u_nearPlaneZ) ? (u_nearPlaneZ - csOrigin.z) / csDirection.z : maxDistance;
+    const float rayLength = ((csOrigin.z + csDirection.z * maxDistance) > cSsr.zNear) ? (cSsr.zNear - csOrigin.z) / csDirection.z : maxDistance;
     const vec3 csEndPoint = csOrigin + csDirection * rayLength;
     hitPixel = vec2(-1.f);
     
     // Project into screen space.
-    const vec4 H0 = u_proj * vec4(csOrigin, 1.f);
-    const vec4 H1 = u_proj * vec4(csEndPoint, 1.f);
+    const vec4 H0 = cSsr.projection * vec4(csOrigin, 1.f);
+    const vec4 H1 = cSsr.projection * vec4(csEndPoint, 1.f);
     float k0 = 1.f / H0.w;
     float k1 = 1.f / H1.w;
     vec3 Q0 = csOrigin * k0;
@@ -154,7 +151,7 @@ bool traceScreenSpaceRay(
         
         // Camera-space z.
         const vec3 positionWorldSpace = texelFetch(u_positionTexture, ivec2(hitPixel), 0).xyz;
-        const float sceneZMax = (u_viewMatrix * vec4(positionWorldSpace, 1.f)).z;
+        const float sceneZMax = (camera.viewMatrix * vec4(positionWorldSpace, 1.f)).z;
         const float sceneZMin = sceneZMax - zThickness;
         
         if (((rayZMax >= sceneZMin) && (rayZMin <= sceneZMax)) || sceneZMax == 0.f)
@@ -197,7 +194,7 @@ void main()
     const vec3 normal = normalize(texture(u_normalTexture, v_uv).xyz);
     const float roughness = texture(u_roughnessTexture, v_uv).r;
     
-    const vec3 direction = normalize(u_cameraPosition - position);
+    const vec3 direction = normalize(camera.position - position);
     
     const vec2 csZBufferSize = textureSize(u_positionTexture, 0);
 
@@ -215,9 +212,9 @@ void main()
         // This is the probability distribution function for both unreal and frostbite.
         const float pdf = (D * nDotH) / (4.f * vDotH + 0.0001f);
 
-        const vec3 reflectionViewSpace = (u_viewMatrix * vec4(reflection, 0.f)).xyz;
+        const vec3 reflectionViewSpace = (camera.viewMatrix * vec4(reflection, 0.f)).xyz;
         // Slight offset to avoid self-intersection (just like ray tracing).
-        const vec3 positionViewSpace = (u_viewMatrix * vec4(position + normal * 0.1f, 1.f)).xyz;
+        const vec3 positionViewSpace = (camera.viewMatrix * vec4(position + normal * 0.1f, 1.f)).xyz;
         
         const float zThickness = 0.1f;  // (0-inf] Controls the 'smearing'.
         const float stride = 1.f;  // [1-4]

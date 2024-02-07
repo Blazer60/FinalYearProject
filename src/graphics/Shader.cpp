@@ -111,6 +111,9 @@ void Shader::set(const std::string &uniformName, const glm::mat4 *values, const 
 void Shader::block(const std::string& blockName, const unsigned int blockBindPoint)
 {
     const auto blockIndex = glGetUniformBlockIndex(mId, blockName.c_str());
+    if (blockIndex == GL_INVALID_INDEX)
+        WARN("Block with name % does not exists in shader %", blockName, mDebugName);
+
     glUniformBlockBinding(mId, blockIndex, blockBindPoint);
 }
 

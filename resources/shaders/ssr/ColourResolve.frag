@@ -1,5 +1,8 @@
 #version 460
 
+#include "../interfaces/CameraBlock.h"
+#include "../interfaces/ScreenSpaceReflectionsBlock.h"
+
 in vec2 v_uv;
 
 layout(binding =  0) uniform sampler2D u_albedoTexture;
@@ -15,12 +18,6 @@ layout(binding =  9) uniform samplerCube u_pre_filterTexture;
 layout(binding = 10) uniform sampler2D u_brdfLutTexture;
 layout(binding = 11) uniform sampler2D u_emissiveTexture;
 
-uniform vec3 u_cameraPositionWs;
-uniform int u_colour_max_lod;
-uniform float u_luminance_multiplier;
-uniform float u_maxDistanceFalloff;
-uniform float u_exposure;
-
 out layout(location = 0) vec4 o_colour;
 
 const float PI = 3.14159265359f;
@@ -33,11 +30,11 @@ float computeRoughness(vec2 hitUv)
     const vec3 hitPosition = texture(u_positionTexture, hitUv).rgb;
 
     const vec3 l = normalize(hitPosition - position);  // Pretend that our reflection point is a light source direction.
-    const vec3 v = normalize(u_cameraPositionWs - position);
+    const vec3 v = normalize(camera.position - position);
 
     const float lDotV = max(0.f, dot(l, v));
 
-    const float maxDistance = u_maxDistanceFalloff;
+    const float maxDistance = cSsr.maxDistanceFalloff;
     const float distanceRoughness = 1.f - clamp(distance(hitPosition, position) / maxDistance, 0.f, 1.f);
 
     const float gloss = 1.f - localRoughness;
@@ -98,7 +95,7 @@ vec3 brdf(vec2 hitUv)
     const vec3 hitPosition = texture(u_positionTexture, hitUv).rgb;
     const vec3 l = normalize(hitPosition - position);
     const vec3 n = normalize(texture(u_normalTexture, v_uv).rgb);
-    const vec3 v = normalize(u_cameraPositionWs - position);
+    const vec3 v = normalize(camera.position - position);
     const vec3 h = normalize(l + v);
 
     const float vDotN = max(dot(v, n), 0.f);
@@ -166,7 +163,7 @@ ResolvedColours colourResolve()
         totalAlpha += alpha;
 
         const vec3 weight = brdf(hitUv) / pdf;
-        result += (textureLod(u_colourTexture, hitUv, alpha * (1 - u_colour_max_lod)).rgb / u_exposure) * weight;
+        result += (textureLod(u_colourTexture, hitUv, alpha * (1 - cSsr.colourMaxLod)).rgb / camera.exposure) * weight;
         weightSum += weight;
 
         totalEmissive += texture(u_emissiveTexture, hitUv).rgb;
@@ -195,7 +192,7 @@ vec4 getSkyboxColour()
     const float roughness = texture(u_roughnessTexture, v_uv).r;
 
     const vec3 n = normalize(texture(u_normalTexture, v_uv).rgb);
-    const vec3 v = normalize(u_cameraPositionWs - position);
+    const vec3 v = normalize(camera.position - position);
     const vec3 r = reflect(-v, n);
 
     const float vDotN = max(dot(v, n), 0.f);
@@ -214,7 +211,7 @@ vec4 getSkyboxColour()
     const vec2 brdf = texture(u_brdfLutTexture, vec2(vDotN, roughness)).rg;
     const vec3 specular = preFilterColour * (fresnel * brdf.x + brdf.y);
 
-    return vec4((specular + diffuse) * u_luminance_multiplier, roughness);
+    return vec4((specular + diffuse) * cSsr.luminanceMultiplier, roughness);
 }
 
 void main()
@@ -229,5 +226,5 @@ void main()
     const vec3 skyboxColour = getSkyboxColour().rgb;
     o_colour = vec4(mix(colour.colour, skyboxColour, colour.alpha), colour.alpha);
     o_colour.rgb += colour.emissive;
-    o_colour.rgb *= u_exposure;
+    o_colour.rgb *= camera.exposure;
 }

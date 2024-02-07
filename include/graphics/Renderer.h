@@ -19,6 +19,7 @@
 #include "CameraBlock.h"
 #include "DirectionalLightBlock.h"
 #include "PointLightBlock.h"
+#include "ScreenSpaceReflectionsBlock.h"
 #include "SpotlightBlock.h"
 
 
@@ -258,6 +259,7 @@ protected:
     graphics::UniformBufferObject<DirectionalLightBlock> mDirectionalLightBlock;
     graphics::UniformBufferObject<PointLightBlock> mPointLightBlock;
     graphics::UniformBufferObject<SpotlightBlock> mSpotlightBlock;
+    graphics::UniformBufferObject<ScreenSpaceReflectionsBlock> mSsrBlock;
 
     glm::ivec2 mCurrentRenderBufferSize;
     

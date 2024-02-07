@@ -132,6 +132,7 @@ void Renderer::bindUbos()
     mDirectionalLightBlock.bindToSlot(++bindPoint);
     mPointLightBlock.bindToSlot(++bindPoint);
     mSpotlightBlock.bindToSlot(++bindPoint);
+    mSsrBlock.bindToSlot(++bindPoint);
 
     mDirectionalLightShader.block("CameraBlock", mCamera.getBindPoint());
     mDirectionalLightShader.block("DirectionalLightBlock", mDirectionalLightBlock.getBindPoint());
@@ -141,6 +142,12 @@ void Renderer::bindUbos()
 
     mSpotlightShader->block("CameraBlock", mCamera.getBindPoint());
     mSpotlightShader->block("SpotlightBlock", mSpotlightBlock.getBindPoint());
+
+    mScreenSpaceReflectionsShader->block("CameraBlock", mCamera.getBindPoint());
+    mScreenSpaceReflectionsShader->block("ScreenSpaceReflectionsBlock", mSsrBlock.getBindPoint());
+
+    mColourResolveShader->block("CameraBlock", mCamera.getBindPoint());
+    mColourResolveShader->block("ScreenSpaceReflectionsBlock", mSsrBlock.getBindPoint());
 }
 
 void Renderer::detachTextureRenderBuffersFromFrameBuffers() const
@@ -299,8 +306,8 @@ void Renderer::render()
         const glm::mat4 cameraProjectionMatrix = glm::perspective(camera.fovY, window::aspectRatio(), camera.nearClipDistance, camera.farClipDistance);
         const glm::mat4 vpMatrix = cameraProjectionMatrix * camera.viewMatrix;
 
-        mCamera->position = glm::vec3(glm::inverse(camera.viewMatrix) * glm::vec4(glm::vec3(0.f), 1.f));
         mCamera->viewMatrix = camera.viewMatrix;
+        mCamera->position = glm::vec3(glm::inverse(camera.viewMatrix) * glm::vec4(glm::vec3(0.f), 1.f));
         mCamera->exposure = exposure;
         mCamera.updateGlsl();
         
@@ -432,7 +439,19 @@ void Renderer::render()
         graphics::popDebugGroup();
         PROFILE_SCOPE_BEGIN(screenSpace, "Reflections");
         graphics::pushDebugGroup("Reflections");
-        
+
+        const glm::mat4 scaleTextureSpace = glm::scale(glm::mat4(1.f), glm::vec3(0.5f, 0.5f, 1.f));
+        const glm::mat4 translateTextureSpace = glm::translate(glm::mat4(1.f), glm::vec3(0.5f, 0.5f, 0.f));
+        const glm::mat4 scaleFrameBufferSpace = glm::scale(glm::mat4(1.f), glm::vec3(mLightTextureBuffer->getSize().x, mLightTextureBuffer->getSize().y, 1));
+
+        const glm::mat4 viewToPixelCoordMatrix = scaleFrameBufferSpace * translateTextureSpace * scaleTextureSpace * cameraProjectionMatrix;
+        mSsrBlock->projection = viewToPixelCoordMatrix;
+        mSsrBlock->zNear = -camera.nearClipDistance;
+        mSsrBlock->colourMaxLod = static_cast<int>(mDeferredLightingTextureBuffer->getMipLevels());
+        mSsrBlock->luminanceMultiplier = mIblLuminanceMultiplier;
+        mSsrBlock->maxDistanceFalloff = mRoughnessFallOff;
+        mSsrBlock.updateGlsl();
+
         // Render at half-resolution for performance.
         glViewport(0, 0, mSsrDataTextureBuffer->getSize().x, mSsrDataTextureBuffer->getSize().y);
         mSsrFramebuffer->bind();
@@ -445,19 +464,6 @@ void Renderer::render()
         mScreenSpaceReflectionsShader->set("u_normalTexture", mNormalTextureBuffer->getId(), 1);
         mScreenSpaceReflectionsShader->set("u_depthTexture", mDepthTextureBuffer->getId(), 2);
         mScreenSpaceReflectionsShader->set("u_roughnessTexture", mRoughnessTextureBuffer->getId(), 3);
-
-        mScreenSpaceReflectionsShader->set("u_viewMatrix", camera.viewMatrix);
-        mScreenSpaceReflectionsShader->set("u_cameraPosition", cameraPosition);
-
-
-        const glm::mat4 scaleTextureSpace = glm::scale(glm::mat4(1.f), glm::vec3(0.5f, 0.5f, 1.f));
-        const glm::mat4 translateTextureSpace = glm::translate(glm::mat4(1.f), glm::vec3(0.5f, 0.5f, 0.f));
-        const glm::mat4 scaleFrameBufferSpace = glm::scale(glm::mat4(1.f), glm::vec3(mLightTextureBuffer->getSize().x, mLightTextureBuffer->getSize().y, 1));
-
-        const glm::mat4 viewToPixelCoordMatrix = scaleFrameBufferSpace * translateTextureSpace * scaleTextureSpace * cameraProjectionMatrix;
-        mScreenSpaceReflectionsShader->set("u_proj", viewToPixelCoordMatrix);
-
-        mScreenSpaceReflectionsShader->set("u_nearPlaneZ", -camera.nearClipDistance);
 
         drawFullscreenTriangleNow();
 
@@ -479,12 +485,6 @@ void Renderer::render()
         mColourResolveShader->set("u_pre_filterTexture",         mPreFilterMap->getId(),            9);
         mColourResolveShader->set("u_brdfLutTexture",            mBrdfLutTextureBuffer->getId(),    10);
         mColourResolveShader->set("u_emissiveTexture", mEmissiveTextureBuffer->getId(), 11);
-
-        mColourResolveShader->set("u_cameraPositionWs", cameraPosition);
-        mColourResolveShader->set("u_exposure", exposure);
-        mColourResolveShader->set("u_colour_max_lod", static_cast<int>(mDeferredLightingTextureBuffer->getMipLevels()));
-        mColourResolveShader->set("u_luminance_multiplier", mIblLuminanceMultiplier);
-        mColourResolveShader->set("u_maxDistanceFalloff", mRoughnessFallOff);
 
         drawFullscreenTriangleNow();
 

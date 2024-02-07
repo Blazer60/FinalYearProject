@@ -65,6 +65,7 @@ add_library(${GRAPHICS_LIBRARY} STATIC
         resources/shaders/interfaces/DirectionalLightBlock.h
         resources/shaders/interfaces/PointLightBlock.h
         resources/shaders/interfaces/SpotlightBlock.h
+        resources/shaders/interfaces/ScreenSpaceReflectionsBlock.h
 )
 
 target_include_directories(${GRAPHICS_LIBRARY} PUBLIC
