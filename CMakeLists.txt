@@ -60,6 +60,8 @@ add_library(${GRAPHICS_LIBRARY} STATIC
         src/graphics/shader/ShaderCompilation.h
         include/graphics/buffers/UniformBufferObject.h
         resources/shaders/interfaces/CameraBlock.h
+        src/graphics/shader/ShaderInformation.cpp
+        src/graphics/shader/ShaderInformation.h
 )
 
 target_include_directories(${GRAPHICS_LIBRARY} PUBLIC

@@ -7,6 +7,8 @@
 
 #include "Format.h"
 
+#include <sstream>
+
 
 namespace format
 {
@@ -15,7 +17,13 @@ namespace format
     {
         return value.string();
     }
-    
+
+    template<>
+    std::string value<std::stringstream>(const std::stringstream& value)
+    {
+        return value.str();
+    }
+
     template<>
     std::string value(const bool &value)
     {

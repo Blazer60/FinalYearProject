@@ -46,6 +46,9 @@ namespace format
     std::string value(const std::filesystem::path &value);
 
     template<>
+    std::string value(const std::stringstream &value);
+
+    template<>
     std::string value(const bool &value);
     
     template<typename TIterator>
