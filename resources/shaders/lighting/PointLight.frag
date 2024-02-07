@@ -1,5 +1,9 @@
 #version 460
 
+#include "../interfaces/PointLightBlock.h"
+#include "../interfaces/CameraBlock.h"
+#include "Brdf.glsl"
+
 in vec2 v_uv;
 
 layout(binding = 0) uniform sampler2D u_albedo_texture;
@@ -9,24 +13,11 @@ layout(binding = 3) uniform sampler2D u_roughness_texture;
 layout(binding = 4) uniform sampler2D u_metallic_texture;
 layout(binding = 5) uniform samplerCube u_shadow_map_texture;
 
-uniform vec3 u_light_position;
-uniform vec3 u_light_intensity;
-uniform float u_light_inv_sqr_radius;
-uniform float u_softness_radius;
-uniform float u_z_far;
-uniform vec2 u_bias;
-
-uniform vec3 u_camera_position_ws;
-
-uniform float u_exposure;
-
 out layout(location = 0) vec3 o_colour;
-
-const float PI = 3.14159265359f;
 
 float sample_shadow_map(vec3 direction, float pixel_depth, float bias)
 {
-    const float shadow_depth = texture(u_shadow_map_texture, -direction).x * u_z_far;
+    const float shadow_depth = texture(u_shadow_map_texture, -direction).x * cLight.zFar;
     return pixel_depth - bias > shadow_depth ? 1.f : 0.f;
 }
 
@@ -39,50 +30,18 @@ float calculate_shadow_map(vec3 light_direction)
         vec3( 1,  0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1,  0, -1),
         vec3( 0,  1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0,  1, -1)
     );
-    const float disk_radius = u_softness_radius;
+    const float disk_radius = cLight.softnessRadius;
 
     float shadow = 0.f;
     for (int i = 0; i < 20; i++)
     {
         const vec3 direction = light_direction + samples_offsets[i] * disk_radius;
         const float pixel_depth = length(direction);
-        const float bias = mix(u_bias.x, u_bias.y, clamp(pixel_depth / u_z_far, 0.f, 1.f));
+        const float bias = mix(cLight.bias.x, cLight.bias.y, clamp(pixel_depth / cLight.zFar, 0.f, 1.f));
         shadow += sample_shadow_map(direction, pixel_depth, bias);
     }
 
     return shadow / 20.f;
-}
-
-// Unreal's fresnel function using spherical gaussian approximation.
-vec3 fresnelSchlick(float vDotH, vec3 f0)
-{
-    return f0 + (1.f - f0) * pow(2.f, (-5.55473f * vDotH - 6.98316f) * vDotH);
-}
-
-// Unreal's and Disney's distribution function.
-float distributionGgx(float nDotH, float roughness)
-{
-    const float alpha = roughness * roughness;
-    const float alpha2 = alpha * alpha;
-    const float nDotH2 = nDotH * nDotH;
-    const float denominator = nDotH2 * (alpha2 - 1.f) + 1.f;
-
-    return alpha2 / (PI * denominator * denominator);
-}
-
-// Unreal's geometry schlick function.
-float geometrySchlick(float vDotN, float k)
-{
-    return vDotN / (vDotN * (1.f - k) + k);
-}
-
-// Unreal's geometry smith function. Note the remapping of roughness before squaring
-// should only be done on analytical lights. Remap function: (R + 1) / 2
-float geometrySmith(float vDotN, float lDotN, float roughness)
-{
-    const float r = roughness + 1.f;
-    const float k = r * r / 8.f;
-    return geometrySchlick(vDotN, k) * geometrySchlick(lDotN, k);
 }
 
 float smoothDistanceAttenuation(float distance2, float invSqrAttRadius)
@@ -108,36 +67,28 @@ void main()
     const float roughness = texture(u_roughness_texture, v_uv).r;
     const float metallic = texture(u_metallic_texture, v_uv).r;
 
-    const vec3 light_direction = u_light_position - position;
+    const vec3 light_direction = cLight.position - position;
     const vec3 l = normalize(light_direction);
     const vec3 n = normalize(texture(u_normal_texture, v_uv).rgb);
-    const vec3 v = normalize(u_camera_position_ws - position);
+    const vec3 v = normalize(camera.position - position);
     const vec3 h = normalize(l + v);
 
-    const float vDotN = max(dot(v, n), 0.f);
-    const float lDotN = max(dot(l, n), 0.f);
-    const float vDotH = max(dot(v, h), 0.f);
-    const float nDotH = max(dot(n, h), 0.f);
+    Brdf brdf;
+    brdf.vDotN = max(dot(v, n), 0.f);
+    brdf.lDotN = max(dot(l, n), 0.f);
+    brdf.vDotH = max(dot(v, h), 0.f);
+    brdf.nDotH = max(dot(n, h), 0.f);
+    brdf.albedo = albedo;
+    brdf.f0 = mix(vec3(0.04f), albedo, metallic);
+    brdf.roughness = roughness;
 
-    const vec3 f0 = mix(vec3(0.04f), albedo, metallic);
-
-    // Calculate how the material interacts with the light.
-    const vec3 fresnel = fresnelSchlick(vDotH, f0);
-    const float distribution = distributionGgx(nDotH, roughness);
-    const float geometry = geometrySmith(vDotN, lDotN, roughness);
-
-    const vec3 specular = distribution * geometry * fresnel / (4.f * vDotN * lDotN + 0.0001f);
-
-    const vec3 kD = (vec3(1.f) - fresnel) * (1.f - metallic);
-    const vec3 diffuse = kD * albedo / PI;
-
-    const vec3 irradiance = diffuse + specular;
+    const vec3 irradiance = calculateIrradiance(brdf, metallic);
 
     // Point light lighting calculation.
     float attenuation = 1.f;
-    attenuation *= getDistanceAttenuation(light_direction, u_light_inv_sqr_radius);
+    attenuation *= getDistanceAttenuation(light_direction, cLight.invSqrRadius);
     const float shadow_intensity = calculate_shadow_map(light_direction);
-    const vec3 radiance = attenuation * u_light_intensity * (1.f - shadow_intensity);
+    const vec3 radiance = attenuation * cLight.intensity * (1.f - shadow_intensity);
 
-    o_colour = u_exposure * irradiance * radiance * (4.f * PI) * lDotN;
+    o_colour = camera.exposure * irradiance * radiance * (4.f * PI) * brdf.lDotN;
 }

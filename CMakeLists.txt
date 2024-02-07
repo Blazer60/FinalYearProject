@@ -62,6 +62,9 @@ add_library(${GRAPHICS_LIBRARY} STATIC
         resources/shaders/interfaces/CameraBlock.h
         src/graphics/shader/ShaderInformation.cpp
         src/graphics/shader/ShaderInformation.h
+        resources/shaders/interfaces/DirectionalLightBlock.h
+        resources/shaders/interfaces/PointLightBlock.h
+        resources/shaders/interfaces/SpotlightBlock.h
 )
 
 target_include_directories(${GRAPHICS_LIBRARY} PUBLIC

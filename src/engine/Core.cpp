@@ -82,7 +82,7 @@ namespace engine
         if (!initImGui())
         {
             mIsRunning = false;
-            LOG_MAJOR("Could not load drawUi for an opengl context.");
+            LOG_MAJOR("Could not load imgui for an opengl context.");
             return;
         }
         

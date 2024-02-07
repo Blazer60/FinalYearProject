@@ -1,5 +1,7 @@
 #version 460
 
+#include "../../interfaces/CameraBlock.h"
+
 layout(location=0) in vec3 a_position;
 layout(location=1) in vec2 a_uv;
 layout(location=2) in vec3 a_normal;
@@ -7,7 +9,6 @@ layout(location=3) in vec3 a_tangent;
 
 uniform mat4 u_mvp_matrix;
 uniform mat4 u_model_matrix;
-uniform vec3 u_camera_position_ws;
 
 out vec2 v_uv;
 out vec3 v_position_ws;
@@ -31,6 +32,6 @@ void main()
     v_tbn_matrix = (mat3(tangent_ws, bi_tangent_ws, normal_ws));
 
     const mat3 transposed_tbn_matrix = transpose(v_tbn_matrix);
-    v_camera_position_ts = transposed_tbn_matrix * u_camera_position_ws;
+    v_camera_position_ts = transposed_tbn_matrix * camera.position;
     v_position_ts = transposed_tbn_matrix * v_position_ws;
 }

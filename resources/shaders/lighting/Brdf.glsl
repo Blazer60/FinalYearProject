@@ -33,3 +33,29 @@ float geometrySmith(float vDotN, float lDotN, float roughness)
     const float k = r * r / 8.f;
     return geometrySchlick(vDotN, k) * geometrySchlick(lDotN, k);
 }
+
+struct Brdf
+{
+    vec3 albedo;
+    vec3 f0;
+    float roughness;
+    float vDotN;
+    float lDotN;
+    float vDotH;
+    float nDotH;
+};
+
+vec3 calculateIrradiance(in Brdf brdf, float metallic)
+{
+    const vec3 fresnel = fresnelSchlick(brdf.vDotH, brdf.f0);
+    const float distribution = distributionGgx(brdf.nDotH, brdf.roughness);
+    const float geometry = geometrySmith(brdf.vDotN, brdf.lDotN, brdf.roughness);
+
+    const vec3 specular = distribution * geometry * fresnel / (4.f * brdf.vDotN * brdf.lDotN + 0.0001f);
+
+    const vec3 kD = (vec3(1.f) - fresnel) * (1.f - metallic);
+    const vec3 diffuse = kD * brdf.albedo / PI;
+
+    const vec3 irradiance = diffuse + specular;
+    return irradiance;
+}

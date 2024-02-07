@@ -54,6 +54,7 @@ Renderer::Renderer() :
 
     initFrameBuffers();
     initTextureRenderBuffers();
+    bindUbos();
     
     setViewportSize();
     graphics::popDebugGroup();
@@ -122,6 +123,24 @@ void Renderer::initTextureRenderBuffers()
 
     // Debug.
     mDebugFramebuffer->attach(mDebugTextureBuffer.get(), 0);
+}
+
+void Renderer::bindUbos()
+{
+    int bindPoint = 0;
+    mCamera.bindToSlot(++bindPoint);
+    mDirectionalLightBlock.bindToSlot(++bindPoint);
+    mPointLightBlock.bindToSlot(++bindPoint);
+    mSpotlightBlock.bindToSlot(++bindPoint);
+
+    mDirectionalLightShader.block("CameraBlock", mCamera.getBindPoint());
+    mDirectionalLightShader.block("DirectionalLightBlock", mDirectionalLightBlock.getBindPoint());
+
+    mPointLightShader->block("CameraBlock", mCamera.getBindPoint());
+    mPointLightShader->block("PointLightBlock", mPointLightBlock.getBindPoint());
+
+    mSpotlightShader->block("CameraBlock", mCamera.getBindPoint());
+    mSpotlightShader->block("SpotlightBlock", mSpotlightBlock.getBindPoint());
 }
 
 void Renderer::detachTextureRenderBuffersFromFrameBuffers() const
@@ -282,6 +301,7 @@ void Renderer::render()
 
         mCamera->position = glm::vec3(glm::inverse(camera.viewMatrix) * glm::vec4(glm::vec3(0.f), 1.f));
         mCamera->viewMatrix = camera.viewMatrix;
+        mCamera->exposure = exposure;
         mCamera.updateGlsl();
         
         for (const auto &rqo : mRenderQueue)
@@ -293,7 +313,7 @@ void Renderer::render()
             shader->bind();
             shader->set("u_mvp_matrix", vpMatrix * rqo.matrix);
             shader->set("u_model_matrix", rqo.matrix);
-            shader->set("u_camera_position_ws", glm::vec3(glm::inverse(camera.viewMatrix) * glm::vec4(glm::vec3(0.f), 1.f)));
+            shader->block("CameraBlock", mCamera.getBindPoint());
             rqo.onDraw();
             glBindVertexArray(rqo.vao);
             glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
@@ -317,9 +337,6 @@ void Renderer::render()
         const glm::vec3 cameraPosition = glm::inverse(camera.viewMatrix) * glm::vec4(glm::vec3(0.f), 1.f);
         
         mDirectionalLightShader.bind();
-        // todo: How tf? It worked!
-        mCamera.bindToSlot(3);
-        mDirectionalLightShader.block("CameraBlock", mCamera.getBindPoint());
 
         mDirectionalLightShader.set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 0);
         mDirectionalLightShader.set("u_position_texture", mPositionTextureBuffer->getId(), 1);
@@ -327,22 +344,18 @@ void Renderer::render()
         mDirectionalLightShader.set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 3);
         mDirectionalLightShader.set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
 
-        mDirectionalLightShader.set("u_camera_position_ws", cameraPosition);
-        mDirectionalLightShader.set("u_view_matrix", camera.viewMatrix);
-        mDirectionalLightShader.set("u_exposure", exposure);
-
         glBindVertexArray(mFullscreenTriangle.vao());
 
         for (const graphics::DirectionalLight &directionalLight : mDirectionalLightQueue)
         {
-            mDirectionalLightShader.set("u_cascade_distances", directionalLight.cascadeDepths.data(), static_cast<int>(directionalLight.cascadeDepths.size()));
-            mDirectionalLightShader.set("u_cascade_count", static_cast<int>(directionalLight.cascadeDepths.size()));
-            
-            mDirectionalLightShader.set("u_bias", directionalLight.shadowBias);
-            
-            mDirectionalLightShader.set("u_light_direction", directionalLight.direction);
-            mDirectionalLightShader.set("u_light_intensity", directionalLight.colourIntensity);
-            mDirectionalLightShader.set("u_light_vp_matrix", directionalLight.vpMatrices.data(), static_cast<int>(directionalLight.vpMatrices.size()));
+            mDirectionalLightBlock->direction = glm::vec4(directionalLight.direction, 0.f);
+            mDirectionalLightBlock->intensity = glm::vec4(directionalLight.colourIntensity, 0.f);
+            std::copy(directionalLight.vpMatrices.begin(), directionalLight.vpMatrices.end(), std::begin(mDirectionalLightBlock->vpMatrices));
+            std::copy(directionalLight.cascadeDepths.begin(), directionalLight.cascadeDepths.end(), std::begin(mDirectionalLightBlock->cascadeDistances));
+            mDirectionalLightBlock->bias = directionalLight.shadowBias;
+            mDirectionalLightBlock->cascadeCount = static_cast<int>(directionalLight.cascadeDepths.size());
+
+            mDirectionalLightBlock.updateGlsl();
             mDirectionalLightShader.set("u_shadow_map_texture", directionalLight.shadowMap->getId(), 5);
 
             glDrawElements(GL_TRIANGLES, mFullscreenTriangle.indicesCount(), GL_UNSIGNED_INT, nullptr);
@@ -361,24 +374,22 @@ void Renderer::render()
         mPointLightShader->set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 3);
         mPointLightShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
         
-        mPointLightShader->set("u_camera_position_ws", cameraPosition);
-        mPointLightShader->set("u_exposure", exposure);
-        
         glBindVertexArray(mUnitSphere.vao());
         
         for (const auto &pointLight : mPointLightQueue)
         {
+            mPointLightBlock->position = glm::vec4(pointLight.position, 1.f);
+            mPointLightBlock->intensity = glm::vec4(pointLight.colourIntensity, 0.f);
+            mPointLightBlock->invSqrRadius = 1.f / (pointLight.radius * pointLight.radius);
+            mPointLightBlock->zFar = pointLight.radius;
+            mPointLightBlock->softnessRadius = pointLight.softnessRadius;
+            mPointLightBlock->bias = pointLight.bias;
             const glm::mat4 pointLightModelMatrix = glm::translate(glm::mat4(1.f), pointLight.position) * glm::scale(glm::mat4(1.f), glm::vec3(pointLight.radius));
-            mPointLightShader->set("u_mvp_matrix", vpMatrix * pointLightModelMatrix);
-            
-            mPointLightShader->set("u_light_position", pointLight.position);
-            mPointLightShader->set("u_light_intensity", pointLight.colourIntensity);
-            mPointLightShader->set("u_light_inv_sqr_radius", 1.f / (pointLight.radius * pointLight.radius));
+            mPointLightBlock->mvpMatrix = vpMatrix * pointLightModelMatrix;
+            mPointLightBlock.updateGlsl();
+
             mPointLightShader->set("u_shadow_map_texture", pointLight.shadowMap->getId(), 5);
-            mPointLightShader->set("u_z_far", pointLight.radius);
-            mPointLightShader->set("u_softness_radius", pointLight.softnessRadius);
-            mPointLightShader->set("u_bias", pointLight.bias);
-            
+
             glDrawElements(GL_TRIANGLES, mUnitSphere.indicesCount(), GL_UNSIGNED_INT, nullptr);
         }
         
@@ -396,25 +407,24 @@ void Renderer::render()
         mSpotlightShader->set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 3);
         mSpotlightShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
         
-        mSpotlightShader->set("u_camera_position_ws", cameraPosition);
-        mSpotlightShader->set("u_exposure", exposure);
-        
         for (const graphics::Spotlight &spotLight : mSpotlightQueue)
         {
             mSpotlightShader->set("u_shadow_map_texture", spotLight.shadowMap->getId(), 5);
-            
-            mSpotlightShader->set("u_light_position", spotLight.position);
-            mSpotlightShader->set("u_light_direction", spotLight.direction);
+
+            mSpotlightBlock->position = glm::vec4(spotLight.position, 1.f);
+            mSpotlightBlock->direction = glm::vec4(spotLight.direction, 0.f);
+            mSpotlightBlock->invSqrRadius = 1.f / (spotLight.radius * spotLight.radius);
+            mSpotlightBlock->intensity = glm::vec4(spotLight.colourIntensity, 0.f);
+            mSpotlightBlock->bias = spotLight.shadowBias;
+            mSpotlightBlock->zFar = spotLight.radius;
+            mSpotlightBlock->vpMatrix = spotLight.vpMatrix;
             const float lightAngleScale = 1.f / glm::max(0.001f, (spotLight.cosInnerAngle - spotLight.cosOuterAngle));
             const float lightAngleOffset = -spotLight.cosOuterAngle * lightAngleScale;
-            mSpotlightShader->set("u_light_angle_scale", lightAngleScale);
-            mSpotlightShader->set("u_light_angle_offset", lightAngleOffset);
-            mSpotlightShader->set("u_light_inv_sqr_radius", 1.f / (spotLight.radius * spotLight.radius));
-            mSpotlightShader->set("u_light_intensity", spotLight.colourIntensity);
-            mSpotlightShader->set("u_light_vp_matrix", spotLight.vpMatrix);
-            mSpotlightShader->set("u_z_far", spotLight.radius);
-            mSpotlightShader->set("u_bias", spotLight.shadowBias);
-            
+            mSpotlightBlock->angleScale = lightAngleScale;
+            mSpotlightBlock->angleOffset = lightAngleOffset;
+
+            mSpotlightBlock.updateGlsl();
+
             drawFullscreenTriangleNow();
         }
         

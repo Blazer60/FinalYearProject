@@ -16,7 +16,6 @@ uniform sampler2D u_metallic_texture;
 uniform vec3 u_emissive_colour;
 uniform mat4 u_model_matrix;
 
-uniform vec3 u_camera_position_ws;
 uniform float u_height_scale = 0.1f;
 uniform int u_min_height_samples = 4;
 uniform int u_max_height_samples = 32;

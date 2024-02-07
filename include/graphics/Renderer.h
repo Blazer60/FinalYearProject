@@ -17,6 +17,9 @@
 #include "UniformBufferObject.h"
 #include "WindowHelpers.h"
 #include "CameraBlock.h"
+#include "DirectionalLightBlock.h"
+#include "PointLightBlock.h"
+#include "SpotlightBlock.h"
 
 
 /**
@@ -178,6 +181,7 @@ public:
 protected:
     void initFrameBuffers();
     void initTextureRenderBuffers();
+    void bindUbos();
     void detachTextureRenderBuffersFromFrameBuffers() const;
     std::unique_ptr<Cubemap> createCubemapFromHdrTexture(const HdrTexture *hdrTexture, const glm::ivec2 &size) const;
     std::unique_ptr<Cubemap> generateIrradianceMap(const Cubemap *cubemap, const glm::ivec2 &size) const;
@@ -251,6 +255,9 @@ protected:
     std::unique_ptr<TextureBufferObject> mDebugTextureBuffer;
 
     graphics::UniformBufferObject<CameraBlock> mCamera;
+    graphics::UniformBufferObject<DirectionalLightBlock> mDirectionalLightBlock;
+    graphics::UniformBufferObject<PointLightBlock> mPointLightBlock;
+    graphics::UniformBufferObject<SpotlightBlock> mSpotlightBlock;
 
     glm::ivec2 mCurrentRenderBufferSize;
     
