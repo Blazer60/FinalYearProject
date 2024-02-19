@@ -19,7 +19,8 @@ Renderer::Renderer() :
     mFullscreenTriangle(primitives::fullscreenTriangle()),
     mUnitSphere(primitives::invertedSphere()),
     mLine(primitives::line()),
-    mDirectionalLightShader { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/DirectionalLight.frag" }
+    mDirectionalLightShader { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/DirectionalLight.frag" },
+    mIntegrateBrdfShader { file::shaderPath() / "brdf/GgxDirectionalAlbedo.comp" }
 {
     // Blending texture data / enabling lerping.
     glEnable(GL_BLEND);
@@ -43,13 +44,19 @@ Renderer::Renderer() :
     mHdrToCubemapShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "cubemap/ToCubemap.frag");
     mCubemapToIrradianceShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "cubemap/IrradianceMap.frag");
     mPreFilterShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() /  "cubemap/PreFilter.frag");
-    mIntegrateBrdfShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "brdf/IntegrateBrdf.frag");
     mScreenSpaceReflectionsShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "ssr/SsrDda.frag");
     mColourResolveShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "ssr/ColourResolve.frag");
     mBlurShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "postProcessing/bloom/BloomDownSample.frag");
     mDebugShader = std::make_unique<Shader>(file::shaderPath() / "geometry/debug/Debug.vert", file::shaderPath() / "geometry/debug/Debug.frag");
     mLineShader = std::make_unique<Shader>(file::shaderPath() / "geometry/debug/Line.vert", file::shaderPath() / "geometry/debug/Line.frag");
-    
+
+    Shader testShader { file::shaderPath() / "test.comp" };
+    TextureBufferObject testTexture(glm::ivec2(8), GL_RGBA32F, graphics::filter::Linear, graphics::wrap::ClampToEdge);
+    testShader.bind();
+    testShader.image("screen", testTexture.getId(), testTexture.getFormat(), 0, GL_WRITE_ONLY);
+    glDispatchCompute(1, 1, 1);
+
+    mBrdfLutTextureBuffer = generateBrdfLut(glm::ivec2(64));
     generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
 
     initFrameBuffers();
@@ -947,17 +954,20 @@ std::unique_ptr<Cubemap> Renderer::generatePreFilterMap(const Cubemap *cubemap, 
 
 std::unique_ptr<TextureBufferObject> Renderer::generateBrdfLut(const glm::ivec2 &size)
 {
-    auto lut = std::make_unique<TextureBufferObject>(size, GL_RGB16F, graphics::filter::Linear, graphics::wrap::ClampToEdge);
+    auto lut = std::make_unique<TextureBufferObject>(size, GL_RGBA16F, graphics::filter::Linear, graphics::wrap::ClampToEdge);
+    //
+    // FramebufferObject auxiliaryFrameBuffer(GL_ONE, GL_ONE, GL_ALWAYS);
     
-    FramebufferObject auxiliaryFrameBuffer(GL_ONE, GL_ONE, GL_ALWAYS);
-    
-    auxiliaryFrameBuffer.bind();
-    mIntegrateBrdfShader->bind();
-    auxiliaryFrameBuffer.attach(lut.get(), 0);
-    glViewport(0, 0, size.x, size.y);
-    auxiliaryFrameBuffer.clear(glm::vec4(glm::vec3(0.f), 1.f));
-    drawFullscreenTriangleNow();
-    auxiliaryFrameBuffer.detach(0);
+    // auxiliaryFrameBuffer.bind();
+    mIntegrateBrdfShader.bind();
+    mIntegrateBrdfShader.image("lut", lut->getId(), lut->getFormat(), 5);
+    const glm::uvec2 groupSize = glm::ceil(static_cast<glm::vec2>(size / 8));
+    glDispatchCompute(groupSize.x, groupSize.y, 1);
+    // auxiliaryFrameBuffer.attach(lut.get(), 0);
+    // glViewport(0, 0, size.x, size.y);
+    // auxiliaryFrameBuffer.clear(glm::vec4(glm::vec3(0.f), 1.f));
+    // drawFullscreenTriangleNow();
+    // auxiliaryFrameBuffer.detach(0);
     
     return lut;
 }
@@ -973,7 +983,6 @@ void Renderer::generateSkybox(std::string_view path, const glm::ivec2 desiredSiz
     mIrradianceMap->setDebugName("Irradiance");
     mPreFilterMap = generatePreFilterMap(mHdrSkybox.get(), desiredSize / 4);  // 4
     mPreFilterMap->setDebugName("Prefilter Map");
-    mBrdfLutTextureBuffer = generateBrdfLut(desiredSize);
 }
 
 void Renderer::drawFullscreenTriangleNow() const

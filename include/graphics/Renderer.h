@@ -228,7 +228,7 @@ protected:
     std::unique_ptr<Shader> mHdrToCubemapShader;
     std::unique_ptr<Shader> mCubemapToIrradianceShader;
     std::unique_ptr<Shader> mPreFilterShader;
-    std::unique_ptr<Shader> mIntegrateBrdfShader;
+    Shader mIntegrateBrdfShader;
     std::unique_ptr<Shader> mScreenSpaceReflectionsShader;
     std::unique_ptr<Shader> mColourResolveShader;
     std::unique_ptr<Shader> mBlurShader;
