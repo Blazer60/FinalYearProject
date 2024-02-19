@@ -8,18 +8,18 @@ layout(binding = 0, rgba32f) uniform image2D screen;
 struct Stream
 {
     uint data[8];
-    int byteOffset = 0;
-}
+    int byteOffset;
+};
 
 void streamInsertBytes(in out Stream stream, uint bytes, int byteCount)
 {
-    const int index = floor(stream.byteOffset / UINT_SIZE);
+    const int index = int(floor(stream.byteOffset / UINT_SIZE));
     const int localOffset = stream.byteOffset % UINT_SIZE;
     const int localSpaceRemaining = UINT_SIZE - localOffset;
-    if (localSpaceRemaining > elementCount)
+    if (localSpaceRemaining > byteCount)
     {
         // direction insertion, we do not have to split our packedVector.
-        bitfieldInsert(stream.data[index], localOffset * BYTES, byteCount * BYTES);
+        stream.data[index] = bitfieldInsert(stream.data[index], bytes, localOffset * BYTES, byteCount * BYTES);
     }
     else
     {
@@ -30,8 +30,8 @@ void streamInsertBytes(in out Stream stream, uint bytes, int byteCount)
         const uint leftPart  = bitfieldExtract(bytes, 0 * BYTES,        leftSize * BYTES);
         const uint rightPart = bitfieldExtract(bytes, leftSize * BYTES, rightSize * BYTES);
 
-        bitfieldInsert(stream.data[index],      leftPart,  localOffset * BYTES, leftSize * BYTES);
-        bitfieldInsert(stream.data[index + 1],  rightPart, 0 * BYTES,           rightSize * BYTES);
+        stream.data[index]     = bitfieldInsert(stream.data[index],      leftPart,  localOffset * BYTES, leftSize * BYTES);
+        stream.data[index + 1] = bitfieldInsert(stream.data[index + 1],  rightPart, 0 * BYTES,           rightSize * BYTES);
     }
 
     stream.byteOffset += byteCount;
@@ -44,39 +44,55 @@ void streamPackUnorm(in out Stream stream, vec4 vector, int elementCount)
     streamInsertBytes(stream, packedVector, elementCount);
 }
 
+uint streamExtractBytes(in out Stream stream, int byteCount)
+{
+    const int index = int(floor(stream.byteOffset / UINT_SIZE));
+    const int localOffset = stream.byteOffset % UINT_SIZE;
+    const int localSpaceRemaining = UINT_SIZE - localOffset;
+
+    stream.byteOffset += byteCount;
+
+    if (localSpaceRemaining > byteCount)
+    {
+        // direct extraction.
+        return bitfieldExtract(stream.data[index], localOffset * BYTES, byteCount * BYTES);
+    }
+    else
+    {
+        const int leftSize = localSpaceRemaining;
+        const int rightSize = byteCount - localSpaceRemaining;
+
+        const uint leftPart   = bitfieldExtract(stream.data[index], localOffset * BYTES, leftSize * BYTES);
+        const uint rightPart  = bitfieldExtract(stream.data[index + 1], 0 * BYTES, rightSize * BYTES);
+
+        uint result = bitfieldInsert(0, leftPart, 0 * BYTES, leftSize * BYTES);
+        result      = bitfieldInsert(result, rightPart, leftSize * BYTES, rightSize * BYTES);
+        return result;
+    }
+}
+
+vec4 streamUnpackUnorm(in out Stream stream, int elementCount)
+{
+    return unpackUnorm4x8(streamExtractBytes(stream, elementCount));
+}
+
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 void main()
 {
+    Stream stream;
+    stream.byteOffset = 0;
+
     const vec4 diffuse = vec4(0.9f, 0.5f, 0.3f, 0.f);
     const vec4 specular = vec4(1.f, 1.f, 1.f, 0.f);
 
-    uint a = packUnorm4x8(specular);
-    uint b = packUnorm4x8(diffuse);
-
-    uint bSplitFirstPart = bitfieldExtract(b, 0 * BYTES, 1 * BYTES);
-    uint bSplitSecondPart = bitfieldExtract(b, 1 * BYTES, 3 * BYTES);
-
-    uint sectionA = bitfieldInsert(a, bSplitFirstPart, 3 * BYTES, 1 * BYTES);
-    uint sectionB = bSplitSecondPart;
-
-    // This would go into the GBuffer.
-    uvec4 chunk = uvec4(sectionA, sectionB, a, b);
+    streamPackUnorm(stream, specular, 3);
+    streamPackUnorm(stream, diffuse, 3);
 
     // Unpacking - reverse of above.
-    uint outSectionA = chunk.x;
-    uint outSectionB = chunk.y;
-
-    uint outA = bitfieldExtract(outSectionA, 0 * BYTES, 3 * BYTES);
-    uint outFirstPartB = bitfieldExtract(outSectionA, 3 * BYTES, 1 * BYTES);
-    uint outSecondPartB = bitfieldExtract(outSectionB, 0 * BYTES, 3 * BYTES);
-//    uint outB = outFirstPartB >> 3 * BYTES + outSecondPartB;
-    // Don't rely on bit shifts because we don't know the endian'es.
-    uint outB = bitfieldInsert(0, outFirstPartB, 0 * BYTES, 1 * BYTES);
-    outB = bitfieldInsert(outB, outSecondPartB, 1 * BYTES, 3 * BYTES);
-
-    const vec4 outSpecular = unpackUnorm4x8(outA);
-    const vec4 outDiffuse = unpackUnorm4x8(outB);
+    stream.byteOffset = 0;
+    const vec3 outSpecular = streamUnpackUnorm(stream, 3).xyz;
+    const vec3 outDiffuse  = streamUnpackUnorm(stream, 3).xyz;
 
     // test this with easy uint values to float to make sure my understanding is correct.
-    imageStore(screen, ivec2(gl_GlobalInvocationID.xy), outDiffuse);
+    imageStore(screen, ivec2(gl_GlobalInvocationID.xy), vec4(outDiffuse, 0.f));
 }
