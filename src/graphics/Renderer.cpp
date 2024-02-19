@@ -51,9 +51,11 @@ Renderer::Renderer() :
     mLineShader = std::make_unique<Shader>(file::shaderPath() / "geometry/debug/Line.vert", file::shaderPath() / "geometry/debug/Line.frag");
 
     Shader testShader { file::shaderPath() / "test.comp" };
-    TextureBufferObject testTexture(glm::ivec2(8), GL_RGBA32F, graphics::filter::Linear, graphics::wrap::ClampToEdge);
+    const TextureArrayObject testTexture(glm::ivec2(8), 3, GL_RGBA32UI, graphics::filter::Nearest, graphics::wrap::ClampToEdge);
+    const TextureBufferObject secondTexture(glm::ivec2(8), GL_RGBA32F, graphics::filter::Nearest, graphics::wrap::ClampToEdge);
     testShader.bind();
-    testShader.image("screen", testTexture.getId(), testTexture.getFormat(), 0, GL_WRITE_ONLY);
+    testShader.image("storageGBuffer", testTexture.getId(), testTexture.getFormat(), 0, true, GL_READ_WRITE);
+    testShader.image("testScreen", secondTexture.getId(), secondTexture.getFormat(), 1, false, GL_WRITE_ONLY);
     glDispatchCompute(1, 1, 1);
 
     mBrdfLutTextureBuffer = generateBrdfLut(glm::ivec2(64));
@@ -960,7 +962,7 @@ std::unique_ptr<TextureBufferObject> Renderer::generateBrdfLut(const glm::ivec2 
     
     // auxiliaryFrameBuffer.bind();
     mIntegrateBrdfShader.bind();
-    mIntegrateBrdfShader.image("lut", lut->getId(), lut->getFormat(), 5);
+    mIntegrateBrdfShader.image("lut", lut->getId(), lut->getFormat(), 5, false);
     const glm::uvec2 groupSize = glm::ceil(static_cast<glm::vec2>(size / 8));
     glDispatchCompute(groupSize.x, groupSize.y, 1);
     // auxiliaryFrameBuffer.attach(lut.get(), 0);

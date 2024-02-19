@@ -108,12 +108,12 @@ void Shader::set(const std::string &uniformName, const glm::mat4 *values, const 
     glProgramUniformMatrix4fv(mId, getLocation(uniformName), count, GL_FALSE, glm::value_ptr(values[0]));
 }
 
-void Shader::image(const std::string &uniformName, const uint32_t textureId, const GLenum textureFormat, const int bindPoint, const uint32_t permissions, const int level)
+void Shader::image(const std::string &uniformName, const uint32_t textureId, const GLenum textureFormat, const int bindPoint, const bool isArray, const uint32_t permissions, const int level)
 {
     if (textureFormat == GL_RGB16F || textureFormat == GL_RGB32F)
         WARN("Images do not support 3 component vectors.");
 
-    glBindImageTexture(bindPoint, textureId, level, GL_FALSE, 0, permissions, textureFormat);
+    glBindImageTexture(bindPoint, textureId, level, isArray ? GL_TRUE : GL_FALSE, 0, permissions, textureFormat);
     set(uniformName, bindPoint);
 }
 

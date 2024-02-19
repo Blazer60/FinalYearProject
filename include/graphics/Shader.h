@@ -85,7 +85,7 @@ public:
     
     void set(const std::string &uniformName, const glm::mat4 *values, int count);
 
-    void image(const std::string &uniformName, uint32_t textureId, GLenum textureFormat, int bindPoint, uint32_t permissions=GL_READ_WRITE, int level=0);
+    void image(const std::string &uniformName, uint32_t textureId, GLenum textureFormat, int bindPoint, bool isArray, uint32_t permissions=GL_READ_WRITE, int level=0);
 
     void block(const std::string &blockName, unsigned int blockBindPoint);
     

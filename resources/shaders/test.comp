@@ -1,15 +1,25 @@
 #version 460 core
 
-layout(binding = 0, rgba32f) uniform image2D screen;
+layout(binding = 0, rgba32ui) uniform uimage2DArray storageGBuffer;
+layout(binding = 1, rgba32f) uniform image2D testScreen;
 
 #define BYTES 8
 #define UINT_SIZE 4
+#define DATA_STREAM_SIZE 8
+#define GBUFFER_LAYER_COUNT 3
 
 struct Stream
 {
-    uint data[8];
-    int byteOffset;
+    // Do not touch data. Use the helper functions to get information.
+    uint data[DATA_STREAM_SIZE];
+    int byteOffset;  // Should start at 1.
 };
+
+void streamRecordUintCount(in out Stream stream)
+{
+    const uint uintCount = uint(ceil(stream.byteOffset / UINT_SIZE));
+    stream.data[0] = bitfieldInsert(stream.data[0], uintCount, 0 * BYTES, 1 * BYTES);
+}
 
 void streamInsertBytes(in out Stream stream, uint bytes, int byteCount)
 {
@@ -37,7 +47,7 @@ void streamInsertBytes(in out Stream stream, uint bytes, int byteCount)
     stream.byteOffset += byteCount;
 }
 
-void streamPackUnorm(in out Stream stream, vec4 vector, int elementCount)
+void streamPackUnorm4x8(in out Stream stream, vec4 vector, int elementCount)
 {
     uint packedVector = packUnorm4x8(vector);
 
@@ -71,28 +81,79 @@ uint streamExtractBytes(in out Stream stream, int byteCount)
     }
 }
 
-vec4 streamUnpackUnorm(in out Stream stream, int elementCount)
+vec4 streamUnpackUnorm4x8(in out Stream stream, int elementCount)
 {
     return unpackUnorm4x8(streamExtractBytes(stream, elementCount));
+}
+
+void streamPushToStorageGBuffer(Stream stream, ivec2 coord)
+{
+    streamRecordUintCount(stream);
+    const int uintCount = int(ceil(stream.byteOffset / UINT_SIZE));
+
+    for (int index = 0; index < uintCount; index += 4)
+    {
+        imageStore(storageGBuffer, ivec3(coord, int(floor(index / 4))), uvec4(stream.data[index], stream.data[index + 1], stream.data[index + 2], stream.data[index + 3]));
+    }
+}
+
+Stream streamPullFromStorageGBuffer(ivec2 coord)
+{
+    Stream stream;
+    stream.byteOffset = 0;
+
+    const uvec4 slice = imageLoad(storageGBuffer, ivec3(coord, 0));
+    stream.data[0] = slice.x;
+    stream.data[1] = slice.y;
+    stream.data[2] = slice.z;
+    stream.data[3] = slice.w;
+    const uint uintCount = streamExtractBytes(stream, 1);
+
+    int i = 1;
+    for (int index = 4; index < uintCount * 4; index += 4)
+    {
+        const uvec4 slice = imageLoad(storageGBuffer, ivec3(coord, i++));
+        stream.data[index + 0] = slice.x;
+        stream.data[index + 1] = slice.y;
+        stream.data[index + 2] = slice.z;
+        stream.data[index + 3] = slice.w;
+    }
+
+    return stream;
 }
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 void main()
 {
     Stream stream;
-    stream.byteOffset = 0;
+    stream.byteOffset = 1;
+
+    const vec4 junk0 = vec4(1.f);
+    const vec4 junk1 = vec4(0.5f);
+    const vec4 junk2 = vec4(0.5f);
+    const vec4 junk3 = vec4(1.0f);
 
     const vec4 diffuse = vec4(0.9f, 0.5f, 0.3f, 0.f);
     const vec4 specular = vec4(1.f, 1.f, 1.f, 0.f);
 
-    streamPackUnorm(stream, specular, 3);
-    streamPackUnorm(stream, diffuse, 3);
+    streamPackUnorm4x8(stream, junk0, 4);
+    streamPackUnorm4x8(stream, junk1, 4);
+    streamPackUnorm4x8(stream, junk2, 4);
+    streamPackUnorm4x8(stream, junk3, 4);
+    streamPackUnorm4x8(stream, specular, 3);
+    streamPackUnorm4x8(stream, diffuse, 3);
 
-    // Unpacking - reverse of above.
-    stream.byteOffset = 0;
-    const vec3 outSpecular = streamUnpackUnorm(stream, 3).xyz;
-    const vec3 outDiffuse  = streamUnpackUnorm(stream, 3).xyz;
+    streamPushToStorageGBuffer(stream, ivec2(gl_GlobalInvocationID.xy));
+    groupMemoryBarrier();
+    // Unpacking
+    stream = streamPullFromStorageGBuffer(ivec2(gl_GlobalInvocationID.xy));
 
-    // test this with easy uint values to float to make sure my understanding is correct.
-    imageStore(screen, ivec2(gl_GlobalInvocationID.xy), vec4(outDiffuse, 0.f));
+    streamUnpackUnorm4x8(stream, 4);
+    streamUnpackUnorm4x8(stream, 4);
+    streamUnpackUnorm4x8(stream, 4);
+    streamUnpackUnorm4x8(stream, 4);
+    const vec3 outSpecular = streamUnpackUnorm4x8(stream, 3).xyz;
+    const vec3 outDiffuse  = streamUnpackUnorm4x8(stream, 3).xyz;
+
+    imageStore(testScreen, ivec2(gl_GlobalInvocationID.xy), vec4(outDiffuse, 0.f));
 }
