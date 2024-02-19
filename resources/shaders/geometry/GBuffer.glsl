@@ -6,7 +6,7 @@ layout(binding = 0, rgba32ui) uniform uimage2DArray storageGBuffer;
 
 #define BYTES 8
 #define UINT_SIZE 4
-#define DATA_STREAM_SIZE 8
+#define DATA_STREAM_SIZE 12
 #define GBUFFER_LAYER_COUNT 3
 
 struct GBuffer
@@ -166,4 +166,18 @@ void pushToStorageGBuffer(GBuffer gBuffer, ivec2 coord)
     streamPackUnorm4x8(stream, vec4(gBuffer.emissive, 0.f), 3);
 
     streamPushToStorageGBuffer(stream, coord);
+}
+
+GBuffer pullFromStorageGBuffer(ivec2 coord)
+{
+    Stream stream = streamPullFromStorageGBuffer(coord);
+
+    GBuffer gBuffer;
+    gBuffer.normal      = streamUnpackNormal(stream);
+    gBuffer.roughness   = streamUnpackUnorm4x8(stream, 1).x;
+    gBuffer.diffuse     = streamUnpackUnorm4x8(stream, 3).xyz;
+    gBuffer.specular    = streamUnpackUnorm4x8(stream, 3).xyz;
+    gBuffer.emissive    = streamUnpackUnorm4x8(stream, 3).xyz;
+
+    return gBuffer;
 }

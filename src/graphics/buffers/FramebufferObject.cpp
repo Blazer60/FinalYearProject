@@ -30,7 +30,7 @@ FramebufferObject::~FramebufferObject()
     mFboId = 0;
 }
 
-void FramebufferObject::attach(const TextureBufferObject *textureBufferObject, int bindPoint, int mipLevel)
+void FramebufferObject::attach(const TextureBufferObject *textureBufferObject, const int bindPoint, const int mipLevel)
 {
     glNamedFramebufferTexture(mFboId, GL_COLOR_ATTACHMENT0 + bindPoint, textureBufferObject->getId(), mipLevel);
     
@@ -47,10 +47,19 @@ void FramebufferObject::attach(const RenderBufferObject *const renderBufferObjec
     validate();
 }
 
-void FramebufferObject::attach(const Cubemap *cubemap, int bindPoint, int layer, int mipLevel)
+void FramebufferObject::attach(const Cubemap *cubemap, const int bindPoint, const int layer, const int mipLevel)
 {
     glNamedFramebufferTextureLayer(mFboId, GL_COLOR_ATTACHMENT0 + bindPoint, cubemap->getId(), mipLevel, layer);
     
+    mAttachments.emplace_back(GL_COLOR_ATTACHMENT0 + bindPoint);
+    glNamedFramebufferDrawBuffers(mFboId, static_cast<int>(mAttachments.size()), &mAttachments[0]);
+    validate();
+}
+
+void FramebufferObject::attach(const TextureArrayObject* textureArrayObject, const int bindPoint, const int layer, const int mipLevel)
+{
+    glNamedFramebufferTextureLayer(mFboId, GL_COLOR_ATTACHMENT0 + bindPoint, textureArrayObject->getId(), mipLevel, layer);
+
     mAttachments.emplace_back(GL_COLOR_ATTACHMENT0 + bindPoint);
     glNamedFramebufferDrawBuffers(mFboId, static_cast<int>(mAttachments.size()), &mAttachments[0]);
     validate();
@@ -75,7 +84,7 @@ void FramebufferObject::attachDepthBuffer(const TextureBufferObject *textureBuff
     validate();
 }
 
-void FramebufferObject::attachDepthBuffer(const TextureArrayObject &textureArrayObject, int layer, int mipLevel)
+void FramebufferObject::attachDepthBuffer(const TextureArrayObject &textureArrayObject, const int layer, const int mipLevel)
 {
     if (!(textureArrayObject.getFormat()  == GL_DEPTH_COMPONENT
           || textureArrayObject.getFormat() == GL_DEPTH_COMPONENT16
@@ -174,6 +183,11 @@ void FramebufferObject::clear(const glm::vec4 &clearColour)
     }
     glClearNamedFramebufferfv(mFboId, GL_DEPTH, 0, &mDepthClearValue);
     graphics::popDebugGroup();
+}
+
+void FramebufferObject::clear(const int bindPoint, const glm::vec4& clearColour)
+{
+    glClearNamedFramebufferfv(mFboId, GL_COLOR, bindPoint, glm::value_ptr(clearColour));
 }
 
 unsigned int FramebufferObject::getFboName() const

@@ -116,8 +116,11 @@ void Renderer::initTextureRenderBuffers()
     mGeometryFramebuffer->attach(mAlbedoTextureBuffer.get(),      2);
     mGeometryFramebuffer->attach(mEmissiveTextureBuffer.get(),    3);
     mGeometryFramebuffer->attach(mRoughnessTextureBuffer.get(),   4);
-    mGeometryFramebuffer->attach(mMetallicTextureBuffer.get(),    5);
-    
+    // mGeometryFramebuffer->attach(mMetallicTextureBuffer.get(),    5);
+    mGeometryFramebuffer->attach(mGBufferTexture.get(), 5, 0);
+    mGeometryFramebuffer->attach(mGBufferTexture.get(), 6, 1);
+    mGeometryFramebuffer->attach(mGBufferTexture.get(), 7, 2);
+
     mGeometryFramebuffer->attachDepthBuffer(mDepthTextureBuffer.get());
     
     // Lighting.
@@ -168,6 +171,8 @@ void Renderer::detachTextureRenderBuffersFromFrameBuffers() const
     mGeometryFramebuffer->detach(3);
     mGeometryFramebuffer->detach(4);
     mGeometryFramebuffer->detach(5);
+    mGeometryFramebuffer->detach(6);
+    mGeometryFramebuffer->detach(7);
     mGeometryFramebuffer->detachDepthBuffer();
     
     mLightFramebuffer->detach(0);
@@ -311,7 +316,15 @@ void Renderer::render()
         graphics::pushDebugGroup("Geometry Pass");
         
         mGeometryFramebuffer->bind();
-        mGeometryFramebuffer->clear(camera.clearColour);
+        // mGeometryFramebuffer->clear(camera.clearColour);
+        mGeometryFramebuffer->clear(0, camera.clearColour);
+        mGeometryFramebuffer->clear(1, camera.clearColour);
+        mGeometryFramebuffer->clear(2, camera.clearColour);
+        mGeometryFramebuffer->clear(3, camera.clearColour);
+        mGeometryFramebuffer->clear(4, camera.clearColour);
+        // mGeometryFramebuffer->clear(5, camera.clearColour);
+        mGeometryFramebuffer->clearDepthBuffer();
+        mGBufferTexture->clear();
         
         const glm::mat4 cameraProjectionMatrix = glm::perspective(camera.fovY, window::aspectRatio(), camera.nearClipDistance, camera.farClipDistance);
         const glm::mat4 vpMatrix = cameraProjectionMatrix * camera.viewMatrix;
@@ -320,7 +333,7 @@ void Renderer::render()
         mCamera->position = glm::vec3(glm::inverse(camera.viewMatrix) * glm::vec4(glm::vec3(0.f), 1.f));
         mCamera->exposure = exposure;
         mCamera.updateGlsl();
-        
+
         for (const auto &rqo : mRenderQueue)
         {
             if (rqo.shader.expired())
@@ -356,11 +369,8 @@ void Renderer::render()
         
         mDirectionalLightShader.bind();
 
-        mDirectionalLightShader.set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 0);
-        mDirectionalLightShader.set("u_position_texture", mPositionTextureBuffer->getId(), 1);
-        mDirectionalLightShader.set("u_normal_texture", mNormalTextureBuffer->getId(), 2);
-        mDirectionalLightShader.set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 3);
-        mDirectionalLightShader.set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
+        mDirectionalLightShader.set("u_position_texture", mPositionTextureBuffer->getId(), 0);
+        mDirectionalLightShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
 
         glBindVertexArray(mFullscreenTriangle.vao());
 
@@ -374,7 +384,7 @@ void Renderer::render()
             mDirectionalLightBlock->cascadeCount = static_cast<int>(directionalLight.cascadeDepths.size());
 
             mDirectionalLightBlock.updateGlsl();
-            mDirectionalLightShader.set("u_shadow_map_texture", directionalLight.shadowMap->getId(), 5);
+            mDirectionalLightShader.set("u_shadow_map_texture", directionalLight.shadowMap->getId(), 1);
 
             glDrawElements(GL_TRIANGLES, mFullscreenTriangle.indicesCount(), GL_UNSIGNED_INT, nullptr);
         }
@@ -386,12 +396,9 @@ void Renderer::render()
         
         mPointLightShader->bind();
         
-        mPointLightShader->set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 0);
-        mPointLightShader->set("u_position_texture", mPositionTextureBuffer->getId(), 1);
-        mPointLightShader->set("u_normal_texture", mNormalTextureBuffer->getId(), 2);
-        mPointLightShader->set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 3);
-        mPointLightShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
-        
+        mPointLightShader->set("u_position_texture", mPositionTextureBuffer->getId(), 0);
+        mPointLightShader->image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
+
         glBindVertexArray(mUnitSphere.vao());
         
         for (const auto &pointLight : mPointLightQueue)
@@ -406,7 +413,7 @@ void Renderer::render()
             mPointLightBlock->mvpMatrix = vpMatrix * pointLightModelMatrix;
             mPointLightBlock.updateGlsl();
 
-            mPointLightShader->set("u_shadow_map_texture", pointLight.shadowMap->getId(), 5);
+            mPointLightShader->set("u_shadow_map_texture", pointLight.shadowMap->getId(), 1);
 
             glDrawElements(GL_TRIANGLES, mUnitSphere.indicesCount(), GL_UNSIGNED_INT, nullptr);
         }
@@ -419,15 +426,12 @@ void Renderer::render()
         
         mSpotlightShader->bind();
         
-        mSpotlightShader->set("u_albedo_texture", mAlbedoTextureBuffer->getId(), 0);
-        mSpotlightShader->set("u_position_texture", mPositionTextureBuffer->getId(), 1);
-        mSpotlightShader->set("u_normal_texture", mNormalTextureBuffer->getId(), 2);
-        mSpotlightShader->set("u_roughness_texture", mRoughnessTextureBuffer->getId(), 3);
-        mSpotlightShader->set("u_metallic_texture", mMetallicTextureBuffer->getId(), 4);
-        
+        mSpotlightShader->set("u_position_texture", mPositionTextureBuffer->getId(), 0);
+        mPointLightShader->image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
+
         for (const graphics::Spotlight &spotLight : mSpotlightQueue)
         {
-            mSpotlightShader->set("u_shadow_map_texture", spotLight.shadowMap->getId(), 5);
+            mSpotlightShader->set("u_shadow_map_texture", spotLight.shadowMap->getId(), 1);
 
             mSpotlightBlock->position = glm::vec4(spotLight.position, 1.f);
             mSpotlightBlock->direction = glm::vec4(spotLight.direction, 0.f);
@@ -448,61 +452,62 @@ void Renderer::render()
         
         PROFILE_SCOPE_END(spotLightTimer);
         graphics::popDebugGroup();
-        PROFILE_SCOPE_BEGIN(screenSpace, "Reflections");
-        graphics::pushDebugGroup("Reflections");
-
-        const glm::mat4 scaleTextureSpace = glm::scale(glm::mat4(1.f), glm::vec3(0.5f, 0.5f, 1.f));
-        const glm::mat4 translateTextureSpace = glm::translate(glm::mat4(1.f), glm::vec3(0.5f, 0.5f, 0.f));
-        const glm::mat4 scaleFrameBufferSpace = glm::scale(glm::mat4(1.f), glm::vec3(mLightTextureBuffer->getSize().x, mLightTextureBuffer->getSize().y, 1));
-
-        const glm::mat4 viewToPixelCoordMatrix = scaleFrameBufferSpace * translateTextureSpace * scaleTextureSpace * cameraProjectionMatrix;
-        mSsrBlock->projection = viewToPixelCoordMatrix;
-        mSsrBlock->zNear = -camera.nearClipDistance;
-        mSsrBlock->colourMaxLod = static_cast<int>(mDeferredLightingTextureBuffer->getMipLevels());
-        mSsrBlock->luminanceMultiplier = mIblLuminanceMultiplier;
-        mSsrBlock->maxDistanceFalloff = mRoughnessFallOff;
-        mSsrBlock.updateGlsl();
-
-        // Render at half-resolution for performance.
-        glViewport(0, 0, mSsrDataTextureBuffer->getSize().x, mSsrDataTextureBuffer->getSize().y);
-        mSsrFramebuffer->bind();
-        mSsrFramebuffer->clear(glm::vec4(0.f));
-        mScreenSpaceReflectionsShader->bind();
-
-        mDepthTextureBuffer->setBorderColour(glm::vec4(0.f, 0.f, 0.f, 1.f));
-
-        mScreenSpaceReflectionsShader->set("u_positionTexture", mPositionTextureBuffer->getId(), 0);
-        mScreenSpaceReflectionsShader->set("u_normalTexture", mNormalTextureBuffer->getId(), 1);
-        mScreenSpaceReflectionsShader->set("u_depthTexture", mDepthTextureBuffer->getId(), 2);
-        mScreenSpaceReflectionsShader->set("u_roughnessTexture", mRoughnessTextureBuffer->getId(), 3);
-
-        drawFullscreenTriangleNow();
-
-        glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
-
-        mReflectionFramebuffer->bind();
-        mReflectionFramebuffer->clear(glm::vec4(0.f));
-        mColourResolveShader->bind();
-
-        mColourResolveShader->set("u_albedoTexture",             mAlbedoTextureBuffer->getId(),     0);
-        mColourResolveShader->set("u_positionTexture",           mPositionTextureBuffer->getId(),   1);
-        mColourResolveShader->set("u_normalTexture",             mNormalTextureBuffer->getId(),     2);
-        mColourResolveShader->set("u_roughnessTexture",          mRoughnessTextureBuffer->getId(),  3);
-        mColourResolveShader->set("u_metallicTexture",           mMetallicTextureBuffer->getId(),   4);
-        mColourResolveShader->set("u_reflectionDataTexture",     mSsrDataTextureBuffer->getId(),    5);
-        mColourResolveShader->set("u_colourTexture",             mDeferredLightingTextureBuffer->getId(), 6);
-        mColourResolveShader->set("u_depthTexture",              mDepthTextureBuffer->getId(),      7);
-        mColourResolveShader->set("u_irradianceTexture",         mIrradianceMap->getId(),           8);
-        mColourResolveShader->set("u_pre_filterTexture",         mPreFilterMap->getId(),            9);
-        mColourResolveShader->set("u_brdfLutTexture",            mBrdfLutTextureBuffer->getId(),    10);
-        mColourResolveShader->set("u_emissiveTexture", mEmissiveTextureBuffer->getId(), 11);
-
-        drawFullscreenTriangleNow();
-
-        glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
-        
-        PROFILE_SCOPE_END(screenSpace);
-        graphics::popDebugGroup();
+        // todo: ibl
+        // PROFILE_SCOPE_BEGIN(screenSpace, "Reflections");
+        // graphics::pushDebugGroup("Reflections");
+        //
+        // const glm::mat4 scaleTextureSpace = glm::scale(glm::mat4(1.f), glm::vec3(0.5f, 0.5f, 1.f));
+        // const glm::mat4 translateTextureSpace = glm::translate(glm::mat4(1.f), glm::vec3(0.5f, 0.5f, 0.f));
+        // const glm::mat4 scaleFrameBufferSpace = glm::scale(glm::mat4(1.f), glm::vec3(mLightTextureBuffer->getSize().x, mLightTextureBuffer->getSize().y, 1));
+        //
+        // const glm::mat4 viewToPixelCoordMatrix = scaleFrameBufferSpace * translateTextureSpace * scaleTextureSpace * cameraProjectionMatrix;
+        // mSsrBlock->projection = viewToPixelCoordMatrix;
+        // mSsrBlock->zNear = -camera.nearClipDistance;
+        // mSsrBlock->colourMaxLod = static_cast<int>(mDeferredLightingTextureBuffer->getMipLevels());
+        // mSsrBlock->luminanceMultiplier = mIblLuminanceMultiplier;
+        // mSsrBlock->maxDistanceFalloff = mRoughnessFallOff;
+        // mSsrBlock.updateGlsl();
+        //
+        // // Render at half-resolution for performance.
+        // glViewport(0, 0, mSsrDataTextureBuffer->getSize().x, mSsrDataTextureBuffer->getSize().y);
+        // mSsrFramebuffer->bind();
+        // mSsrFramebuffer->clear(glm::vec4(0.f));
+        // mScreenSpaceReflectionsShader->bind();
+        //
+        // mDepthTextureBuffer->setBorderColour(glm::vec4(0.f, 0.f, 0.f, 1.f));
+        //
+        // mScreenSpaceReflectionsShader->set("u_positionTexture", mPositionTextureBuffer->getId(), 0);
+        // mScreenSpaceReflectionsShader->set("u_normalTexture", mNormalTextureBuffer->getId(), 1);
+        // mScreenSpaceReflectionsShader->set("u_depthTexture", mDepthTextureBuffer->getId(), 2);
+        // mScreenSpaceReflectionsShader->set("u_roughnessTexture", mRoughnessTextureBuffer->getId(), 3);
+        //
+        // drawFullscreenTriangleNow();
+        //
+        // glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
+        //
+        // mReflectionFramebuffer->bind();
+        // mReflectionFramebuffer->clear(glm::vec4(0.f));
+        // mColourResolveShader->bind();
+        //
+        // mColourResolveShader->set("u_albedoTexture",             mAlbedoTextureBuffer->getId(),     0);
+        // mColourResolveShader->set("u_positionTexture",           mPositionTextureBuffer->getId(),   1);
+        // mColourResolveShader->set("u_normalTexture",             mNormalTextureBuffer->getId(),     2);
+        // mColourResolveShader->set("u_roughnessTexture",          mRoughnessTextureBuffer->getId(),  3);
+        // mColourResolveShader->set("u_metallicTexture",           mMetallicTextureBuffer->getId(),   4);
+        // mColourResolveShader->set("u_reflectionDataTexture",     mSsrDataTextureBuffer->getId(),    5);
+        // mColourResolveShader->set("u_colourTexture",             mDeferredLightingTextureBuffer->getId(), 6);
+        // mColourResolveShader->set("u_depthTexture",              mDepthTextureBuffer->getId(),      7);
+        // mColourResolveShader->set("u_irradianceTexture",         mIrradianceMap->getId(),           8);
+        // mColourResolveShader->set("u_pre_filterTexture",         mPreFilterMap->getId(),            9);
+        // mColourResolveShader->set("u_brdfLutTexture",            mBrdfLutTextureBuffer->getId(),    10);
+        // mColourResolveShader->set("u_emissiveTexture", mEmissiveTextureBuffer->getId(), 11);
+        //
+        // drawFullscreenTriangleNow();
+        //
+        // glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
+        //
+        // PROFILE_SCOPE_END(screenSpace);
+        // graphics::popDebugGroup();
         PROFILE_SCOPE_BEGIN(deferredTimer, "Skybox Pass");
         graphics::pushDebugGroup("Combine + Skybox Pass");
         

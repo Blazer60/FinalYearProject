@@ -39,6 +39,7 @@ public:
     void attach(const TextureBufferObject *textureBufferObject, int bindPoint, int mipLevel = 0);
     void attach(const RenderBufferObject *renderBufferObject) const;
     void attach(const Cubemap *cubemap, int bindPoint, int layer, int mipLevel = 0);
+    void attach(const TextureArrayObject *textureArrayObject, int bindPoint, int layer, int mipLevel = 0);
     void attachDepthBuffer(const TextureBufferObject *textureBufferObject, int mipLevel = 0);
     void attachDepthBuffer(const TextureArrayObject &textureArrayObject, int layer = 0, int mipLevel = 0);
     void attachDepthBuffer(const Cubemap &cubemap, int layer = 0, int mipLevel = 0);
@@ -47,7 +48,8 @@ public:
     void detachRenderBuffer() const;
     void detachDepthBuffer() const;
     void clear(const glm::vec4 &clearColour=glm::vec4(0.f, 0.f, 0.f, 1.f));
-    
+    void clear(int bindPoint, const glm::vec4 &clearColour=glm::vec4(0.f, 0.f, 0.f, 1.f));
+
     /**
      * @brief Only clears the depth buffer. This exists for cpu performance. clear() = ~0.2ms and
      * clearDepthBuffer() = <0.01ms

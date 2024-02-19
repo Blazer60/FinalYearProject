@@ -26,6 +26,7 @@ public:
     ~TextureArrayObject();
     
     void setBorderColour(const glm::vec4 &colour) const;
+    void clear(const glm::uvec4 &clearColour=glm::uvec4(0)) const;
     
     [[nodiscard]] uint32_t getId() const;
     [[nodiscard]] glm::ivec2 getSize() const;

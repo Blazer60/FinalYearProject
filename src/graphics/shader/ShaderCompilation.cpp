@@ -87,6 +87,9 @@ namespace graphics
             for (const auto &includePath : currentShader.includePaths)
             {
                 const auto it = std::find_if(mInformation.begin(), mInformation.end(), [&includePath](const ShaderInformation &lhs) { return lhs.path == includePath; });
+                if (it == mInformation.begin())
+                    continue;  // Already at the top. Splice destory the array otherwise.
+
                 mInformation.splice(mInformation.begin(), mInformation, it, std::next(it));
                 if (sorted.count(&*it) == 0)
                     toSort.emplace(&*it);

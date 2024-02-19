@@ -31,7 +31,10 @@ layout(location = 1) out vec3 o_normal;
 layout(location = 2) out vec3 o_albedo;
 layout(location = 3) out vec3 o_emissive;
 layout(location = 4) out float o_roughness;
-layout(location = 5) out float o_metallic;
+//layout(location = 5) out float o_metallic;
+layout(location = 5) out uvec4 oGBuffer0;
+layout(location = 6) out uvec4 oGBuffer1;
+layout(location = 7) out uvec4 oGBuffer2;
 
 
 vec3 sRgbToLinear(vec3 sRgb)
@@ -96,9 +99,10 @@ void main()
         o_roughness = u_roughness;
     o_roughness = max(0.02f, o_roughness);
 
-    o_metallic = texture(u_metallic_texture, uv).r;
-    if (o_metallic <= 0.f)
-        o_metallic = u_metallic;
+    int o_metallic = 0;
+//    o_metallic = texture(u_metallic_texture, uv).r;
+//    if (o_metallic <= 0.f)
+//        o_metallic = u_metallic;
 
     if (texture_colour == vec3(0.f))
         texture_colour = vec3(1.f);
@@ -119,6 +123,18 @@ void main()
     gBuffer.normal = o_normal;
     gBuffer.roughness = o_roughness;
 
-    const ivec2 coord = ivec2(imageSize(storageGBuffer).xy * vScreenUv.xy + vec2(0.5f));
-    pushToStorageGBuffer(gBuffer, coord);
+    const ivec2 coord = ivec2(imageSize(storageGBuffer).xy * vScreenUv.xy);
+
+    Stream stream;
+    stream.byteOffset = 1;
+
+    streamPackNormal(stream, gBuffer.normal);
+    streamPackUnorm4x8(stream, vec4(gBuffer.roughness, 0.f, 0.f, 0.f), 1);
+    streamPackUnorm4x8(stream, vec4(gBuffer.diffuse, 0.f), 3);
+    streamPackUnorm4x8(stream, vec4(gBuffer.specular, 0.f), 3);
+    streamPackUnorm4x8(stream, vec4(gBuffer.emissive, 0.f), 3);
+
+    oGBuffer0.xyzw = uvec4(stream.data[0], stream.data[1], stream.data[2], stream.data[3]);
+    oGBuffer1.xyzw = uvec4(stream.data[4], stream.data[5], stream.data[6], stream.data[7]);
+    oGBuffer2.xyzw = uvec4(stream.data[8], stream.data[9], stream.data[10], stream.data[11]);
 }

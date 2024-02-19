@@ -3,15 +3,12 @@
 #include "../interfaces/CameraBlock.h"
 #include "../interfaces/SpotlightBlock.h"
 #include "Brdf.glsl"
+#include "../geometry/GBuffer.glsl"
 
 in vec2 v_uv;
 
-uniform sampler2D u_albedo_texture;
-uniform sampler2D u_position_texture;
-uniform sampler2D u_normal_texture;
-uniform sampler2D u_roughness_texture;
-uniform sampler2D u_metallic_texture;
-uniform sampler2D u_shadow_map_texture;
+layout(binding = 0) uniform sampler2D u_position_texture;
+layout(binding = 1) uniform sampler2D u_shadow_map_texture;
 
 out layout(location = 0) vec3 o_colour;
 
@@ -70,14 +67,13 @@ float getAngleAttenuation(vec3 light_vector, float light_angle_scale, float ligh
 
 void main()
 {
-    const vec3 albedo = texture(u_albedo_texture, v_uv).rgb;
+    const ivec2 coord = ivec2(floor(imageSize(storageGBuffer).xy * v_uv) + vec2(0.5f));
+    GBuffer gBuffer = pullFromStorageGBuffer(coord);
     const vec3 position = texture(u_position_texture, v_uv).rgb;
-    const float roughness = texture(u_roughness_texture, v_uv).r;
-    const float metallic = texture(u_metallic_texture, v_uv).r;
 
     const vec3 light_direction = cLight.position - position;
     const vec3 l = normalize(light_direction);
-    const vec3 n = normalize(texture(u_normal_texture, v_uv).rgb);
+    const vec3 n = gBuffer.normal;
     const vec3 v = normalize(camera.position - position);
     const vec3 h = normalize(l + v);
 
@@ -91,11 +87,11 @@ void main()
     brdf.lDotN = max(dot(l, n), 0.f);
     brdf.vDotH = max(dot(v, h), 0.f);
     brdf.nDotH = max(dot(n, h), 0.f);
-    brdf.albedo = albedo;
-    brdf.f0 = mix(vec3(0.04f), albedo, metallic);
-    brdf.roughness = roughness;
+    brdf.albedo = gBuffer.diffuse;
+    brdf.f0 = gBuffer.specular;
+    brdf.roughness = gBuffer.roughness;
 
-    const vec3 irradiance = calculateIrradiance(brdf, metallic);
+    const vec3 irradiance = calculateIrradiance(brdf);
 
     // Point light lighting calculation.
     float attenuation = 1.f;

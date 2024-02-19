@@ -40,6 +40,11 @@ void TextureArrayObject::setBorderColour(const glm::vec4 &colour) const
     glTextureParameterfv(mId, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(colour));
 }
 
+void TextureArrayObject::clear(const glm::uvec4 &clearColour) const
+{
+    glClearTexImage(mId, 0, GL_RGBA_INTEGER, GL_UNSIGNED_INT, glm::value_ptr(clearColour));
+}
+
 glm::ivec2 TextureArrayObject::getSize() const
 {
     return mSize;

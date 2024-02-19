@@ -1,6 +1,6 @@
 #version 460 core
 
-const float PI = 3.14159265359f;
+#include "../Maths.glsl"
 
 // Unreal's fresnel function using spherical gaussian approximation.
 vec3 fresnelSchlick(float vDotH, vec3 f0)
@@ -45,7 +45,7 @@ struct Brdf
     float nDotH;
 };
 
-vec3 calculateIrradiance(in Brdf brdf, float metallic)
+vec3 calculateIrradiance(Brdf brdf)
 {
     const vec3 fresnel = fresnelSchlick(brdf.vDotH, brdf.f0);
     const float distribution = distributionGgx(brdf.nDotH, brdf.roughness);
@@ -53,7 +53,7 @@ vec3 calculateIrradiance(in Brdf brdf, float metallic)
 
     const vec3 specular = distribution * geometry * fresnel / (4.f * brdf.vDotN * brdf.lDotN + 0.0001f);
 
-    const vec3 kD = (vec3(1.f) - fresnel) * (1.f - metallic);
+    const vec3 kD = (vec3(1.f) - fresnel);
     const vec3 diffuse = kD * brdf.albedo / PI;
 
     const vec3 irradiance = diffuse + specular;
