@@ -94,6 +94,7 @@ void Renderer::initFrameBuffers()
 void Renderer::initTextureRenderBuffers()
 {
     auto ssrSize = glm::ivec2(glm::vec2(window::bufferSize()) * glm::vec2(1.f / mReflectionDivideSize));
+    mGBufferTexture = std::make_unique<TextureArrayObject>(window::bufferSize(), 3, GL_RGBA32UI, graphics::filter::Nearest, graphics::wrap::ClampToEdge);
     mPositionTextureBuffer           = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
     mAlbedoTextureBuffer             = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
     mNormalTextureBuffer             = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16_SNORM,           GL_NEAREST, GL_NEAREST);
@@ -330,6 +331,7 @@ void Renderer::render()
             shader->set("u_mvp_matrix", vpMatrix * rqo.matrix);
             shader->set("u_model_matrix", rqo.matrix);
             shader->block("CameraBlock", mCamera.getBindPoint());
+            shader->image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_WRITE_ONLY);
             rqo.onDraw();
             glBindVertexArray(rqo.vao);
             glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);

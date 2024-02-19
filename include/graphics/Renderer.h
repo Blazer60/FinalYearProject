@@ -238,7 +238,8 @@ protected:
     SubMesh mFullscreenTriangle;
     SubMesh mUnitSphere;
     SubMesh mLine;
-    
+
+    std::unique_ptr<TextureArrayObject> mGBufferTexture;
     std::unique_ptr<TextureBufferObject> mAlbedoTextureBuffer;
     std::unique_ptr<TextureBufferObject> mDepthTextureBuffer;
     std::unique_ptr<TextureBufferObject> mLightTextureBuffer;

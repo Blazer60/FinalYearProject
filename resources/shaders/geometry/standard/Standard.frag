@@ -1,11 +1,14 @@
 #version 460
 
+#include "../GBuffer.glsl"
+
 in vec2 v_uv;
 in vec3 v_position_ws;
 in vec3 v_normal_ws;
 in mat3 v_tbn_matrix;
 in vec3 v_camera_position_ts;
 in vec3 v_position_ts;
+in vec2 vScreenUv;
 
 uniform vec3 u_ambient_colour;
 uniform sampler2D u_diffuse_texture;
@@ -108,5 +111,14 @@ void main()
     o_albedo = sRgbToLinear(u_ambient_colour * texture_colour);
     o_position = v_position_ws;
     o_emissive = u_emissive_colour;
-//    o_depth = gl_FragCoord.z;
+
+    GBuffer gBuffer;
+    gBuffer.emissive = o_emissive;
+    gBuffer.diffuse = o_albedo;
+    gBuffer.specular = mix(vec3(0.04f), o_albedo, o_metallic);
+    gBuffer.normal = o_normal;
+    gBuffer.roughness = o_roughness;
+
+    const ivec2 coord = ivec2(imageSize(storageGBuffer).xy * vScreenUv.xy + vec2(0.5f));
+    pushToStorageGBuffer(gBuffer, coord);
 }

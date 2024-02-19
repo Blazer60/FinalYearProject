@@ -14,7 +14,7 @@ int main()
 
     initComponentsForEngine();
 
-    core.setScene(std::make_unique<ExampleScene>());
+    core.setScene(load::scene( file::resourcePath() / "scenes/test2.pcy"));
 
     core.run();
     
