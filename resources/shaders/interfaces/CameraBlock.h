@@ -13,8 +13,11 @@
 struct CameraBlock
 {
     glm::mat4 viewMatrix;
+    glm::mat4 inverseVpMatrix;
     glm::vec3 position;
     float exposure;
+    float zNear;
+    float zFar;
 };
 
 #else
@@ -22,8 +25,11 @@ struct CameraBlock
 layout(std140) uniform CameraBlock
 {
     mat4 viewMatrix;
+    mat4 inverseVpMatrix;
     vec3 position;
     float exposure;
+    float zNear;
+    float zFar;
 } camera;
 
 #endif  // CPP

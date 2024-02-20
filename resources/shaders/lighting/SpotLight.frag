@@ -4,10 +4,11 @@
 #include "../interfaces/SpotlightBlock.h"
 #include "Brdf.glsl"
 #include "../geometry/GBuffer.glsl"
+#include "../Camera.glsl"
 
 in vec2 v_uv;
 
-layout(binding = 0) uniform sampler2D u_position_texture;
+layout(binding = 0) uniform sampler2D depthBufferTexture;
 layout(binding = 1) uniform sampler2D u_shadow_map_texture;
 
 out layout(location = 0) vec3 o_colour;
@@ -67,9 +68,11 @@ float getAngleAttenuation(vec3 light_vector, float light_angle_scale, float ligh
 
 void main()
 {
+    const float depth = texture(depthBufferTexture, v_uv).r;
+    const vec3 position = positionFromDepth(v_uv, depth);
+
     const ivec2 coord = ivec2(floor(imageSize(storageGBuffer).xy * v_uv) + vec2(0.5f));
     GBuffer gBuffer = pullFromStorageGBuffer(coord);
-    const vec3 position = texture(u_position_texture, v_uv).rgb;
 
     const vec3 light_direction = cLight.position - position;
     const vec3 l = normalize(light_direction);

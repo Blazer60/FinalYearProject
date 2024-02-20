@@ -240,15 +240,9 @@ protected:
     SubMesh mLine;
 
     std::unique_ptr<TextureArrayObject> mGBufferTexture;
-    std::unique_ptr<TextureBufferObject> mAlbedoTextureBuffer;
     std::unique_ptr<TextureBufferObject> mDepthTextureBuffer;
     std::unique_ptr<TextureBufferObject> mLightTextureBuffer;
-    std::unique_ptr<TextureBufferObject> mEmissiveTextureBuffer;
-    std::unique_ptr<TextureBufferObject> mNormalTextureBuffer;
-    std::unique_ptr<TextureBufferObject> mRoughnessTextureBuffer;
-    std::unique_ptr<TextureBufferObject> mMetallicTextureBuffer;
     std::unique_ptr<TextureBufferObject> mDeferredLightingTextureBuffer;
-    std::unique_ptr<TextureBufferObject> mPositionTextureBuffer;
     std::unique_ptr<TextureBufferObject> mBrdfLutTextureBuffer;
     std::unique_ptr<TextureBufferObject> mPrimaryImageBuffer;
     std::unique_ptr<TextureBufferObject> mAuxiliaryImageBuffer;

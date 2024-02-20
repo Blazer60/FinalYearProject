@@ -13,3 +13,8 @@ vec2 signNotZero(vec2 v)
     return vec2((v.x >= 0.f) ? 1.f : -1.f, (v.y >= 0.f) ? 1.f : 0.f);
 }
 // end.
+
+vec2 uvToNdc(vec2 uv)
+{
+    return 2.f * uv - vec2(1.f);
+}

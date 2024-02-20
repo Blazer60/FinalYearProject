@@ -51,9 +51,9 @@ protected:
 
     // Rendering.
     float       mEV100                  { 10.f };
-    float       mFarClip                { 1000.f };
+    float       mFarClip                { 100.f };
     float       mFovY                   { glm::radians(45.f) };
-    float       mNearClip               { 0.01f };
+    float       mNearClip               { 1.f };
     glm::mat4   mProjectionMatrix       { 1.f };
     glm::mat4   mViewMatrix             { 1.f };
     glm::mat4   mVpMatrix               { 1.f };

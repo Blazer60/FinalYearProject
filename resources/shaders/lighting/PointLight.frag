@@ -4,10 +4,11 @@
 #include "../interfaces/CameraBlock.h"
 #include "Brdf.glsl"
 #include "../geometry/GBuffer.glsl"
+#include "../Camera.glsl"
 
 in vec2 v_uv;
 
-layout(binding = 0) uniform sampler2D u_position_texture;
+layout(binding = 0) uniform sampler2D depthBufferTexture;
 layout(binding = 1) uniform samplerCube u_shadow_map_texture;
 
 out layout(location = 0) vec3 o_colour;
@@ -59,9 +60,11 @@ float getDistanceAttenuation(vec3 lightVector, float invSqrAttRadius)
 
 void main()
 {
+    const float depth = texture(depthBufferTexture, v_uv).r;
+    const vec3 position = positionFromDepth(v_uv, depth);
+
     const ivec2 coord = ivec2(floor(imageSize(storageGBuffer).xy * v_uv) + vec2(0.5f));
     GBuffer gBuffer = pullFromStorageGBuffer(coord);
-    const vec3 position = texture(u_position_texture, v_uv).rgb;
 
     const vec3 light_direction = cLight.position - position;
     const vec3 l = normalize(light_direction);
@@ -83,7 +86,8 @@ void main()
     // Point light lighting calculation.
     float attenuation = 1.f;
     attenuation *= getDistanceAttenuation(light_direction, cLight.invSqrRadius);
-    const float shadow_intensity = calculate_shadow_map(light_direction);
+//    const float shadow_intensity = calculate_shadow_map(light_direction);
+    const float shadow_intensity = 0.f;
     const vec3 radiance = attenuation * cLight.intensity * (1.f - shadow_intensity);
 
     o_colour = camera.exposure * irradiance * radiance * (4.f * PI) * brdf.lDotN;

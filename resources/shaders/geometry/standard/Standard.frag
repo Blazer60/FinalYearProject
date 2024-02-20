@@ -26,15 +26,9 @@ uniform int u_max_height_samples = 32;
 uniform float u_roughness;
 uniform float u_metallic;
 
-layout(location = 0) out vec3 o_position;
-layout(location = 1) out vec3 o_normal;
-layout(location = 2) out vec3 o_albedo;
-layout(location = 3) out vec3 o_emissive;
-layout(location = 4) out float o_roughness;
-//layout(location = 5) out float o_metallic;
-layout(location = 5) out uvec4 oGBuffer0;
-layout(location = 6) out uvec4 oGBuffer1;
-layout(location = 7) out uvec4 oGBuffer2;
+layout(location = 0) out uvec4 oGBuffer0;
+layout(location = 1) out uvec4 oGBuffer1;
+layout(location = 2) out uvec4 oGBuffer2;
 
 
 vec3 sRgbToLinear(vec3 sRgb)
@@ -94,27 +88,25 @@ void main()
     vec3 texture_colour = texture(u_diffuse_texture, uv).rgb;
     vec3 model_normal_direction = 2.f * texture(u_normal_texture, uv).rgb - vec3(1.f);
 
-    o_roughness = texture(u_roughness_texture, uv).r;
+    float o_roughness = texture(u_roughness_texture, uv).r;
     if (o_roughness <= 0.f)
         o_roughness = u_roughness;
     o_roughness = max(0.02f, o_roughness);
 
     int o_metallic = 0;
-//    o_metallic = texture(u_metallic_texture, uv).r;
-//    if (o_metallic <= 0.f)
-//        o_metallic = u_metallic;
 
     if (texture_colour == vec3(0.f))
         texture_colour = vec3(1.f);
 
+    vec3 o_normal = vec3(0.f);
     if (model_normal_direction == vec3(-1.f))
         o_normal = v_normal_ws;
     else
         o_normal = normalize(v_tbn_matrix * model_normal_direction);
 
-    o_albedo = sRgbToLinear(u_ambient_colour * texture_colour);
-    o_position = v_position_ws;
-    o_emissive = u_emissive_colour;
+    vec3 o_albedo = sRgbToLinear(u_ambient_colour * texture_colour);
+    vec3 o_position = v_position_ws;
+    vec3 o_emissive = u_emissive_colour;
 
     GBuffer gBuffer;
     gBuffer.emissive = o_emissive;

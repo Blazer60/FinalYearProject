@@ -95,15 +95,10 @@ void Renderer::initTextureRenderBuffers()
 {
     auto ssrSize = glm::ivec2(glm::vec2(window::bufferSize()) * glm::vec2(1.f / mReflectionDivideSize));
     mGBufferTexture = std::make_unique<TextureArrayObject>(window::bufferSize(), 3, GL_RGBA32UI, graphics::filter::Nearest, graphics::wrap::ClampToEdge);
-    mPositionTextureBuffer           = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
-    mAlbedoTextureBuffer             = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
-    mNormalTextureBuffer             = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16_SNORM,           GL_NEAREST, GL_NEAREST);
-    mEmissiveTextureBuffer           = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
-    mRoughnessTextureBuffer          = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_R16,                   GL_NEAREST, GL_NEAREST);
-    mMetallicTextureBuffer           = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_R16,                   GL_NEAREST, GL_NEAREST);
+    mDepthTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_DEPTH_COMPONENT32F,    graphics::filter::Nearest, graphics::wrap::ClampToBorder);
+
     mLightTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                graphics::filter::Nearest, graphics::wrap::ClampToEdge);
     mDeferredLightingTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                graphics::filter::LinearMipmapLinear, graphics::wrap::ClampToEdge, 8);
-    mDepthTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_DEPTH_COMPONENT32F,    graphics::filter::Nearest, graphics::wrap::ClampToBorder);
     mPrimaryImageBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
     mAuxiliaryImageBuffer            = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
     mSsrDataTextureBuffer            = std::make_unique<TextureBufferObject>(ssrSize,              GL_RGBA16F,               graphics::filter::Nearest, graphics::wrap::ClampToEdge);
@@ -111,15 +106,9 @@ void Renderer::initTextureRenderBuffers()
     mDebugTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16,                graphics::filter::Linear,  graphics::wrap::ClampToEdge);
     
     // Make sure that the framebuffers have been set up before calling this function.
-    mGeometryFramebuffer->attach(mPositionTextureBuffer.get(),    0);
-    mGeometryFramebuffer->attach(mNormalTextureBuffer.get(),      1);
-    mGeometryFramebuffer->attach(mAlbedoTextureBuffer.get(),      2);
-    mGeometryFramebuffer->attach(mEmissiveTextureBuffer.get(),    3);
-    mGeometryFramebuffer->attach(mRoughnessTextureBuffer.get(),   4);
-    // mGeometryFramebuffer->attach(mMetallicTextureBuffer.get(),    5);
-    mGeometryFramebuffer->attach(mGBufferTexture.get(), 5, 0);
-    mGeometryFramebuffer->attach(mGBufferTexture.get(), 6, 1);
-    mGeometryFramebuffer->attach(mGBufferTexture.get(), 7, 2);
+    mGeometryFramebuffer->attach(mGBufferTexture.get(), 0, 0);
+    mGeometryFramebuffer->attach(mGBufferTexture.get(), 1, 1);
+    mGeometryFramebuffer->attach(mGBufferTexture.get(), 2, 2);
 
     mGeometryFramebuffer->attachDepthBuffer(mDepthTextureBuffer.get());
     
@@ -168,11 +157,6 @@ void Renderer::detachTextureRenderBuffersFromFrameBuffers() const
     mGeometryFramebuffer->detach(0);
     mGeometryFramebuffer->detach(1);
     mGeometryFramebuffer->detach(2);
-    mGeometryFramebuffer->detach(3);
-    mGeometryFramebuffer->detach(4);
-    mGeometryFramebuffer->detach(5);
-    mGeometryFramebuffer->detach(6);
-    mGeometryFramebuffer->detach(7);
     mGeometryFramebuffer->detachDepthBuffer();
     
     mLightFramebuffer->detach(0);
@@ -330,8 +314,11 @@ void Renderer::render()
         const glm::mat4 vpMatrix = cameraProjectionMatrix * camera.viewMatrix;
 
         mCamera->viewMatrix = camera.viewMatrix;
+        mCamera->inverseVpMatrix = glm::inverse(vpMatrix);
         mCamera->position = glm::vec3(glm::inverse(camera.viewMatrix) * glm::vec4(glm::vec3(0.f), 1.f));
         mCamera->exposure = exposure;
+        mCamera->zNear = camera.nearClipDistance;
+        mCamera->zFar = camera.farClipDistance;
         mCamera.updateGlsl();
 
         for (const auto &rqo : mRenderQueue)
@@ -365,11 +352,10 @@ void Renderer::render()
         
         mLightFramebuffer->bind();
         mLightFramebuffer->clear();
-        const glm::vec3 cameraPosition = glm::inverse(camera.viewMatrix) * glm::vec4(glm::vec3(0.f), 1.f);
-        
+
         mDirectionalLightShader.bind();
 
-        mDirectionalLightShader.set("u_position_texture", mPositionTextureBuffer->getId(), 0);
+        mDirectionalLightShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
         mDirectionalLightShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
 
         glBindVertexArray(mFullscreenTriangle.vao());
@@ -396,7 +382,7 @@ void Renderer::render()
         
         mPointLightShader->bind();
         
-        mPointLightShader->set("u_position_texture", mPositionTextureBuffer->getId(), 0);
+        mPointLightShader->set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
         mPointLightShader->image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
 
         glBindVertexArray(mUnitSphere.vao());
@@ -426,7 +412,7 @@ void Renderer::render()
         
         mSpotlightShader->bind();
         
-        mSpotlightShader->set("u_position_texture", mPositionTextureBuffer->getId(), 0);
+        mSpotlightShader->set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
         mPointLightShader->image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
 
         for (const graphics::Spotlight &spotLight : mSpotlightQueue)
@@ -522,7 +508,8 @@ void Renderer::render()
         const glm::mat4 inverseViewProjection = glm::inverse(cameraProjectionMatrix * viewMatrixNoPosition);
 
         mDeferredLightShader->set("u_irradiance_texture", mLightTextureBuffer->getId(), 0);
-        mDeferredLightShader->set("u_emissive_texture", mEmissiveTextureBuffer->getId(), 1);
+        // todo: emissive buffer should go straight in irradiance texture.
+        // mDeferredLightShader->set("u_emissive_texture", mEmissiveTextureBuffer->getId(), 1);
         mDeferredLightShader->set("u_depth_texture", mDepthTextureBuffer->getId(), 2);
         mDeferredLightShader->set("u_skybox_texture", mHdrSkybox->getId(), 3);
         mDeferredLightShader->set("u_reflection_texture", mReflectionTextureBuffer->getId(), 4);
@@ -1007,22 +994,22 @@ const TextureBufferObject &Renderer::getPrimaryBuffer() const
 
 const TextureBufferObject &Renderer::getAlbedoBuffer() const
 {
-    return *mAlbedoTextureBuffer;
+    return *mPrimaryImageBuffer;
 }
 
 const TextureBufferObject &Renderer::getNormalBuffer() const
 {
-    return *mNormalTextureBuffer;
+    return *mPrimaryImageBuffer;
 }
 
 const TextureBufferObject &Renderer::getPositionBuffer() const
 {
-    return *mPositionTextureBuffer;
+    return *mPrimaryImageBuffer;
 }
 
 const TextureBufferObject &Renderer::getEmissiveBuffer() const
 {
-    return *mEmissiveTextureBuffer;
+    return *mPrimaryImageBuffer;
 }
 
 const TextureBufferObject &Renderer::getLightBuffer() const
@@ -1037,12 +1024,12 @@ const TextureBufferObject &Renderer::getDepthBuffer() const
 
 const TextureBufferObject &Renderer::getRoughnessBuffer() const
 {
-    return *mRoughnessTextureBuffer;
+    return *mPrimaryImageBuffer;
 }
 
 const TextureBufferObject &Renderer::getMetallicBuffer() const
 {
-    return *mMetallicTextureBuffer;
+    return *mPrimaryImageBuffer;
 }
 
 const TextureBufferObject &Renderer::getDeferredLightingBuffer() const
