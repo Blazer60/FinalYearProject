@@ -53,7 +53,7 @@ vec3 calculateIrradiance(Brdf brdf)
 
     const vec3 specular = distribution * geometry * fresnel / (4.f * brdf.vDotN * brdf.lDotN + 0.0001f);
 
-    const vec3 kD = (vec3(1.f) - fresnel);
+    const vec3 kD = (vec3(1.f) - fresnel) * brdf.albedo;
     const vec3 diffuse = kD * brdf.albedo / PI;
 
     const vec3 irradiance = diffuse + specular;

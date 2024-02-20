@@ -187,6 +187,7 @@ protected:
     void directionalLightShadowMapping(const CameraSettings &cameraSettings);
     void pointLightShadowMapping() const;
     void spotlightShadowMapping() const;
+    void shadeDistantLightProbe();
     void blurTexture(const TextureBufferObject &texture) const;
 
     static void setViewportSize(const glm::ivec2 &size=window::bufferSize());
@@ -217,7 +218,7 @@ protected:
     Shader mDirectionalLightShader;
     std::unique_ptr<Shader> mPointLightShader;
     std::unique_ptr<Shader> mSpotlightShader;
-    std::unique_ptr<Shader> mIblShader;
+    Shader mIblShader;
     std::unique_ptr<Shader> mDirectionalLightShadowShader;
     std::unique_ptr<Shader> mPointLightShadowShader;
     std::unique_ptr<Shader> mSpotlightShadowShader;

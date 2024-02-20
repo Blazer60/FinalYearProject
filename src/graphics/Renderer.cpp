@@ -21,7 +21,8 @@ Renderer::Renderer() :
     mLine(primitives::line()),
     mDirectionalLightShader { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/DirectionalLight.frag" },
     mIntegrateBrdfShader { file::shaderPath() / "brdf/GgxDirectionalAlbedo.comp" },
-    mDebugGBufferShader { file::shaderPath() / "geometry/DebugGBuffer.comp" }
+    mDebugGBufferShader { file::shaderPath() / "geometry/DebugGBuffer.comp" },
+    mIblShader { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/IBL.frag" }
 {
     // Blending texture data / enabling lerping.
     glEnable(GL_BLEND);
@@ -33,11 +34,9 @@ Renderer::Renderer() :
     graphics::pushDebugGroup("Setup");
 
     auto fsTriShader = file::shaderPath() / "FullscreenTriangle.vert";
-    // mDirectionalLightShader = std::make_unique<Shader>({ fsTriShader, file::shaderPath() / "lighting/DirectionalLight.frag" });
     mDirectionalLightShader.setDebugName("Directional Lighting Shader");
     mPointLightShader = std::make_unique<Shader>(file::shaderPath() / "lighting/PointLight.vert", file::shaderPath() / "lighting/PointLight.frag");
     mSpotlightShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "lighting/SpotLight.frag");
-    mIblShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "lighting/IBL.frag");
     mDeferredLightShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "lighting/CombineOutput.frag");
     mDirectionalLightShadowShader = std::make_unique<Shader>(file::shaderPath() / "shadow/Shadow.vert", file::shaderPath() / "shadow/Shadow.frag");
     mPointLightShadowShader = std::make_unique<Shader>(file::shaderPath() / "shadow/PointShadow.vert", file::shaderPath() / "shadow/PointShadow.frag");
@@ -156,6 +155,8 @@ void Renderer::bindUbos()
     mColourResolveShader->block("ScreenSpaceReflectionsBlock", mSsrBlock.getBindPoint());
 
     mDebugGBufferShader.block("DebugGBufferBlock", mDebugGBufferBlock.getBindPoint());
+
+    mIblShader.block("CameraBlock", mCamera.getBindPoint());
 }
 
 void Renderer::detachTextureRenderBuffersFromFrameBuffers() const
@@ -444,6 +445,9 @@ void Renderer::render()
         
         PROFILE_SCOPE_END(spotLightTimer);
         graphics::popDebugGroup();
+
+        shadeDistantLightProbe();
+
         // todo: ibl
         // PROFILE_SCOPE_BEGIN(screenSpace, "Reflections");
         // graphics::pushDebugGroup("Reflections");
@@ -772,6 +776,25 @@ void Renderer::spotlightShadowMapping() const
         mShadowFramebuffer->detachDepthBuffer();
     }
     
+    graphics::popDebugGroup();
+}
+
+void Renderer::shadeDistantLightProbe()
+{
+    PROFILE_FUNC();
+    graphics::pushDebugGroup("Distant Light Probe");
+
+    mIblShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
+    mIblShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
+    mIblShader.set("u_irradiance_texture", mIrradianceMap->getId(), 1);
+    mIblShader.set("u_pre_filter_texture", mPreFilterMap->getId(), 2);
+    mIblShader.set("u_brdf_lut_texture", mBrdfLutTextureBuffer->getId(), 3);
+    mIblShader.set("u_luminance_multiplier", mIblLuminanceMultiplier);
+
+    mIblShader.bind();
+    mLightFramebuffer->bind();
+    drawFullscreenTriangleNow();
+
     graphics::popDebugGroup();
 }
 

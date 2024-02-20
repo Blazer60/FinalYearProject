@@ -1,6 +1,7 @@
 #version 460
 
 #include "../GBuffer.glsl"
+#include "../../Colour.glsl"
 
 in vec2 v_uv;
 in vec3 v_position_ws;
@@ -29,13 +30,6 @@ uniform float u_metallic;
 layout(location = 0) out uvec4 oGBuffer0;
 layout(location = 1) out uvec4 oGBuffer1;
 layout(location = 2) out uvec4 oGBuffer2;
-
-
-vec3 sRgbToLinear(vec3 sRgb)
-{
-    const vec3 gamma = vec3(2.2f);
-    return pow(sRgb, gamma);
-}
 
 vec2 height_map(vec2 uv)
 {
@@ -93,7 +87,9 @@ void main()
         o_roughness = u_roughness;
     o_roughness = max(0.02f, o_roughness);
 
-    int o_metallic = 0;
+    float o_metallic = texture(u_metallic_texture, uv).r;
+    if (o_metallic <= 0.f)
+        o_metallic = u_metallic;
 
     if (texture_colour == vec3(0.f))
         texture_colour = vec3(1.f);
@@ -110,7 +106,7 @@ void main()
 
     GBuffer gBuffer;
     gBuffer.emissive = o_emissive;
-    gBuffer.diffuse = o_albedo;
+    gBuffer.diffuse = mix(vec3(0.04f), o_albedo, 1 - o_metallic);
     gBuffer.specular = mix(vec3(0.04f), o_albedo, o_metallic);
     gBuffer.normal = o_normal;
     gBuffer.roughness = o_roughness;
