@@ -957,20 +957,12 @@ std::unique_ptr<Cubemap> Renderer::generatePreFilterMap(const Cubemap *cubemap, 
 std::unique_ptr<TextureBufferObject> Renderer::generateBrdfLut(const glm::ivec2 &size)
 {
     auto lut = std::make_unique<TextureBufferObject>(size, GL_RGBA16F, graphics::filter::Linear, graphics::wrap::ClampToEdge);
-    //
-    // FramebufferObject auxiliaryFrameBuffer(GL_ONE, GL_ONE, GL_ALWAYS);
-    
-    // auxiliaryFrameBuffer.bind();
+
     mIntegrateBrdfShader.bind();
     mIntegrateBrdfShader.image("lut", lut->getId(), lut->getFormat(), 5, false);
     const glm::uvec2 groupSize = glm::ceil(static_cast<glm::vec2>(size / 8));
     glDispatchCompute(groupSize.x, groupSize.y, 1);
-    // auxiliaryFrameBuffer.attach(lut.get(), 0);
-    // glViewport(0, 0, size.x, size.y);
-    // auxiliaryFrameBuffer.clear(glm::vec4(glm::vec3(0.f), 1.f));
-    // drawFullscreenTriangleNow();
-    // auxiliaryFrameBuffer.detach(0);
-    
+
     return lut;
 }
 
@@ -998,26 +990,6 @@ const TextureBufferObject &Renderer::getPrimaryBuffer() const
     return *mPrimaryImageBuffer;
 }
 
-const TextureBufferObject &Renderer::getAlbedoBuffer() const
-{
-    return *mPrimaryImageBuffer;
-}
-
-const TextureBufferObject &Renderer::getNormalBuffer() const
-{
-    return *mPrimaryImageBuffer;
-}
-
-const TextureBufferObject &Renderer::getPositionBuffer() const
-{
-    return *mPrimaryImageBuffer;
-}
-
-const TextureBufferObject &Renderer::getEmissiveBuffer() const
-{
-    return *mPrimaryImageBuffer;
-}
-
 const TextureBufferObject &Renderer::getLightBuffer() const
 {
     return *mLightTextureBuffer;
@@ -1026,16 +998,6 @@ const TextureBufferObject &Renderer::getLightBuffer() const
 const TextureBufferObject &Renderer::getDepthBuffer() const
 {
     return *mDepthTextureBuffer;
-}
-
-const TextureBufferObject &Renderer::getRoughnessBuffer() const
-{
-    return *mPrimaryImageBuffer;
-}
-
-const TextureBufferObject &Renderer::getMetallicBuffer() const
-{
-    return *mPrimaryImageBuffer;
 }
 
 const TextureBufferObject &Renderer::getDeferredLightingBuffer() const

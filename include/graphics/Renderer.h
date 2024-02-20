@@ -161,14 +161,8 @@ public:
     
     [[nodiscard]] const TextureBufferObject &getPrimaryBuffer() const;
     [[nodiscard]] const TextureBufferObject &getDeferredLightingBuffer() const;
-    [[nodiscard]] const TextureBufferObject &getAlbedoBuffer() const;
-    [[nodiscard]] const TextureBufferObject &getNormalBuffer() const;
-    [[nodiscard]] const TextureBufferObject &getPositionBuffer() const;
-    [[nodiscard]] const TextureBufferObject &getEmissiveBuffer() const;
     [[nodiscard]] const TextureBufferObject &getLightBuffer() const;
     [[nodiscard]] const TextureBufferObject &getDepthBuffer() const;
-    [[nodiscard]] const TextureBufferObject &getRoughnessBuffer() const;
-    [[nodiscard]] const TextureBufferObject &getMetallicBuffer() const;
     [[nodiscard]] const TextureBufferObject &getSsrBuffer() const;
     [[nodiscard]] const TextureBufferObject &getReflectionBuffer() const;
     [[nodiscard]] const TextureBufferObject &getDebugBuffer() const;
