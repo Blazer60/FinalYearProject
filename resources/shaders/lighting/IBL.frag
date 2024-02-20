@@ -2,6 +2,12 @@
 
 #include "../geometry/GBuffer.glsl"
 #include "../Camera.glsl"
+#include "Brdf.glsl"
+#include "../Maths.glsl"
+
+#ifdef WHITE_FURNACE_TEST
+    #include "../Colour.glsl"
+#endif
 
 in vec2 v_uv;
 
@@ -13,12 +19,6 @@ layout(binding = 3) uniform sampler2D u_brdf_lut_texture;
 uniform float u_luminance_multiplier;
 
 out layout(location = 0) vec3 o_irradiance;
-
-// Unreal's fresnel function using spherical gaussian approximation.
-vec3 fresnelSchlickRoughness(float cosTheta, vec3 f0, float roughness)
-{
-    return f0 + (max(vec3(1.f - roughness), f0) - f0) * pow(2.f, (-5.55473f * cosTheta - 6.98316f) * cosTheta);
-}
 
 void main()
 {
@@ -34,19 +34,23 @@ void main()
 
     const float vDotN = max(dot(v, n), 0.f);
 
-    const vec3 f0 = gBuffer.specular;
+#ifdef WHITE_FURNACE_TEST
+    const vec3 fresnel = vec3(1.f);
+#else
+    const vec3 fresnel = fresnelSchlick(gBuffer.specular, vDotN);
+#endif
 
-    const vec3 fresnel = fresnelSchlickRoughness(vDotN, f0, gBuffer.roughness);
-
-    const vec3 kD = (vec3(1.f) - fresnel) * gBuffer.diffuse / PI;
-
-    const vec3 irradiance = texture(u_irradiance_texture, n).rgb;
-    const vec3 diffuse = kD * irradiance * gBuffer.diffuse;
+    const vec2 lut = texture(u_brdf_lut_texture, vec2(vDotN, gBuffer.roughness)).rg;
+    const vec3 specular = (fresnel * lut.x + lut.y);
+    const vec3 diffuse = evaluateDiffuseBrdf(gBuffer, fresnel);
 
     const float maxReflectionLod = 4.f;
     const vec3 preFilterColour = textureLod(u_pre_filter_texture, r, gBuffer.roughness * maxReflectionLod).rgb;
-    const vec2 brdf = texture(u_brdf_lut_texture, vec2(vDotN, gBuffer.roughness)).rg;
-    const vec3 specular = preFilterColour * (fresnel * brdf.x + brdf.y);
+    const vec3 irradiance = texture(u_irradiance_texture, n).rgb;
 
-    o_irradiance = camera.exposure * (specular + diffuse) * u_luminance_multiplier;
+#ifdef WHITE_FURNACE_TEST
+    o_irradiance = linearToSRgb((specular + diffuse) - vec3(0.5));
+#else
+    o_irradiance = camera.exposure * (specular * preFilterColour + diffuse * irradiance) * u_luminance_multiplier;
+#endif
 }

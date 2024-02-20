@@ -69,10 +69,10 @@ namespace graphics
     {
         emitLineCount();
         if (!evaluationStack.top())
-            return path;
+            return "";
 
         if (const auto it = std::find(includePaths.begin(), includePaths.end(), includePath); it != includePaths.end())
-            return path;
+            return "";
 
         includePaths.push_back(includePath);
         return includePath;

@@ -37,14 +37,13 @@ namespace graphics
 
 
     protected:
-        void preprocessInclude(std::string token, ShaderInformation& shaderData);
-        void walk();
+        void preprocessInclude(std::string token, ShaderInformation& shaderData, uint32_t depth);
+        void walk(uint32_t depth);
         void crash(const std::string &message) const;
 
         std::filesystem::path mInvokingPath;
         std::filesystem::path mCurrentPath;
         std::list<ShaderInformation> mInformation;
-        std::set<std::filesystem::path> mAllPaths;
         std::unordered_map<std::string, int> mDefinitions;
     };
 }

@@ -36,5 +36,6 @@ namespace graphics
         std::stack<bool> evaluationStack;
         std::string mCurrentLine;
         int lineCount { 2 };
+        uint32_t depthFromSource;
     };
 }

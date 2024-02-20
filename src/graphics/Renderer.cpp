@@ -13,6 +13,7 @@
 #include "Shader.h"
 #include "ProfileTimer.h"
 #include "FileLoader.h"
+#include "shader/ShaderCompilation.h"
 
 Renderer::Renderer() :
     mCurrentRenderBufferSize(window::bufferSize()),
@@ -22,7 +23,7 @@ Renderer::Renderer() :
     mDirectionalLightShader { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/DirectionalLight.frag" },
     mIntegrateBrdfShader { file::shaderPath() / "brdf/GgxDirectionalAlbedo.comp" },
     mDebugGBufferShader { file::shaderPath() / "geometry/DebugGBuffer.comp" },
-    mIblShader { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/IBL.frag" }
+    mIblShader({ file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/IBL.frag" }, { graphics::Macro{ "WHITE_FURNACE_TEST", 1 } })
 {
     // Blending texture data / enabling lerping.
     glEnable(GL_BLEND);
