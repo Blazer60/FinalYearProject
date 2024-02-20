@@ -45,16 +45,16 @@ namespace graphics
 
         const auto addIfNonZeroLength = [&] {
             if (std::distance(startIt, endIt) > 1)
-            {
                 out.emplace_back(++startIt, endIt);
-                startIt = endIt;
-            }
         };
 
         while (endIt != str.end())
         {
             if (*endIt == delim)
+            {
                 addIfNonZeroLength();
+                startIt = endIt;
+            }
             ++endIt;
         }
         addIfNonZeroLength();

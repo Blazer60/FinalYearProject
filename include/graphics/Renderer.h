@@ -17,6 +17,7 @@
 #include "UniformBufferObject.h"
 #include "WindowHelpers.h"
 #include "CameraBlock.h"
+#include "DebugGBufferBlock.h"
 #include "DirectionalLightBlock.h"
 #include "PointLightBlock.h"
 #include "ScreenSpaceReflectionsBlock.h"
@@ -171,6 +172,7 @@ public:
     [[nodiscard]] const TextureBufferObject &getSsrBuffer() const;
     [[nodiscard]] const TextureBufferObject &getReflectionBuffer() const;
     [[nodiscard]] const TextureBufferObject &getDebugBuffer() const;
+    [[nodiscard]] const TextureBufferObject &getFromGBuffer(graphics::gbuffer type, bool gammaCorrect, const glm::vec4 &defaultValue=glm::vec4(0.f, 0.f, 0.f, 1.f));
     
     [[nodiscard]] std::vector<graphics::DirectionalLight> &getDirectionalLights();
     
@@ -234,6 +236,7 @@ protected:
     std::unique_ptr<Shader> mBlurShader;
     std::unique_ptr<Shader> mDebugShader;
     std::unique_ptr<Shader> mLineShader;
+    Shader mDebugGBufferShader;
     
     SubMesh mFullscreenTriangle;
     SubMesh mUnitSphere;
@@ -249,12 +252,14 @@ protected:
     std::unique_ptr<TextureBufferObject> mSsrDataTextureBuffer;
     std::unique_ptr<TextureBufferObject> mReflectionTextureBuffer;
     std::unique_ptr<TextureBufferObject> mDebugTextureBuffer;
+    std::unique_ptr<TextureBufferObject> mDebugGeometryTextureBuffer;
 
     graphics::UniformBufferObject<CameraBlock> mCamera;
     graphics::UniformBufferObject<DirectionalLightBlock> mDirectionalLightBlock;
     graphics::UniformBufferObject<PointLightBlock> mPointLightBlock;
     graphics::UniformBufferObject<SpotlightBlock> mSpotlightBlock;
     graphics::UniformBufferObject<ScreenSpaceReflectionsBlock> mSsrBlock;
+    graphics::UniformBufferObject<DebugGBufferBlock> mDebugGBufferBlock;
 
     glm::ivec2 mCurrentRenderBufferSize;
     

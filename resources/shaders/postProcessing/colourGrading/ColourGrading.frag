@@ -1,5 +1,7 @@
 #version 460 core
 
+#include "../../Colour.glsl"
+
 in vec2 v_uv;
 
 uniform sampler2D u_texture;
@@ -7,11 +9,6 @@ uniform float u_inv_gamma_correction;
 uniform float u_exposure;
 
 out layout(location = 0) vec3 o_colour;
-
-vec3 linearToSRgb(vec3 linear)
-{
-    return pow(linear, vec3(u_inv_gamma_correction));
-}
 
 /**
  * https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/

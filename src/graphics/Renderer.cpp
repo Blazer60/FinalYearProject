@@ -20,7 +20,8 @@ Renderer::Renderer() :
     mUnitSphere(primitives::invertedSphere()),
     mLine(primitives::line()),
     mDirectionalLightShader { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/DirectionalLight.frag" },
-    mIntegrateBrdfShader { file::shaderPath() / "brdf/GgxDirectionalAlbedo.comp" }
+    mIntegrateBrdfShader { file::shaderPath() / "brdf/GgxDirectionalAlbedo.comp" },
+    mDebugGBufferShader { file::shaderPath() / "geometry/DebugGBuffer.comp" }
 {
     // Blending texture data / enabling lerping.
     glEnable(GL_BLEND);
@@ -104,7 +105,9 @@ void Renderer::initTextureRenderBuffers()
     mSsrDataTextureBuffer            = std::make_unique<TextureBufferObject>(ssrSize,              GL_RGBA16F,               graphics::filter::Nearest, graphics::wrap::ClampToEdge);
     mReflectionTextureBuffer         = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F,               graphics::filter::Linear,  graphics::wrap::ClampToEdge);
     mDebugTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16,                graphics::filter::Linear,  graphics::wrap::ClampToEdge);
-    
+
+    mDebugGeometryTextureBuffer      = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F,                graphics::filter::Linear,  graphics::wrap::ClampToEdge);
+
     // Make sure that the framebuffers have been set up before calling this function.
     mGeometryFramebuffer->attach(mGBufferTexture.get(), 0, 0);
     mGeometryFramebuffer->attach(mGBufferTexture.get(), 1, 1);
@@ -135,6 +138,7 @@ void Renderer::bindUbos()
     mPointLightBlock.bindToSlot(++bindPoint);
     mSpotlightBlock.bindToSlot(++bindPoint);
     mSsrBlock.bindToSlot(++bindPoint);
+    mDebugGBufferBlock.bindToSlot(++bindPoint);
 
     mDirectionalLightShader.block("CameraBlock", mCamera.getBindPoint());
     mDirectionalLightShader.block("DirectionalLightBlock", mDirectionalLightBlock.getBindPoint());
@@ -150,6 +154,8 @@ void Renderer::bindUbos()
 
     mColourResolveShader->block("CameraBlock", mCamera.getBindPoint());
     mColourResolveShader->block("ScreenSpaceReflectionsBlock", mSsrBlock.getBindPoint());
+
+    mDebugGBufferShader.block("DebugGBufferBlock", mDebugGBufferBlock.getBindPoint());
 }
 
 void Renderer::detachTextureRenderBuffersFromFrameBuffers() const
@@ -1055,6 +1061,27 @@ const TextureBufferObject& Renderer::getReflectionBuffer() const
 const TextureBufferObject& Renderer::getDebugBuffer() const
 {
     return *mDebugTextureBuffer;
+}
+
+const TextureBufferObject& Renderer::getFromGBuffer(const graphics::gbuffer type, const bool gammaCorrect, const glm::vec4 &defaultValue)
+{
+    PROFILE_FUNC();
+    graphics::pushDebugGroup("GBuffer Query");
+    mDebugGBufferBlock->id = toInt(type);
+    mDebugGBufferBlock->gammaCorrect = static_cast<int>(gammaCorrect);
+    mDebugGBufferBlock->defaultValue = defaultValue;
+    mDebugGBufferBlock.updateGlsl();
+
+    mDebugGBufferShader.bind();
+    mDebugGBufferShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
+    mDebugGBufferShader.image("debug", mDebugGeometryTextureBuffer->getId(), mDebugGeometryTextureBuffer->getFormat(), 1, false, GL_WRITE_ONLY);
+
+    const glm::vec2 screenSize = mDebugGeometryTextureBuffer->getSize();
+    const glm::ivec2 numThreadGroups = glm::ceil(screenSize / glm::vec2(DEBUG_GBUFFER_THREAD_SIZE));
+    glDispatchCompute(numThreadGroups.x, numThreadGroups.y, 1);
+
+    graphics::popDebugGroup();
+    return *mDebugGeometryTextureBuffer;
 }
 
 float Renderer::getCurrentEV100() const

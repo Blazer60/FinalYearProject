@@ -1,0 +1,31 @@
+#version 460 core
+
+#include "../interfaces/DebugGBufferBlock.h"
+#include "GBuffer.glsl"
+#include "../Colour.glsl"
+
+layout(binding = 1, rgba16f) uniform image2D debug;
+
+layout(local_size_x = DEBUG_GBUFFER_THREAD_SIZE, local_size_y = DEBUG_GBUFFER_THREAD_SIZE, local_size_z = 1) in;
+void main()
+{
+    const ivec2 coord = ivec2(gl_GlobalInvocationID.xy);
+    GBuffer gBuffer = pullFromStorageGBuffer(coord);
+    vec4 result = cDebug.defaultValue;
+
+    if (cDebug.id == DEBUG_GBUFFER_NORMAL)
+        result.xyz = gBuffer.normal;
+    if (cDebug.id == DEBUG_GBUFFER_ROUGHNESS)
+        result.xyz = gBuffer.roughness.xxx;
+    if (cDebug.id == DEBUG_GBUFFER_DIFFUSE)
+        result.xyz = gBuffer.diffuse;
+    if (cDebug.id == DEBUG_GBUFFER_SPECULAR)
+        result.xyz = gBuffer.specular;
+    if (cDebug.id == DEBUG_GBUFFER_EMISSIVE)
+        result.xyz = gBuffer.emissive;
+
+    if (cDebug.gammaCorrect != 0)
+        result.xyz = linearToSRgb(result.xyz);
+
+    imageStore(debug, coord, result);
+}

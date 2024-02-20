@@ -30,10 +30,16 @@ namespace graphics
     {
         ClampToEdge, ClampToBorder, MirrorRepeat, Repeat, MirrorClampToEdge
     };
+
+    enum class gbuffer : uint8_t
+    {
+        Normal, Roughness, Diffuse, Specular, Emissive
+    };
     
     GLint toGLint(filter f);
     GLint toMagGLint(filter f);
     GLint toGLint(wrap w);
+    int toInt(gbuffer g);
     
     struct RenderQueueObject
     {
