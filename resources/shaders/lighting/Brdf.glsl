@@ -1,61 +1,39 @@
 #version 460 core
 
 #include "../Maths.glsl"
+#include "../brdf/Ggx.glsl"
+#include "../geometry/GBuffer.glsl"
+#include "../Camera.glsl"
 
-// Unreal's fresnel function using spherical gaussian approximation.
-vec3 fresnelSchlick(float vDotH, vec3 f0)
+vec3 evaluateSpecularBrdf(GBuffer gBuffer, vec3 fresnel, float hDotN, float vDotN, float lDotN)
 {
-    return f0 + (1.f - f0) * pow(2.f, (-5.55473f * vDotH - 6.98316f) * vDotH);
+    const float alpha2 = gBuffer.roughness * gBuffer.roughness * gBuffer.roughness * gBuffer.roughness + 0.001f;
+    const float distribution = ggxDistribution(hDotN, alpha2);
+    const float geometry = ggxGeometry2(vDotN, lDotN, alpha2);
+
+    return fresnel * distribution * geometry / (4.f * vDotN * lDotN + 0.0001f);
 }
 
-// Unreal's and Disney's distribution function.
-float distributionGgx(float nDotH, float roughness)
+vec3 evaluateDiffuseBrdf(GBuffer gBuffer, vec3 fresnel)
 {
-    const float alpha = roughness * roughness;
-    const float alpha2 = alpha * alpha;
-    const float nDotH2 = nDotH * nDotH;
-    const float denominator = nDotH2 * (alpha2 - 1.f) + 1.f;
-
-    return alpha2 / (PI * denominator * denominator);
+    return (vec3(1.f) - fresnel) * gBuffer.diffuse / PI;
 }
 
-// Unreal's geometry schlick function.
-float geometrySchlick(float vDotN, float k)
+vec3 evaluateClosure(GBuffer gBuffer, vec3 position, vec3 lightDirection)
 {
-    return vDotN / (vDotN * (1.f - k) + k);
-}
+    const vec3 l = lightDirection;
+    const vec3 n = gBuffer.normal;
+    const vec3 v = normalize(camera.position - position);
+    const vec3 h = normalize(l + v);
 
-// Unreal's geometry smith function. Note the remapping of roughness before squaring
-// should only be done on analytical lights. Remap function: (R + 1) / 2
-float geometrySmith(float vDotN, float lDotN, float roughness)
-{
-    const float r = roughness + 1.f;
-    const float k = r * r / 8.f;
-    return geometrySchlick(vDotN, k) * geometrySchlick(lDotN, k);
-}
+    const float vDotN = saturate(dot(v, n));
+    const float lDotN = saturate(dot(l, n));
+    const float hDotN = saturate(dot(h, n));
+    const float vDotH = saturate(dot(v, h));
 
-struct Brdf
-{
-    vec3 albedo;
-    vec3 f0;
-    float roughness;
-    float vDotN;
-    float lDotN;
-    float vDotH;
-    float nDotH;
-};
+    const vec3 fresnel = fresnelSchlick(gBuffer.specular, lDotN);
+    const vec3 specular = evaluateSpecularBrdf(gBuffer, fresnel, hDotN, vDotN, lDotN);
+    const vec3 diffuse = evaluateDiffuseBrdf(gBuffer, fresnel);
 
-vec3 calculateIrradiance(Brdf brdf)
-{
-    const vec3 fresnel = fresnelSchlick(brdf.vDotH, brdf.f0);
-    const float distribution = distributionGgx(brdf.nDotH, brdf.roughness);
-    const float geometry = geometrySmith(brdf.vDotN, brdf.lDotN, brdf.roughness);
-
-    const vec3 specular = distribution * geometry * fresnel / (4.f * brdf.vDotN * brdf.lDotN + 0.0001f);
-
-    const vec3 kD = (vec3(1.f) - fresnel) * brdf.albedo;
-    const vec3 diffuse = kD * brdf.albedo / PI;
-
-    const vec3 irradiance = diffuse + specular;
-    return irradiance;
+    return specular + diffuse;
 }

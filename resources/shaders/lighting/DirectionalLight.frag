@@ -1,10 +1,7 @@
 #version 460 core
 
-#include "../interfaces/CameraBlock.h"
 #include "../interfaces/DirectionalLightBlock.h"
 #include "Brdf.glsl"
-#include "../geometry/GBuffer.glsl"
-#include "../Camera.glsl"
 
 in vec2 v_uv;
 
@@ -61,25 +58,12 @@ void main()
     GBuffer gBuffer = pullFromStorageGBuffer(coord);
 
     const vec3 l = normalize(light.direction);
-    const vec3 n = gBuffer.normal;
-    const vec3 v = normalize(camera.position - position);
-    const vec3 h = normalize(l + v);
-
-    Brdf brdf;
-    brdf.vDotN = max(dot(v, n), 0.f);
-    brdf.lDotN = max(dot(l, n), 0.f);
-    brdf.vDotH = max(dot(v, h), 0.f);
-    brdf.nDotH = max(dot(n, h), 0.f);
-    brdf.albedo = gBuffer.diffuse;
-    brdf.f0 = gBuffer.specular;
-    brdf.roughness = gBuffer.roughness;
-
-    const vec3 irradiance = calculateIrradiance(brdf);
+    const vec3 irradiance = evaluateClosure(gBuffer, position, l);
 
     const float attenuation = 1.f;
-    const float shadow_intensity = calculate_shadow_map(position, n);
+    const float shadow_intensity = calculate_shadow_map(position, gBuffer.normal);
     const vec3 radiance = (1.f - shadow_intensity) * light.intensity * attenuation;
 
     // Combine the output with dot(N, L).
-    o_irradiance = camera.exposure * irradiance * radiance * brdf.lDotN;
+    o_irradiance = camera.exposure * irradiance * radiance * saturate(dot(gBuffer.normal, l));
 }

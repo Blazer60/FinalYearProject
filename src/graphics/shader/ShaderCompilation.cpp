@@ -12,6 +12,7 @@
 #include <queue>
 #include <sstream>
 
+#include "GraphicsDefinitions.h"
 #include "Logger.h"
 #include "LoggerMacros.h"
 
@@ -28,13 +29,14 @@ namespace graphics
         return conversions.at(path.extension().string());
     }
 
-    unsigned int compileShader(const std::filesystem::path &path)
+    unsigned int compileShader(const std::filesystem::path &path, const std::vector<Macro>& macros)
     {
         const unsigned int shaderType = getGlslType(path);
         ShaderPreprocessor preprocessor(path);
+        preprocessor.setupDefinitions(macros);
         preprocessor.start();
         preprocessor.orderByInclude();
-        return compileShaderSource(shaderType, preprocessor.getSources());
+        return compileShaderSource(shaderType, preprocessor.getSources(), macros);
     }
 
     std::vector<std::string> tokenise(const std::string& str, const char delim)
@@ -67,6 +69,12 @@ namespace graphics
     {
     }
 
+    void ShaderPreprocessor::setupDefinitions(const std::vector<Macro>& macros)
+    {
+        for (const auto & [symbol, constant] : macros)
+            mDefinitions[symbol] = constant;
+    }
+
     void ShaderPreprocessor::start()
     {
         mCurrentPath = mInvokingPath;
@@ -76,7 +84,7 @@ namespace graphics
     void ShaderPreprocessor::orderByInclude()
     {
         std::set<ShaderInformation*> sorted;
-        std::set<ShaderInformation*> toSort { &*mInformation.begin() };
+        std::list<ShaderInformation*> toSort { &*mInformation.begin() };  // Breadth first so order matters here.
         while (!toSort.empty())
         {
             const auto currentIt = toSort.begin();
@@ -87,12 +95,11 @@ namespace graphics
             for (const auto &includePath : currentShader.includePaths)
             {
                 const auto it = std::find_if(mInformation.begin(), mInformation.end(), [&includePath](const ShaderInformation &lhs) { return lhs.path == includePath; });
-                if (it == mInformation.begin())
-                    continue;  // Already at the top. Splice destory the array otherwise.
+                if (it != mInformation.begin())
+                    mInformation.splice(mInformation.begin(), mInformation, it, std::next(it));
 
-                mInformation.splice(mInformation.begin(), mInformation, it, std::next(it));
                 if (sorted.count(&*it) == 0)
-                    toSort.emplace(&*it);
+                    toSort.emplace_back(&*it);
             }
         }
     }
@@ -159,15 +166,19 @@ namespace graphics
         CRASH("Failed to compile shader %\nError while preprocessing file %.\n%", mInvokingPath, mCurrentPath, message);
     }
 
-    unsigned int compileShaderSource(const unsigned int shaderType, const std::list<ShaderInformation> &data)
+    unsigned int compileShaderSource(const unsigned int shaderType, const std::list<ShaderInformation> &data, const std::vector<Macro> &macros)
     {
-        const char *prependShader = "#version 460 core\n";
+        std::stringstream prependShader;
+        prependShader << "#version 460 core\n";
+        for (const auto & [symbol, constant] : macros)
+            prependShader << "#define " << symbol << " " << constant << "\n";
+        const std::string prependShaderString = prependShader.str();
 
         const unsigned shaderId = glCreateShader(shaderType);
         std::vector<std::string> sourceStrings;
         std::vector<const char *> dataPtrs;
         dataPtrs.reserve(data.size() + 1);
-        dataPtrs.push_back(prependShader);
+        dataPtrs.push_back(prependShaderString.c_str());
         int shaderIndex = 0;
         for (const auto &shader : data)
         {

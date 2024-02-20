@@ -10,6 +10,11 @@
 #include "Pch.h"
 #include <filesystem>
 
+namespace graphics
+{
+    struct Macro;
+}
+
 /**
  * Holds and compiles the shader program for OpenGL.
  * @author Ryan Purse
@@ -19,6 +24,7 @@ class Shader
 {
 public:
     Shader(std::initializer_list<std::filesystem::path> paths);
+    Shader(const std::vector<std::filesystem::path> &paths, const std::vector<graphics::Macro> &macros);
     Shader(const std::filesystem::path &vertexPath, const std::filesystem::path &fragmentPath);
     virtual ~Shader();
     
@@ -102,6 +108,7 @@ protected:
     int getLocation(const std::string &name);
 
     void CreateShaderSource(std::initializer_list<std::filesystem::path> paths) const;
+    void CreateShaderSource(const std::vector<std::filesystem::path> &paths, const std::vector<graphics::Macro> &macros) const;
 };
 
 

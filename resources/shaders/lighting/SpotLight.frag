@@ -76,32 +76,15 @@ void main()
 
     const vec3 light_direction = cLight.position - position;
     const vec3 l = normalize(light_direction);
-    const vec3 n = gBuffer.normal;
-    const vec3 v = normalize(camera.position - position);
-    const vec3 h = normalize(l + v);
 
-    const float vDotN = max(dot(v, n), 0.f);
-    const float lDotN = max(dot(l, n), 0.f);
-    const float vDotH = max(dot(v, h), 0.f);
-    const float nDotH = max(dot(n, h), 0.f);
-
-    Brdf brdf;
-    brdf.vDotN = max(dot(v, n), 0.f);
-    brdf.lDotN = max(dot(l, n), 0.f);
-    brdf.vDotH = max(dot(v, h), 0.f);
-    brdf.nDotH = max(dot(n, h), 0.f);
-    brdf.albedo = gBuffer.diffuse;
-    brdf.f0 = gBuffer.specular;
-    brdf.roughness = gBuffer.roughness;
-
-    const vec3 irradiance = calculateIrradiance(brdf);
+    const vec3 irradiance = evaluateClosure(gBuffer, position, l);
 
     // Point light lighting calculation.
     float attenuation = 1.f;
     attenuation *= getAngleAttenuation(l, cLight.angleScale, cLight.angleOffset);
     attenuation *= getDistanceAttenuation(light_direction, cLight.invSqrRadius);
-    float shadow_intensity = calculate_shadow_map(light_direction, position, n);
+    float shadow_intensity = calculate_shadow_map(light_direction, position, gBuffer.normal);
     const vec3 radiance = (1.f - shadow_intensity) * attenuation * cLight.intensity;
 
-    o_colour = camera.exposure * irradiance * radiance * (4.f * PI) * brdf.lDotN;
+    o_colour = camera.exposure * irradiance * radiance * (4.f * PI) * saturate(dot(l, gBuffer.normal));
 }

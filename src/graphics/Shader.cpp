@@ -26,6 +26,18 @@ Shader::Shader(const std::initializer_list<std::filesystem::path> paths)
     CreateShaderSource(paths);
 }
 
+Shader::Shader(const std::vector<std::filesystem::path>& paths, const std::vector<graphics::Macro>& macros)
+    : mId(glCreateProgram())
+{
+    if (paths.size() != 0)
+    {
+        mDebugName = std::prev(paths.end())->filename().string();
+        setDebugName(mDebugName);
+    }
+
+    CreateShaderSource(paths, macros);
+}
+
 Shader::Shader(const std::filesystem::path &vertexPath, const std::filesystem::path &fragmentPath)
     : mDebugName(vertexPath.filename().string() + " | " + fragmentPath.filename().string()), mId(glCreateProgram())
 {
@@ -152,7 +164,24 @@ void Shader::CreateShaderSource(const std::initializer_list<std::filesystem::pat
 {
     std::vector<unsigned int> shaderIds;
     for (const std::filesystem::path &path : paths)
-        shaderIds.push_back(graphics::compileShader(path));
+        shaderIds.push_back(graphics::compileShader(path, { }));
+
+    for (const unsigned int shaderId : shaderIds)
+        glAttachShader(mId, shaderId);
+
+    glLinkProgram(mId);
+    validateProgram();
+
+    for (const unsigned int shaderId : shaderIds)
+        glDeleteShader(shaderId);
+}
+
+void Shader::CreateShaderSource(
+    const std::vector<std::filesystem::path>& paths, const std::vector<graphics::Macro>& macros) const
+{
+    std::vector<unsigned int> shaderIds;
+    for (const std::filesystem::path &path : paths)
+        shaderIds.push_back(compileShader(path, macros));
 
     for (const unsigned int shaderId : shaderIds)
         glAttachShader(mId, shaderId);
