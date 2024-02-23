@@ -7,6 +7,12 @@
 
 #include "ShaderInformation.h"
 
+#include <functional>
+
+#include "Logger.h"
+#include "LoggerMacros.h"
+#include "StringManipulation.h"
+
 namespace graphics
 {
     ShaderInformation::ShaderInformation(std::filesystem::path path)
@@ -25,9 +31,64 @@ namespace graphics
         sourceBuffer << "#line " << lineCount << "\n";
     }
 
+    void ShaderInformation::preprocessIf(
+        const std::vector<std::string>& tokens, const std::unordered_map<std::string, int> &definitions)
+    {
+        const std::string expression = join(std::next(tokens.begin()), tokens.end());
+        if (expression.empty())
+            CRASH("Expected expression");
+
+        const std::vector<char> blackList { ' ', '(', ')' };
+        if (expression.rfind("defined", 0) == 0)
+        {
+            constexpr int definedCharCount = 7;
+            const std::string value = strip(
+                std::next(expression.begin(), definedCharCount), expression.end(), blackList);
+
+            evaluationStack.emplace(definitions.count(value) != 0 && evaluationStack.top());
+        }
+        else if (expression.rfind("!defined", 0) == 0)
+        {
+            constexpr int notDefinedCharCount = 8;
+            const std::string value = strip(
+                std::next(expression.begin(), notDefinedCharCount), expression.end(), blackList);
+
+            evaluationStack.emplace(definitions.count(value) == 0 && evaluationStack.top());
+        }
+        else if (tokens.size() <= 2)
+        {
+            const int constant = isdigit(tokens[1][0]) != 0 ? std::stoi(tokens[1]) : definitions.at(tokens[1]);
+            evaluationStack.emplace(constant != 0 && evaluationStack.top());
+        }
+        else
+        {
+            // Basic evaluation.
+            const std::string& lhs = tokens[1];
+            const std::string& operatorString = tokens[2];
+            const std::string& rhs = tokens[3];
+
+            const int lhsConstant = isdigit(lhs[0]) != 0 ? std::stoi(lhs) : definitions.at(lhs);
+            const int rhsConstant = isdigit(rhs[0]) != 0 ? std::stoi(rhs) : definitions.at(rhs);
+
+            const std::unordered_map<std::string, std::function<bool(int, int)>> opList
+            {
+                { "==", [](const int lhs, const int rhs) { return lhs == rhs; } },
+                { "!=", [](const int lhs, const int rhs) { return lhs != rhs; } },
+                { ">=", [](const int lhs, const int rhs) { return lhs >= rhs; } },
+                { "<=", [](const int lhs, const int rhs) { return lhs <= rhs; } },
+                { ">",  [](const int lhs, const int rhs) { return lhs > rhs; } },
+                { "<",  [](const int lhs, const int rhs) { return lhs < rhs; } },
+            };
+
+            evaluationStack.emplace(opList.at(operatorString)(lhsConstant, rhsConstant) && evaluationStack.top());
+        }
+
+        emitCurrentLine();
+    }
+
     void ShaderInformation::preprocessIfdef(const std::string& token, std::unordered_map<std::string, int> &definitions)
     {
-        evaluationStack.emplace(definitions[token] != 0 && evaluationStack.top());
+        evaluationStack.emplace(definitions.count(token) != 0 && evaluationStack.top());
         emitCurrentLine();
     }
 
@@ -41,7 +102,7 @@ namespace graphics
     {
         const bool top = evaluationStack.top();
         evaluationStack.pop();
-        evaluationStack.emplace(definitions[token] != 0 && !top && evaluationStack.top());
+        evaluationStack.emplace(definitions.count(token) != 0 && !top && evaluationStack.top());
         emitCurrentLine();
     }
 

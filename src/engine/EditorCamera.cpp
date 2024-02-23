@@ -135,9 +135,9 @@ void EditorCamera::onDrawUi()
         }
         if (ImGui::TreeNode("Transform"))
         {
-            ImGui::Text("Pos: %f, %f, %f", mPosition.x, mPosition.y, mPosition.z);
-            ImGui::Text("Rot: %f, %f, %f, %f,", mRotation.w, mRotation.x, mRotation.y, mRotation.z);
-            
+            ImGui::DragFloat3("Positon", glm::value_ptr(mPosition));
+            ImGui::DragFloat4("Rotation", glm::value_ptr(mRotation));
+
             ImGui::TreePop();
         }
         float fovYDegrees = glm::degrees(mFovY);

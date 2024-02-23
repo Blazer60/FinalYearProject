@@ -20,6 +20,8 @@ add_library(${HELPER_LIBRARY} STATIC
         src/helpers/logger/Logger.cpp include/helpers/logger/Logger.h
         src/helpers/profiler/ProfileTimer.cpp include/helpers/profiler/ProfileTimer.h
         src/helpers/profiler/Profiler.cpp include/helpers/profiler/Profiler.h
+        src/helpers/StringManipulation.cpp
+        include/helpers/StringManipulation.h
 )
 
 target_include_directories(${HELPER_LIBRARY} PUBLIC

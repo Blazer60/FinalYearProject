@@ -24,7 +24,6 @@ namespace graphics
     unsigned int getGlslType(const std::filesystem::path &path);
     unsigned int compileShader(const std::filesystem::path &path, const std::vector<graphics::Macro>& macros);
     unsigned int compileShaderSource(unsigned int shaderType, const std::list<ShaderInformation> &data, const std::vector<Macro> &macros);
-    std::vector<std::string> tokenise(const std::string &str, char delim=' ');
 
     class ShaderPreprocessor
     {

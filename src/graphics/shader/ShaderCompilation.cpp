@@ -15,6 +15,7 @@
 #include "GraphicsDefinitions.h"
 #include "Logger.h"
 #include "LoggerMacros.h"
+#include "StringManipulation.h"
 
 namespace graphics
 {
@@ -39,31 +40,6 @@ namespace graphics
         return compileShaderSource(shaderType, preprocessor.getSources(), macros);
     }
 
-    std::vector<std::string> tokenise(const std::string& str, const char delim)
-    {
-        std::vector<std::string> out;
-        auto startIt = str.begin();
-        auto endIt = std::next(startIt);
-
-        const auto addIfNonZeroLength = [&] {
-            if (std::distance(startIt, endIt) > 1)
-                out.emplace_back(startIt, endIt);
-        };
-
-        while (endIt != str.end())
-        {
-            if (*endIt == delim)
-            {
-                addIfNonZeroLength();
-                startIt = std::next(endIt);
-            }
-            ++endIt;
-        }
-        addIfNonZeroLength();
-
-        return out;
-    }
-
     ShaderPreprocessor::ShaderPreprocessor(const std::filesystem::path& path)
         : mInvokingPath(path)
     {
@@ -83,7 +59,7 @@ namespace graphics
 
     void ShaderPreprocessor::orderByInclude()
     {
-        std::list<ShaderInformation*> toSort { &*mInformation.begin() };  // Breadth first so order matters here.
+        std::list toSort { &*mInformation.begin() };  // Breadth first so order matters here.
         while (!toSort.empty())
         {
             const auto currentIt = toSort.begin();
@@ -92,8 +68,12 @@ namespace graphics
 
             for (const auto &includePath : currentShader.includePaths)
             {
-                const auto it = std::find_if(mInformation.begin(), mInformation.end(), [&includePath](const ShaderInformation &lhs) { return lhs.path == includePath; });
-                if (it != mInformation.begin())
+                const auto it = std::find_if(mInformation.begin(), mInformation.end(),
+                    [&includePath](const ShaderInformation &lhs) {
+                        return lhs.path == includePath;
+                });
+
+                if (it != mInformation.begin())  // Move to the front of the list.
                     mInformation.splice(mInformation.begin(), mInformation, it, std::next(it));
 
                 toSort.emplace_back(&*it);
@@ -136,11 +116,11 @@ namespace graphics
 
         ShaderInformation &shaderData = mInformation.emplace_back(mCurrentPath);
         shaderData.depthFromSource = depth;
-        // ShaderInformation shaderData(mCurrentPath);
         std::vector<std::string> tokens;
         const std::unordered_map<std::string, std::function<void()>> commands
         {
             { "#include", [&] { preprocessInclude(tokens[1], shaderData, depth); } },
+            { "#if",      [&] { shaderData.preprocessIf(tokens, mDefinitions); } },
             { "#ifdef",   [&] { shaderData.preprocessIfdef(tokens[1], mDefinitions); } },
             { "#elifdef", [&] { shaderData.preprocessElifdef(tokens[1], mDefinitions); } },
             { "#else",    [&] { shaderData.preprocessElse(); } },
@@ -158,7 +138,7 @@ namespace graphics
             const auto characterOffset = line.find_first_not_of(' ');
             if (characterOffset != std::string::npos && line[characterOffset] == '#')
             {
-                tokens = tokenise(line);
+                tokens = split(line);
                 const std::string &command = tokens[0];
                 commands.at(command)();
             }
@@ -166,7 +146,6 @@ namespace graphics
                 shaderData.emitCurrentLine();
             ++shaderData.lineCount;
         }
-        // mInformation.emplace_front(std::move(shaderData));
     }
 
     void ShaderPreprocessor::crash(const std::string& message) const

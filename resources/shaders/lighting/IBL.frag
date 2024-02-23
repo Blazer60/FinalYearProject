@@ -5,7 +5,10 @@
 #include "Brdf.glsl"
 #include "../Maths.glsl"
 
-#ifdef WHITE_FURNACE_TEST
+#if !defined(WHITE_FURNACE_TEST)
+    #define WHITE_FURNACE_TEST 0
+#endif
+#if WHITE_FURNACE_TEST > 0
     #include "../Colour.glsl"
 #endif
 
@@ -34,7 +37,7 @@ void main()
 
     const float vDotN = max(dot(v, n), 0.f);
 
-#ifdef WHITE_FURNACE_TEST
+#if WHITE_FURNACE_TEST > 0
     const vec3 fresnel = vec3(1.f);
 #else
     const vec3 fresnel = fresnelSchlick(gBuffer.specular, vDotN);
@@ -48,7 +51,7 @@ void main()
     const vec3 preFilterColour = textureLod(u_pre_filter_texture, r, gBuffer.roughness * maxReflectionLod).rgb;
     const vec3 irradiance = texture(u_irradiance_texture, n).rgb;
 
-#ifdef WHITE_FURNACE_TEST
+#if WHITE_FURNACE_TEST > 0
     o_irradiance = linearToSRgb((specular + diffuse) - vec3(0.5));
 #else
     o_irradiance = camera.exposure * (specular * preFilterColour + diffuse * irradiance) * u_luminance_multiplier;

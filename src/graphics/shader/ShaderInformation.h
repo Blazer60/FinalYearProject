@@ -22,6 +22,7 @@ namespace graphics
         explicit ShaderInformation(std::filesystem::path path);
         void emitCurrentLine();
         void emitLineCount();
+        void preprocessIf(const std::vector<std::string> &tokens, const std::unordered_map<std::string, int> &definitions);
         void preprocessIfdef(const std::string& token, std::unordered_map<std::string, int> &definitions);
         void preprocessEndif();
         void preprocessElifdef(const std::string &token, std::unordered_map<std::string, int> &definitions);
