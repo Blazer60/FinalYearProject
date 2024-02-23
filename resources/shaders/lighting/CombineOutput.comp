@@ -1,0 +1,57 @@
+#version 460 core
+
+#include "../interfaces/ThreadGroupSizes.h"
+#include "../Maths.glsl"
+
+layout(binding = 0) uniform sampler2D u_irradiance_texture;
+layout(binding = 1) uniform sampler2D u_emissive_texture;
+layout(binding = 2) uniform sampler2D depthBufferTexture;
+layout(binding = 3) uniform samplerCube u_skybox_texture;
+layout(binding = 4) uniform sampler2D u_reflection_texture;
+
+uniform mat4 u_inverse_vp_matrix;
+uniform float u_luminance_multiplier;
+uniform float u_exposure;
+
+layout(binding = 1, rgba16f) uniform image2D lighting;
+
+vec3 sample_skybox_colour(vec2 uv)
+{
+    const vec2 uv_normalised = uvToNdc(uv);
+
+    vec4 near_plane = vec4(uv_normalised.x, uv_normalised.y, -1.0f, 1.f);
+    vec4 far_plane  = vec4(uv_normalised.x, uv_normalised.y,  1.0f, 1.f);
+
+    near_plane = u_inverse_vp_matrix * near_plane;
+    far_plane  = u_inverse_vp_matrix * far_plane;
+
+    near_plane /= near_plane.w;
+    far_plane  /= far_plane.w;
+
+    const vec3 direction = (far_plane - near_plane).xyz;
+    const vec3 colour = texture(u_skybox_texture, direction.xyz).rgb;
+    return colour * u_luminance_multiplier;
+}
+
+layout(local_size_x = FULLSCREEN_THREAD_GROUP_SIZE, local_size_y = FULLSCREEN_THREAD_GROUP_SIZE, local_size_z = 1) in;
+void main()
+{
+    const vec2 id = gl_GlobalInvocationID.xy;
+    const vec2 dispatchSize = gl_NumWorkGroups.xy * gl_WorkGroupSize.xy;
+    const vec2 uv = (id - vec2(0.5f)) / textureSize(depthBufferTexture, 0);
+
+    const float depth = texture(depthBufferTexture, uv).r;
+    if (depth < 1.f)
+    {
+        const vec3 l0  = texture(u_irradiance_texture, uv).rgb;
+        const vec3 emissive = texture(u_emissive_texture, uv).rgb * u_exposure;
+        const vec4 reflections = texture(u_reflection_texture, uv).rgba;
+        const vec3 colour = emissive + l0 + reflections.rgb;
+        imageStore(lighting, ivec2(id), vec4(colour, 1.f));
+    }
+    else
+    {
+        const vec3 colour = sample_skybox_colour(uv) * u_exposure;
+        imageStore(lighting, ivec2(id), vec4(colour, 1.f));
+    }
+}

@@ -68,9 +68,9 @@ void Renderer::initTextureRenderBuffers()
     mDepthTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_DEPTH_COMPONENT32F,    graphics::filter::Nearest, graphics::wrap::ClampToBorder);
 
     mLightTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F, graphics::filter::Nearest, graphics::wrap::ClampToEdge);
-    mDeferredLightingTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,  graphics::filter::LinearMipmapLinear, graphics::wrap::ClampToEdge, 8);
-    mPrimaryImageBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,  GL_NEAREST, GL_NEAREST);
-    mAuxiliaryImageBuffer            = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,  GL_NEAREST, GL_NEAREST);
+    mCombinedLightingTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F,  graphics::filter::LinearMipmapLinear, graphics::wrap::ClampToEdge, 8);
+    mPrimaryImageBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F,  GL_NEAREST, GL_NEAREST);
+    mAuxiliaryImageBuffer            = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F,  GL_NEAREST, GL_NEAREST);
     mSsrDataTextureBuffer            = std::make_unique<TextureBufferObject>(ssrSize,              GL_RGBA16F, graphics::filter::Nearest, graphics::wrap::ClampToEdge);
     mReflectionTextureBuffer         = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F, graphics::filter::Linear,  graphics::wrap::ClampToEdge);
     mDebugTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16,  graphics::filter::Linear,  graphics::wrap::ClampToEdge);
@@ -91,7 +91,7 @@ void Renderer::initTextureRenderBuffers()
     mReflectionFramebuffer->attach(mReflectionTextureBuffer.get(), 0);
     
     // Deferred Lighting.
-    mDeferredLightFramebuffer->attach(mDeferredLightingTextureBuffer.get(), 0);
+    mDeferredLightFramebuffer->attach(mCombinedLightingTextureBuffer.get(), 0);
 
     // Debug.
     mDebugFramebuffer->attach(mDebugTextureBuffer.get(), 0);
@@ -476,28 +476,30 @@ void Renderer::render()
         
         // Deferred Lighting step.
         
-        mDeferredLightFramebuffer->bind();
-        mDeferredLightFramebuffer->clear(glm::vec4(glm::vec3(0.f), 0.f));
+        // mDeferredLightFramebuffer->bind();
+        // mDeferredLightFramebuffer->clear(glm::vec4(glm::vec3(0.f), 0.f));
+        mCombinedLightingTextureBuffer->clear();
         
-        mDeferredLightShader.bind();
+        mCombineLightingShader.bind();
         
         const glm::mat4 viewMatrixNoPosition = glm::mat4(glm::mat3(camera.viewMatrix));
         const glm::mat4 inverseViewProjection = glm::inverse(cameraProjectionMatrix * viewMatrixNoPosition);
 
-        mDeferredLightShader.set("u_irradiance_texture", mLightTextureBuffer->getId(), 0);
+        mCombineLightingShader.set("u_irradiance_texture", mLightTextureBuffer->getId(), 0);
         // todo: emissive buffer should go straight in irradiance texture.
         // mDeferredLightShader.set("u_emissive_texture", mEmissiveTextureBuffer->getId(), 1);
-        mDeferredLightShader.set("u_depth_texture", mDepthTextureBuffer->getId(), 2);
-        mDeferredLightShader.set("u_skybox_texture", mHdrSkybox->getId(), 3);
-        mDeferredLightShader.set("u_reflection_texture", mReflectionTextureBuffer->getId(), 4);
+        mCombineLightingShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 2);
+        mCombineLightingShader.set("u_skybox_texture", mHdrSkybox->getId(), 3);
+        mCombineLightingShader.set("u_reflection_texture", mReflectionTextureBuffer->getId(), 4);
 
-        mDeferredLightShader.set("u_inverse_vp_matrix", inverseViewProjection);
-        mDeferredLightShader.set("u_luminance_multiplier", mIblLuminanceMultiplier);
-        mDeferredLightShader.set("u_exposure", exposure);
-        
-        drawFullscreenTriangleNow();
+        mCombineLightingShader.set("u_inverse_vp_matrix", inverseViewProjection);
+        mCombineLightingShader.set("u_luminance_multiplier", mIblLuminanceMultiplier);
+        mCombineLightingShader.set("u_exposure", exposure);
+        mCombineLightingShader.image("lighting", mCombinedLightingTextureBuffer->getId(), mCombinedLightingTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
 
-        blurTexture(*mDeferredLightingTextureBuffer);
+        glDispatchCompute(threadGroupSize.x, threadGroupSize.y, 1);
+
+        blurTexture(*mCombinedLightingTextureBuffer);
 
         PROFILE_SCOPE_END(deferredTimer);
         graphics::popDebugGroup();
@@ -505,7 +507,7 @@ void Renderer::render()
         PROFILE_SCOPE_BEGIN(postProcessTimer, "Post-processing Stack");
         graphics::pushDebugGroup("Post-processing Pass");
         
-        graphics::copyTexture2D(*mDeferredLightingTextureBuffer, *mPrimaryImageBuffer);
+        graphics::copyTexture2D(*mCombinedLightingTextureBuffer, *mPrimaryImageBuffer);
         for (std::unique_ptr<PostProcessLayer> &postProcessLayer : camera.postProcessStack)
         {
             postProcessLayer->draw(mPrimaryImageBuffer.get(), mAuxiliaryImageBuffer.get());
@@ -989,11 +991,6 @@ const TextureBufferObject &Renderer::getLightBuffer() const
 const TextureBufferObject &Renderer::getDepthBuffer() const
 {
     return *mDepthTextureBuffer;
-}
-
-const TextureBufferObject &Renderer::getDeferredLightingBuffer() const
-{
-    return *mDeferredLightingTextureBuffer;
 }
 
 std::vector<graphics::DirectionalLight> &Renderer::getDirectionalLights()

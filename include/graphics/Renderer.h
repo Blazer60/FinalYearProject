@@ -161,7 +161,6 @@ public:
     static void rendererGuiNewFrame();
 
     [[nodiscard]] const TextureBufferObject &getPrimaryBuffer() const;
-    [[nodiscard]] const TextureBufferObject &getDeferredLightingBuffer() const;
     [[nodiscard]] const TextureBufferObject &getLightBuffer() const;
     [[nodiscard]] const TextureBufferObject &getDepthBuffer() const;
     [[nodiscard]] const TextureBufferObject &getSsrBuffer() const;
@@ -232,8 +231,8 @@ protected:
         { file::shaderPath() / "brdf/GgxDirectionalAlbedo.comp" }
     };
 
-    Shader mDeferredLightShader {
-        { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/CombineOutput.frag" }
+    Shader mCombineLightingShader {
+        { file::shaderPath() / "lighting/CombineOutput.comp" }
     };
 
     Shader mPointLightShader {
@@ -299,7 +298,7 @@ protected:
     std::unique_ptr<TextureArrayObject> mGBufferTexture;
     std::unique_ptr<TextureBufferObject> mDepthTextureBuffer;
     std::unique_ptr<TextureBufferObject> mLightTextureBuffer;
-    std::unique_ptr<TextureBufferObject> mDeferredLightingTextureBuffer;
+    std::unique_ptr<TextureBufferObject> mCombinedLightingTextureBuffer;
     std::unique_ptr<TextureBufferObject> mBrdfLutTextureBuffer;
     std::unique_ptr<TextureBufferObject> mPrimaryImageBuffer;
     std::unique_ptr<TextureBufferObject> mAuxiliaryImageBuffer;

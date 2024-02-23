@@ -9,7 +9,7 @@ uniform int u_down_mip_level;
 uniform int u_up_mip_level;
 uniform float u_scale;
 
-out layout(location = 0) vec3 o_output;
+out layout(location = 0) vec4 o_output;
 
 vec3 up_filter_9_tap(sampler2D previous, vec2 uv, vec2 texel_size)
 {
@@ -29,6 +29,6 @@ vec3 up_filter_9_tap(sampler2D previous, vec2 uv, vec2 texel_size)
 void main()
 {
     vec2 texel_size = 1.f / textureSize(u_up_sample_texture, u_up_mip_level);
-    o_output = max(up_filter_9_tap(u_up_sample_texture, v_uv, texel_size), vec3(0.f))
-             + textureLod(u_down_sample_texture, v_uv, u_down_mip_level).rgb;
+    o_output = vec4(max(up_filter_9_tap(u_up_sample_texture, v_uv, texel_size), vec3(0.f))
+             + textureLod(u_down_sample_texture, v_uv, u_down_mip_level).rgb, 1.f);
 }

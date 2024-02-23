@@ -5,7 +5,7 @@ in vec2 v_uv;
 uniform sampler2D u_texture;
 uniform float u_exposure;
 
-out layout(location = 0) vec3 o_output;
+out layout(location = 0) vec4 o_output;
 
 vec3 to_srgb(vec3 v)
 {
@@ -71,5 +71,5 @@ void main()
     // The prefilter pass is the same as the down sample passes but with karis average applied to avoid 'fire flies'.
     // https://learnopengl.com/Guest-Articles/2022/Phys.-Based-Bloom
     const vec2 texel_size = 1.f / textureSize(u_texture, 0);
-    o_output = u_exposure * max(down_filter_13_tap(v_uv, texel_size), vec3(0.f));
+    o_output = vec4(u_exposure * max(down_filter_13_tap(v_uv, texel_size), vec3(0.f)), 1.f);
 }

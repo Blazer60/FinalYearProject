@@ -5,7 +5,7 @@ in vec2 v_uv;
 uniform sampler2D u_texture;
 uniform int u_mip_level;
 
-out layout(location = 0) vec3 o_output;
+out layout(location = 0) vec4 o_output;
 
 // [Jimenez14] http://goo.gl/eomGso
 // . . . . . . .
@@ -46,5 +46,5 @@ vec3 down_filter_13_tap(vec2 uv, vec2 texel_size)
 void main()
 {
     const vec2 texel_size = 1.f / textureSize(u_texture, u_mip_level);
-    o_output = max(down_filter_13_tap(v_uv, texel_size), vec3(0.f));
+    o_output = vec4(max(down_filter_13_tap(v_uv, texel_size), vec3(0.f)), 1.f);
 }
