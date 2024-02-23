@@ -14,35 +14,16 @@
 #include "shader/ShaderCompilation.h"
 
 
-Shader::Shader(const std::initializer_list<std::filesystem::path> paths)
+Shader::Shader(const std::vector<std::filesystem::path>& paths, const std::vector<graphics::Definitions>& definitions)
     : mId(glCreateProgram())
 {
-    if (paths.size() != 0)
+    if (!paths.empty())
     {
         mDebugName = std::prev(paths.end())->filename().string();
         setDebugName(mDebugName);
     }
 
-    CreateShaderSource(paths);
-}
-
-Shader::Shader(const std::vector<std::filesystem::path>& paths, const std::vector<graphics::Macro>& macros)
-    : mId(glCreateProgram())
-{
-    if (paths.size() != 0)
-    {
-        mDebugName = std::prev(paths.end())->filename().string();
-        setDebugName(mDebugName);
-    }
-
-    CreateShaderSource(paths, macros);
-}
-
-Shader::Shader(const std::filesystem::path &vertexPath, const std::filesystem::path &fragmentPath)
-    : mDebugName(vertexPath.filename().string() + " | " + fragmentPath.filename().string()), mId(glCreateProgram())
-{
-    CreateShaderSource({ vertexPath, fragmentPath });
-    setDebugName(mDebugName);
+    CreateShaderSource(paths, definitions);
 }
 
 Shader::~Shader()
@@ -177,7 +158,7 @@ void Shader::CreateShaderSource(const std::initializer_list<std::filesystem::pat
 }
 
 void Shader::CreateShaderSource(
-    const std::vector<std::filesystem::path>& paths, const std::vector<graphics::Macro>& macros) const
+    const std::vector<std::filesystem::path>& paths, const std::vector<graphics::Definitions>& macros) const
 {
     std::vector<unsigned int> shaderIds;
     for (const std::filesystem::path &path : paths)

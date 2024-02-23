@@ -45,7 +45,7 @@ namespace engine
             return it->second;
         
         // Currently no error handling for incorrect path.
-        auto resource = std::make_shared<Shader>(vertexPath, fragmentPath);
+        auto resource = std::make_shared<Shader>(std::vector { vertexPath, fragmentPath });
         mShaders[hashName] = resource;
         return resource;
     }

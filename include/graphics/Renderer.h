@@ -19,6 +19,7 @@
 #include "CameraBlock.h"
 #include "DebugGBufferBlock.h"
 #include "DirectionalLightBlock.h"
+#include "FileLoader.h"
 #include "PointLightBlock.h"
 #include "ScreenSpaceReflectionsBlock.h"
 #include "SpotlightBlock.h"
@@ -37,7 +38,7 @@ public:
     Renderer operator=(const Renderer&) = delete;
     Renderer operator=(Renderer&&) = delete;
     ~Renderer() = default;
-    
+
     /**
      * @brief Draws an element to the geometry buffer.
      * @param vao - Vertex Array Object.
@@ -51,7 +52,7 @@ public:
         uint32_t vao, int32_t indicesCount, std::weak_ptr<Shader> shader,
         graphics::drawMode renderMode, const glm::mat4 &matrix,
         const graphics::DrawCallback &onDraw);
-    
+
     /**
      * @brief Draws an element to the geometry buffer.
      * @param subMesh - The mesh that you want to be drawn.
@@ -59,7 +60,7 @@ public:
      * @param matrix - The model's matrix (used for shadow mapping).
      */
     void drawMesh(const SubMesh &subMesh, Material &material, const glm::mat4 &matrix);
-    
+
     /**
      * @brief Draws a number of meshes to the geometry buffer with the same model matrix.
      * @param mesh - N sub-meshes that you want to be drawn to the geometry buffer.
@@ -101,38 +102,38 @@ public:
      * @param colour - The colour that the line should be.
      */
     void drawDebugLine(const glm::vec3 &startPosition, const glm::vec3 &endPosition, const glm::vec3 &colour);
-    
+
     /**
      * @brief Submits a camera that will be used for the render pipeline.
      */
     void submit(const CameraSettings &cameraSettings);
-    
+
     /**
      * @brief Submits a directional light that will be used to light the world and cast shadows.
      */
     void submit(const graphics::DirectionalLight &directionalLight);
-    
+
     /**
      * @brief Submits a point light that will be used to light the world.
      */
     void submit(const graphics::PointLight &pointLight);
-    
+
     /**
      * @brief Submits a spot light that will be used to light the world.
      */
     void submit(const graphics::Spotlight &spotLight);
-    
+
     /**
      * Starts rendering everything that was submitted to the renderer this frame.
      */
     void render();
-    
+
     /**
      * @brief Resets the data fro the next round of rendering. This is split so that ImGui can display information
      * before being reset.
      */
     void clear();
-    
+
     /**
      * @returns false if debug message was failed to be setup. This is most likely due to the openGl version being
      * less than 4.3.
@@ -144,21 +145,21 @@ public:
      * @brief Gets the current version of OpenGL that is being used.
      */
     [[nodiscard]] static std::string getVersion();
-    
+
     void generateSkybox(std::string_view path, glm::ivec2 desiredSize);
-    
+
     /**
      * @brief Draws a triangle to the screen so that fullscreen passes can be performs without
      * having to worry about mesh data. Make sure that a shader and fbo are already bound before
      * calling this method.
      */
     void drawFullscreenTriangleNow() const;
-    
+
     /**
      * @brief Resets some internal state so that the GUI system doesn't override anything in the renderer.
      */
     static void rendererGuiNewFrame();
-    
+
     [[nodiscard]] const TextureBufferObject &getPrimaryBuffer() const;
     [[nodiscard]] const TextureBufferObject &getDeferredLightingBuffer() const;
     [[nodiscard]] const TextureBufferObject &getLightBuffer() const;
@@ -167,12 +168,12 @@ public:
     [[nodiscard]] const TextureBufferObject &getReflectionBuffer() const;
     [[nodiscard]] const TextureBufferObject &getDebugBuffer() const;
     [[nodiscard]] const TextureBufferObject &getFromGBuffer(graphics::gbuffer type, bool gammaCorrect, const glm::vec4 &defaultValue=glm::vec4(0.f, 0.f, 0.f, 1.f));
-    
+
     [[nodiscard]] std::vector<graphics::DirectionalLight> &getDirectionalLights();
-    
+
     [[nodiscard]] float getCurrentEV100() const;
     [[nodiscard]] float getCurrentExposure() const;
-    
+
     void setIblMultiplier(float multiplier);
 
 protected:
@@ -180,18 +181,18 @@ protected:
     void initTextureRenderBuffers();
     void bindUbos();
     void detachTextureRenderBuffersFromFrameBuffers() const;
-    std::unique_ptr<Cubemap> createCubemapFromHdrTexture(const HdrTexture *hdrTexture, const glm::ivec2 &size) const;
-    std::unique_ptr<Cubemap> generateIrradianceMap(const Cubemap *cubemap, const glm::ivec2 &size) const;
-    std::unique_ptr<Cubemap> generatePreFilterMap(const Cubemap *cubemap, const glm::ivec2 &size) const;
+    std::unique_ptr<Cubemap> createCubemapFromHdrTexture(const HdrTexture *hdrTexture, const glm::ivec2 &size);
+    std::unique_ptr<Cubemap> generateIrradianceMap(const Cubemap *cubemap, const glm::ivec2 &size);
+    std::unique_ptr<Cubemap> generatePreFilterMap(const Cubemap *cubemap, const glm::ivec2 &size);
     std::unique_ptr<TextureBufferObject> generateBrdfLut(const glm::ivec2 &size);
     void directionalLightShadowMapping(const CameraSettings &cameraSettings);
-    void pointLightShadowMapping() const;
-    void spotlightShadowMapping() const;
+    void pointLightShadowMapping();
+    void spotlightShadowMapping();
     void shadeDistantLightProbe();
-    void blurTexture(const TextureBufferObject &texture) const;
+    void blurTexture(const TextureBufferObject &texture);
 
     static void setViewportSize(const glm::ivec2 &size=window::bufferSize());
-    
+
     std::vector<graphics::RenderQueueObject>        mRenderQueue;
     std::vector<CameraSettings>                     mCameraQueue;
     std::vector<graphics::DirectionalLight>         mDirectionalLightQueue;
@@ -199,12 +200,12 @@ protected:
     std::vector<graphics::Spotlight>                mSpotlightQueue;
     std::vector<graphics::DebugQueueObject>         mDebugQueue;
     std::vector<graphics::LineQueueObject>          mLineQueue;
-    
+
     std::unique_ptr<HdrTexture>  mHdrImage;
     std::unique_ptr<Cubemap>     mHdrSkybox;
     std::unique_ptr<Cubemap>     mIrradianceMap;
     std::unique_ptr<Cubemap>     mPreFilterMap;
-    
+
     std::unique_ptr<FramebufferObject> mDeferredLightFramebuffer;
     std::unique_ptr<FramebufferObject> mGeometryFramebuffer;
     std::unique_ptr<FramebufferObject> mLightFramebuffer;
@@ -214,25 +215,78 @@ protected:
     std::unique_ptr<FramebufferObject> mBlurFramebuffer;
     std::unique_ptr<FramebufferObject> mDebugFramebuffer;
 
-    std::unique_ptr<Shader> mDeferredLightShader;
-    Shader mDirectionalLightShader;
-    std::unique_ptr<Shader> mPointLightShader;
-    std::unique_ptr<Shader> mSpotlightShader;
-    Shader mIblShader;
-    std::unique_ptr<Shader> mDirectionalLightShadowShader;
-    std::unique_ptr<Shader> mPointLightShadowShader;
-    std::unique_ptr<Shader> mSpotlightShadowShader;
-    std::unique_ptr<Shader> mHdrToCubemapShader;
-    std::unique_ptr<Shader> mCubemapToIrradianceShader;
-    std::unique_ptr<Shader> mPreFilterShader;
-    Shader mIntegrateBrdfShader;
-    std::unique_ptr<Shader> mScreenSpaceReflectionsShader;
-    std::unique_ptr<Shader> mColourResolveShader;
-    std::unique_ptr<Shader> mBlurShader;
-    std::unique_ptr<Shader> mDebugShader;
-    std::unique_ptr<Shader> mLineShader;
-    Shader mDebugGBufferShader;
-    
+    Shader mDirectionalLightShader {
+        { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/DirectionalLight.frag" }
+    };
+
+    Shader mIblShader {
+        { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/IBL.frag" }
+    };
+
+    Shader mIntegrateBrdfShader {
+        { file::shaderPath() / "brdf/GgxDirectionalAlbedo.comp" }
+    };
+
+    Shader mDeferredLightShader {
+        { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/CombineOutput.frag" }
+    };
+
+    Shader mPointLightShader {
+        { file::shaderPath() / "lighting/PointLight.vert", file::shaderPath() / "lighting/PointLight.frag" }
+    };
+
+    Shader mSpotlightShader {
+        { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/SpotLight.frag" }
+    };
+
+    Shader mDirectionalLightShadowShader {
+        { file::shaderPath() / "shadow/Shadow.vert", file::shaderPath() / "shadow/Shadow.frag" }
+    };
+
+    Shader mPointLightShadowShader {
+        { file::shaderPath() / "shadow/PointShadow.vert", file::shaderPath() / "shadow/PointShadow.frag" }
+    };
+
+    Shader mSpotlightShadowShader {
+        { file::shaderPath() / "shadow/PointShadow.vert", file::shaderPath() / "shadow/PointShadow.frag" }
+    };
+
+    Shader mHdrToCubemapShader {
+        { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "cubemap/ToCubemap.frag" }
+    };
+
+    Shader mCubemapToIrradianceShader {
+        { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "cubemap/IrradianceMap.frag" }
+    };
+
+    Shader mPreFilterShader {
+        { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() /  "cubemap/PreFilter.frag" }
+    };
+
+    Shader mScreenSpaceReflectionsShader {
+        { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "ssr/SsrDda.frag" }
+    };
+
+    Shader mColourResolveShader {
+        { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "ssr/ColourResolve.frag" }
+    };
+
+    Shader mBlurShader {
+        { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "postProcessing/bloom/BloomDownSample.frag" }
+    };
+
+    Shader mDebugShader {
+        { file::shaderPath() / "geometry/debug/Debug.vert", file::shaderPath() / "geometry/debug/Debug.frag" }
+    };
+
+    Shader mLineShader {
+        { file::shaderPath() / "geometry/debug/Line.vert", file::shaderPath() / "geometry/debug/Line.frag" }
+    };
+
+    Shader mDebugGBufferShader {
+        { file::shaderPath() / "geometry/DebugGBuffer.comp" }
+    };
+
     SubMesh mFullscreenTriangle;
     SubMesh mUnitSphere;
     SubMesh mLine;
@@ -257,7 +311,7 @@ protected:
     graphics::UniformBufferObject<DebugGBufferBlock> mDebugGBufferBlock;
 
     glm::ivec2 mCurrentRenderBufferSize;
-    
+
     float mCurrentEV100 { 10.f };
     float mIblLuminanceMultiplier { 1000.f };
 

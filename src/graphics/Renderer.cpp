@@ -19,11 +19,7 @@ Renderer::Renderer() :
     mCurrentRenderBufferSize(window::bufferSize()),
     mFullscreenTriangle(primitives::fullscreenTriangle()),
     mUnitSphere(primitives::invertedSphere()),
-    mLine(primitives::line()),
-    mDirectionalLightShader { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/DirectionalLight.frag" },
-    mIntegrateBrdfShader { file::shaderPath() / "brdf/GgxDirectionalAlbedo.comp" },
-    mDebugGBufferShader { file::shaderPath() / "geometry/DebugGBuffer.comp" },
-    mIblShader({ file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/IBL.frag" }, { graphics::Macro{ "WHITE_FURNACE_TEST", 1 } })
+    mLine(primitives::line())
 {
     // Blending texture data / enabling lerping.
     glEnable(GL_BLEND);
@@ -33,31 +29,6 @@ Renderer::Renderer() :
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
     graphics::pushDebugGroup("Setup");
-
-    auto fsTriShader = file::shaderPath() / "FullscreenTriangle.vert";
-    mDirectionalLightShader.setDebugName("Directional Lighting Shader");
-    mPointLightShader = std::make_unique<Shader>(file::shaderPath() / "lighting/PointLight.vert", file::shaderPath() / "lighting/PointLight.frag");
-    mSpotlightShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "lighting/SpotLight.frag");
-    mDeferredLightShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "lighting/CombineOutput.frag");
-    mDirectionalLightShadowShader = std::make_unique<Shader>(file::shaderPath() / "shadow/Shadow.vert", file::shaderPath() / "shadow/Shadow.frag");
-    mPointLightShadowShader = std::make_unique<Shader>(file::shaderPath() / "shadow/PointShadow.vert", file::shaderPath() / "shadow/PointShadow.frag");
-    mSpotlightShadowShader = std::make_unique<Shader>(file::shaderPath() / "shadow/PointShadow.vert", file::shaderPath() / "shadow/PointShadow.frag");
-    mHdrToCubemapShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "cubemap/ToCubemap.frag");
-    mCubemapToIrradianceShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "cubemap/IrradianceMap.frag");
-    mPreFilterShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() /  "cubemap/PreFilter.frag");
-    mScreenSpaceReflectionsShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "ssr/SsrDda.frag");
-    mColourResolveShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "ssr/ColourResolve.frag");
-    mBlurShader = std::make_unique<Shader>(fsTriShader, file::shaderPath() / "postProcessing/bloom/BloomDownSample.frag");
-    mDebugShader = std::make_unique<Shader>(file::shaderPath() / "geometry/debug/Debug.vert", file::shaderPath() / "geometry/debug/Debug.frag");
-    mLineShader = std::make_unique<Shader>(file::shaderPath() / "geometry/debug/Line.vert", file::shaderPath() / "geometry/debug/Line.frag");
-
-    Shader testShader { file::shaderPath() / "test.comp" };
-    const TextureArrayObject testTexture(glm::ivec2(8), 3, GL_RGBA32UI, graphics::filter::Nearest, graphics::wrap::ClampToEdge);
-    const TextureBufferObject secondTexture(glm::ivec2(8), GL_RGBA32F, graphics::filter::Nearest, graphics::wrap::ClampToEdge);
-    testShader.bind();
-    testShader.image("storageGBuffer", testTexture.getId(), testTexture.getFormat(), 0, true, GL_READ_WRITE);
-    testShader.image("testScreen", secondTexture.getId(), secondTexture.getFormat(), 1, false, GL_WRITE_ONLY);
-    glDispatchCompute(1, 1, 1);
 
     mBrdfLutTextureBuffer = generateBrdfLut(glm::ivec2(64));
     generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
@@ -143,17 +114,17 @@ void Renderer::bindUbos()
     mDirectionalLightShader.block("CameraBlock", mCamera.getBindPoint());
     mDirectionalLightShader.block("DirectionalLightBlock", mDirectionalLightBlock.getBindPoint());
 
-    mPointLightShader->block("CameraBlock", mCamera.getBindPoint());
-    mPointLightShader->block("PointLightBlock", mPointLightBlock.getBindPoint());
+    mPointLightShader.block("CameraBlock", mCamera.getBindPoint());
+    mPointLightShader.block("PointLightBlock", mPointLightBlock.getBindPoint());
 
-    mSpotlightShader->block("CameraBlock", mCamera.getBindPoint());
-    mSpotlightShader->block("SpotlightBlock", mSpotlightBlock.getBindPoint());
+    mSpotlightShader.block("CameraBlock", mCamera.getBindPoint());
+    mSpotlightShader.block("SpotlightBlock", mSpotlightBlock.getBindPoint());
 
-    mScreenSpaceReflectionsShader->block("CameraBlock", mCamera.getBindPoint());
-    mScreenSpaceReflectionsShader->block("ScreenSpaceReflectionsBlock", mSsrBlock.getBindPoint());
+    mScreenSpaceReflectionsShader.block("CameraBlock", mCamera.getBindPoint());
+    mScreenSpaceReflectionsShader.block("ScreenSpaceReflectionsBlock", mSsrBlock.getBindPoint());
 
-    mColourResolveShader->block("CameraBlock", mCamera.getBindPoint());
-    mColourResolveShader->block("ScreenSpaceReflectionsBlock", mSsrBlock.getBindPoint());
+    mColourResolveShader.block("CameraBlock", mCamera.getBindPoint());
+    mColourResolveShader.block("ScreenSpaceReflectionsBlock", mSsrBlock.getBindPoint());
 
     mDebugGBufferShader.block("DebugGBufferBlock", mDebugGBufferBlock.getBindPoint());
 
@@ -388,10 +359,10 @@ void Renderer::render()
         PROFILE_SCOPE_BEGIN(pointLightTimer, "Point Lighting");
         graphics::pushDebugGroup("Point Lighting");
         
-        mPointLightShader->bind();
+        mPointLightShader.bind();
         
-        mPointLightShader->set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
-        mPointLightShader->image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
+        mPointLightShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
+        mPointLightShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
 
         glBindVertexArray(mUnitSphere.vao());
         
@@ -407,7 +378,7 @@ void Renderer::render()
             mPointLightBlock->mvpMatrix = vpMatrix * pointLightModelMatrix;
             mPointLightBlock.updateGlsl();
 
-            mPointLightShader->set("u_shadow_map_texture", pointLight.shadowMap->getId(), 1);
+            mPointLightShader.set("u_shadow_map_texture", pointLight.shadowMap->getId(), 1);
 
             glDrawElements(GL_TRIANGLES, mUnitSphere.indicesCount(), GL_UNSIGNED_INT, nullptr);
         }
@@ -418,14 +389,14 @@ void Renderer::render()
         PROFILE_SCOPE_BEGIN(spotLightTimer, "Spot Light");
         graphics::pushDebugGroup("Spot Light");
         
-        mSpotlightShader->bind();
+        mSpotlightShader.bind();
         
-        mSpotlightShader->set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
-        mPointLightShader->image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
+        mSpotlightShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
+        mPointLightShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
 
         for (const graphics::Spotlight &spotLight : mSpotlightQueue)
         {
-            mSpotlightShader->set("u_shadow_map_texture", spotLight.shadowMap->getId(), 1);
+            mSpotlightShader.set("u_shadow_map_texture", spotLight.shadowMap->getId(), 1);
 
             mSpotlightBlock->position = glm::vec4(spotLight.position, 1.f);
             mSpotlightBlock->direction = glm::vec4(spotLight.direction, 0.f);
@@ -513,21 +484,21 @@ void Renderer::render()
         mDeferredLightFramebuffer->bind();
         mDeferredLightFramebuffer->clear(glm::vec4(glm::vec3(0.f), 0.f));
         
-        mDeferredLightShader->bind();
+        mDeferredLightShader.bind();
         
         const glm::mat4 viewMatrixNoPosition = glm::mat4(glm::mat3(camera.viewMatrix));
         const glm::mat4 inverseViewProjection = glm::inverse(cameraProjectionMatrix * viewMatrixNoPosition);
 
-        mDeferredLightShader->set("u_irradiance_texture", mLightTextureBuffer->getId(), 0);
+        mDeferredLightShader.set("u_irradiance_texture", mLightTextureBuffer->getId(), 0);
         // todo: emissive buffer should go straight in irradiance texture.
-        // mDeferredLightShader->set("u_emissive_texture", mEmissiveTextureBuffer->getId(), 1);
-        mDeferredLightShader->set("u_depth_texture", mDepthTextureBuffer->getId(), 2);
-        mDeferredLightShader->set("u_skybox_texture", mHdrSkybox->getId(), 3);
-        mDeferredLightShader->set("u_reflection_texture", mReflectionTextureBuffer->getId(), 4);
+        // mDeferredLightShader.set("u_emissive_texture", mEmissiveTextureBuffer->getId(), 1);
+        mDeferredLightShader.set("u_depth_texture", mDepthTextureBuffer->getId(), 2);
+        mDeferredLightShader.set("u_skybox_texture", mHdrSkybox->getId(), 3);
+        mDeferredLightShader.set("u_reflection_texture", mReflectionTextureBuffer->getId(), 4);
 
-        mDeferredLightShader->set("u_inverse_vp_matrix", inverseViewProjection);
-        mDeferredLightShader->set("u_luminance_multiplier", mIblLuminanceMultiplier);
-        mDeferredLightShader->set("u_exposure", exposure);
+        mDeferredLightShader.set("u_inverse_vp_matrix", inverseViewProjection);
+        mDeferredLightShader.set("u_luminance_multiplier", mIblLuminanceMultiplier);
+        mDeferredLightShader.set("u_exposure", exposure);
         
         drawFullscreenTriangleNow();
 
@@ -557,12 +528,12 @@ void Renderer::render()
 
         mDebugFramebuffer->bind();
         mDebugFramebuffer->clear(glm::vec4(0.f));
-        mDebugShader->bind();
+        mDebugShader.bind();
 
         for (const auto & [vao, count, modelMatrix, colour] : mDebugQueue)
         {
-            mDebugShader->set("u_mvp_matrix", vpMatrix * modelMatrix);
-            mDebugShader->set("u_colour", colour);
+            mDebugShader.set("u_mvp_matrix", vpMatrix * modelMatrix);
+            mDebugShader.set("u_colour", colour);
             glBindVertexArray(vao);
             glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
         }
@@ -570,14 +541,14 @@ void Renderer::render()
         glEnable(GL_CULL_FACE);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-        mLineShader->bind();
-        mLineShader->set("u_mvp_matrix", vpMatrix);
+        mLineShader.bind();
+        mLineShader.set("u_mvp_matrix", vpMatrix);
         glBindVertexArray(mLine.vao());
         for (const auto &[startPosition, endPosition, colour] : mLineQueue)
         {
-            mLineShader->set("u_locationA", startPosition);
-            mLineShader->set("u_locationB", endPosition);
-            mLineShader->set("u_colour",    colour);
+            mLineShader.set("u_locationA", startPosition);
+            mLineShader.set("u_locationB", endPosition);
+            mLineShader.set("u_colour",    colour);
             glDrawElements(GL_LINES, mLine.indicesCount(), GL_UNSIGNED_INT, nullptr);
         }
 
@@ -595,7 +566,7 @@ void Renderer::directionalLightShadowMapping(const CameraSettings &cameraSetting
     const auto resize = [](const glm::vec4 &vec) { return vec / vec.w; };
     
     mShadowFramebuffer->bind();
-    mDirectionalLightShadowShader->bind();
+    mDirectionalLightShadowShader.bind();
     
     for (graphics::DirectionalLight &directionalLight : mDirectionalLightQueue)
     {
@@ -681,7 +652,7 @@ void Renderer::directionalLightShadowMapping(const CameraSettings &cameraSetting
             {
                 const glm::mat4 &modelMatrix = rqo.matrix;
                 const glm::mat4 mvp = lightProjectionMatrix * lightViewMatrix * modelMatrix;
-                mDirectionalLightShadowShader->set("u_mvp_matrix", mvp);
+                mDirectionalLightShadowShader.set("u_mvp_matrix", mvp);
                 glBindVertexArray(rqo.vao);
                 glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
             }
@@ -699,12 +670,12 @@ void Renderer::directionalLightShadowMapping(const CameraSettings &cameraSetting
     graphics::popDebugGroup();
 }
 
-void Renderer::pointLightShadowMapping() const
+void Renderer::pointLightShadowMapping()
 {
     PROFILE_FUNC();
     graphics::pushDebugGroup("Point Light Shadow Mapping");
     mShadowFramebuffer->bind();
-    mPointLightShadowShader->bind();
+    mPointLightShadowShader.bind();
     
     for (auto &pointLight : mPointLightQueue)
     {
@@ -713,8 +684,8 @@ void Renderer::pointLightShadowMapping() const
         const glm::ivec2 size = pointLight.shadowMap->getSize();
         glViewport(0, 0, size.x, size.y);
         
-        mPointLightShadowShader->set("u_light_pos", pointLight.position);
-        mPointLightShadowShader->set("u_z_far", pointLight.radius);
+        mPointLightShadowShader.set("u_light_pos", pointLight.position);
+        mPointLightShadowShader.set("u_z_far", pointLight.radius);
         
         for (int viewIndex = 0; viewIndex < 6; ++viewIndex)
         {
@@ -728,8 +699,8 @@ void Renderer::pointLightShadowMapping() const
             {
                 const glm::mat4 &modelMatrix = rqo.matrix;
                 const glm::mat4 mvp = pointLight.vpMatrices[viewIndex] * modelMatrix;
-                mPointLightShadowShader->set("u_model_matrix", modelMatrix);
-                mPointLightShadowShader->set("u_mvp_matrix", mvp);
+                mPointLightShadowShader.set("u_model_matrix", modelMatrix);
+                mPointLightShadowShader.set("u_mvp_matrix", mvp);
                 
                 glBindVertexArray(rqo.vao);
                 glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
@@ -744,12 +715,12 @@ void Renderer::pointLightShadowMapping() const
     graphics::popDebugGroup();
 }
 
-void Renderer::spotlightShadowMapping() const
+void Renderer::spotlightShadowMapping()
 {
     PROFILE_FUNC();
     graphics::pushDebugGroup("Spotlight Shadow Mapping");
     
-    mSpotlightShadowShader->bind();
+    mSpotlightShadowShader.bind();
     mShadowFramebuffer->bind();
     
     for (const graphics::Spotlight &spotlight : mSpotlightQueue)
@@ -761,14 +732,14 @@ void Renderer::spotlightShadowMapping() const
         mShadowFramebuffer->clearDepthBuffer();
         
         const glm::mat4 &vpMatrix = spotlight.vpMatrix;
-        mSpotlightShadowShader->set("u_light_pos", spotlight.position);
-        mSpotlightShadowShader->set("u_z_far", spotlight.radius);
+        mSpotlightShadowShader.set("u_light_pos", spotlight.position);
+        mSpotlightShadowShader.set("u_z_far", spotlight.radius);
         
         for (const auto &rqo : mRenderQueue)
         {
             const glm::mat4 mvpMatrix = vpMatrix * rqo.matrix;
-            mSpotlightShadowShader->set("u_mvp_matrix", mvpMatrix);
-            mSpotlightShadowShader->set("u_model_matrix", rqo.matrix);
+            mSpotlightShadowShader.set("u_mvp_matrix", mvpMatrix);
+            mSpotlightShadowShader.set("u_model_matrix", rqo.matrix);
             
             glBindVertexArray(rqo.vao);
             glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
@@ -799,20 +770,20 @@ void Renderer::shadeDistantLightProbe()
     graphics::popDebugGroup();
 }
 
-void Renderer::blurTexture(const TextureBufferObject& texture) const
+void Renderer::blurTexture(const TextureBufferObject& texture)
 {
     PROFILE_FUNC();
     graphics::pushDebugGroup("Auxilliary Blur Pass");
     const uint32_t mipLevels = texture.getMipLevels();
     const glm::ivec2 &size = texture.getSize();
     mBlurFramebuffer->bind();
-    mBlurShader->bind();
-    mBlurShader->set("u_texture", texture.getId(), 0);
+    mBlurShader.bind();
+    mBlurShader.set("u_texture", texture.getId(), 0);
 
     for (int i = 1; i < mipLevels; ++i)
     {
         glViewport(0, 0, size.x >> i, size.y >> i);
-        mBlurShader->set("u_mip_level", i - 1);
+        mBlurShader.set("u_mip_level", i - 1);
         mBlurFramebuffer->attach(&texture, 0, i);
         drawFullscreenTriangleNow();
         mBlurFramebuffer->detach(0);
@@ -859,7 +830,7 @@ void Renderer::clear()
 }
 
 
-std::unique_ptr<Cubemap> Renderer::createCubemapFromHdrTexture(const HdrTexture *hdrTexture, const glm::ivec2 &size) const
+std::unique_ptr<Cubemap> Renderer::createCubemapFromHdrTexture(const HdrTexture *hdrTexture, const glm::ivec2 &size)
 {
     auto cubemap = std::make_unique<Cubemap>(size, GL_RGB16F);
     
@@ -875,8 +846,8 @@ std::unique_ptr<Cubemap> Renderer::createCubemapFromHdrTexture(const HdrTexture 
     };
     
     auxiliaryFrameBuffer.bind();
-    mHdrToCubemapShader->bind();
-    mHdrToCubemapShader->set("u_texture", hdrTexture->getId(), 0);
+    mHdrToCubemapShader.bind();
+    mHdrToCubemapShader.set("u_texture", hdrTexture->getId(), 0);
     
     glViewport(0, 0, size.x, size.y);
     
@@ -884,7 +855,7 @@ std::unique_ptr<Cubemap> Renderer::createCubemapFromHdrTexture(const HdrTexture 
     
     for (int i = 0; i < 6; ++i)
     {
-        mHdrToCubemapShader->set("u_view_matrix", views[i]);
+        mHdrToCubemapShader.set("u_view_matrix", views[i]);
         auxiliaryFrameBuffer.attach(cubemap.get(), 0, i);
         auxiliaryFrameBuffer.clear(glm::vec4(glm::vec3(0.f), 1.f));
         
@@ -896,7 +867,7 @@ std::unique_ptr<Cubemap> Renderer::createCubemapFromHdrTexture(const HdrTexture 
     return cubemap;
 }
 
-std::unique_ptr<Cubemap> Renderer::generateIrradianceMap(const Cubemap *cubemap, const glm::ivec2 &size) const
+std::unique_ptr<Cubemap> Renderer::generateIrradianceMap(const Cubemap *cubemap, const glm::ivec2 &size)
 {
     auto irradiance = std::make_unique<Cubemap>(size, GL_RGB16F);
     
@@ -912,8 +883,8 @@ std::unique_ptr<Cubemap> Renderer::generateIrradianceMap(const Cubemap *cubemap,
     };
     
     auxiliaryFrameBuffer.bind();
-    mCubemapToIrradianceShader->bind();
-    mCubemapToIrradianceShader->set("u_environment_texture", cubemap->getId(), 0);
+    mCubemapToIrradianceShader.bind();
+    mCubemapToIrradianceShader.set("u_environment_texture", cubemap->getId(), 0);
     
     glViewport(0, 0, size.x, size.y);
     
@@ -921,7 +892,7 @@ std::unique_ptr<Cubemap> Renderer::generateIrradianceMap(const Cubemap *cubemap,
     
     for (int i = 0; i < 6; ++i)
     {
-        mCubemapToIrradianceShader->set("u_view_matrix", views[i]);
+        mCubemapToIrradianceShader.set("u_view_matrix", views[i]);
         auxiliaryFrameBuffer.attach(irradiance.get(), 0, i);
         auxiliaryFrameBuffer.clear(glm::vec4(glm::vec3(0.f), 1.f));
         
@@ -933,7 +904,7 @@ std::unique_ptr<Cubemap> Renderer::generateIrradianceMap(const Cubemap *cubemap,
     return irradiance;
 }
 
-std::unique_ptr<Cubemap> Renderer::generatePreFilterMap(const Cubemap *cubemap, const glm::ivec2 &size) const
+std::unique_ptr<Cubemap> Renderer::generatePreFilterMap(const Cubemap *cubemap, const glm::ivec2 &size)
 {
     constexpr int maxMipLevels = 5;
     auto filter = std::make_unique<Cubemap>(size, GL_RGB16F, maxMipLevels);
@@ -950,8 +921,8 @@ std::unique_ptr<Cubemap> Renderer::generatePreFilterMap(const Cubemap *cubemap, 
     };
     
     auxiliaryFrameBuffer.bind();
-    mPreFilterShader->bind();
-    mPreFilterShader->set("u_environment_texture", cubemap->getId(), 0);
+    mPreFilterShader.bind();
+    mPreFilterShader.set("u_environment_texture", cubemap->getId(), 0);
     
     glBindVertexArray(mFullscreenTriangle.vao());
     
@@ -961,11 +932,11 @@ std::unique_ptr<Cubemap> Renderer::generatePreFilterMap(const Cubemap *cubemap, 
         glViewport(0, 0, mipSize.x, mipSize.y);
         
         const float roughness = static_cast<float>(mip) / (static_cast<float>(maxMipLevels) - 1.f);
-        mPreFilterShader->set("u_roughness", roughness);
+        mPreFilterShader.set("u_roughness", roughness);
         
         for (int i = 0; i < 6; ++i)
         {
-            mPreFilterShader->set("u_view_matrix", views[i]);
+            mPreFilterShader.set("u_view_matrix", views[i]);
             auxiliaryFrameBuffer.attach(filter.get(), 0, i, mip);
             auxiliaryFrameBuffer.clear(glm::vec4(glm::vec3(0.f), 1.f));
             

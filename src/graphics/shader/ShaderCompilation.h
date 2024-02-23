@@ -15,21 +15,16 @@
 
 namespace graphics
 {
-    struct Macro
-    {
-        std::string symbol;
-        int constant = 1;
-    };
 
     unsigned int getGlslType(const std::filesystem::path &path);
-    unsigned int compileShader(const std::filesystem::path &path, const std::vector<graphics::Macro>& macros);
-    unsigned int compileShaderSource(unsigned int shaderType, const std::list<ShaderInformation> &data, const std::vector<Macro> &macros);
+    unsigned int compileShader(const std::filesystem::path &path, const std::vector<graphics::Definitions>& macros);
+    unsigned int compileShaderSource(unsigned int shaderType, const std::list<ShaderInformation> &data, const std::vector<Definitions> &macros);
 
     class ShaderPreprocessor
     {
     public:
         explicit ShaderPreprocessor(const std::filesystem::path &path);
-        void setupDefinitions(const std::vector<Macro>& macros);
+        void setupDefinitions(const std::vector<Definitions>& definitions);
         void start();
         void orderByInclude();
         const std::list<ShaderInformation>& getSources() const { return mInformation; }

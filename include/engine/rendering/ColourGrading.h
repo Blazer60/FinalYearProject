@@ -25,5 +25,5 @@ protected:
     void onDraw(TextureBufferObject *imageInput, TextureBufferObject *imageOutput) override;
     void onDrawUi() override;
 
-    Shader mShader { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "postProcessing/colourGrading/ColourGrading.frag" };
+    Shader mShader { { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "postProcessing/colourGrading/ColourGrading.frag" } };
 };

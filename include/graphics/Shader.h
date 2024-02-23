@@ -12,7 +12,11 @@
 
 namespace graphics
 {
-    struct Macro;
+    struct Definitions
+    {
+        std::string symbol;
+        int constant = 1;
+    };
 }
 
 /**
@@ -23,9 +27,7 @@ namespace graphics
 class Shader
 {
 public:
-    Shader(std::initializer_list<std::filesystem::path> paths);
-    Shader(const std::vector<std::filesystem::path> &paths, const std::vector<graphics::Macro> &macros);
-    Shader(const std::filesystem::path &vertexPath, const std::filesystem::path &fragmentPath);
+    explicit Shader(const std::vector<std::filesystem::path> &paths, const std::vector<graphics::Definitions> &definitions={ });
     virtual ~Shader();
     
     void bind() const;
@@ -37,14 +39,14 @@ public:
      * @param value - The value you want to pass to it.
      */
     void set(const std::string &uniformName, int value);
-    
+
     /**
      * @brief Sets a uniform within the shader.
      * @param uniformName - The name within the shader.
      * @param value - The value you want to pass to it.
      */
     void set(const std::string &uniformName, float value);
-    
+
     /**
      * @brief Sets a uniform within the shader.
      * @param uniformName - The name within the shader.
@@ -65,7 +67,7 @@ public:
      * @param value - The value you want to pass to it.
      */
     void set(const std::string &uniformName, const glm::vec3 &value);
-    
+
     /**
      * @brief Sets a uniform within the shader.
      * @param uniformName - The name within the shader.
@@ -108,7 +110,5 @@ protected:
     int getLocation(const std::string &name);
 
     void CreateShaderSource(std::initializer_list<std::filesystem::path> paths) const;
-    void CreateShaderSource(const std::vector<std::filesystem::path> &paths, const std::vector<graphics::Macro> &macros) const;
+    void CreateShaderSource(const std::vector<std::filesystem::path> &paths, const std::vector<graphics::Definitions> &macros) const;
 };
-
-

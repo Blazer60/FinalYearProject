@@ -30,10 +30,10 @@ protected:
     
     void generateAuxiliaryBuffers(const glm::ivec2 &size);
     
-    Shader mPreFilter   { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "postProcessing/bloom/BloomPreFilter.frag"   };
-    Shader mDownSample  { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "postProcessing/bloom/BloomDownSample.frag"  };
-    Shader mUpSample    { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "postProcessing/bloom/BloomUpSample.frag"    };
-    Shader mComposite   { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "postProcessing/bloom/BloomComposite.frag"   };
+    Shader mPreFilter   { { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "postProcessing/bloom/BloomPreFilter.frag"   } };
+    Shader mDownSample  { { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "postProcessing/bloom/BloomDownSample.frag"  } };
+    Shader mUpSample    { { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "postProcessing/bloom/BloomUpSample.frag"    } };
+    Shader mComposite   { { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "postProcessing/bloom/BloomComposite.frag"   } };
     
     std::unique_ptr<TextureBufferObject> mDownSampleTexture;
     std::unique_ptr<TextureBufferObject> mUpSampleTexture;
