@@ -168,6 +168,7 @@ public:
     [[nodiscard]] const TextureBufferObject &getReflectionBuffer() const;
     [[nodiscard]] const TextureBufferObject &getDebugBuffer() const;
     [[nodiscard]] const TextureBufferObject &getFromGBuffer(graphics::gbuffer type, bool gammaCorrect, const glm::vec4 &defaultValue=glm::vec4(0.f, 0.f, 0.f, 1.f));
+    [[nodiscard]] const TextureBufferObject &whiteFurnaceTest();
 
     [[nodiscard]] std::vector<graphics::DirectionalLight> &getDirectionalLights();
 
@@ -220,7 +221,12 @@ protected:
     };
 
     Shader mIblShader {
-        { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/IBL.frag" }
+        { file::shaderPath() / "lighting/IBL.comp" }
+    };
+
+    Shader mWhiteFurnaceTestShader {
+        { file::shaderPath() / "lighting/IBL.comp" },
+        { { "WHITE_FURNACE_TEST" } }
     };
 
     Shader mIntegrateBrdfShader {
@@ -302,6 +308,7 @@ protected:
     std::unique_ptr<TextureBufferObject> mReflectionTextureBuffer;
     std::unique_ptr<TextureBufferObject> mDebugTextureBuffer;
     std::unique_ptr<TextureBufferObject> mDebugGeometryTextureBuffer;
+    std::unique_ptr<TextureBufferObject> mDebugWhiteFurnaceTextureBuffer;
 
     graphics::UniformBufferObject<CameraBlock> mCamera;
     graphics::UniformBufferObject<DirectionalLightBlock> mDirectionalLightBlock;

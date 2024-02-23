@@ -50,6 +50,7 @@ namespace engine
             ViewportImage { "SSR",          []() -> const TextureBufferObject& { return graphics::renderer->getSsrBuffer(); } },
             ViewportImage { "Reflections",  []() -> const TextureBufferObject& { return graphics::renderer->getReflectionBuffer(); } },
             ViewportImage { "Debug View",   []() -> const TextureBufferObject& { return graphics::renderer->getDebugBuffer(); } },
+            ViewportImage { "White Furnace Test", []() -> const TextureBufferObject& { return graphics::renderer->whiteFurnaceTest(); } },
         };
     }
 

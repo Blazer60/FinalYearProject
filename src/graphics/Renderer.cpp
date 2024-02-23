@@ -13,6 +13,7 @@
 #include "Shader.h"
 #include "ProfileTimer.h"
 #include "FileLoader.h"
+#include "ThreadGroupSizes.h"
 #include "shader/ShaderCompilation.h"
 
 Renderer::Renderer() :
@@ -69,15 +70,16 @@ void Renderer::initTextureRenderBuffers()
     mGBufferTexture = std::make_unique<TextureArrayObject>(window::bufferSize(), 3, GL_RGBA32UI, graphics::filter::Nearest, graphics::wrap::ClampToEdge);
     mDepthTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_DEPTH_COMPONENT32F,    graphics::filter::Nearest, graphics::wrap::ClampToBorder);
 
-    mLightTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                graphics::filter::Nearest, graphics::wrap::ClampToEdge);
-    mDeferredLightingTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                graphics::filter::LinearMipmapLinear, graphics::wrap::ClampToEdge, 8);
-    mPrimaryImageBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
-    mAuxiliaryImageBuffer            = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,                GL_NEAREST, GL_NEAREST);
-    mSsrDataTextureBuffer            = std::make_unique<TextureBufferObject>(ssrSize,              GL_RGBA16F,               graphics::filter::Nearest, graphics::wrap::ClampToEdge);
-    mReflectionTextureBuffer         = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F,               graphics::filter::Linear,  graphics::wrap::ClampToEdge);
-    mDebugTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16,                graphics::filter::Linear,  graphics::wrap::ClampToEdge);
+    mLightTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F, graphics::filter::Nearest, graphics::wrap::ClampToEdge);
+    mDeferredLightingTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,  graphics::filter::LinearMipmapLinear, graphics::wrap::ClampToEdge, 8);
+    mPrimaryImageBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,  GL_NEAREST, GL_NEAREST);
+    mAuxiliaryImageBuffer            = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGB16F,  GL_NEAREST, GL_NEAREST);
+    mSsrDataTextureBuffer            = std::make_unique<TextureBufferObject>(ssrSize,              GL_RGBA16F, graphics::filter::Nearest, graphics::wrap::ClampToEdge);
+    mReflectionTextureBuffer         = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F, graphics::filter::Linear,  graphics::wrap::ClampToEdge);
+    mDebugTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16,  graphics::filter::Linear,  graphics::wrap::ClampToEdge);
 
-    mDebugGeometryTextureBuffer      = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F,                graphics::filter::Linear,  graphics::wrap::ClampToEdge);
+    mDebugGeometryTextureBuffer      = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F,  graphics::filter::Linear,  graphics::wrap::ClampToEdge);
+    mDebugWhiteFurnaceTextureBuffer  = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F,  graphics::filter::Nearest,  graphics::wrap::ClampToEdge);
 
     // Make sure that the framebuffers have been set up before calling this function.
     mGeometryFramebuffer->attach(mGBufferTexture.get(), 0, 0);
@@ -129,6 +131,7 @@ void Renderer::bindUbos()
     mDebugGBufferShader.block("DebugGBufferBlock", mDebugGBufferBlock.getBindPoint());
 
     mIblShader.block("CameraBlock", mCamera.getBindPoint());
+    mWhiteFurnaceTestShader.block("CameraBlock", mCamera.getBindPoint());
 }
 
 void Renderer::detachTextureRenderBuffersFromFrameBuffers() const
@@ -757,15 +760,16 @@ void Renderer::shadeDistantLightProbe()
     graphics::pushDebugGroup("Distant Light Probe");
 
     mIblShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
+    mIblShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
     mIblShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
-    mIblShader.set("u_irradiance_texture", mIrradianceMap->getId(), 1);
-    mIblShader.set("u_pre_filter_texture", mPreFilterMap->getId(), 2);
-    mIblShader.set("u_brdf_lut_texture", mBrdfLutTextureBuffer->getId(), 3);
+    mIblShader.set("u_brdf_lut_texture", mBrdfLutTextureBuffer->getId(), 1);
+    mIblShader.set("u_irradiance_texture", mIrradianceMap->getId(), 2);
+    mIblShader.set("u_pre_filter_texture", mPreFilterMap->getId(), 3);
     mIblShader.set("u_luminance_multiplier", mIblLuminanceMultiplier);
 
     mIblShader.bind();
-    mLightFramebuffer->bind();
-    drawFullscreenTriangleNow();
+    const auto threadGroupSize = glm::ivec2(ceil(glm::vec2(mLightTextureBuffer->getSize()) / glm::vec2(FULLSCREEN_THREAD_GROUP_SIZE)));
+    glDispatchCompute(threadGroupSize.x, threadGroupSize.y, 1);
 
     graphics::popDebugGroup();
 }
@@ -1039,6 +1043,25 @@ const TextureBufferObject& Renderer::getFromGBuffer(const graphics::gbuffer type
 
     graphics::popDebugGroup();
     return *mDebugGeometryTextureBuffer;
+}
+
+const TextureBufferObject &Renderer::whiteFurnaceTest()
+{
+    PROFILE_FUNC();
+    graphics::pushDebugGroup("White Furnace Test");
+
+    mWhiteFurnaceTestShader.bind();
+    mWhiteFurnaceTestShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
+    mWhiteFurnaceTestShader.image("lighting", mDebugWhiteFurnaceTextureBuffer->getId(), mDebugWhiteFurnaceTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
+    mWhiteFurnaceTestShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
+    mWhiteFurnaceTestShader.set("u_brdf_lut_texture", mBrdfLutTextureBuffer->getId(), 1);
+
+    const glm::vec2 screenSize = mDebugWhiteFurnaceTextureBuffer->getSize();
+    const glm::ivec2 numThreadGroups = glm::ceil(screenSize / glm::vec2(FULLSCREEN_THREAD_GROUP_SIZE));
+    glDispatchCompute(numThreadGroups.x, numThreadGroups.y, 1);
+
+    graphics::popDebugGroup();
+    return *mDebugWhiteFurnaceTextureBuffer;
 }
 
 float Renderer::getCurrentEV100() const
