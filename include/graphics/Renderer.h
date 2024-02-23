@@ -209,7 +209,6 @@ protected:
 
     std::unique_ptr<FramebufferObject> mDeferredLightFramebuffer;
     std::unique_ptr<FramebufferObject> mGeometryFramebuffer;
-    std::unique_ptr<FramebufferObject> mLightFramebuffer;
     std::unique_ptr<FramebufferObject> mShadowFramebuffer;
     std::unique_ptr<FramebufferObject> mSsrFramebuffer;
     std::unique_ptr<FramebufferObject> mReflectionFramebuffer;
@@ -238,11 +237,11 @@ protected:
     };
 
     Shader mPointLightShader {
-        { file::shaderPath() / "lighting/PointLight.vert", file::shaderPath() / "lighting/PointLight.frag" }
+        { file::shaderPath() / "lighting/PointLight.comp" }
     };
 
     Shader mSpotlightShader {
-        { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/SpotLight.frag" }
+        { file::shaderPath() / "lighting/SpotLight.comp" }
     };
 
     Shader mDirectionalLightShadowShader {

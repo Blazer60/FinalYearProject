@@ -46,10 +46,7 @@ void Renderer::initFrameBuffers()
 {
     // One, Zero (override any geometry that is further away from the camera).
     mGeometryFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ZERO, GL_LESS);
-    
-    // One, One (additive blending for each light that we pass through)
-    mLightFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ONE, GL_ALWAYS);
-    
+
     // We only ever write to this framebuffer once, so it shouldn't matter.
     mDeferredLightFramebuffer = std::make_unique<FramebufferObject>(GL_ONE, GL_ONE, GL_ALWAYS);
     
@@ -87,9 +84,6 @@ void Renderer::initTextureRenderBuffers()
     mGeometryFramebuffer->attach(mGBufferTexture.get(), 2, 2);
 
     mGeometryFramebuffer->attachDepthBuffer(mDepthTextureBuffer.get());
-    
-    // Lighting.
-    mLightFramebuffer->attach(mLightTextureBuffer.get(), 0);
 
     // Reflection Buffer
     mSsrFramebuffer->attach(mSsrDataTextureBuffer.get(), 0);
@@ -141,8 +135,6 @@ void Renderer::detachTextureRenderBuffersFromFrameBuffers() const
     mGeometryFramebuffer->detach(2);
     mGeometryFramebuffer->detachDepthBuffer();
     
-    mLightFramebuffer->detach(0);
-
     mSsrFramebuffer->detach(0);
 
     mReflectionFramebuffer->detach(0);
@@ -366,9 +358,8 @@ void Renderer::render()
         
         mPointLightShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
         mPointLightShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
+        mPointLightShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
 
-        glBindVertexArray(mUnitSphere.vao());
-        
         for (const auto &pointLight : mPointLightQueue)
         {
             mPointLightBlock->position = glm::vec4(pointLight.position, 1.f);
@@ -383,7 +374,7 @@ void Renderer::render()
 
             mPointLightShader.set("u_shadow_map_texture", pointLight.shadowMap->getId(), 1);
 
-            glDrawElements(GL_TRIANGLES, mUnitSphere.indicesCount(), GL_UNSIGNED_INT, nullptr);
+            glDispatchCompute(threadGroupSize.x, threadGroupSize.y, 1);
         }
         
         
@@ -396,6 +387,7 @@ void Renderer::render()
         
         mSpotlightShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
         mPointLightShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
+        mPointLightShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
 
         for (const graphics::Spotlight &spotLight : mSpotlightQueue)
         {
@@ -415,7 +407,7 @@ void Renderer::render()
 
             mSpotlightBlock.updateGlsl();
 
-            drawFullscreenTriangleNow();
+            glDispatchCompute(threadGroupSize.x, threadGroupSize.y, 1);
         }
         
         PROFILE_SCOPE_END(spotLightTimer);
