@@ -332,15 +332,15 @@ void Renderer::render()
         PROFILE_SCOPE_BEGIN(directionalLightTimer, "Directional Lighting");
         graphics::pushDebugGroup("Directional Lighting");
         
-        mLightFramebuffer->bind();
-        mLightFramebuffer->clear();
+        mLightTextureBuffer->clear();
 
         mDirectionalLightShader.bind();
 
         mDirectionalLightShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
         mDirectionalLightShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
+        mDirectionalLightShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
 
-        glBindVertexArray(mFullscreenTriangle.vao());
+        const auto threadGroupSize = glm::ivec2(ceil(glm::vec2(mCurrentRenderBufferSize) / glm::vec2(FULLSCREEN_THREAD_GROUP_SIZE)));
 
         for (const graphics::DirectionalLight &directionalLight : mDirectionalLightQueue)
         {
@@ -354,7 +354,7 @@ void Renderer::render()
             mDirectionalLightBlock.updateGlsl();
             mDirectionalLightShader.set("u_shadow_map_texture", directionalLight.shadowMap->getId(), 1);
 
-            glDrawElements(GL_TRIANGLES, mFullscreenTriangle.indicesCount(), GL_UNSIGNED_INT, nullptr);
+            glDispatchCompute(threadGroupSize.x, threadGroupSize.y, 1);
         }
         
         PROFILE_SCOPE_END(directionalLightTimer);

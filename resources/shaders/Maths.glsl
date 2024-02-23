@@ -19,6 +19,11 @@ vec2 uvToNdc(vec2 uv)
     return 2.f * uv - vec2(1.f);
 }
 
+vec3 uvToNdc(vec3 uv)
+{
+    return 2.f * uv - vec3(1.f);
+}
+
 float saturate(float p)
 {
     return clamp(p, 0.f, 1.f);

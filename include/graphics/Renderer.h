@@ -217,7 +217,7 @@ protected:
     std::unique_ptr<FramebufferObject> mDebugFramebuffer;
 
     Shader mDirectionalLightShader {
-        { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "lighting/DirectionalLight.frag" }
+        { file::shaderPath() / "lighting/DirectionalLight.comp" }
     };
 
     Shader mIblShader {

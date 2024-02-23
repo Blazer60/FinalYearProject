@@ -93,3 +93,8 @@ uint32_t TextureBufferObject::getMipLevels() const
 {
     return mMipMapLevels;
 }
+
+void TextureBufferObject::clear(const glm::vec4 clearColour) const
+{
+    glClearTexImage(mId, 0, GL_RGBA, GL_FLOAT, glm::value_ptr(clearColour));
+}

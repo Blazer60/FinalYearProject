@@ -32,7 +32,7 @@ void main()
 {
     const vec2 id = gl_GlobalInvocationID.xy;
     const vec2 dispatchSize = gl_NumWorkGroups.xy * gl_WorkGroupSize.xy;
-    const vec2 uv = (id + vec2(0.5f)) / dispatchSize;
+    const vec2 uv = (id - vec2(0.5f)) / textureSize(depthBufferTexture, 0);
     const float depth = texture(depthBufferTexture, uv).r;
     const vec3 position = positionFromDepth(uv, depth);
 
