@@ -17,14 +17,14 @@ namespace graphics
 {
 
     unsigned int getGlslType(const std::filesystem::path &path);
-    unsigned int compileShader(const std::filesystem::path &path, const std::vector<graphics::Definitions>& macros);
-    unsigned int compileShaderSource(unsigned int shaderType, const std::list<ShaderInformation> &data, const std::vector<Definitions> &macros);
+    unsigned int compileShader(const std::filesystem::path &path, const std::vector<graphics::Definition>& macros);
+    unsigned int compileShaderSource(unsigned int shaderType, const std::list<ShaderInformation> &data, const std::vector<Definition> &macros);
 
     class ShaderPreprocessor
     {
     public:
         explicit ShaderPreprocessor(const std::filesystem::path &path);
-        void setupDefinitions(const std::vector<Definitions>& definitions);
+        void setupDefinitions(const std::vector<Definition>& definitions);
         void start();
         void orderByInclude();
         const std::list<ShaderInformation>& getSources() const { return mInformation; }

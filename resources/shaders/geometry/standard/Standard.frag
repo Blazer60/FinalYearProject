@@ -27,10 +27,6 @@ uniform int u_max_height_samples = 32;
 uniform float u_roughness;
 uniform float u_metallic;
 
-layout(location = 0) out uvec4 oGBuffer0;
-layout(location = 1) out uvec4 oGBuffer1;
-layout(location = 2) out uvec4 oGBuffer2;
-
 vec2 height_map(vec2 uv)
 {
     const vec3 view_direction = normalize(v_camera_position_ts - v_position_ts);
@@ -111,24 +107,5 @@ void main()
     gBuffer.normal = o_normal;
     gBuffer.roughness = o_roughness;
 
-    const ivec2 coord = ivec2(imageSize(storageGBuffer).xy * vScreenUv.xy);
-
-    Stream stream;
-    stream.byteOffset = 1;
-
-    streamPackNormal(stream, gBuffer.normal);
-    streamPackUnorm4x8(stream, vec4(gBuffer.roughness, 0.f, 0.f, 0.f), 1);
-    streamPackUnorm4x8(stream, vec4(gBuffer.diffuse, 0.f), 3);
-    streamPackUnorm4x8(stream, vec4(gBuffer.specular, 0.f), 3);
-    streamPackUnorm4x8(stream, vec4(gBuffer.emissive, 0.f), 3);
-    const uint count = streamRecordUintCount(stream);
-
-    oGBuffer0.xyzw = uvec4(stream.data[0], stream.data[1], stream.data[2], stream.data[3]);
-    oGBuffer1.xyzw = uvec4(stream.data[4], stream.data[5], stream.data[6], stream.data[7]);
-    oGBuffer2.xyzw = uvec4(stream.data[8], stream.data[9], stream.data[10], stream.data[11]);
-
-    storageGBufferSsbo.byteStream[0] = stream.data[0];
-    storageGBufferSsbo.byteStream[1] = stream.data[1];
-    storageGBufferSsbo.byteStream[2] = stream.data[2];
-    storageGBufferSsbo.byteStream[3] = stream.data[3];
+    pushToStorageGBuffer(gBuffer, ivec2(0));
 }

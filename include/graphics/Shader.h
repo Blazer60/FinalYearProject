@@ -12,7 +12,7 @@
 
 namespace graphics
 {
-    struct Definitions
+    struct Definition
     {
         std::string symbol;
         int constant = 1;
@@ -27,7 +27,7 @@ namespace graphics
 class Shader
 {
 public:
-    explicit Shader(const std::vector<std::filesystem::path> &paths, const std::vector<graphics::Definitions> &definitions={ });
+    explicit Shader(const std::vector<std::filesystem::path> &paths, const std::vector<graphics::Definition> &definitions={ });
     virtual ~Shader();
     
     void bind() const;
@@ -117,5 +117,5 @@ protected:
     int getLocation(const std::string &name);
 
     void CreateShaderSource(std::initializer_list<std::filesystem::path> paths) const;
-    void CreateShaderSource(const std::vector<std::filesystem::path> &paths, const std::vector<graphics::Definitions> &macros) const;
+    void CreateShaderSource(const std::vector<std::filesystem::path> &paths, const std::vector<graphics::Definition> &macros) const;
 };

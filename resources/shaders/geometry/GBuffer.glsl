@@ -1,19 +1,32 @@
 #version 460 core
 
-layout(binding = 0, rgba32ui) uniform uimage2DArray storageGBuffer;
-
-layout(binding = 0, std430) buffer StorageGBufferSsbo
-{
-    uint uintOffset;  // uint to avoid race-conditions.
-    uint byteStream[];
-} storageGBufferSsbo;
-
-#include "../Maths.glsl"
+#if !defined(FRAGMENT_OUTPUT)
+    #define FRAGMENT_OUTPUT 0
+#endif
 
 #define BYTES 8
 #define UINT_SIZE 4
-#define DATA_STREAM_SIZE 12
+#define DATA_STREAM_SIZE 25
 #define GBUFFER_LAYER_COUNT 3
+#define GBUFFER_UINT_COUNT 12
+#define STREAM_HEADER_BYTE_COUNT 1;
+
+#include "../Maths.glsl"
+
+layout(binding = 0, rgba32ui) uniform uimage2DArray storageGBuffer;
+
+// Requires a depth prepass and early depth testing.
+//layout(binding = 0, std430) buffer StorageGBufferSsbo
+//{
+//    uint uintOffset;  // uint to avoid race-conditions.
+//    uint byteStream[];
+//} storageGBufferSsbo;
+
+#if FRAGMENT_OUTPUT > 0
+layout(location = 0) out uvec4 oGBuffer0;
+layout(location = 1) out uvec4 oGBuffer1;
+layout(location = 2) out uvec4 oGBuffer2;
+#endif
 
 struct GBuffer
 {
@@ -29,7 +42,7 @@ struct Stream
 {
     // Do not touch data. Use the helper functions to get information.
     uint data[DATA_STREAM_SIZE];
-    int byteOffset;  // Should start at 1.
+    int byteOffset;
 };
 
 uint streamRecordUintCount(in out Stream stream)
@@ -37,6 +50,12 @@ uint streamRecordUintCount(in out Stream stream)
     const uint uintCount = uint(ceil(stream.byteOffset / UINT_SIZE));
     stream.data[0] = bitfieldInsert(stream.data[0], uintCount, 0 * BYTES, 1 * BYTES);
     return uintCount;
+}
+
+// Unused until SSBO is in use.
+void streamRecordSsboIndex(in out Stream stream, uint index)
+{
+    stream.data[0] = bitfieldInsert(stream.data[0], index, 1 * BYTES, 3 * BYTES);
 }
 
 void streamInsertBytes(in out Stream stream, uint bytes, int byteCount)
@@ -126,15 +145,33 @@ vec3 streamUnpackNormal(in out Stream stream)
 }
 // end.
 
+// Unused until SSBO is in use.
+//uint requestAdditionalStorage(uint uintCount)
+//{
+//    return atomicAdd(storageGBufferSsbo.uintOffset, uintCount);
+//}
+
 void streamPushToStorageGBuffer(Stream stream, ivec2 coord)
 {
     streamRecordUintCount(stream);
     const int uintCount = int(ceil(stream.byteOffset / UINT_SIZE));
 
-    for (int index = 0; index < uintCount; index += 4)
+#if FRAGMENT_OUTPUT > 0
+    oGBuffer0.xyzw = uvec4(stream.data[0], stream.data[1], stream.data[2], stream.data[3]);
+    oGBuffer1.xyzw = uvec4(stream.data[4], stream.data[5], stream.data[6], stream.data[7]);
+    oGBuffer2.xyzw = uvec4(stream.data[8], stream.data[9], stream.data[10], stream.data[11]);
+#else
+    int imageIndex = 0;
+    for (int streamIndex = 0; streamIndex < uintCount; streamIndex += 4)
     {
-        imageStore(storageGBuffer, ivec3(coord, int(floor(index / 4))), uvec4(stream.data[index], stream.data[index + 1], stream.data[index + 2], stream.data[index + 3]));
+        imageStore(storageGBuffer, ivec3(coord, imageIndex++),
+            uvec4(
+                stream.data[streamIndex + 0],
+                stream.data[streamIndex + 1],
+                stream.data[streamIndex + 2],
+                stream.data[streamIndex + 3]));
     }
+#endif
 }
 
 Stream streamPullFromStorageGBuffer(ivec2 coord)
@@ -165,7 +202,7 @@ Stream streamPullFromStorageGBuffer(ivec2 coord)
 void pushToStorageGBuffer(GBuffer gBuffer, ivec2 coord)
 {
     Stream stream;
-    stream.byteOffset = 1;
+    stream.byteOffset = STREAM_HEADER_BYTE_COUNT;
 
     streamPackNormal(stream, gBuffer.normal);
     streamPackUnorm4x8(stream, vec4(gBuffer.roughness, 0.f, 0.f, 0.f), 1);

@@ -30,7 +30,7 @@ namespace graphics
         return conversions.at(path.extension().string());
     }
 
-    unsigned int compileShader(const std::filesystem::path &path, const std::vector<Definitions>& macros)
+    unsigned int compileShader(const std::filesystem::path &path, const std::vector<Definition>& macros)
     {
         const unsigned int shaderType = getGlslType(path);
         ShaderPreprocessor preprocessor(path);
@@ -45,7 +45,7 @@ namespace graphics
     {
     }
 
-    void ShaderPreprocessor::setupDefinitions(const std::vector<Definitions>& definitions)
+    void ShaderPreprocessor::setupDefinitions(const std::vector<Definition>& definitions)
     {
         for (const auto & [symbol, constant] : definitions)
             mDefinitions[symbol] = constant;
@@ -153,7 +153,7 @@ namespace graphics
         CRASH("Failed to compile shader %\nError while preprocessing file %.\n%", mInvokingPath, mCurrentPath, message);
     }
 
-    unsigned int compileShaderSource(const unsigned int shaderType, const std::list<ShaderInformation> &data, const std::vector<Definitions> &macros)
+    unsigned int compileShaderSource(const unsigned int shaderType, const std::list<ShaderInformation> &data, const std::vector<Definition> &macros)
     {
         std::stringstream prependShader;
         prependShader << "#version 460 core\n";

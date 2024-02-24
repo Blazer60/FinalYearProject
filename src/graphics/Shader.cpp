@@ -14,7 +14,7 @@
 #include "shader/ShaderCompilation.h"
 
 
-Shader::Shader(const std::vector<std::filesystem::path>& paths, const std::vector<graphics::Definitions>& definitions)
+Shader::Shader(const std::vector<std::filesystem::path>& paths, const std::vector<graphics::Definition>& definitions)
     : mId(glCreateProgram())
 {
     if (!paths.empty())
@@ -163,7 +163,7 @@ void Shader::CreateShaderSource(const std::initializer_list<std::filesystem::pat
 }
 
 void Shader::CreateShaderSource(
-    const std::vector<std::filesystem::path>& paths, const std::vector<graphics::Definitions>& macros) const
+    const std::vector<std::filesystem::path>& paths, const std::vector<graphics::Definition>& macros) const
 {
     std::vector<unsigned int> shaderIds;
     for (const std::filesystem::path &path : paths)
