@@ -2,6 +2,12 @@
 
 layout(binding = 0, rgba32ui) uniform uimage2DArray storageGBuffer;
 
+layout(binding = 0, std430) buffer StorageGBufferSsbo
+{
+    uint uintOffset;  // uint to avoid race-conditions.
+    uint byteStream[];
+} storageGBufferSsbo;
+
 #include "../Maths.glsl"
 
 #define BYTES 8
@@ -26,10 +32,11 @@ struct Stream
     int byteOffset;  // Should start at 1.
 };
 
-void streamRecordUintCount(in out Stream stream)
+uint streamRecordUintCount(in out Stream stream)
 {
     const uint uintCount = uint(ceil(stream.byteOffset / UINT_SIZE));
     stream.data[0] = bitfieldInsert(stream.data[0], uintCount, 0 * BYTES, 1 * BYTES);
+    return uintCount;
 }
 
 void streamInsertBytes(in out Stream stream, uint bytes, int byteCount)

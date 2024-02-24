@@ -22,6 +22,7 @@
 #include "FileLoader.h"
 #include "PointLightBlock.h"
 #include "ScreenSpaceReflectionsBlock.h"
+#include "ShaderStorageBufferObject.h"
 #include "SpotlightBlock.h"
 
 
@@ -179,7 +180,7 @@ public:
 protected:
     void initFrameBuffers();
     void initTextureRenderBuffers();
-    void bindUbos();
+    void bindBuffers();
     void detachTextureRenderBuffersFromFrameBuffers() const;
     std::unique_ptr<Cubemap> createCubemapFromHdrTexture(const HdrTexture *hdrTexture, const glm::ivec2 &size);
     std::unique_ptr<Cubemap> generateIrradianceMap(const Cubemap *cubemap, const glm::ivec2 &size);
@@ -296,6 +297,7 @@ protected:
     SubMesh mLine;
 
     std::unique_ptr<TextureArrayObject> mGBufferTexture;
+    graphics::ShaderStorageBufferObject mGBufferStorage;
     std::unique_ptr<TextureBufferObject> mDepthTextureBuffer;
     std::unique_ptr<TextureBufferObject> mLightTextureBuffer;
     std::unique_ptr<TextureBufferObject> mCombinedLightingTextureBuffer;

@@ -121,9 +121,14 @@ void main()
     streamPackUnorm4x8(stream, vec4(gBuffer.diffuse, 0.f), 3);
     streamPackUnorm4x8(stream, vec4(gBuffer.specular, 0.f), 3);
     streamPackUnorm4x8(stream, vec4(gBuffer.emissive, 0.f), 3);
-    streamRecordUintCount(stream);
+    const uint count = streamRecordUintCount(stream);
 
     oGBuffer0.xyzw = uvec4(stream.data[0], stream.data[1], stream.data[2], stream.data[3]);
     oGBuffer1.xyzw = uvec4(stream.data[4], stream.data[5], stream.data[6], stream.data[7]);
     oGBuffer2.xyzw = uvec4(stream.data[8], stream.data[9], stream.data[10], stream.data[11]);
+
+    storageGBufferSsbo.byteStream[0] = stream.data[0];
+    storageGBufferSsbo.byteStream[1] = stream.data[1];
+    storageGBufferSsbo.byteStream[2] = stream.data[2];
+    storageGBufferSsbo.byteStream[3] = stream.data[3];
 }

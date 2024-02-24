@@ -20,7 +20,8 @@ Renderer::Renderer() :
     mCurrentRenderBufferSize(window::bufferSize()),
     mFullscreenTriangle(primitives::fullscreenTriangle()),
     mUnitSphere(primitives::invertedSphere()),
-    mLine(primitives::line())
+    mLine(primitives::line()),
+    mGBufferStorage(sizeof(uint32_t) * 1'000, "GBuffer Storage Block")
 {
     // Blending texture data / enabling lerping.
     glEnable(GL_BLEND);
@@ -36,7 +37,7 @@ Renderer::Renderer() :
 
     initFrameBuffers();
     initTextureRenderBuffers();
-    bindUbos();
+    bindBuffers();
     
     setViewportSize();
     graphics::popDebugGroup();
@@ -97,8 +98,10 @@ void Renderer::initTextureRenderBuffers()
     mDebugFramebuffer->attach(mDebugTextureBuffer.get(), 0);
 }
 
-void Renderer::bindUbos()
+void Renderer::bindBuffers()
 {
+    mGBufferStorage.bindToSlot(0);  // SSBOs use a seperate binding slots. I hope.
+    mGBufferStorage.reserve(sizeof(uint32_t) * 10'000);
     int bindPoint = 0;
     mCamera.bindToSlot(++bindPoint);
     mDirectionalLightBlock.bindToSlot(++bindPoint);
@@ -283,6 +286,7 @@ void Renderer::render()
         // mGeometryFramebuffer->clear(5, camera.clearColour);
         mGeometryFramebuffer->clearDepthBuffer();
         mGBufferTexture->clear();
+        mGBufferStorage.write(0u);  // No point in overwriting the entire object.
         
         const glm::mat4 cameraProjectionMatrix = glm::perspective(camera.fovY, window::aspectRatio(), camera.nearClipDistance, camera.farClipDistance);
         const glm::mat4 vpMatrix = cameraProjectionMatrix * camera.viewMatrix;
@@ -306,6 +310,7 @@ void Renderer::render()
             shader->set("u_model_matrix", rqo.matrix);
             shader->block("CameraBlock", mCamera.getBindPoint());
             shader->image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_WRITE_ONLY);
+            shader->set("storageGBufferSsbo", mGBufferStorage.getBindPoint());
             rqo.onDraw();
             glBindVertexArray(rqo.vao);
             glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);

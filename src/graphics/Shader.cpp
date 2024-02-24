@@ -60,6 +60,11 @@ void Shader::set(const std::string &uniformName, const int value)
     glProgramUniform1i(mId, getLocation(uniformName), value);
 }
 
+void Shader::set(const std::string& uniformName, const unsigned int value)
+{
+    glProgramUniform1i(mId, getLocation(uniformName), static_cast<int>(value));
+}
+
 void Shader::set(const std::string &uniformName, const float value)
 {
     glProgramUniform1f(mId, getLocation(uniformName), value);

@@ -70,6 +70,8 @@ add_library(${GRAPHICS_LIBRARY} STATIC
         resources/shaders/interfaces/ScreenSpaceReflectionsBlock.h
         resources/shaders/interfaces/DebugGBufferBlock.h
         resources/shaders/interfaces/ThreadGroupSizes.h
+        src/graphics/buffers/ShaderStorageBufferObject.cpp
+        include/graphics/buffers/ShaderStorageBufferObject.h
 )
 
 target_include_directories(${GRAPHICS_LIBRARY} PUBLIC

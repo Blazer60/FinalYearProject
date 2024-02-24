@@ -41,6 +41,13 @@ public:
     void set(const std::string &uniformName, int value);
 
     /**
+     * \brief Sets a uniform with the shader.
+     * \param uniformName - The name within the shader.
+     * \param value - The value you want to pass to it.
+     */
+    void set(const std::string &uniformName, unsigned int value);
+
+    /**
      * @brief Sets a uniform within the shader.
      * @param uniformName - The name within the shader.
      * @param value - The value you want to pass to it.
