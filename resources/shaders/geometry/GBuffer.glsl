@@ -16,6 +16,7 @@ struct GBuffer
     vec3 specular;
     vec3 normal;
     float roughness;
+    uint byteCount;
 };
 
 struct Stream
@@ -178,6 +179,7 @@ GBuffer pullFromStorageGBuffer(ivec2 coord)
     gBuffer.diffuse     = streamUnpackUnorm4x8(stream, 3).xyz;
     gBuffer.specular    = streamUnpackUnorm4x8(stream, 3).xyz;
     gBuffer.emissive    = streamUnpackUnorm4x8(stream, 3).xyz;
+    gBuffer.byteCount   = stream.byteOffset;  // This is the amount of bytes read. Not the actual amount submitted to the buffer.
 
     return gBuffer;
 }

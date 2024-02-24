@@ -121,6 +121,7 @@ void main()
     streamPackUnorm4x8(stream, vec4(gBuffer.diffuse, 0.f), 3);
     streamPackUnorm4x8(stream, vec4(gBuffer.specular, 0.f), 3);
     streamPackUnorm4x8(stream, vec4(gBuffer.emissive, 0.f), 3);
+    streamRecordUintCount(stream);
 
     oGBuffer0.xyzw = uvec4(stream.data[0], stream.data[1], stream.data[2], stream.data[3]);
     oGBuffer1.xyzw = uvec4(stream.data[4], stream.data[5], stream.data[6], stream.data[7]);

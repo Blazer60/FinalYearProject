@@ -51,6 +51,7 @@ namespace engine
             ViewportImage { "Reflections",  []() -> const TextureBufferObject& { return graphics::renderer->getReflectionBuffer(); } },
             ViewportImage { "Debug View",   []() -> const TextureBufferObject& { return graphics::renderer->getDebugBuffer(); } },
             ViewportImage { "White Furnace Test", []() -> const TextureBufferObject& { return graphics::renderer->whiteFurnaceTest(); } },
+            ViewportImage { "Buffer Byte Count", []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::ByteCount, true); } },
         };
     }
 
@@ -112,8 +113,8 @@ namespace engine
         ImGui::Checkbox("Debug Overlay", &mShowDebugOverlay);
 
         ImGui::SameLine();
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - 100.f);
-        ImGui::SetNextItemWidth(100.f);
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - 140.f);
+        ImGui::SetNextItemWidth(140.f);
         if (ImGui::BeginCombo("##ViewImage", mViewportImages[mCurrentSelectedImage].name.c_str()))
         {
             for (int i = 0; i < mViewportImages.size(); ++i)

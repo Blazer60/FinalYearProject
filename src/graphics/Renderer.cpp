@@ -278,8 +278,8 @@ void Renderer::render()
         mGeometryFramebuffer->clear(0, camera.clearColour);
         mGeometryFramebuffer->clear(1, camera.clearColour);
         mGeometryFramebuffer->clear(2, camera.clearColour);
-        mGeometryFramebuffer->clear(3, camera.clearColour);
-        mGeometryFramebuffer->clear(4, camera.clearColour);
+        // mGeometryFramebuffer->clear(3, camera.clearColour);
+        // mGeometryFramebuffer->clear(4, camera.clearColour);
         // mGeometryFramebuffer->clear(5, camera.clearColour);
         mGeometryFramebuffer->clearDepthBuffer();
         mGBufferTexture->clear();
