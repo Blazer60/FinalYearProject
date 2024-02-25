@@ -34,7 +34,7 @@ Renderer::Renderer() :
 
     constexpr int lutSize = 64;
     mBrdfLutTextureBuffer = generateBrdfLut(glm::ivec2(lutSize));
-    mSpecularMissingTextureBuffer = generateSpecularMissingLut(lutSize);
+    mBrdfAverageLutTextureBuffer = generateBrdfAverageLut(lutSize);
     generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
 
     initFrameBuffers();
@@ -963,14 +963,14 @@ std::unique_ptr<TextureBufferObject> Renderer::generateBrdfLut(const glm::ivec2 
     return lut;
 }
 
-std::unique_ptr<TextureBufferObject> Renderer::generateSpecularMissingLut(const uint32_t size)
+std::unique_ptr<TextureBufferObject> Renderer::generateBrdfAverageLut(const uint32_t size)
 {
     auto lut = std::make_unique<TextureBufferObject>(glm::ivec2(size, 1), GL_RG16F, graphics::filter::Linear, graphics::wrap::ClampToEdge);
     lut->setDebugName("Specular Missing LUT");
 
-    mIntegrateSpecularMissingShader.bind();
-    mIntegrateSpecularMissingShader.set("brdfLut", mBrdfLutTextureBuffer->getId(), 0);
-    mIntegrateSpecularMissingShader.image("missingLut", lut->getId(), lut->getFormat(), 0, false, GL_WRITE_ONLY);
+    mIntegrateBrdfAverageShader.bind();
+    mIntegrateBrdfAverageShader.set("brdfLut", mBrdfLutTextureBuffer->getId(), 0);
+    mIntegrateBrdfAverageShader.image("brdfAverageLut", lut->getId(), lut->getFormat(), 0, false, GL_WRITE_ONLY);
 
     const uint32_t groupSize = glm::ceil(size / 8);
     glDispatchCompute(groupSize, 1, 1);
