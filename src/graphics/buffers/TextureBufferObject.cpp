@@ -98,3 +98,8 @@ void TextureBufferObject::clear(const glm::vec4 clearColour) const
 {
     glClearTexImage(mId, 0, GL_RGBA, GL_FLOAT, glm::value_ptr(clearColour));
 }
+
+void TextureBufferObject::setDebugName(const std::string& debugName) const
+{
+    glObjectLabel(GL_TEXTURE, mId, -1, debugName.data());
+}
