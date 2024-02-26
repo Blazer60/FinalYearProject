@@ -34,6 +34,7 @@ Renderer::Renderer() :
 
     constexpr int lutSize = 64;
     mBrdfLutTextureBuffer = generateBrdfLut(glm::ivec2(lutSize));
+    mDirectionalAlbedoF1TextureBuffer = generateDirectionalAlbedoF1(glm::ivec2(lutSize));
     mBrdfAverageLutTextureBuffer = generateBrdfAverageLut(lutSize);
     generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
 
@@ -761,8 +762,10 @@ void Renderer::shadeDistantLightProbe()
     mIblShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
     mIblShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
     mIblShader.set("u_brdf_lut_texture", mBrdfLutTextureBuffer->getId(), 1);
-    mIblShader.set("u_irradiance_texture", mIrradianceMap->getId(), 2);
-    mIblShader.set("u_pre_filter_texture", mPreFilterMap->getId(), 3);
+    mIblShader.set("directionAlbedoF1Texture", mDirectionalAlbedoF1TextureBuffer->getId(), 2);
+    mIblShader.set("directionAlbedoF1AverageTexture", mBrdfAverageLutTextureBuffer->getId(), 3);
+    mIblShader.set("u_irradiance_texture", mIrradianceMap->getId(), 4);
+    mIblShader.set("u_pre_filter_texture", mPreFilterMap->getId(), 5);
     mIblShader.set("u_luminance_multiplier", mIblLuminanceMultiplier);
 
     mIblShader.bind();
@@ -966,14 +969,27 @@ std::unique_ptr<TextureBufferObject> Renderer::generateBrdfLut(const glm::ivec2 
 std::unique_ptr<TextureBufferObject> Renderer::generateBrdfAverageLut(const uint32_t size)
 {
     auto lut = std::make_unique<TextureBufferObject>(glm::ivec2(size, 1), GL_RG16F, graphics::filter::Linear, graphics::wrap::ClampToEdge);
-    lut->setDebugName("Specular Missing LUT");
+    lut->setDebugName("BRDF Average LUT");
 
     mIntegrateBrdfAverageShader.bind();
-    mIntegrateBrdfAverageShader.set("brdfLut", mBrdfLutTextureBuffer->getId(), 0);
+    mIntegrateBrdfAverageShader.set("brdfLut", mDirectionalAlbedoF1TextureBuffer->getId(), 0);
     mIntegrateBrdfAverageShader.image("brdfAverageLut", lut->getId(), lut->getFormat(), 0, false, GL_WRITE_ONLY);
 
     const uint32_t groupSize = glm::ceil(size / 8);
     glDispatchCompute(groupSize, 1, 1);
+
+    return lut;
+}
+
+std::unique_ptr<TextureBufferObject> Renderer::generateDirectionalAlbedoF1(const glm::ivec2& size)
+{
+    auto lut = std::make_unique<TextureBufferObject>(size, GL_R16F, graphics::filter::Linear, graphics::wrap::ClampToEdge);
+    lut->setDebugName("Directional Albedo F1");
+
+    mIntegrateDirectionalAlbedoF1.bind();
+    mIntegrateDirectionalAlbedoF1.image("lut", lut->getId(), lut->getFormat(), 0, false, GL_WRITE_ONLY);
+    const glm::uvec2 groupSize = glm::ceil(static_cast<glm::vec2>(size / 8));
+    glDispatchCompute(groupSize.x, groupSize.y, 1);
 
     return lut;
 }
@@ -1063,6 +1079,8 @@ const TextureBufferObject &Renderer::whiteFurnaceTest()
     mWhiteFurnaceTestShader.image("lighting", mDebugWhiteFurnaceTextureBuffer->getId(), mDebugWhiteFurnaceTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
     mWhiteFurnaceTestShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
     mWhiteFurnaceTestShader.set("u_brdf_lut_texture", mBrdfLutTextureBuffer->getId(), 1);
+    mWhiteFurnaceTestShader.set("directionAlbedoF1Texture", mDirectionalAlbedoF1TextureBuffer->getId(), 2);
+    mWhiteFurnaceTestShader.set("directionAlbedoF1AverageTexture", mBrdfAverageLutTextureBuffer->getId(), 3);
 
     const glm::vec2 screenSize = mDebugWhiteFurnaceTextureBuffer->getSize();
     const glm::ivec2 numThreadGroups = glm::ceil(screenSize / glm::vec2(FULLSCREEN_THREAD_GROUP_SIZE));

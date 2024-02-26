@@ -43,6 +43,30 @@ float ggxGeometry2(float nDotV, float nDotL, float alpha2)
     return ggxGeometry1(nDotV, alpha2) * ggxGeometry1(nDotL, alpha2);
 }
 
+float ggxLambda(float nDotS, float alpha2)
+{
+    const float nDotS2 = nDotS * nDotS;
+    const float sqrtPart = sqrt(1.f + (alpha2 * (1.f - nDotS)) / max(nDotS2, 0.001f));
+
+    return (-1.f + sqrtPart) / 2.f;
+}
+
+float ggxGeometry2Smith(float nDotV, float nDotL, float alpha2)
+{
+    return 1.f / (1.f + ggxLambda(nDotV, alpha2) + ggxLambda(nDotL, alpha2));
+}
+
+float ggxGeometry1Unreal(float nDotS, float k)
+{
+    return nDotS / (nDotS * (1.f - k) + k);
+}
+
+float ggxGeometry2Unreal(float nDotV, float nDotL, float alpha)
+{
+    const float k = alpha / 2.f;
+    return ggxGeometry1Unreal(nDotV, k) * ggxGeometry1Unreal(nDotL, k);
+}
+
 vec3 ggxSpecularBrdf(vec3 fresnelColour, float nDotL, float nDotV, float nDotH, float alpha2)
 {
     const float geometry     = ggxGeometry2(nDotV, nDotL, alpha2);

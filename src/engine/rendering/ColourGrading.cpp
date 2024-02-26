@@ -23,7 +23,6 @@ void ColourGrading::onDraw(TextureBufferObject *imageInput, TextureBufferObject 
 
     mShader.bind();
     mShader.set("u_texture", imageInput->getId(), 0);
-    mShader.set("u_inv_gamma_correction", 1.f / 2.2f);
 
     graphics::renderer->drawFullscreenTriangleNow();
     

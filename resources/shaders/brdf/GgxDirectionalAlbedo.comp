@@ -3,6 +3,10 @@
 #include "Ggx.glsl"
 #include "Hammersley.glsl"
 
+#if !defined(WHITE_DIRECTIONAL_ALBEDO)
+    #define WHITE_DIRECTIONAL_ALBEDO 0
+#endif
+
 layout(binding = 0) writeonly uniform image2D lut;
 
 vec2 integrateGgxDirectionalAlbedo(float nDotV, float roughness)
@@ -13,7 +17,8 @@ vec2 integrateGgxDirectionalAlbedo(float nDotV, float roughness)
     float B = 0.f;
 
     vec3 N = vec3(0.f, 0.f, 1.f);
-    const float alpha2 = roughness * roughness * roughness * roughness;
+    const float alpha = roughness * roughness;
+    const float alpha2 = alpha * alpha;
 
     const uint sampleCount = 1024u;
     for (uint i = 0u; i < sampleCount; ++i)
@@ -28,12 +33,16 @@ vec2 integrateGgxDirectionalAlbedo(float nDotV, float roughness)
 
         if (nDotL > 0.f)
         {
-            const float G = ggxGeometry2(nDotV, nDotL, alpha2);
+            const float G = ggxGeometry2Unreal(nDotV, nDotL, alpha);
             const float gVis = (G * vDotH) / (nDotH * nDotV);
-            const float fC = pow(1.f - vDotH, 5.f);
 
+#if WHITE_DIRECTIONAL_ALBEDO > 0
+            A += gVis;
+#else
+            const float fC = pow(1.f - vDotH, 5.f);
             A += (1.f - fC) * gVis;
             B += fC * gVis;
+#endif
         }
     }
 
@@ -48,7 +57,9 @@ void main()
 {
     const vec3 id = gl_GlobalInvocationID;
     const vec3 dispatchSize = gl_NumWorkGroups * gl_WorkGroupSize;
-    const vec2 uv = (id.xy + vec2(0.5f)) / dispatchSize.xy;
+    const vec2 uv = vec2(1.f) - ((id.xy + vec2(0.5f)) / dispatchSize.xy);
+
     const vec2 result = integrateGgxDirectionalAlbedo(uv.x, uv.y);
-    imageStore(lut, ivec2(id.xy), vec4(result.xy, 0.f, 0.f));
+
+    imageStore(lut, ivec2(dispatchSize) - ivec2(1) - ivec2(id.xy), vec4(result.xy, 0.f, 0.f));
 }
