@@ -12,23 +12,15 @@ float integrateGgxAverage(float roughness)
 
     float accumulation;
 
-    // Todo: technically this can just go down the column/row and average the result. See if that gets about the same answer?
     const uint sampleCount = 1024u;
     for (uint i = 1u; i <= sampleCount; ++i)
     {
-//        const vec2 rand = hammersley(i, sampleCount);
-//        const vec3 l = cosImportanceSample(rand, n);
-
-//        const float nDotl = saturate(dot(n, l));
         const float nDotl = float(i) / float(sampleCount);
 
         accumulation += texture(brdfLut, vec2(nDotl, roughness)).r * nDotl;
     }
 
     return 2.f * accumulation / float(sampleCount);
-//    return (1.f / float(sampleCount)) * accumulation;
-//    return (2.f / float(sampleCount)) * accumulation;
-//    return (2.f * PI / float(sampleCount)) * accumulation;
 }
 
 layout(local_size_x = 8, local_size_y = 1, local_size_z = 1) in;

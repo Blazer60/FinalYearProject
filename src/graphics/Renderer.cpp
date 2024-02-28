@@ -335,6 +335,8 @@ void Renderer::render()
         mDirectionalLightShader.bind();
 
         mDirectionalLightShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
+        mDirectionalLightShader.set("directionalAlbedoWhite", mDirectionalAlbedoF1TextureBuffer->getId(), 3);
+        mDirectionalLightShader.set("directionalAlbedoAverageWhite", mBrdfAverageLutTextureBuffer->getId(), 4);
         mDirectionalLightShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
         mDirectionalLightShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
 
@@ -363,6 +365,8 @@ void Renderer::render()
         mPointLightShader.bind();
         
         mPointLightShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
+        mPointLightShader.set("directionalAlbedoWhite", mDirectionalAlbedoF1TextureBuffer->getId(), 3);
+        mPointLightShader.set("directionalAlbedoAverageWhite", mBrdfAverageLutTextureBuffer->getId(), 4);
         mPointLightShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
         mPointLightShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
 
@@ -392,6 +396,8 @@ void Renderer::render()
         mSpotlightShader.bind();
         
         mSpotlightShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
+        mSpotlightShader.set("directionalAlbedoWhite", mDirectionalAlbedoF1TextureBuffer->getId(), 3);
+        mSpotlightShader.set("directionalAlbedoAverageWhite", mBrdfAverageLutTextureBuffer->getId(), 4);
         mPointLightShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
         mPointLightShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
 
