@@ -4,9 +4,15 @@
 #include "Ggx.glsl"
 #include "../Maths.glsl"
 
-layout(binding = 0) uniform sampler2D directionalAlbedoWhite;
+layout(binding = 0) uniform sampler2D directionalAlbedoLut;
 layout(binding = 1) uniform sampler2D directionalAlbedoAverageWhite;
 layout(binding = 0, r16f) writeonly uniform image2D specMissing;
+
+float directionalAlbedoWhite(vec2 uv)
+{
+    vec2 result = texture(directionalAlbedoLut, uv).rg;
+    return result.x + result.y;
+}
 
 // The result of this should be combined with the f0 section to yeild the correct result. @see IBL.comp.
 float integrateGgxSpecularMissing(float nDotV, float roughness)
@@ -26,12 +32,12 @@ float integrateGgxSpecularMissing(float nDotV, float roughness)
 
         if (nDotL > 0.f)
         {
-            const float oneMinusRspecL = 1.f - texture(directionalAlbedoWhite, vec2(nDotL, roughness)).r;
+            const float oneMinusRspecL = 1.f - directionalAlbedoWhite(vec2(nDotL, roughness));
             accumulation += oneMinusRspecL;
         }
     }
 
-    const float rspecV = texture(directionalAlbedoWhite, vec2(nDotV, roughness)).r;
+    const float rspecV = directionalAlbedoWhite(vec2(nDotV, roughness));
     const float oneMinusRspecV = 1.f - rspecV;
     const float averageRspec = texture(directionalAlbedoAverageWhite, vec2(roughness, 0.5f)).r;
     const float oneMinusAverageRspec = 1.f - averageRspec;

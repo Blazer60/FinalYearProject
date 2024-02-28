@@ -5,8 +5,14 @@
 #include "../geometry/GBuffer.glsl"
 #include "../Camera.glsl"
 
-layout(binding = 3) uniform sampler2D directionalAlbedoWhite;
+layout(binding = 3) uniform sampler2D directionalAlbedoLut;
 layout(binding = 4) uniform sampler2D directionalAlbedoAverageWhite;
+
+float directionalAlbedoWhite(vec2 uv)
+{
+    vec2 result = texture(directionalAlbedoLut, uv).rg;
+    return result.x + result.y;
+}
 
 vec3 evaluateMissingSpecularBrdf(GBuffer gBuffer, vec3 fresnel, float lDotN, float vDotN)
 {
@@ -15,8 +21,8 @@ vec3 evaluateMissingSpecularBrdf(GBuffer gBuffer, vec3 fresnel, float lDotN, flo
     const float averageRspec = texture(directionalAlbedoAverageWhite, vec2(gBuffer.roughness, 0.5f)).r;
     const float oneMinusAverageRspec = 1.f - averageRspec;
 
-    const float oneMinusRspecL = 1.f - texture(directionalAlbedoWhite, vec2(lDotN, gBuffer.roughness)).r;
-    const float oneMinusRspecV = 1.f - texture(directionalAlbedoWhite, vec2(vDotN, gBuffer.roughness)).r;
+    const float oneMinusRspecL = 1.f - directionalAlbedoWhite(vec2(lDotN, gBuffer.roughness));
+    const float oneMinusRspecV = 1.f - directionalAlbedoWhite(vec2(vDotN, gBuffer.roughness));
 
     const vec3 denominator = PI * oneMinusAverageRspec * (vec3(1.f) - averageFresnel * oneMinusAverageRspec) + vec3(0.001f);
 

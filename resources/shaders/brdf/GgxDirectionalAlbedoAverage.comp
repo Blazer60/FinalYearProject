@@ -6,6 +6,12 @@
 layout(binding = 0) uniform sampler2D brdfLut;
 layout(binding = 0, rg16f) writeonly uniform image2D brdfAverageLut;
 
+float directionalAlbedoWhite(vec2 uv)
+{
+    vec2 result = texture(brdfLut, uv).rg;
+    return result.x + result.y;
+}
+
 float integrateGgxAverage(float roughness)
 {
     const vec3 n = vec3(0.f, 0.f, 1.f);
@@ -17,7 +23,7 @@ float integrateGgxAverage(float roughness)
     {
         const float nDotl = float(i) / float(sampleCount);
 
-        accumulation += texture(brdfLut, vec2(nDotl, roughness)).r * nDotl;
+        accumulation += directionalAlbedoWhite(vec2(nDotl, roughness)) * nDotl;
     }
 
     return 2.f * accumulation / float(sampleCount);
