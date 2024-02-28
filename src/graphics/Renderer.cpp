@@ -763,11 +763,10 @@ void Renderer::shadeDistantLightProbe()
     mIblShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
     mIblShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
     mIblShader.set("u_brdf_lut_texture", mBrdfLutTextureBuffer->getId(), 1);
-    mIblShader.set("directionAlbedoF1Texture", mDirectionalAlbedoF1TextureBuffer->getId(), 2);
-    mIblShader.set("directionAlbedoF1AverageTexture", mBrdfAverageLutTextureBuffer->getId(), 3);
-    mIblShader.set("missingSpecularLutTexture", mSpecularMissingTextureBuffer->getId(), 4);
-    mIblShader.set("u_irradiance_texture", mIrradianceMap->getId(), 5);
-    mIblShader.set("u_pre_filter_texture", mPreFilterMap->getId(), 6);
+    mIblShader.set("directionAlbedoF1AverageTexture", mBrdfAverageLutTextureBuffer->getId(), 2);
+    mIblShader.set("missingSpecularLutTexture", mSpecularMissingTextureBuffer->getId(), 3);
+    mIblShader.set("u_irradiance_texture", mIrradianceMap->getId(), 4);
+    mIblShader.set("u_pre_filter_texture", mPreFilterMap->getId(), 5);
     mIblShader.set("u_luminance_multiplier", mIblLuminanceMultiplier);
 
     mIblShader.bind();
@@ -1095,9 +1094,8 @@ const TextureBufferObject &Renderer::whiteFurnaceTest()
     mWhiteFurnaceTestShader.image("lighting", mDebugWhiteFurnaceTextureBuffer->getId(), mDebugWhiteFurnaceTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
     mWhiteFurnaceTestShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
     mWhiteFurnaceTestShader.set("u_brdf_lut_texture", mBrdfLutTextureBuffer->getId(), 1);
-    mWhiteFurnaceTestShader.set("directionAlbedoF1Texture", mDirectionalAlbedoF1TextureBuffer->getId(), 2);
-    mWhiteFurnaceTestShader.set("directionAlbedoF1AverageTexture", mBrdfAverageLutTextureBuffer->getId(), 3);
-    mWhiteFurnaceTestShader.set("missingSpecularLutTexture", mSpecularMissingTextureBuffer->getId(), 4);
+    mWhiteFurnaceTestShader.set("directionAlbedoF1AverageTexture", mBrdfAverageLutTextureBuffer->getId(), 2);
+    mWhiteFurnaceTestShader.set("missingSpecularLutTexture", mSpecularMissingTextureBuffer->getId(), 3);
 
     const glm::vec2 screenSize = mDebugWhiteFurnaceTextureBuffer->getSize();
     const glm::ivec2 numThreadGroups = glm::ceil(screenSize / glm::vec2(FULLSCREEN_THREAD_GROUP_SIZE));

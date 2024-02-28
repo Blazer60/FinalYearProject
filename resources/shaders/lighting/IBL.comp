@@ -15,14 +15,13 @@
 
 layout(binding = 0) uniform sampler2D depthBufferTexture;
 layout(binding = 1) uniform sampler2D u_brdf_lut_texture;
-layout(binding = 2) uniform sampler2D directionAlbedoF1Texture;
-layout(binding = 3) uniform sampler2D directionAlbedoF1AverageTexture;
-layout(binding = 4) uniform sampler2D missingSpecularLutTexture;
+layout(binding = 2) uniform sampler2D directionAlbedoF1AverageTexture;
+layout(binding = 3) uniform sampler2D missingSpecularLutTexture;
 
 #if WHITE_FURNACE_TEST <= 0
 
-layout(binding = 5) uniform samplerCube u_irradiance_texture;
-layout(binding = 6) uniform samplerCube u_pre_filter_texture;
+layout(binding = 4) uniform samplerCube u_irradiance_texture;
+layout(binding = 5) uniform samplerCube u_pre_filter_texture;
 
 uniform float u_luminance_multiplier;
 
@@ -30,33 +29,19 @@ uniform float u_luminance_multiplier;
 
 layout(binding = 1, rgba16f) uniform image2D lighting;
 
-vec3 averageFresnel(vec3 f0)
-{
-    return (20.f / 21.f) * f0 + vec3(1.f / 21.f);
-}
-
-float averageRspecF1(float roughness)
-{
-    return texture(directionAlbedoF1AverageTexture, vec2(roughness, 0.5f)).r;
-}
-
-float rspecF1(float nDotS, float roughness)
-{
-    return texture(directionAlbedoF1Texture, vec2(nDotS, roughness)).r;
-}
-
+// specular missing is split as we don't know f0 until now.
 vec3 reconstructSpecularMissing(vec3 f0, float nDotV, float roughness)
 {
-    const vec3 f0Average = averageFresnel(f0);
+    const vec3 f0Average = (20.f / 21.f) * f0 + vec3(1.f / 21.f);
 
-    const float avgRspec = averageRspecF1(roughness);
+    const float avgRspec = texture(directionAlbedoF1AverageTexture, vec2(roughness, 0.5f)).r;
     const float oneMinusAvgRspec = 1.f - avgRspec;
 
     const float thatSummationPartOnTheRight = texture(missingSpecularLutTexture, vec2(nDotV, roughness)).r;
 
     const vec3 denominator = (vec3(1.f) - f0Average * oneMinusAvgRspec);
 
-    return f0Average * avgRspec / denominator * thatSummationPartOnTheRight;
+    return f0Average / denominator * thatSummationPartOnTheRight;
 }
 
 layout(local_size_x = FULLSCREEN_THREAD_GROUP_SIZE, local_size_y = FULLSCREEN_THREAD_GROUP_SIZE, local_size_z = 1) in;
@@ -90,10 +75,7 @@ void main()
 
 #if WHITE_FURNACE_TEST > 0
     const vec3 colour = linearToSRgb(specular + specMissing) - vec3(0.5f);
-//    if (depth >= 1)
-//        imageStore(lighting, ivec2(id), vec4(linearToSRgb(vec3(1.f)) - vec3(0.5f), 1.f));
-//    else
-        imageStore(lighting, ivec2(id), vec4(colour, 1.f));
+    imageStore(lighting, ivec2(id), vec4(colour, 1.f));
 #else
 
     const float maxReflectionLod = 4.f;
