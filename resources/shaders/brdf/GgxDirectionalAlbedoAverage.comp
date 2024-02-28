@@ -6,24 +6,18 @@
 layout(binding = 0) uniform sampler2D brdfLut;
 layout(binding = 0, rg16f) writeonly uniform image2D brdfAverageLut;
 
-float directionalAlbedoWhite(vec2 uv)
-{
-    vec2 result = texture(brdfLut, uv).rg;
-    return result.x + result.y;
-}
-
-float integrateGgxAverage(float roughness)
+vec2 integrateGgxAverage(float roughness)
 {
     const vec3 n = vec3(0.f, 0.f, 1.f);
 
-    float accumulation;
+    vec2 accumulation;
 
     const uint sampleCount = 1024u;
     for (uint i = 1u; i <= sampleCount; ++i)
     {
         const float nDotl = float(i) / float(sampleCount);
 
-        accumulation += directionalAlbedoWhite(vec2(nDotl, roughness)) * nDotl;
+        accumulation += texture(brdfLut, vec2(nDotl, roughness)).rg * nDotl;
     }
 
     return 2.f * accumulation / float(sampleCount);
@@ -36,7 +30,7 @@ void main()
     const vec3 dispatchSize = gl_NumWorkGroups * gl_WorkGroupSize;
     const vec2 uv = vec2(1.f) - ((id.xy + vec2(0.5f)) / dispatchSize.xy);
 
-    const float result = integrateGgxAverage(uv.x);
+    const vec2 result = integrateGgxAverage(uv.x);
 
-    imageStore(brdfAverageLut, ivec2(dispatchSize) - ivec2(1) - ivec2(id.xy), vec4(result, 0.f, 0.f, 0.f));
+    imageStore(brdfAverageLut, ivec2(dispatchSize) - ivec2(1) - ivec2(id.xy), vec4(result, 0.f, 0.f));
 }

@@ -34,7 +34,7 @@ Renderer::Renderer() :
 
     constexpr int lutSize = 64;
     mSpecularDirectionalAlbedoLut = generateBrdfLut(glm::ivec2(lutSize));
-    mBrdfAverageLutTextureBuffer = generateBrdfAverageLut(lutSize);
+    mSpecularDirectionalAlbedoAverageLut = generateBrdfAverageLut(lutSize);
     mSpecularMissingTextureBuffer = generateSpecularMissingLut(glm::ivec2(lutSize));
     generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
 
@@ -335,7 +335,7 @@ void Renderer::render()
 
         mDirectionalLightShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
         mDirectionalLightShader.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut->getId(), 3);
-        mDirectionalLightShader.set("directionalAlbedoAverageWhite", mBrdfAverageLutTextureBuffer->getId(), 4);
+        mDirectionalLightShader.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 4);
         mDirectionalLightShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
         mDirectionalLightShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
 
@@ -365,7 +365,7 @@ void Renderer::render()
         
         mPointLightShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
         mPointLightShader.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut->getId(), 3);
-        mPointLightShader.set("directionalAlbedoAverageWhite", mBrdfAverageLutTextureBuffer->getId(), 4);
+        mPointLightShader.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 4);
         mPointLightShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
         mPointLightShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
 
@@ -396,7 +396,7 @@ void Renderer::render()
         
         mSpotlightShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
         mSpotlightShader.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut->getId(), 3);
-        mSpotlightShader.set("directionalAlbedoAverageWhite", mBrdfAverageLutTextureBuffer->getId(), 4);
+        mSpotlightShader.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 4);
         mPointLightShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
         mPointLightShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
 
@@ -767,9 +767,9 @@ void Renderer::shadeDistantLightProbe()
     mIblShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
     mIblShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
     mIblShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
-    mIblShader.set("u_brdf_lut_texture", mSpecularDirectionalAlbedoLut->getId(), 1);
-    mIblShader.set("directionAlbedoF1AverageTexture", mBrdfAverageLutTextureBuffer->getId(), 2);
-    mIblShader.set("missingSpecularLutTexture", mSpecularMissingTextureBuffer->getId(), 3);
+    mIblShader.set("missingSpecularLutTexture", mSpecularMissingTextureBuffer->getId(), 1);
+    mIblShader.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut->getId(), 2);
+    mIblShader.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 3);
     mIblShader.set("u_irradiance_texture", mIrradianceMap->getId(), 4);
     mIblShader.set("u_pre_filter_texture", mPreFilterMap->getId(), 5);
     mIblShader.set("u_luminance_multiplier", mIblLuminanceMultiplier);
@@ -978,7 +978,7 @@ std::unique_ptr<TextureBufferObject> Renderer::generateSpecularMissingLut(const 
 
     mIntergateSpecularMissing.bind();
     mIntergateSpecularMissing.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut->getId(), 0);
-    mIntergateSpecularMissing.set("directionalAlbedoAverageWhite", mBrdfAverageLutTextureBuffer->getId(), 1);
+    mIntergateSpecularMissing.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 1);
     mIntergateSpecularMissing.image("specMissing", lut->getId(), lut->getFormat(), 0, false);
     const glm::uvec2 groupSize = glm::ceil(static_cast<glm::vec2>(size / 8));
     glDispatchCompute(groupSize.x, groupSize.y, 1);
@@ -1084,8 +1084,8 @@ const TextureBufferObject &Renderer::whiteFurnaceTest()
     mWhiteFurnaceTestShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
     mWhiteFurnaceTestShader.image("lighting", mDebugWhiteFurnaceTextureBuffer->getId(), mDebugWhiteFurnaceTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
     mWhiteFurnaceTestShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
-    mWhiteFurnaceTestShader.set("u_brdf_lut_texture", mSpecularDirectionalAlbedoLut->getId(), 1);
-    mWhiteFurnaceTestShader.set("directionAlbedoF1AverageTexture", mBrdfAverageLutTextureBuffer->getId(), 2);
+    mWhiteFurnaceTestShader.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut->getId(), 1);
+    mWhiteFurnaceTestShader.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 2);
     mWhiteFurnaceTestShader.set("missingSpecularLutTexture", mSpecularMissingTextureBuffer->getId(), 3);
 
     const glm::vec2 screenSize = mDebugWhiteFurnaceTextureBuffer->getSize();

@@ -14,9 +14,7 @@
 #endif
 
 layout(binding = 0) uniform sampler2D depthBufferTexture;
-layout(binding = 1) uniform sampler2D u_brdf_lut_texture;
-layout(binding = 2) uniform sampler2D directionAlbedoF1AverageTexture;
-layout(binding = 3) uniform sampler2D missingSpecularLutTexture;
+layout(binding = 1) uniform sampler2D missingSpecularLutTexture;
 
 #if WHITE_FURNACE_TEST <= 0
 
@@ -34,7 +32,7 @@ vec3 reconstructSpecularMissing(vec3 f0, float nDotV, float roughness)
 {
     const vec3 f0Average = (20.f / 21.f) * f0 + vec3(1.f / 21.f);
 
-    const float avgRspec = texture(directionAlbedoF1AverageTexture, vec2(roughness, 0.5f)).r;
+    const float avgRspec = directionalAlbedoAverageWhite(vec2(roughness, 0.5f));
     const float oneMinusAvgRspec = 1.f - avgRspec;
 
     const float thatSummationPartOnTheRight = texture(missingSpecularLutTexture, vec2(nDotV, roughness)).r;
@@ -67,14 +65,14 @@ void main()
     const vec3 fresnel = fresnelSchlick(gBuffer.specular, vDotN);
 #endif
 
-    const vec2 lut = texture(u_brdf_lut_texture, vec2(vDotN, gBuffer.roughness)).rg;
+    const vec2 lut = texture(directionalAlbedoLut, vec2(vDotN, gBuffer.roughness)).rg;
     const vec3 specular = (fresnel * lut.x + lut.y);
     const vec3 specMissing = reconstructSpecularMissing(fresnel, vDotN, gBuffer.roughness);
 
     const vec3 diffuse = evaluateDiffuseBrdf(gBuffer, fresnel);
 
 #if WHITE_FURNACE_TEST > 0
-    const vec3 colour = linearToSRgb(specular + specMissing) - vec3(0.5f);
+    const vec3 colour = linearToSRgb(specular + specMissing + diffuse - vec3(0.5f));
     imageStore(lighting, ivec2(id), vec4(colour, 1.f));
 #else
 

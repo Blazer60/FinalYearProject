@@ -313,7 +313,7 @@ protected:
     std::unique_ptr<TextureBufferObject> mCombinedLightingTextureBuffer;
     std::unique_ptr<TextureBufferObject> mSpecularDirectionalAlbedoLut;
     std::unique_ptr<TextureBufferObject> mSpecularMissingTextureBuffer;
-    std::unique_ptr<TextureBufferObject> mBrdfAverageLutTextureBuffer;
+    std::unique_ptr<TextureBufferObject> mSpecularDirectionalAlbedoAverageLut;
     std::unique_ptr<TextureBufferObject> mPrimaryImageBuffer;
     std::unique_ptr<TextureBufferObject> mAuxiliaryImageBuffer;
     std::unique_ptr<TextureBufferObject> mSsrDataTextureBuffer;
