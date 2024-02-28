@@ -9,7 +9,7 @@
 #define DATA_STREAM_SIZE 25
 #define GBUFFER_LAYER_COUNT 3
 #define GBUFFER_UINT_COUNT 12
-#define STREAM_HEADER_BYTE_COUNT 1;
+#define STREAM_HEADER_BYTE_COUNT 1
 
 #include "../Maths.glsl"
 

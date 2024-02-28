@@ -186,6 +186,7 @@ protected:
     std::unique_ptr<Cubemap> generateIrradianceMap(const Cubemap *cubemap, const glm::ivec2 &size);
     std::unique_ptr<Cubemap> generatePreFilterMap(const Cubemap *cubemap, const glm::ivec2 &size);
     std::unique_ptr<TextureBufferObject> generateBrdfLut(const glm::ivec2 &size);
+    std::unique_ptr<TextureBufferObject> generateSpecularMissingLut(const glm::ivec2 &size);
     std::unique_ptr<TextureBufferObject> generateBrdfAverageLut(uint32_t size);
     std::unique_ptr<TextureBufferObject> generateDirectionalAlbedoF1(const glm::ivec2 &size);
     void directionalLightShadowMapping(const CameraSettings &cameraSettings);
@@ -237,6 +238,10 @@ protected:
     Shader mIntegrateDirectionalAlbedoF1 {
         { file::shaderPath() / "brdf/GgxDirectionalAlbedo.comp" },
         { { "WHITE_DIRECTIONAL_ALBEDO" } }
+    };
+
+    Shader mIntergateSpecularMissing {
+        { file::shaderPath() / "brdf/GgxSpecMissing.comp" }
     };
 
     Shader mIntegrateBrdfAverageShader {
@@ -314,6 +319,7 @@ protected:
     std::unique_ptr<TextureBufferObject> mCombinedLightingTextureBuffer;
     std::unique_ptr<TextureBufferObject> mBrdfLutTextureBuffer;
     std::unique_ptr<TextureBufferObject> mDirectionalAlbedoF1TextureBuffer;
+    std::unique_ptr<TextureBufferObject> mSpecularMissingTextureBuffer;
     std::unique_ptr<TextureBufferObject> mBrdfAverageLutTextureBuffer;
     std::unique_ptr<TextureBufferObject> mPrimaryImageBuffer;
     std::unique_ptr<TextureBufferObject> mAuxiliaryImageBuffer;
