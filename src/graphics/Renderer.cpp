@@ -37,6 +37,7 @@ Renderer::Renderer() :
     mSpecularDirectionalAlbedoAverageLut = generateBrdfAverageLut(lutSize);
     mSpecularMissingTextureBuffer = generateSpecularMissingLut(glm::ivec2(lutSize));
     mSpecularMissingAverageLut = generateSpecularMissingAverageLut(lutSize);
+    mFullSpecularLut = generateFullSpecularLut(glm::ivec3(16));
     generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
 
     initFrameBuffers();
@@ -1013,6 +1014,15 @@ std::unique_ptr<TextureBufferObject> Renderer::generateSpecularMissingAverageLut
 
     const uint32_t groupSize = glm::ceil(size / 8);
     glDispatchCompute(groupSize, 1, 1);
+
+    return lut;
+}
+
+std::unique_ptr<graphics::Texture3DObject> Renderer::generateFullSpecularLut(const glm::ivec3& size)
+{
+    auto lut = std::make_unique<graphics::Texture3DObject>(size, graphics::textureFormat::R16f);
+    lut->setDebugName("Full Specular LUT");
+
 
     return lut;
 }

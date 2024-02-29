@@ -24,6 +24,7 @@
 #include "ScreenSpaceReflectionsBlock.h"
 #include "ShaderStorageBufferObject.h"
 #include "SpotlightBlock.h"
+#include "Texture3DObject.h"
 
 
 /**
@@ -189,6 +190,7 @@ protected:
     std::unique_ptr<TextureBufferObject> generateSpecularMissingLut(const glm::ivec2 &size);
     std::unique_ptr<TextureBufferObject> generateBrdfAverageLut(uint32_t size);
     std::unique_ptr<TextureBufferObject> generateSpecularMissingAverageLut(uint32_t size);
+    std::unique_ptr<graphics::Texture3DObject> generateFullSpecularLut(const glm::ivec3 &size);
     void directionalLightShadowMapping(const CameraSettings &cameraSettings);
     void pointLightShadowMapping();
     void spotlightShadowMapping();
@@ -320,6 +322,7 @@ protected:
     std::unique_ptr<TextureBufferObject> mSpecularMissingTextureBuffer;
     std::unique_ptr<TextureBufferObject> mSpecularMissingAverageLut;
     std::unique_ptr<TextureBufferObject> mSpecularDirectionalAlbedoAverageLut;
+    std::unique_ptr<graphics::Texture3DObject> mFullSpecularLut;
     std::unique_ptr<TextureBufferObject> mPrimaryImageBuffer;
     std::unique_ptr<TextureBufferObject> mAuxiliaryImageBuffer;
     std::unique_ptr<TextureBufferObject> mSsrDataTextureBuffer;

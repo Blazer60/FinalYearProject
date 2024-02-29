@@ -31,6 +31,11 @@ namespace graphics
         ClampToEdge, ClampToBorder, MirrorRepeat, Repeat, MirrorClampToEdge
     };
 
+    enum class textureFormat : uint8_t
+    {
+        Rgba16f, Rg16f, R16f
+    };
+
     enum class gbuffer : uint8_t
     {
         Normal, Roughness, Diffuse, Specular, Emissive, ByteCount
@@ -39,6 +44,7 @@ namespace graphics
     GLint toGLint(filter f);
     GLint toMagGLint(filter f);
     GLint toGLint(wrap w);
+    GLenum toGLenum(textureFormat f);
     int toInt(gbuffer g);
     
     struct RenderQueueObject

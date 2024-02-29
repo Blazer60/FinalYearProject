@@ -15,6 +15,7 @@ namespace graphics
     GLint filterMagToGLenum[] { GL_NEAREST, GL_LINEAR, GL_NEAREST, GL_NEAREST, GL_LINEAR, GL_LINEAR };
     GLint wrapToGLenum[] { GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER, GL_MIRRORED_REPEAT, GL_REPEAT, GL_MIRROR_CLAMP_TO_EDGE };
     int gbufferToInt[] { DEBUG_GBUFFER_NORMAL, DEBUG_GBUFFER_ROUGHNESS, DEBUG_GBUFFER_DIFFUSE, DEBUG_GBUFFER_SPECULAR, DEBUG_GBUFFER_EMISSIVE, DEBUG_GBUFFER_BYTE_COUNT };
+    GLenum formatToEnum[] { GL_RGBA16F, GL_RG16F, GL_R16F };
     
     GLint toGLint(filter f)
     {
@@ -24,6 +25,11 @@ namespace graphics
     GLint toGLint(wrap w)
     {
         return wrapToGLenum[static_cast<int>(w)];
+    }
+
+    GLenum toGLenum(textureFormat f)
+    {
+        return formatToEnum[static_cast<int>(f)];
     }
 
     GLint toMagGLint(filter f)

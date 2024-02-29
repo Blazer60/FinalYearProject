@@ -72,6 +72,8 @@ add_library(${GRAPHICS_LIBRARY} STATIC
         resources/shaders/interfaces/ThreadGroupSizes.h
         src/graphics/buffers/ShaderStorageBufferObject.cpp
         include/graphics/buffers/ShaderStorageBufferObject.h
+        src/graphics/buffers/Texture3DObject.cpp
+        include/graphics/buffers/Texture3DObject.h
 )
 
 target_include_directories(${GRAPHICS_LIBRARY} PUBLIC
