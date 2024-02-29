@@ -37,7 +37,9 @@ Renderer::Renderer() :
     mSpecularDirectionalAlbedoAverageLut = generateBrdfAverageLut(lutSize);
     mSpecularMissingTextureBuffer = generateSpecularMissingLut(glm::ivec2(lutSize));
     mSpecularMissingAverageLut = generateSpecularMissingAverageLut(lutSize);
+
     mFullSpecularLut = generateFullSpecularLut(glm::ivec3(16));
+    mFullSpecularAverageLut = generateFullSpecularAverageLut(glm::ivec2(16));
     generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
 
     initFrameBuffers();
@@ -1023,6 +1025,30 @@ std::unique_ptr<graphics::Texture3DObject> Renderer::generateFullSpecularLut(con
     auto lut = std::make_unique<graphics::Texture3DObject>(size, graphics::textureFormat::R16f);
     lut->setDebugName("Full Specular LUT");
 
+    mIntegrateFullSpecular.bind();
+    mIntegrateFullSpecular.set("ggxDirectionalAlbedoLut", mSpecularDirectionalAlbedoLut->getId(), 0);
+    mIntegrateFullSpecular.set("specularMissingDirectionalAlbedoLut", mSpecularMissingTextureBuffer->getId(), 1);
+    mIntegrateFullSpecular.set("ggxDirectionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 2);
+
+    mIntegrateFullSpecular.image("fullSpecularLut", lut->getId(), lut->getFormat(), 0, true, GL_WRITE_ONLY);
+
+    const glm::uvec3 groupSize = glm::ceil(static_cast<glm::vec3>(size / 8));
+    glDispatchCompute(groupSize.x, groupSize.y, groupSize.z);
+
+    return lut;
+}
+
+std::unique_ptr<TextureBufferObject> Renderer::generateFullSpecularAverageLut(const glm::ivec2& size)
+{
+    auto lut = std::make_unique<TextureBufferObject>(size, GL_R16F, graphics::filter::Linear, graphics::wrap::ClampToEdge);
+    lut->setDebugName("Full Specular Average LUT");
+
+    mIntegrateFullSpecularAverage.bind();
+    mIntegrateFullSpecularAverage.set("fullSpecularDirectionalAlbedo", mFullSpecularLut->getId(), 0);
+    mIntegrateFullSpecularAverage.image("fullSpecularDirectionalAlbedoAverage", lut->getId(), lut->getFormat(), 0, false, GL_WRITE_ONLY);
+
+    const glm::uvec2 groupSize = glm::ceil(static_cast<glm::vec2>(size / 8));
+    glDispatchCompute(groupSize.x, groupSize.y, 1);
 
     return lut;
 }

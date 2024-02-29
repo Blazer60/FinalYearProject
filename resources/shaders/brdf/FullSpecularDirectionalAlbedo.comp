@@ -1,0 +1,79 @@
+#version 460 core
+
+#include "../Maths.glsl"
+#include "Hammersley.glsl"
+
+layout(binding = 0) uniform sampler2D ggxDirectionalAlbedoLut;
+layout(binding = 1) uniform sampler2D specularMissingDirectionalAlbedoLut;
+layout(binding = 2) uniform sampler2D ggxDirectionalAlbedoAverageLut;
+layout(binding = 0, r16f) writeonly uniform image3D fullSpecularLut;
+
+float directionalAlbedoAverage(vec2 uv, float f0)
+{
+    vec2 result = texture(ggxDirectionalAlbedoAverageLut, uv).rg;
+    return f0 + result.x + result.y;
+}
+
+float reconstructSpecularMissing(float f0, float nDotS, float roughness)
+{
+    const float f0Average = (20.f / 21.f) * f0 + (1.f / 21.f);
+
+    const float avgRspec = directionalAlbedoAverage(vec2(roughness, 0.5f), 1.f);
+    const float oneMinusAvgRspec = 1.f - avgRspec;
+
+    const float thatSummationPartOnTheRight = texture(specularMissingDirectionalAlbedoLut, vec2(nDotS, roughness)).r;
+
+    const float denominator = 1.f - f0Average * oneMinusAvgRspec;
+
+    return f0Average / denominator * thatSummationPartOnTheRight;
+}
+
+float fullRspec(float nDotS, float roughness, float f0)
+{
+    const vec2 ggxResult = texture(ggxDirectionalAlbedoLut, vec2(nDotS, roughness)).rg;
+    const float ggxPart = f0 * ggxResult.x + ggxResult.y;
+
+    const float specMissingPart = reconstructSpecularMissing(f0, nDotS, roughness);
+
+    return ggxPart + specMissingPart;
+}
+
+float integrateFullSpecular(float nDotV, float roughness, float f0)
+{
+    const vec3 v = vec3(sqrt(1.f - nDotV * nDotV), 0.f, nDotV);
+    const vec3 n = vec3(0.f, 0.f, 1.f);
+
+    float accumulation = 0.f;
+
+    const uint sampleCount = 1024u;
+    for (uint i = 0u; i < sampleCount; ++i)
+    {
+        const vec2 rand = hammersley(i, sampleCount);
+        const vec3 l = cosImportanceSample(rand, n);
+        const vec3 h = normalize(l + v);
+
+        const float nDotL = saturate(dot(n, l));
+        const float nDotV = saturate(dot(n, v));
+
+        if (nDotL > 0.f)
+        {
+            const float rspecL = fullRspec(nDotL, roughness, f0);
+
+            accumulation += rspecL;
+        }
+    }
+
+    return accumulation / float(sampleCount);
+}
+
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
+void main()
+{
+    const vec3 id = gl_GlobalInvocationID;
+    const vec3 dispatchSize = gl_NumWorkGroups * gl_WorkGroupSize;
+    const vec3 uv = vec3(1.f) - ((id + vec3(0.5f)) / dispatchSize);
+
+    const float result = integrateFullSpecular(uv.x, uv.y, uv.z);
+
+    imageStore(fullSpecularLut, ivec3(dispatchSize) - ivec3(1) - ivec3(id), vec4(result.x, 0.f, 0.f, 0.f));
+}
