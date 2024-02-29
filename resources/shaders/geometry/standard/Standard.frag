@@ -108,7 +108,7 @@ void main()
 
     GBuffer gBuffer;
     gBuffer.emissive = o_emissive;
-    gBuffer.diffuse = mix(vec3(0.04f), o_albedo, 1 - o_metallic);
+    gBuffer.diffuse = o_albedo;
     gBuffer.specular = sRgbToLinear(specularColour * specularTextureColour);
     gBuffer.normal = o_normal;
     gBuffer.roughness = o_roughness;

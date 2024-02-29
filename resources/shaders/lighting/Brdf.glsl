@@ -46,8 +46,8 @@ vec3 evaluateSpecularBrdf(GBuffer gBuffer, vec3 fresnel, float hDotN, float vDot
 
 vec3 evaluateDiffuseBrdf(GBuffer gBuffer, vec3 fresnel)
 {
-    return gBuffer.diffuse / PI;
-//    return (vec3(1.f) - fresnel) * gBuffer.diffuse / PI;
+//    return gBuffer.diffuse / PI;
+    return (vec3(1.f) - fresnel) * gBuffer.diffuse / PI;
 }
 
 vec3 evaluateClosure(GBuffer gBuffer, vec3 position, vec3 lightDirection)

@@ -1,0 +1,32 @@
+#version 460 core
+
+layout(binding = 0) uniform sampler2D specMissingLut;
+layout(binding = 0, r16f) writeonly uniform image2D specMissingAverageLut;
+
+float integrateGgxSpecMissingAverage(float roughness)
+{
+    const vec3 n = vec3(0.f, 0.f, 1.f);
+
+    float accumulation = 0.f;
+
+    const uint sampleCount = 1024u;
+    for (uint i = 0u; i < sampleCount; ++i)
+    {
+        const float nDotL = float(i) / float(sampleCount);
+        accumulation += texture(specMissingLut, vec2(nDotL, roughness)).r * nDotL;
+    }
+
+    return 2.f * accumulation / float(sampleCount);
+}
+
+layout(local_size_x = 8, local_size_y = 1, local_size_z = 1) in;
+void main()
+{
+    const vec3 id = gl_GlobalInvocationID;
+    const vec3 dispatchSize = gl_NumWorkGroups * gl_WorkGroupSize;
+    const vec2 uv = vec2(1.f) - ((id.xy + vec2(0.5f)) / dispatchSize.xy);
+
+    const float result = integrateGgxSpecMissingAverage(uv.x);
+
+    imageStore(specMissingAverageLut, ivec2(dispatchSize) - ivec2(1) - ivec2(id.xy), vec4(result, 0.f, 0.f, 0.f));
+}

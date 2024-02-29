@@ -36,6 +36,7 @@ Renderer::Renderer() :
     mSpecularDirectionalAlbedoLut = generateBrdfLut(glm::ivec2(lutSize));
     mSpecularDirectionalAlbedoAverageLut = generateBrdfAverageLut(lutSize);
     mSpecularMissingTextureBuffer = generateSpecularMissingLut(glm::ivec2(lutSize));
+    mSpecularMissingAverageLut = generateSpecularMissingAverageLut(lutSize);
     generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
 
     initFrameBuffers();
@@ -976,10 +977,10 @@ std::unique_ptr<TextureBufferObject> Renderer::generateSpecularMissingLut(const 
 {
     auto lut = std::make_unique<TextureBufferObject>(size, GL_R16F, graphics::filter::Linear, graphics::wrap::ClampToEdge);
 
-    mIntergateSpecularMissing.bind();
-    mIntergateSpecularMissing.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut->getId(), 0);
-    mIntergateSpecularMissing.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 1);
-    mIntergateSpecularMissing.image("specMissing", lut->getId(), lut->getFormat(), 0, false);
+    mIntegrateSpecularMissing.bind();
+    mIntegrateSpecularMissing.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut->getId(), 0);
+    mIntegrateSpecularMissing.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 1);
+    mIntegrateSpecularMissing.image("specMissing", lut->getId(), lut->getFormat(), 0, false);
     const glm::uvec2 groupSize = glm::ceil(static_cast<glm::vec2>(size / 8));
     glDispatchCompute(groupSize.x, groupSize.y, 1);
 
@@ -994,6 +995,21 @@ std::unique_ptr<TextureBufferObject> Renderer::generateBrdfAverageLut(const uint
     mIntegrateBrdfAverageShader.bind();
     mIntegrateBrdfAverageShader.set("brdfLut", mSpecularDirectionalAlbedoLut->getId(), 0);
     mIntegrateBrdfAverageShader.image("brdfAverageLut", lut->getId(), lut->getFormat(), 0, false, GL_WRITE_ONLY);
+
+    const uint32_t groupSize = glm::ceil(size / 8);
+    glDispatchCompute(groupSize, 1, 1);
+
+    return lut;
+}
+
+std::unique_ptr<TextureBufferObject> Renderer::generateSpecularMissingAverageLut(const uint32_t size)
+{
+    auto lut = std::make_unique<TextureBufferObject>(glm::ivec2(size, 1), GL_R16F, graphics::filter::Linear, graphics::wrap::ClampToEdge);
+    lut->setDebugName("Spec Missing Average LUT");
+
+    mIntegrateSpecularMissingAverage.bind();
+    mIntegrateSpecularMissingAverage.set("specMissingLut", mSpecularMissingTextureBuffer->getId(), 0);
+    mIntegrateSpecularMissingAverage.image("specMissingAverageLut", lut->getId(), lut->getFormat(), 0, false, GL_WRITE_ONLY);
 
     const uint32_t groupSize = glm::ceil(size / 8);
     glDispatchCompute(groupSize, 1, 1);
