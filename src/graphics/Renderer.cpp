@@ -40,6 +40,8 @@ Renderer::Renderer() :
 
     mFullSpecularLut = generateFullSpecularLut(glm::ivec3(16));
     mFullSpecularAverageLut = generateFullSpecularAverageLut(glm::ivec2(16));
+
+    mDiffuseLut = generateDiffuseLut(glm::ivec3(16));
     generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
 
     initFrameBuffers();
@@ -776,6 +778,7 @@ void Renderer::shadeDistantLightProbe()
     mIblShader.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 3);
     mIblShader.set("u_irradiance_texture", mIrradianceMap->getId(), 4);
     mIblShader.set("u_pre_filter_texture", mPreFilterMap->getId(), 5);
+    mIblShader.set("diffuseDirectionalAlbedoLut", mDiffuseLut->getId(), 6);
     mIblShader.set("u_luminance_multiplier", mIblLuminanceMultiplier);
 
     mIblShader.bind();
@@ -1053,6 +1056,22 @@ std::unique_ptr<TextureBufferObject> Renderer::generateFullSpecularAverageLut(co
     return lut;
 }
 
+std::unique_ptr<graphics::Texture3DObject> Renderer::generateDiffuseLut(const glm::ivec3& size)
+{
+    auto lut = std::make_unique<graphics::Texture3DObject>(size, graphics::textureFormat::R16f, graphics::filter::Linear, graphics::wrap::ClampToEdge);
+    lut->setDebugName("Diffuse LUT");
+
+    mIntegrateDiffuseDirectionalAlbedo.bind();
+    mIntegrateDiffuseDirectionalAlbedo.set("fullSpecularDirectionalAlbedoLut", mFullSpecularLut->getId(), 0);
+    mIntegrateDiffuseDirectionalAlbedo.set("fullSpecularDirectionalAlbedoAverageLut", mFullSpecularAverageLut->getId(), 1);
+    mIntegrateDiffuseDirectionalAlbedo.image("diffuseDirectionalAlbedoLut", lut->getId(), lut->getFormat(), 0, true, GL_WRITE_ONLY);
+
+    const glm::uvec3 groupSize = glm::ceil(static_cast<glm::vec3>(size / 8));
+    glDispatchCompute(groupSize.x, groupSize.y, groupSize.z);
+
+    return lut;
+}
+
 void Renderer::generateSkybox(std::string_view path, const glm::ivec2 desiredSize)
 {
     mHdrImage = std::make_unique<HdrTexture>(path);
@@ -1139,6 +1158,8 @@ const TextureBufferObject &Renderer::whiteFurnaceTest()
     mWhiteFurnaceTestShader.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut->getId(), 1);
     mWhiteFurnaceTestShader.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 2);
     mWhiteFurnaceTestShader.set("missingSpecularLutTexture", mSpecularMissingTextureBuffer->getId(), 3);
+    mWhiteFurnaceTestShader.set("diffuseDirectionalAlbedoLut", mDiffuseLut->getId(), 6);
+    // todo: Diffuse Directional Albedo is gaining some energy in the red channel. See if this is a mistake or if I need to renormalised or something?
 
     const glm::vec2 screenSize = mDebugWhiteFurnaceTextureBuffer->getSize();
     const glm::ivec2 numThreadGroups = glm::ceil(screenSize / glm::vec2(FULLSCREEN_THREAD_GROUP_SIZE));
