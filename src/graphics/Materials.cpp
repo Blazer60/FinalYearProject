@@ -19,19 +19,22 @@ StandardMaterial::StandardMaterial() :
     mNormal(std::make_shared<Texture>("")),
     mHeight(std::make_shared<Texture>("")),
     mRoughnessMap(std::make_shared<Texture>("")),
-    mMetallicMap(std::make_shared<Texture>(""))
+    mMetallicMap(std::make_shared<Texture>("")),
+    mSpecular(std::make_shared<Texture>(""))
 {
     // We create empty textures so that the shader can still bind to slot zero.
 }
 
 void StandardMaterial::onDraw()
 {
-    mShader->set("u_ambient_colour", ambientColour);
+    mShader->set("u_ambient_colour", diffuseColour);
     mShader->set("u_diffuse_texture", mDiffuse->id(), 1);
     mShader->set("u_normal_texture", mNormal->id(), 2);
     mShader->set("u_height_texture", mHeight->id(), 3);
     mShader->set("u_roughness_texture", mRoughnessMap->id(), 4);
     mShader->set("u_metallic_texture", mMetallicMap->id(), 5);
+    mShader->set("specularTexture", mSpecular->id(), 6);
+    mShader->set("specularColour", specularColour);
     mShader->set("u_height_scale", heightScale);
     mShader->set("u_min_height_samples", minHeightSamples);
     mShader->set("u_max_height_samples", maxHeightSamples);
@@ -42,7 +45,7 @@ void StandardMaterial::onDraw()
 
 void StandardMaterial::onLoadMtlFile(const MtlMaterialInformation &materialInformation)
 {
-    ambientColour = materialInformation.kD;
+    diffuseColour = materialInformation.kD;
     mDiffuse = std::make_shared<Texture>(materialInformation.mapKd);
     mNormal = std::make_shared<Texture>(materialInformation.mapBump);
 }
@@ -60,6 +63,11 @@ void StandardMaterial::setRoughnessMap(std::shared_ptr<Texture> roughnessMap)
 void StandardMaterial::setDiffuseMap(std::shared_ptr<Texture> diffuseMap)
 {
     mDiffuse = std::move(diffuseMap);
+}
+
+void StandardMaterial::setSpecularMap(std::shared_ptr<Texture> specularMap)
+{
+    mSpecular = std::move(specularMap);
 }
 
 void StandardMaterial::setNormalMap(std::shared_ptr<Texture> normalMap)

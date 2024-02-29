@@ -22,7 +22,14 @@ namespace engine
         mDiffuseMapPath = diffuseMapPath.string();
         mMaterial.setDiffuseMap(std::move(texture));
     }
-    
+
+    void StandardMaterialSubComponent::setSpecularMap(const std::filesystem::path& specularMapPath)
+    {
+        auto texture = load::texture(specularMapPath);
+        mSpecularMapPath = specularMapPath.string();
+        mMaterial.setSpecularMap(std::move(texture));
+    }
+
     void StandardMaterialSubComponent::setNormalMap(const std::filesystem::path &normalMapPath)
     {
         auto texture = load::texture(normalMapPath);
@@ -92,7 +99,42 @@ namespace engine
                 }
             }
             ImGui::SameLine();
-            ImGui::ColorEdit3("Albedo", glm::value_ptr(mMaterial.ambientColour), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueWheel);
+            ImGui::ColorEdit3("Albedo", glm::value_ptr(mMaterial.diffuseColour), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueWheel);
+
+            if (ImGui::Button("X##Specular"))
+            {
+                engine::editor->addUpdateAction([this]() { setSpecularMap(""); });
+            }
+            ImGui::SameLine();
+            if (ui::imageButton("Diffuse texture", mMaterial.specularMapId(), imageSize))
+            {
+                engine::editor->addUpdateAction([this]() {
+                    const std::string result = openFileDialog();
+                    if (result.empty())
+                        return;
+
+                    setSpecularMap(result);
+                });
+            }
+            if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal) && ImGui::BeginTooltip())
+            {
+                const std::string albedoToolTip = "Specular Texture - " + mSpecularMapPath;
+                ImGui::PushTextWrapPos(ImGui::GetFontSize() * 30.f);
+                ImGui::Text("%s", albedoToolTip.c_str());
+                ImGui::PopTextWrapPos();
+                ui::image(mMaterial.specularMapId(), glm::vec3(300.f));
+                ImGui::EndTooltip();
+            }
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(resourceImagePayload))
+                {
+                    std::filesystem::path path = *reinterpret_cast<std::filesystem::path*>(payload->Data);
+                    engine::editor->addUpdateAction([this, path]() { setSpecularMap(path); });
+                }
+            }
+            ImGui::SameLine();
+            ImGui::ColorEdit3("Specular", glm::value_ptr(mMaterial.specularColour), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueWheel);
             
             if (ImGui::Button("X##Normal"))
             {
@@ -222,9 +264,14 @@ namespace engine
     
     void StandardMaterialSubComponent::setAmbientColour(const glm::vec3 &colour)
     {
-        mMaterial.ambientColour = colour;
+        mMaterial.diffuseColour = colour;
     }
-    
+
+    void StandardMaterialSubComponent::setSpecularColour(const glm::vec3& colour)
+    {
+        mMaterial.specularColour = colour;
+    }
+
     void StandardMaterialSubComponent::setEmissive(const glm::vec3 &colour)
     {
         mMaterial.emissive = colour;

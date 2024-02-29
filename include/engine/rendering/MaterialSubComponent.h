@@ -36,6 +36,7 @@ namespace engine
         StandardMaterialSubComponent() = default;
         
         void setDiffuseMap(const std::filesystem::path &diffuseMapPath);
+        void setSpecularMap(const std::filesystem::path &specularMapPath);
         void setNormalMap(const std::filesystem::path &normalMapPath);
         void setHeightMap(const std::filesystem::path &heightMapPath);
         void setRoughnessMap(const std::filesystem::path &roughnessMapPath);
@@ -44,6 +45,7 @@ namespace engine
         void setMetallic(float value);
         void setRoughness(float value);
         void setAmbientColour(const glm::vec3 &colour);
+        void setSpecularColour(const glm::vec3 &colour);
         void setEmissive(const glm::vec3 &colour);
         void setHeightScale(float scale);
         
@@ -55,6 +57,7 @@ namespace engine
         
         // Records for serialization.
         std::string mDiffuseMapPath;
+        std::string mSpecularMapPath;
         std::string mNormalMapPath;
         std::string mHeightMapPath;
         std::string mRoughnessMapPath;

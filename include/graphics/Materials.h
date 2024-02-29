@@ -66,27 +66,32 @@ public:
     void onLoadMtlFile(const MtlMaterialInformation &materialInformation) override;
     
     void setDiffuseMap(std::shared_ptr<Texture> diffuseMap);
+    void setSpecularMap(std::shared_ptr<Texture> specularMap);
     void setNormalMap(std::shared_ptr<Texture> normalMap);
     void setHeightMap(std::shared_ptr<Texture> heightMap);
     void setRoughnessMap(std::shared_ptr<Texture> roughnessMap);
     void setMetallicMap(std::shared_ptr<Texture> metallicMap);
     
     [[nodiscard]] uint32_t diffuseMapId() const { return mDiffuse->id(); }
+    [[nodiscard]] uint32_t specularMapId() const { return mSpecular->id(); }
     [[nodiscard]] uint32_t normalMapId() const { return mNormal->id(); }
     [[nodiscard]] uint32_t heightMapId() const { return mHeight->id(); }
     [[nodiscard]] uint32_t roughnessMapId() const { return mRoughnessMap->id(); }
     [[nodiscard]] uint32_t metallicMapId() const { return mMetallicMap->id(); }
+
 
     float heightScale { 0.1f };
     int32_t maxHeightSamples { 64 };
     int32_t minHeightSamples { 8 };
     float roughness { 1.f };
     float metallic { 0 };
-    glm::vec3 ambientColour { 1.f };
+    glm::vec3 diffuseColour { 1.f };
+    glm::vec3 specularColour { 0.f };
     glm::vec3 emissive { 0.f };
     
 protected:
     std::shared_ptr<Texture> mDiffuse;
+    std::shared_ptr<Texture> mSpecular;
     std::shared_ptr<Texture> mNormal;
     std::shared_ptr<Texture> mHeight;
     std::shared_ptr<Texture> mRoughnessMap;

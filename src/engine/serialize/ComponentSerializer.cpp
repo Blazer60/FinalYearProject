@@ -84,6 +84,16 @@ namespace engine
                     const auto metallicRelativePath = materialNode["MetallicMap"].as<std::string>();
                     if (!metallicRelativePath.empty())
                         standardMaterial->setMetallicMap(file::resourcePath() / metallicRelativePath);
+
+                    if (materialNode["Specular"].IsDefined())
+                        standardMaterial->setSpecularColour(materialNode["Specular"].as<glm::vec3>());
+
+                    if (materialNode["SpecularMap"].IsDefined())
+                    {
+                        const auto specularMapRelativePath = materialNode["SpecularMap"].as<std::string>();
+                        if (!specularMapRelativePath.empty())
+                            standardMaterial->setSpecularMap(file::resourcePath() / specularMapRelativePath);
+                    }
                 }
             }
         });
@@ -209,7 +219,8 @@ void serializeComponent(YAML::Emitter &out, engine::MeshRenderer *meshRenderer)
             standardMaterial != nullptr)
         {
             out << YAML::Key << "MaterialType" << YAML::Value << "StandardMaterial";
-            out << YAML::Key << "Albedo"       << YAML::Value << standardMaterial->mMaterial.ambientColour;
+            out << YAML::Key << "Albedo"       << YAML::Value << standardMaterial->mMaterial.diffuseColour;
+            out << YAML::Key << "Specular"     << YAML::Value << standardMaterial->mMaterial.specularColour;
             out << YAML::Key << "Roughness"    << YAML::Value << standardMaterial->mMaterial.roughness;
             out << YAML::Key << "Metallic"     << YAML::Value << standardMaterial->mMaterial.metallic;
             out << YAML::Key << "Emissive"     << YAML::Value << standardMaterial->mMaterial.emissive;
@@ -219,6 +230,7 @@ void serializeComponent(YAML::Emitter &out, engine::MeshRenderer *meshRenderer)
             out << YAML::Key << "HeightMap"    << YAML::Value << file::makeRelativeToResourcePath(standardMaterial->mHeightMapPath).string();
             out << YAML::Key << "RoughnessMap" << YAML::Value << file::makeRelativeToResourcePath(standardMaterial->mRoughnessMapPath).string();
             out << YAML::Key << "MetallicMap"  << YAML::Value << file::makeRelativeToResourcePath(standardMaterial->mMetallicMapPath).string();
+            out << YAML::Key << "SpecularMap"  << YAML::Value << file::makeRelativeToResourcePath(standardMaterial->mSpecularMapPath).string();
         }
 
         out << YAML::EndMap;

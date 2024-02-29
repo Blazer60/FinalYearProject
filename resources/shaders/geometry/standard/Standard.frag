@@ -13,6 +13,8 @@ in vec2 vScreenUv;
 
 uniform vec3 u_ambient_colour;
 uniform sampler2D u_diffuse_texture;
+uniform vec3 specularColour;
+uniform sampler2D specularTexture;
 uniform sampler2D u_normal_texture;
 uniform sampler2D u_height_texture;
 uniform sampler2D u_roughness_texture;
@@ -100,10 +102,14 @@ void main()
     vec3 o_position = v_position_ws;
     vec3 o_emissive = u_emissive_colour;
 
+    vec3 specularTextureColour = texture(specularTexture, uv).rgb;
+    if (specularTextureColour == vec3(0.f))
+        specularTextureColour = vec3(1.f);
+
     GBuffer gBuffer;
     gBuffer.emissive = o_emissive;
     gBuffer.diffuse = mix(vec3(0.04f), o_albedo, 1 - o_metallic);
-    gBuffer.specular = mix(vec3(0.04f), o_albedo, o_metallic);
+    gBuffer.specular = sRgbToLinear(specularColour * specularTextureColour);
     gBuffer.normal = o_normal;
     gBuffer.roughness = o_roughness;
 
