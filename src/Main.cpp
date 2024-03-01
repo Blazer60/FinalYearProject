@@ -14,7 +14,7 @@ int main()
 
     initComponentsForEngine();
 
-    core.setScene(load::scene( file::resourcePath() / "scenes/test2.pcy"));
+    core.setScene(load::scene( file::resourcePath() / "scenes/BrdfTest.pcy"));
 
     core.run();
     

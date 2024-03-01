@@ -25,7 +25,7 @@
 namespace engine
 {
     Viewport::Viewport()
-        : mEditorCamera(glm::vec3(0.f, 5.f, 0.f))
+        : mEditorCamera(glm::vec3(0.f, 2.f, 20.f))
     {
 
     }

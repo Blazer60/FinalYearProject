@@ -2,40 +2,53 @@
 
 #include "../Maths.glsl"
 #include "Hammersley.glsl"
+#include "Ggx.glsl"
 
 layout(binding = 0) uniform sampler2D ggxDirectionalAlbedoLut;
 layout(binding = 1) uniform sampler2D specularMissingDirectionalAlbedoLut;
 layout(binding = 2) uniform sampler2D ggxDirectionalAlbedoAverageLut;
 layout(binding = 0, r16f) writeonly uniform image3D fullSpecularLut;
 
+float directionalAlbedoWhite(vec2 uv)
+{
+    const vec2 result = texture(ggxDirectionalAlbedoLut, uv).rg;
+    return result.x + result.y;
+}
+
 float directionalAlbedoAverage(vec2 uv, float f0)
 {
     vec2 result = texture(ggxDirectionalAlbedoAverageLut, uv).rg;
-    return f0 + result.x + result.y;
+    return f0 * result.x + result.y;
 }
 
-float reconstructSpecularMissing(float f0, float nDotS, float roughness)
+float reconstructSpecularMissing(float f0, float nDotV, float nDotL, float roughness)
 {
     const float f0Average = (20.f / 21.f) * f0 + (1.f / 21.f);
 
     const float avgRspec = directionalAlbedoAverage(vec2(roughness, 0.5f), 1.f);
     const float oneMinusAvgRspec = 1.f - avgRspec;
 
-    const float thatSummationPartOnTheRight = texture(specularMissingDirectionalAlbedoLut, vec2(nDotS, roughness)).r;
-
     const float denominator = 1.f - f0Average * oneMinusAvgRspec;
 
-    return f0Average / denominator * thatSummationPartOnTheRight;
+    const float f0Part = f0Average * avgRspec / denominator;
+
+    const float oneMinusRsf1L = 1.f - directionalAlbedoWhite(vec2(nDotL, roughness));
+    const float oneMinusRsf1V = 1.f - directionalAlbedoWhite(vec2(nDotV, roughness));
+
+    const float rsf1Part = oneMinusRsf1L * oneMinusRsf1V / (PI * oneMinusAvgRspec + 0.001f);
+
+    return f0Part * rsf1Part;
 }
 
-float fullRspec(float nDotS, float roughness, float f0)
+float evaluateSpecularPart(float f0, float nDotV, float nDotL, float nDotH, float alpha)
 {
-    const vec2 ggxResult = texture(ggxDirectionalAlbedoLut, vec2(nDotS, roughness)).rg;
-    const float ggxPart = f0 * ggxResult.x + ggxResult.y;
+    const float fresnel = fresnelSchlick(f0, nDotL);
+    const float geometry = ggxGeometry2Unreal(nDotV, nDotL, alpha);
+    const float distribution = ggxDistribution(nDotH, alpha * alpha);
 
-    const float specMissingPart = reconstructSpecularMissing(f0, nDotS, roughness);
+    const float denominator = 4.f * nDotL * nDotV + 0.001f;
 
-    return ggxPart + specMissingPart;
+    return fresnel * geometry * distribution / denominator;
 }
 
 float integrateFullSpecular(float nDotV, float roughness, float f0)
@@ -45,21 +58,25 @@ float integrateFullSpecular(float nDotV, float roughness, float f0)
 
     float accumulation = 0.f;
 
+    const float alpha = roughness * roughness;
+    const float alpha2 = alpha * alpha;
+
     const uint sampleCount = 1024u;
     for (uint i = 0u; i < sampleCount; ++i)
     {
         const vec2 rand = hammersley(i, sampleCount);
-        const vec3 l = cosImportanceSample(rand, n);
-        const vec3 h = normalize(l + v);
+        const vec3 h = ggxImportanceSample(rand, n, alpha2);
+        const vec3 l = normalize(2.f * dot(v, h) * h - v);
 
         const float nDotL = saturate(dot(n, l));
-        const float nDotV = saturate(dot(n, v));
+        const float nDotH = saturate(dot(n, h));
+        const float vDotH = saturate(dot(v, h));
 
         if (nDotL > 0.f)
         {
-            const float rspecL = fullRspec(nDotL, roughness, f0);
-
-            accumulation += rspecL;
+            const float f0Part = evaluateSpecularPart(f0, nDotV, nDotL, nDotH, alpha) + reconstructSpecularMissing(f0, nDotV, nDotL, roughness);
+            const float fourDPart = 4.f * vDotH * nDotL / (ggxDistribution(nDotH, alpha2) * nDotH);
+            accumulation += f0Part * fourDPart;
         }
     }
 

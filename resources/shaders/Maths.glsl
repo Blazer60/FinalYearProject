@@ -7,6 +7,11 @@ vec3 fresnelSchlick(vec3 f0, float nDotL)
     return f0 + (1.f - f0) * pow(1 - nDotL, 5);
 }
 
+float fresnelSchlick(float f0, float nDotL)
+{
+    return f0 + (1.f - f0) * pow(1.f - nDotL, 5.f);
+}
+
 // (Cigolle, Z. H, et al., 2014) A Survey of efficient representations for Independent Unit Vectors.
 vec2 signNotZero(vec2 v)
 {
