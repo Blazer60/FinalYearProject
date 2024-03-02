@@ -32,16 +32,11 @@ Renderer::Renderer() :
 
     graphics::pushDebugGroup("Setup");
 
-    constexpr int lutSize = 64;
+    constexpr int lutSize = 32;
     mSpecularDirectionalAlbedoLut = generateBrdfLut(glm::ivec2(lutSize));
     mSpecularDirectionalAlbedoAverageLut = generateBrdfAverageLut(lutSize);
     mSpecularMissingTextureBuffer = generateSpecularMissingLut(glm::ivec2(lutSize));
-    mSpecularMissingAverageLut = generateSpecularMissingAverageLut(lutSize);
 
-    mFullSpecularLut = generateFullSpecularLut(glm::ivec3(16));
-    mFullSpecularAverageLut = generateFullSpecularAverageLut(glm::ivec2(16));
-
-    mDiffuseLut = generateDiffuseLut(glm::ivec3(16));
     generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
 
     initFrameBuffers();
@@ -1003,69 +998,6 @@ std::unique_ptr<TextureBufferObject> Renderer::generateBrdfAverageLut(const uint
 
     const uint32_t groupSize = glm::ceil(size / 8);
     glDispatchCompute(groupSize, 1, 1);
-
-    return lut;
-}
-
-std::unique_ptr<TextureBufferObject> Renderer::generateSpecularMissingAverageLut(const uint32_t size)
-{
-    auto lut = std::make_unique<TextureBufferObject>(glm::ivec2(size, 1), GL_R16F, graphics::filter::Linear, graphics::wrap::ClampToEdge);
-    lut->setDebugName("Spec Missing Average LUT");
-
-    mIntegrateSpecularMissingAverage.bind();
-    mIntegrateSpecularMissingAverage.set("specMissingLut", mSpecularMissingTextureBuffer->getId(), 0);
-    mIntegrateSpecularMissingAverage.image("specMissingAverageLut", lut->getId(), lut->getFormat(), 0, false, GL_WRITE_ONLY);
-
-    const uint32_t groupSize = glm::ceil(size / 8);
-    glDispatchCompute(groupSize, 1, 1);
-
-    return lut;
-}
-
-std::unique_ptr<graphics::Texture3DObject> Renderer::generateFullSpecularLut(const glm::ivec3& size)
-{
-    auto lut = std::make_unique<graphics::Texture3DObject>(size, graphics::textureFormat::R16f);
-    lut->setDebugName("Full Specular LUT");
-
-    mIntegrateFullSpecular.bind();
-    mIntegrateFullSpecular.set("ggxDirectionalAlbedoLut", mSpecularDirectionalAlbedoLut->getId(), 0);
-    mIntegrateFullSpecular.set("ggxDirectionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 2);
-
-    mIntegrateFullSpecular.image("fullSpecularLut", lut->getId(), lut->getFormat(), 0, true, GL_WRITE_ONLY);
-
-    const glm::uvec3 groupSize = glm::ceil(static_cast<glm::vec3>(size / 8));
-    glDispatchCompute(groupSize.x, groupSize.y, groupSize.z);
-
-    return lut;
-}
-
-std::unique_ptr<TextureBufferObject> Renderer::generateFullSpecularAverageLut(const glm::ivec2& size)
-{
-    auto lut = std::make_unique<TextureBufferObject>(size, GL_R16F, graphics::filter::Linear, graphics::wrap::ClampToEdge);
-    lut->setDebugName("Full Specular Average LUT");
-
-    mIntegrateFullSpecularAverage.bind();
-    mIntegrateFullSpecularAverage.set("fullSpecularDirectionalAlbedo", mFullSpecularLut->getId(), 0);
-    mIntegrateFullSpecularAverage.image("fullSpecularDirectionalAlbedoAverage", lut->getId(), lut->getFormat(), 0, false, GL_WRITE_ONLY);
-
-    const glm::uvec2 groupSize = glm::ceil(static_cast<glm::vec2>(size / 8));
-    glDispatchCompute(groupSize.x, groupSize.y, 1);
-
-    return lut;
-}
-
-std::unique_ptr<graphics::Texture3DObject> Renderer::generateDiffuseLut(const glm::ivec3& size)
-{
-    auto lut = std::make_unique<graphics::Texture3DObject>(size, graphics::textureFormat::R16f, graphics::filter::Linear, graphics::wrap::ClampToEdge);
-    lut->setDebugName("Diffuse LUT");
-
-    mIntegrateDiffuseDirectionalAlbedo.bind();
-    mIntegrateDiffuseDirectionalAlbedo.set("fullSpecularDirectionalAlbedoLut", mFullSpecularLut->getId(), 0);
-    mIntegrateDiffuseDirectionalAlbedo.set("fullSpecularDirectionalAlbedoAverageLut", mFullSpecularAverageLut->getId(), 1);
-    mIntegrateDiffuseDirectionalAlbedo.image("diffuseDirectionalAlbedoLut", lut->getId(), lut->getFormat(), 0, true, GL_WRITE_ONLY);
-
-    const glm::uvec3 groupSize = glm::ceil(static_cast<glm::vec3>(size / 8));
-    glDispatchCompute(groupSize.x, groupSize.y, groupSize.z);
 
     return lut;
 }
