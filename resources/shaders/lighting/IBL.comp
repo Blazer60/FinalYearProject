@@ -84,7 +84,7 @@ void main()
     const vec3 specular = (fresnel * lut.x + lut.y);
     const vec3 specMissing = reconstructSpecularMissing(fresnel, vDotN, gBuffer.roughness);
 
-    const vec3 diffuse = reconstructDiffuseFromLut(vDotN, gBuffer.roughness, gBuffer.specular, gBuffer.diffuse);
+    const vec3 diffuse = evaluateDiffuseBrdf(gBuffer, specular + specMissing);
 
 #if WHITE_FURNACE_TEST > 0
     const vec3 colour = linearToSRgb(specular + specMissing + diffuse - vec3(0.5f));

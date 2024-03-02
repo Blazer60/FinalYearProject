@@ -44,10 +44,9 @@ vec3 evaluateSpecularBrdf(GBuffer gBuffer, vec3 fresnel, float hDotN, float vDot
     return fresnel * distribution * geometry / (4.f * vDotN * lDotN + 0.0001f);
 }
 
-vec3 evaluateDiffuseBrdf(GBuffer gBuffer, vec3 fresnel)
+vec3 evaluateDiffuseBrdf(GBuffer gBuffer, vec3 specular)
 {
-//    return gBuffer.diffuse / PI;
-    return (vec3(1.f) - fresnel) * gBuffer.diffuse / PI;
+    return (vec3(1.f) - specular) * gBuffer.diffuse;
 }
 
 vec3 evaluateClosure(GBuffer gBuffer, vec3 position, vec3 lightDirection)
@@ -64,8 +63,8 @@ vec3 evaluateClosure(GBuffer gBuffer, vec3 position, vec3 lightDirection)
 
     const vec3 fresnel = fresnelSchlick(gBuffer.specular, lDotN);
     const vec3 specular = evaluateSpecularBrdf(gBuffer, fresnel, hDotN, vDotN, lDotN);
-    const vec3 diffuse = evaluateDiffuseBrdf(gBuffer, fresnel);
     const vec3 missingSpecular = evaluateMissingSpecularBrdf(gBuffer, fresnel, lDotN, vDotN);
+    const vec3 diffuse = evaluateDiffuseBrdf(gBuffer, specular + missingSpecular);
 
     return specular + missingSpecular + diffuse;
 }
