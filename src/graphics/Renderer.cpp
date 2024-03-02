@@ -778,7 +778,6 @@ void Renderer::shadeDistantLightProbe()
     mIblShader.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 3);
     mIblShader.set("u_irradiance_texture", mIrradianceMap->getId(), 4);
     mIblShader.set("u_pre_filter_texture", mPreFilterMap->getId(), 5);
-    mIblShader.set("diffuseDirectionalAlbedoLut", mDiffuseLut->getId(), 6);
     mIblShader.set("u_luminance_multiplier", mIblLuminanceMultiplier);
 
     mIblShader.bind();
@@ -1030,7 +1029,6 @@ std::unique_ptr<graphics::Texture3DObject> Renderer::generateFullSpecularLut(con
 
     mIntegrateFullSpecular.bind();
     mIntegrateFullSpecular.set("ggxDirectionalAlbedoLut", mSpecularDirectionalAlbedoLut->getId(), 0);
-    mIntegrateFullSpecular.set("specularMissingDirectionalAlbedoLut", mSpecularMissingTextureBuffer->getId(), 1);
     mIntegrateFullSpecular.set("ggxDirectionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 2);
 
     mIntegrateFullSpecular.image("fullSpecularLut", lut->getId(), lut->getFormat(), 0, true, GL_WRITE_ONLY);
@@ -1158,8 +1156,6 @@ const TextureBufferObject &Renderer::whiteFurnaceTest()
     mWhiteFurnaceTestShader.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut->getId(), 1);
     mWhiteFurnaceTestShader.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 2);
     mWhiteFurnaceTestShader.set("missingSpecularLutTexture", mSpecularMissingTextureBuffer->getId(), 3);
-    mWhiteFurnaceTestShader.set("diffuseDirectionalAlbedoLut", mDiffuseLut->getId(), 6);
-    // todo: Diffuse Directional Albedo is gaining some energy in the red channel. See if this is a mistake or if I need to renormalised or something?
 
     const glm::vec2 screenSize = mDebugWhiteFurnaceTextureBuffer->getSize();
     const glm::ivec2 numThreadGroups = glm::ceil(screenSize / glm::vec2(FULLSCREEN_THREAD_GROUP_SIZE));
