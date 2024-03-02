@@ -335,6 +335,7 @@ protected:
 
     float mCurrentEV100 { 10.f };
     float mIblLuminanceMultiplier { 1000.f };
+    bool mHasSkybox = false;
 
 public:
     float mReflectionStepSize { 0.1f };

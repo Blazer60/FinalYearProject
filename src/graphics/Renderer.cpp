@@ -37,8 +37,6 @@ Renderer::Renderer() :
     mSpecularDirectionalAlbedoAverageLut = generateBrdfAverageLut(lutSize);
     mSpecularMissingTextureBuffer = generateSpecularMissingLut(glm::ivec2(lutSize));
 
-    generateSkybox((file::texturePath() / "hdr/newport/NewportLoft.hdr").string(), glm::ivec2(512));
-
     initFrameBuffers();
     initTextureRenderBuffers();
     bindBuffers();
@@ -763,6 +761,9 @@ void Renderer::spotlightShadowMapping()
 void Renderer::shadeDistantLightProbe()
 {
     PROFILE_FUNC();
+    if (!mHasSkybox)
+        return;
+
     graphics::pushDebugGroup("Distant Light Probe");
 
     mIblShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
@@ -1012,6 +1013,7 @@ void Renderer::generateSkybox(std::string_view path, const glm::ivec2 desiredSiz
     mIrradianceMap->setDebugName("Irradiance");
     mPreFilterMap = generatePreFilterMap(mHdrSkybox.get(), desiredSize / 4);  // 4
     mPreFilterMap->setDebugName("Prefilter Map");
+    mHasSkybox = true;
 }
 
 void Renderer::drawFullscreenTriangleNow() const
