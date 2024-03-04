@@ -1,6 +1,6 @@
 Scene: scenes\BrdfTest.pcy
 Actors:
-  - Name: Ball 0
+  - Name: Diffuse 0.1
     UUID: 9235691866103231334
     position: [-10, 1, 0]
     rotation: [1, 0, 0, 0]
@@ -22,9 +22,11 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
             SpecularMap: ""
+            FuzzColour: [0, 0, 0]
+            FuzzRoughness: 1
     Children:
       []
-  - Name: Ball 1
+  - Name: Diffuse 0.2
     UUID: 17656332329987435241
     position: [-7.80000019, 1, 0]
     rotation: [1, 0, 0, 0]
@@ -46,9 +48,11 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
             SpecularMap: ""
+            FuzzColour: [0, 0, 0]
+            FuzzRoughness: 1
     Children:
       []
-  - Name: Ball 2
+  - Name: Diffuse 0.3
     UUID: 15059010188968840541
     position: [-5.5999999, 1, 0]
     rotation: [1, 0, 0, 0]
@@ -60,7 +64,7 @@ Actors:
           - MaterialType: StandardMaterial
             Albedo: [1, 1, 1]
             Specular: [0.156862751, 0.156862751, 0.156862751]
-            Roughness: 0.200000003
+            Roughness: 0.300000012
             Metallic: 0
             Emissive: [0, 0, 0]
             HeightScale: 0.100000001
@@ -70,9 +74,11 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
             SpecularMap: ""
+            FuzzColour: [0, 0, 0]
+            FuzzRoughness: 1
     Children:
       []
-  - Name: Ball 3
+  - Name: Diffuse 0.4
     UUID: 2953179722864376813
     position: [-3.39999962, 1, 0]
     rotation: [1, 0, 0, 0]
@@ -94,9 +100,11 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
             SpecularMap: ""
+            FuzzColour: [0, 0, 0]
+            FuzzRoughness: 1
     Children:
       []
-  - Name: Ball 4
+  - Name: Diffuse 0.5
     UUID: 3305436809899311448
     position: [-1.19999981, 1, 0]
     rotation: [1, 0, 0, 0]
@@ -118,9 +126,11 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
             SpecularMap: ""
+            FuzzColour: [0, 0, 0]
+            FuzzRoughness: 1
     Children:
       []
-  - Name: Ball 5
+  - Name: Diffuse 0.6
     UUID: 2215952589171259832
     position: [1, 1, 0]
     rotation: [1, 0, 0, 0]
@@ -142,9 +152,11 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
             SpecularMap: ""
+            FuzzColour: [0, 0, 0]
+            FuzzRoughness: 1
     Children:
       []
-  - Name: Ball 6
+  - Name: Diffuse 0.7
     UUID: 5081476570778048165
     position: [3.20000076, 1, 0]
     rotation: [1, 0, 0, 0]
@@ -166,9 +178,11 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
             SpecularMap: ""
+            FuzzColour: [0, 0, 0]
+            FuzzRoughness: 1
     Children:
       []
-  - Name: Ball 7
+  - Name: Diffuse 0.8
     UUID: 12622050055582911180
     position: [5.40000057, 1, 0]
     rotation: [1, 0, 0, 0]
@@ -190,9 +204,11 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
             SpecularMap: ""
+            FuzzColour: [0, 0, 0]
+            FuzzRoughness: 1
     Children:
       []
-  - Name: Ball 8
+  - Name: Diffuse 0.9
     UUID: 16317662475208917601
     position: [7.60000038, 1, 0]
     rotation: [1, 0, 0, 0]
@@ -214,9 +230,11 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
             SpecularMap: ""
+            FuzzColour: [0, 0, 0]
+            FuzzRoughness: 1
     Children:
       []
-  - Name: Ball 9
+  - Name: Diffuse 1.0
     UUID: 14695945249867301157
     position: [9.80000114, 1, 0]
     rotation: [1, 0, 0, 0]
@@ -238,9 +256,11 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
             SpecularMap: ""
+            FuzzColour: [0, 0, 0]
+            FuzzRoughness: 1
     Children:
       []
-  - Name: Ball 10
+  - Name: Specular 0.1
     UUID: 512474988472999131
     position: [-10, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
@@ -262,9 +282,11 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
             SpecularMap: ""
+            FuzzColour: [0, 0, 0]
+            FuzzRoughness: 1
     Children:
       []
-  - Name: Ball 11
+  - Name: Specular 0.2
     UUID: 4443347482756965594
     position: [-7.80000019, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
@@ -286,9 +308,11 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
             SpecularMap: ""
+            FuzzColour: [0, 0, 0]
+            FuzzRoughness: 1
     Children:
       []
-  - Name: Ball 12
+  - Name: Specular 0.3
     UUID: 10723275850643407265
     position: [-5.5999999, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
@@ -310,9 +334,11 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
             SpecularMap: ""
+            FuzzColour: [0, 0, 0]
+            FuzzRoughness: 1
     Children:
       []
-  - Name: Ball 13
+  - Name: Specular 0.4
     UUID: 4654122299614092034
     position: [-3.39999962, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
@@ -334,9 +360,11 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
             SpecularMap: ""
+            FuzzColour: [0, 0, 0]
+            FuzzRoughness: 1
     Children:
       []
-  - Name: Ball 14
+  - Name: Specular 0.5
     UUID: 2850402401034655202
     position: [-1.19999981, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
@@ -358,9 +386,11 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
             SpecularMap: ""
+            FuzzColour: [0, 0, 0]
+            FuzzRoughness: 1
     Children:
       []
-  - Name: Ball 15
+  - Name: Specular 0.6
     UUID: 16648665379810708591
     position: [1, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
@@ -382,9 +412,11 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
             SpecularMap: ""
+            FuzzColour: [0, 0, 0]
+            FuzzRoughness: 1
     Children:
       []
-  - Name: Ball 16
+  - Name: Specular 0.7
     UUID: 496619730817337587
     position: [3.20000076, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
@@ -406,9 +438,11 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
             SpecularMap: ""
+            FuzzColour: [0, 0, 0]
+            FuzzRoughness: 1
     Children:
       []
-  - Name: Ball 17
+  - Name: Specular 0.8
     UUID: 7582905100511727991
     position: [5.40000057, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
@@ -430,9 +464,11 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
             SpecularMap: ""
+            FuzzColour: [0, 0, 0]
+            FuzzRoughness: 1
     Children:
       []
-  - Name: Ball 18
+  - Name: Specular 0.9
     UUID: 2161961970670733406
     position: [7.60000038, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
@@ -454,9 +490,11 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
             SpecularMap: ""
+            FuzzColour: [0, 0, 0]
+            FuzzRoughness: 1
     Children:
       []
-  - Name: Ball 19
+  - Name: Specular 1.0
     UUID: 8852229717090644714
     position: [9.80000114, 3.20000005, 0]
     rotation: [1, 0, 0, 0]
@@ -478,6 +516,8 @@ Actors:
             RoughnessMap: ""
             MetallicMap: ""
             SpecularMap: ""
+            FuzzColour: [0, 0, 0]
+            FuzzRoughness: 1
     Children:
       []
   - Name: Skylight

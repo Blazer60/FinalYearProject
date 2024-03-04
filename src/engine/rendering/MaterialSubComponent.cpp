@@ -106,7 +106,7 @@ namespace engine
                 engine::editor->addUpdateAction([this]() { setSpecularMap(""); });
             }
             ImGui::SameLine();
-            if (ui::imageButton("Diffuse texture", mMaterial.specularMapId(), imageSize))
+            if (ui::imageButton("Specular texture", mMaterial.specularMapId(), imageSize))
             {
                 engine::editor->addUpdateAction([this]() {
                     const std::string result = openFileDialog();
@@ -246,7 +246,11 @@ namespace engine
             ImGui::SameLine();
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("Height").x);
             ImGui::SliderFloat("Height", &mMaterial.heightScale, 0.f, 1.f);
-            
+
+            ImGui::ColorEdit3("Fuzz Colour", glm::value_ptr(mMaterial.fuzzColour), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueWheel);
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("Fuzz Roughness").x);
+            ImGui::SliderFloat("Fuzz Roughness", &mMaterial.fuzzRoughness, 0.f, 1.f);
+
             ImGui::TreePop();
         }
         ImGui::PopID();
@@ -281,7 +285,17 @@ namespace engine
     {
         mMaterial.heightScale = scale;
     }
-    
+
+    void StandardMaterialSubComponent::setFuzzColour(const glm::vec3& colour)
+    {
+        mMaterial.fuzzColour = colour;
+    }
+
+    void StandardMaterialSubComponent::setFuzzRoughness(const float roughness)
+    {
+        mMaterial.fuzzRoughness = roughness;
+    }
+
     void MaterialSubComponent::attachShader(const std::shared_ptr<Shader> &shader)
     {
         getMaterial().attachShader(shader);

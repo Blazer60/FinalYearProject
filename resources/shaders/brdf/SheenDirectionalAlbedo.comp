@@ -24,7 +24,6 @@ float integrateSheenDirectionalAlbedo(float nDotV, float roughnees)
     {
         const vec2 rand = hammersley(i, sampleCount);
         const vec3 l = cosImportanceSample(rand, n);
-        const vec3 h = normalize(l + v);
 
         const float nDotL = saturate(dot(n, l));
 

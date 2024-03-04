@@ -71,9 +71,10 @@ void main()
     const vec3 specular = (fresnel * lut.x + lut.y);
     const vec3 specMissing = reconstructSpecularMissing(fresnel, vDotN, gBuffer.roughness);
 
+    // todo: remove dependancy to Brdf.glsl => uniforms are getting too complicated to track.
     const vec3 diffuse = evaluateDiffuseBrdf(gBuffer, specular + specMissing);
     // todo: This should index the sheen roughness!
-    const vec3 sheen = vec3(1.f, 0.f, 1.f) * texture(sheenLut, vec2(vDotN, gBuffer.roughness)).r;
+    const vec3 sheen = gBuffer.fuzzColour * texture(sheenLut, vec2(vDotN, gBuffer.fuzzRoughness)).r;
     // todo: specular + diffuse needs to be scaled back using the min-scale method. Possibly in the G channel as we need V right?
 
 #if WHITE_FURNACE_TEST > 0

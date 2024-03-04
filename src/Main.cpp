@@ -14,7 +14,8 @@ int main()
 
     initComponentsForEngine();
 
-    core.setScene(load::scene( file::resourcePath() / "scenes/BrdfTest.pcy"));
+    const auto path = file::resourcePath() / "scenes/BrdfTest.pcy";
+    core.setScene(load::scene(path), path);
 
     core.run();
     

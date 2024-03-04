@@ -41,6 +41,8 @@ void StandardMaterial::onDraw()
     mShader->set("u_roughness", roughness);
     mShader->set("u_metallic", metallic);
     mShader->set("u_emissive_colour", emissive);
+    mShader->set("fuzzColour", fuzzColour);
+    mShader->set("fuzzRoughness", fuzzRoughness);
 }
 
 void StandardMaterial::onLoadMtlFile(const MtlMaterialInformation &materialInformation)

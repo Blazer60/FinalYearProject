@@ -29,6 +29,9 @@ uniform int u_max_height_samples = 32;
 uniform float u_roughness;
 uniform float u_metallic;
 
+uniform vec3 fuzzColour;
+uniform float fuzzRoughness;
+
 vec2 height_map(vec2 uv)
 {
     const vec3 view_direction = normalize(v_camera_position_ts - v_position_ts);
@@ -112,6 +115,8 @@ void main()
     gBuffer.specular = sRgbToLinear(specularColour * specularTextureColour);
     gBuffer.normal = o_normal;
     gBuffer.roughness = o_roughness;
+    gBuffer.fuzzColour = fuzzColour;
+    gBuffer.fuzzRoughness = fuzzRoughness;
 
     pushToStorageGBuffer(gBuffer, ivec2(0));
 }

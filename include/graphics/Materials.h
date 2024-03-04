@@ -88,7 +88,9 @@ public:
     glm::vec3 diffuseColour { 1.f };
     glm::vec3 specularColour { 0.f };
     glm::vec3 emissive { 0.f };
-    
+    glm::vec3 fuzzColour { 0.f };
+    float fuzzRoughness { 1.f };
+
 protected:
     std::shared_ptr<Texture> mDiffuse;
     std::shared_ptr<Texture> mSpecular;

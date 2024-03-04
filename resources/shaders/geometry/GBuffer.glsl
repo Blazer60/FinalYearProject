@@ -35,6 +35,8 @@ struct GBuffer
     vec3 specular;
     vec3 normal;
     float roughness;
+    vec3 fuzzColour;
+    float fuzzRoughness;
     uint byteCount;
 };
 
@@ -209,6 +211,8 @@ void pushToStorageGBuffer(GBuffer gBuffer, ivec2 coord)
     streamPackUnorm4x8(stream, vec4(gBuffer.diffuse, 0.f), 3);
     streamPackUnorm4x8(stream, vec4(gBuffer.specular, 0.f), 3);
     streamPackUnorm4x8(stream, vec4(gBuffer.emissive, 0.f), 3);
+    streamPackUnorm4x8(stream, vec4(gBuffer.fuzzColour, 0.f), 3);
+    streamPackUnorm4x8(stream, vec4(gBuffer.fuzzRoughness, 0.f, 0.f, 0.f), 1);
 
     streamPushToStorageGBuffer(stream, coord);
 }
@@ -218,11 +222,13 @@ GBuffer pullFromStorageGBuffer(ivec2 coord)
     Stream stream = streamPullFromStorageGBuffer(coord);
 
     GBuffer gBuffer;
-    gBuffer.normal      = streamUnpackNormal(stream);
-    gBuffer.roughness   = streamUnpackUnorm4x8(stream, 1).x;
-    gBuffer.diffuse     = streamUnpackUnorm4x8(stream, 3).xyz;
-    gBuffer.specular    = streamUnpackUnorm4x8(stream, 3).xyz;
-    gBuffer.emissive    = streamUnpackUnorm4x8(stream, 3).xyz;
+    gBuffer.normal        = streamUnpackNormal(stream);
+    gBuffer.roughness     = streamUnpackUnorm4x8(stream, 1).x;
+    gBuffer.diffuse       = streamUnpackUnorm4x8(stream, 3).xyz;
+    gBuffer.specular      = streamUnpackUnorm4x8(stream, 3).xyz;
+    gBuffer.emissive      = streamUnpackUnorm4x8(stream, 3).xyz;
+    gBuffer.fuzzColour    = streamUnpackUnorm4x8(stream, 3).xyz;
+    gBuffer.fuzzRoughness = streamUnpackUnorm4x8(stream, 1).x;
     gBuffer.byteCount   = stream.byteOffset;  // This is the amount of bytes read. Not the actual amount submitted to the buffer.
 
     return gBuffer;

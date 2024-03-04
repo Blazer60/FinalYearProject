@@ -94,6 +94,12 @@ namespace engine
                         if (!specularMapRelativePath.empty())
                             standardMaterial->setSpecularMap(file::resourcePath() / specularMapRelativePath);
                     }
+
+                    if (materialNode["FuzzColour"].IsDefined())
+                        standardMaterial->setFuzzColour(materialNode["FuzzColour"].as<glm::vec3>());
+
+                    if (materialNode["FuzzRoughness"].IsDefined())
+                        standardMaterial->setFuzzRoughness(materialNode["FuzzRoughness"].as<float>());
                 }
             }
         });
@@ -231,6 +237,8 @@ void serializeComponent(YAML::Emitter &out, engine::MeshRenderer *meshRenderer)
             out << YAML::Key << "RoughnessMap" << YAML::Value << file::makeRelativeToResourcePath(standardMaterial->mRoughnessMapPath).string();
             out << YAML::Key << "MetallicMap"  << YAML::Value << file::makeRelativeToResourcePath(standardMaterial->mMetallicMapPath).string();
             out << YAML::Key << "SpecularMap"  << YAML::Value << file::makeRelativeToResourcePath(standardMaterial->mSpecularMapPath).string();
+            out << YAML::Key << "FuzzColour"   << YAML::Value << standardMaterial->mMaterial.fuzzColour;
+            out << YAML::Key << "FuzzRoughness" << YAML::Value << standardMaterial->mMaterial.fuzzRoughness;
         }
 
         out << YAML::EndMap;

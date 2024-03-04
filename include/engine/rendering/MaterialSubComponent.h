@@ -48,6 +48,8 @@ namespace engine
         void setSpecularColour(const glm::vec3 &colour);
         void setEmissive(const glm::vec3 &colour);
         void setHeightScale(float scale);
+        void setFuzzColour(const glm::vec3 &colour);
+        void setFuzzRoughness(float roughness);
         
     protected:
         Material &getMaterial() override { return mMaterial; };

@@ -339,6 +339,7 @@ void Renderer::render()
         mDirectionalLightShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
         mDirectionalLightShader.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut->getId(), 3);
         mDirectionalLightShader.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 4);
+        mDirectionalLightShader.set("sheenTable", mLtcSheenTable->getId(), 5);
         mDirectionalLightShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
         mDirectionalLightShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
 
@@ -369,6 +370,7 @@ void Renderer::render()
         mPointLightShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
         mPointLightShader.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut->getId(), 3);
         mPointLightShader.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 4);
+        mPointLightShader.set("sheenTable", mLtcSheenTable->getId(), 5);
         mPointLightShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
         mPointLightShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
 
@@ -400,8 +402,9 @@ void Renderer::render()
         mSpotlightShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
         mSpotlightShader.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut->getId(), 3);
         mSpotlightShader.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 4);
-        mPointLightShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
-        mPointLightShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
+        mSpotlightShader.set("sheenTable", mLtcSheenTable->getId(), 5);
+        mSpotlightShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
+        mSpotlightShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
 
         for (const graphics::Spotlight &spotLight : mSpotlightQueue)
         {

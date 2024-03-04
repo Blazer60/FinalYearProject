@@ -7,6 +7,7 @@
 
 layout(binding = 2) uniform sampler2D directionalAlbedoLut;
 layout(binding = 3) uniform sampler2D directionalAlbedoAverageLut;
+layout(binding = 4) uniform sampler2D sheenTable;
 
 float directionalAlbedoWhite(vec2 uv)
 {
@@ -18,6 +19,41 @@ float directionalAlbedoAverageWhite(vec2 uv)
 {
     vec2 result = texture(directionalAlbedoAverageLut, uv).rg;
     return result.x + result.y;
+}
+
+float distributionOriginal(vec3 s)
+{
+    return 1.f / PI * max(0.f, s.z);
+}
+
+vec3 evalutateSheenBrdf(GBuffer gBuffer, float nDotL, float nDotV, vec3 v)
+{
+    const float alpha = sqrt(gBuffer.fuzzRoughness);
+    const vec3 tableValues = texture(sheenTable, vec2(nDotL, alpha)).rgb;
+    const float a = tableValues.x;
+    const float b = tableValues.y;
+    const float directionalReflectance = tableValues.z;
+
+    // [a, 0, b]
+    // [0, a, 0]
+    // [0, 0, 1]
+    mat3 inverseMatrix;
+    inverseMatrix[0][0] = a;
+    inverseMatrix[1][1] = a;
+    inverseMatrix[2][2] = 1.f;
+    inverseMatrix[0][2] = b;
+
+    const float matDet = determinant(inverseMatrix);
+
+    const vec3 v0 = inverseMatrix * v;
+    const float v0Length = length(v0);
+    const float v0Length3 = v0Length * v0Length * v0Length;
+
+    float d0 = distributionOriginal(v0 / v0Length);
+
+    const float sheenValue = directionalReflectance * d0 * matDet / v0Length3;
+
+    return gBuffer.fuzzColour * sheenValue / nDotV;
 }
 
 vec3 evaluateMissingSpecularBrdf(GBuffer gBuffer, vec3 fresnel, float lDotN, float vDotN)
@@ -65,6 +101,8 @@ vec3 evaluateClosure(GBuffer gBuffer, vec3 position, vec3 lightDirection)
     const vec3 specular = evaluateSpecularBrdf(gBuffer, fresnel, hDotN, vDotN, lDotN);
     const vec3 missingSpecular = evaluateMissingSpecularBrdf(gBuffer, fresnel, lDotN, vDotN);
     const vec3 diffuse = evaluateDiffuseBrdf(gBuffer, specular + missingSpecular);
+    const vec3 sheen = evalutateSheenBrdf(gBuffer, lDotN, vDotN, v);
 
-    return specular + missingSpecular + diffuse;
+    // todo: Scale back the rest of the sheen brdf.
+    return sheen + specular + missingSpecular + diffuse;
 }
