@@ -25,6 +25,8 @@ uniform float u_luminance_multiplier;
 
 #endif
 
+layout(binding = 6) uniform sampler2D sheenLut;
+
 layout(binding = 1, rgba16f) uniform image2D lighting;
 
 // specular missing is split as we don't know f0 until now.
@@ -70,6 +72,9 @@ void main()
     const vec3 specMissing = reconstructSpecularMissing(fresnel, vDotN, gBuffer.roughness);
 
     const vec3 diffuse = evaluateDiffuseBrdf(gBuffer, specular + specMissing);
+    // todo: This should index the sheen roughness!
+    const vec3 sheen = vec3(1.f, 0.f, 1.f) * texture(sheenLut, vec2(vDotN, gBuffer.roughness)).r;
+    // todo: specular + diffuse needs to be scaled back using the min-scale method. Possibly in the G channel as we need V right?
 
 #if WHITE_FURNACE_TEST > 0
     const vec3 colour = linearToSRgb(specular + specMissing + diffuse - vec3(0.5f));
@@ -81,7 +86,8 @@ void main()
     const vec3 irradiance = texture(u_irradiance_texture, n).rgb;
 
     const vec3 colour = imageLoad(lighting, ivec2(id)).rgb;
-    const vec3 outColour = colour + camera.exposure * ((specular + specMissing) * preFilterColour + diffuse * irradiance) * u_luminance_multiplier;
+    // todo: Where do we add the sheen lobe.
+    const vec3 outColour = colour + camera.exposure * ((specular + specMissing) * preFilterColour + (diffuse + sheen) * irradiance) * u_luminance_multiplier;
     imageStore(lighting, ivec2(id), vec4(outColour, 1.f));
 #endif
 }

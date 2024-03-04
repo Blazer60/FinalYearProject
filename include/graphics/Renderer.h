@@ -189,6 +189,8 @@ protected:
     std::unique_ptr<TextureBufferObject> generateBrdfLut(const glm::ivec2 &size);
     std::unique_ptr<TextureBufferObject> generateSpecularMissingLut(const glm::ivec2 &size);
     std::unique_ptr<TextureBufferObject> generateBrdfAverageLut(uint32_t size);
+    void setupLtcSheenTable();
+    std::unique_ptr<TextureBufferObject> generateSheenLut(const glm::ivec2 &size);
 
     void directionalLightShadowMapping(const CameraSettings &cameraSettings);
     void pointLightShadowMapping();
@@ -242,6 +244,10 @@ protected:
 
     Shader mIntegrateBrdfAverageShader {
         { file::shaderPath() / "brdf/GgxDirectionalAlbedoAverage.comp" }
+    };
+
+    Shader mIntegrateSheenShader {
+        { file::shaderPath() / "brdf/SheenDirectionalAlbedo.comp" }
     };
 
     Shader mCombineLightingShader {
@@ -323,6 +329,8 @@ protected:
     std::unique_ptr<TextureBufferObject> mDebugTextureBuffer;
     std::unique_ptr<TextureBufferObject> mDebugGeometryTextureBuffer;
     std::unique_ptr<TextureBufferObject> mDebugWhiteFurnaceTextureBuffer;
+    std::unique_ptr<TextureBufferObject> mLtcSheenTable;
+    std::unique_ptr<TextureBufferObject> mSheenDirectionalAlbedoLut;
 
     graphics::UniformBufferObject<CameraBlock> mCamera;
     graphics::UniformBufferObject<DirectionalLightBlock> mDirectionalLightBlock;

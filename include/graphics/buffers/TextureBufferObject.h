@@ -42,8 +42,9 @@ public:
     [[nodiscard]] GLenum getFormat() const;
     void generateMipMaps() const;
     [[nodiscard]] uint32_t getMipLevels() const;
-    void clear(const glm::vec4 clearColour=glm::vec4(0.f, 0.f, 0.f, 1.f)) const;
+    void clear(const glm::vec4 &clearColour=glm::vec4(0.f, 0.f, 0.f, 1.f)) const;
     void setDebugName(const std::string &debugName) const;
+    void upload(const float *data, graphics::pixelFormat format=graphics::pixelFormat::Rgba) const;
 protected:
     void init(GLint minFilter, GLint magFilter, GLint wrapS, GLint wrapT);
     void deInit();

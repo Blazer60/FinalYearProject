@@ -74,6 +74,8 @@ add_library(${GRAPHICS_LIBRARY} STATIC
         include/graphics/buffers/ShaderStorageBufferObject.h
         src/graphics/buffers/Texture3DObject.cpp
         include/graphics/buffers/Texture3DObject.h
+        src/graphics/LtcSheenTable.cpp
+        include/graphics/LtcSheenTable.h
 )
 
 target_include_directories(${GRAPHICS_LIBRARY} PUBLIC

@@ -94,7 +94,7 @@ uint32_t TextureBufferObject::getMipLevels() const
     return mMipMapLevels;
 }
 
-void TextureBufferObject::clear(const glm::vec4 clearColour) const
+void TextureBufferObject::clear(const glm::vec4 &clearColour) const
 {
     glClearTexImage(mId, 0, GL_RGBA, GL_FLOAT, glm::value_ptr(clearColour));
 }
@@ -102,4 +102,11 @@ void TextureBufferObject::clear(const glm::vec4 clearColour) const
 void TextureBufferObject::setDebugName(const std::string& debugName) const
 {
     glObjectLabel(GL_TEXTURE, mId, -1, debugName.data());
+}
+
+void TextureBufferObject::upload(const float* data, const graphics::pixelFormat format) const
+{
+    constexpr int level = 0;
+    constexpr int offset = 0;
+    glTextureSubImage2D(mId, level, offset, offset, mSize.x, mSize.y, toGLenum(format), GL_FLOAT, static_cast<const void*>(data));
 }

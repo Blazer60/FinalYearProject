@@ -1,0 +1,71 @@
+#version 460 core
+
+#include "Hammersley.glsl"
+#include "../Maths.glsl"
+
+layout(binding = 0) uniform sampler2D sheenTable;
+layout(binding = 0, r16f) writeonly uniform image2D sheenDirectionalAlbedo;
+
+float distributionOriginal(vec3 s)
+{
+    return 1.f / PI * max(0.f, s.z);
+}
+
+float integrateSheenDirectionalAlbedo(float nDotV, float roughnees)
+{
+    const vec3 v = vec3(sqrt(1.f - nDotV * nDotV), 0.f, nDotV);
+    const vec3 n = vec3(0.f, 0.f, 1.f);
+    const float alpha = sqrt(roughnees);
+
+    float accumulation = 0.f;
+
+    const uint sampleCount = 1024u;
+    for (uint i = 0u; i < sampleCount; ++i)
+    {
+        const vec2 rand = hammersley(i, sampleCount);
+        const vec3 l = cosImportanceSample(rand, n);
+        const vec3 h = normalize(l + v);
+
+        const float nDotL = saturate(dot(n, l));
+
+        const vec3 tableValues = texture(sheenTable, vec2(nDotL, alpha)).rgb;
+        const float a = tableValues.x;
+        const float b = tableValues.y;
+        const float directionalReflectance = tableValues.z;
+
+        // [a, 0, b]
+        // [0, a, 0]
+        // [0, 0, 1]
+        mat3 inverseMatrix;
+        inverseMatrix[0][0] = a;
+        inverseMatrix[1][1] = a;
+        inverseMatrix[2][2] = 1.f;
+        inverseMatrix[0][2] = b;
+
+        const float matDet = determinant(inverseMatrix);
+
+        const vec3 v0 = inverseMatrix * v;
+        const float v0Length = length(v0);
+        const float v0Length3 = v0Length * v0Length * v0Length;
+
+        float d0 = distributionOriginal(v0 / v0Length);
+
+        const float sheenValue = directionalReflectance * d0 * matDet / v0Length3;
+        // Does sheen value need to be divided by cos(theta_o)?
+        accumulation += sheenValue / nDotV;
+    }
+
+    return PI * accumulation / float(sampleCount);
+}
+
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+void main()
+{
+    const vec3 id = gl_GlobalInvocationID;
+    const vec3 dispatchSize = gl_NumWorkGroups * gl_WorkGroupSize;
+    const vec2 uv = vec2(1.f) - ((id.xy + vec2(0.5f)) / dispatchSize.xy);
+
+    const float result = integrateSheenDirectionalAlbedo(uv.x, uv.y);
+
+    imageStore(sheenDirectionalAlbedo, ivec2(dispatchSize) - ivec2(1) - ivec2(id.xy), vec4(result.x, 0.f, 0.f, 0.f));
+}

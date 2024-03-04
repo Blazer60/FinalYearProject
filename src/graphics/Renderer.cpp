@@ -13,6 +13,7 @@
 #include "Shader.h"
 #include "ProfileTimer.h"
 #include "FileLoader.h"
+#include "LtcSheenTable.h"
 #include "ThreadGroupSizes.h"
 #include "shader/ShaderCompilation.h"
 
@@ -36,6 +37,9 @@ Renderer::Renderer() :
     mSpecularDirectionalAlbedoLut = generateBrdfLut(glm::ivec2(lutSize));
     mSpecularDirectionalAlbedoAverageLut = generateBrdfAverageLut(lutSize);
     mSpecularMissingTextureBuffer = generateSpecularMissingLut(glm::ivec2(lutSize));
+
+    setupLtcSheenTable();
+    mSheenDirectionalAlbedoLut = generateSheenLut(glm::ivec2(lutSize));
 
     initFrameBuffers();
     initTextureRenderBuffers();
@@ -774,6 +778,7 @@ void Renderer::shadeDistantLightProbe()
     mIblShader.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 3);
     mIblShader.set("u_irradiance_texture", mIrradianceMap->getId(), 4);
     mIblShader.set("u_pre_filter_texture", mPreFilterMap->getId(), 5);
+    mIblShader.set("sheenLut", mSheenDirectionalAlbedoLut->getId(), 6);
     mIblShader.set("u_luminance_multiplier", mIblLuminanceMultiplier);
 
     mIblShader.bind();
@@ -999,6 +1004,32 @@ std::unique_ptr<TextureBufferObject> Renderer::generateBrdfAverageLut(const uint
 
     const uint32_t groupSize = glm::ceil(size / 8);
     glDispatchCompute(groupSize, 1, 1);
+
+    return lut;
+}
+
+void Renderer::setupLtcSheenTable()
+{
+    mLtcSheenTable = std::make_unique<TextureBufferObject>(
+        glm::ivec2(graphics::sheen::tableSize), GL_RGB16F,
+        graphics::filter::Linear, graphics::wrap::ClampToEdge);
+    mLtcSheenTable->setDebugName("LTC Sheen LUT");
+
+    const auto sheenData = graphics::sheen::data();
+    mLtcSheenTable->upload(sheenData.data(), graphics::pixelFormat::Rgb);
+}
+
+std::unique_ptr<TextureBufferObject> Renderer::generateSheenLut(const glm::ivec2& size)
+{
+    auto lut = std::make_unique<TextureBufferObject>(size, GL_R16F, graphics::filter::Linear, graphics::wrap::ClampToEdge);
+    lut->setDebugName("Sheen Directional Albedo");
+
+    mIntegrateSheenShader.bind();
+    mIntegrateSheenShader.set("sheenTable", mLtcSheenTable->getId(), 0);
+    mIntegrateSheenShader.image("sheenDirectionalAlbedo", lut->getId(), lut->getFormat(), 0, false);
+
+    const glm::uvec2 groupSize = glm::ceil(static_cast<glm::vec2>(size / 8));
+    glDispatchCompute(groupSize.x, groupSize.y, 1);
 
     return lut;
 }

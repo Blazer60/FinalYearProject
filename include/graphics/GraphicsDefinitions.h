@@ -36,6 +36,11 @@ namespace graphics
         Rgba16f, Rg16f, R16f
     };
 
+    enum class pixelFormat : uint8_t
+    {
+        Red, Rg, Rgb, Rgba, Depth, Stencil
+    };
+
     enum class gbuffer : uint8_t
     {
         Normal, Roughness, Diffuse, Specular, Emissive, ByteCount
@@ -45,6 +50,7 @@ namespace graphics
     GLint toMagGLint(filter f);
     GLint toGLint(wrap w);
     GLenum toGLenum(textureFormat f);
+    GLenum toGLenum(pixelFormat p);
     int toInt(gbuffer g);
     
     struct RenderQueueObject
