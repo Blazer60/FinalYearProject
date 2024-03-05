@@ -55,6 +55,9 @@ void main()
 
     GBuffer gBuffer = pullFromStorageGBuffer(ivec2(id));
 
+    if (gBufferIsValid(gBuffer) == 0)
+        return;
+
     const vec3 n = gBuffer.normal;
     const vec3 v = normalize(camera.position - position);
     const vec3 r = reflect(-v, n);
@@ -73,12 +76,20 @@ void main()
 
     // todo: remove dependancy to Brdf.glsl => uniforms are getting too complicated to track.
     const vec3 diffuse = evaluateDiffuseBrdf(gBuffer, specular + specMissing);
-    // todo: This should index the sheen roughness!
-    const vec3 sheen = gBuffer.fuzzColour * texture(sheenLut, vec2(vDotN, gBuffer.fuzzRoughness)).r;
+
+    vec3 sheen = vec3(0.f);
+    if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT) == 1)
+    {
+#if WHITE_FURNACE_TEST > 0
+        sheen = texture(sheenLut, vec2(vDotN, gBuffer.fuzzRoughness)).rrr;
+#else
+        sheen = gBuffer.fuzzColour * texture(sheenLut, vec2(vDotN, gBuffer.fuzzRoughness)).r;
+#endif
+    }
     // todo: specular + diffuse needs to be scaled back using the min-scale method. Possibly in the G channel as we need V right?
 
 #if WHITE_FURNACE_TEST > 0
-    const vec3 colour = linearToSRgb(specular + specMissing + diffuse - vec3(0.5f));
+    const vec3 colour = linearToSRgb(sheen + specular + specMissing + diffuse - vec3(0.5f));
     imageStore(lighting, ivec2(id), vec4(colour, 1.f));
 #else
 

@@ -11,6 +11,9 @@
 #define GBUFFER_UINT_COUNT 12
 #define STREAM_HEADER_BYTE_COUNT 1
 
+#define GBUFFER_FLAG_BYTE_COUNT 1
+#define GBUFFER_FLAG_FUZZ_BIT 0
+
 #include "../Maths.glsl"
 
 layout(binding = 0, rgba32ui) uniform uimage2DArray storageGBuffer;
@@ -30,6 +33,7 @@ layout(location = 2) out uvec4 oGBuffer2;
 
 struct GBuffer
 {
+    uint flags;
     vec3 emissive;
     vec3 diffuse;
     vec3 specular;
@@ -176,7 +180,7 @@ void streamPushToStorageGBuffer(Stream stream, ivec2 coord)
 #endif
 }
 
-Stream streamPullFromStorageGBuffer(ivec2 coord)
+Stream streamPullFromStorageGBuffer(ivec2 coord, out uint uintCount)
 {
     Stream stream;
     stream.byteOffset = 0;
@@ -186,7 +190,8 @@ Stream streamPullFromStorageGBuffer(ivec2 coord)
     stream.data[1] = slice.y;
     stream.data[2] = slice.z;
     stream.data[3] = slice.w;
-    const uint uintCount = streamExtractBytes(stream, 1);
+
+    uintCount = streamExtractBytes(stream, 1);
 
     int i = 1;
     for (int index = 4; index < uintCount * 4; index += 4)
@@ -201,34 +206,85 @@ Stream streamPullFromStorageGBuffer(ivec2 coord)
     return stream;
 }
 
+GBuffer gBufferCreate()
+{
+    GBuffer gBuffer;
+
+    gBuffer.flags = 0;
+    gBuffer.emissive = vec3(0);
+    gBuffer.diffuse = vec3(0);
+    gBuffer.specular = vec3(0);
+    gBuffer.normal = vec3(0);
+    gBuffer.roughness = 0;
+    gBuffer.fuzzColour = vec3(0);
+    gBuffer.fuzzRoughness = 0;
+    gBuffer.byteCount = 0;
+
+    return gBuffer;
+}
+
+void gBufferSetFlag(in out GBuffer gBuffer, int flag, int value)
+{
+    gBuffer.flags = bitfieldInsert(gBuffer.flags, value, flag, 1);
+}
+
+int gBufferHasFlag(GBuffer gBuffer, int flag)
+{
+    return int(bitfieldExtract(gBuffer.flags, flag, 1));
+}
+
+int gBufferIsValid(GBuffer gBuffer)
+{
+    return int(gBuffer.byteCount != 0);
+}
+
 void pushToStorageGBuffer(GBuffer gBuffer, ivec2 coord)
 {
     Stream stream;
     stream.byteOffset = STREAM_HEADER_BYTE_COUNT;
+
+    streamInsertBytes(stream, gBuffer.flags, GBUFFER_FLAG_BYTE_COUNT);
 
     streamPackNormal(stream, gBuffer.normal);
     streamPackUnorm4x8(stream, vec4(gBuffer.roughness, 0.f, 0.f, 0.f), 1);
     streamPackUnorm4x8(stream, vec4(gBuffer.diffuse, 0.f), 3);
     streamPackUnorm4x8(stream, vec4(gBuffer.specular, 0.f), 3);
     streamPackUnorm4x8(stream, vec4(gBuffer.emissive, 0.f), 3);
-    streamPackUnorm4x8(stream, vec4(gBuffer.fuzzColour, 0.f), 3);
-    streamPackUnorm4x8(stream, vec4(gBuffer.fuzzRoughness, 0.f, 0.f, 0.f), 1);
+
+    if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT) == 1)
+    {
+        streamPackUnorm4x8(stream, vec4(gBuffer.fuzzColour, 0.f), 3);
+        streamPackUnorm4x8(stream, vec4(gBuffer.fuzzRoughness, 0.f, 0.f, 0.f), 1);
+    }
 
     streamPushToStorageGBuffer(stream, coord);
 }
 
 GBuffer pullFromStorageGBuffer(ivec2 coord)
 {
-    Stream stream = streamPullFromStorageGBuffer(coord);
+    uint uintCount;
+    Stream stream = streamPullFromStorageGBuffer(coord, uintCount);
 
-    GBuffer gBuffer;
+    if (uintCount == 0)
+    {
+        return gBufferCreate();  // I.e.: A sky pixel.
+    }
+
+    GBuffer gBuffer = gBufferCreate();
+    gBuffer.flags         = streamExtractBytes(stream, GBUFFER_FLAG_BYTE_COUNT);
+
     gBuffer.normal        = streamUnpackNormal(stream);
     gBuffer.roughness     = streamUnpackUnorm4x8(stream, 1).x;
     gBuffer.diffuse       = streamUnpackUnorm4x8(stream, 3).xyz;
     gBuffer.specular      = streamUnpackUnorm4x8(stream, 3).xyz;
     gBuffer.emissive      = streamUnpackUnorm4x8(stream, 3).xyz;
-    gBuffer.fuzzColour    = streamUnpackUnorm4x8(stream, 3).xyz;
-    gBuffer.fuzzRoughness = streamUnpackUnorm4x8(stream, 1).x;
+
+    if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT) == 1)
+    {
+        gBuffer.fuzzColour    = streamUnpackUnorm4x8(stream, 3).xyz;
+        gBuffer.fuzzRoughness = streamUnpackUnorm4x8(stream, 1).x;
+    }
+
     gBuffer.byteCount   = stream.byteOffset;  // This is the amount of bytes read. Not the actual amount submitted to the buffer.
 
     return gBuffer;

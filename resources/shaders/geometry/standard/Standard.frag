@@ -109,14 +109,20 @@ void main()
     if (specularTextureColour == vec3(0.f))
         specularTextureColour = vec3(1.f);
 
-    GBuffer gBuffer;
+    GBuffer gBuffer = gBufferCreate();
     gBuffer.emissive = o_emissive;
     gBuffer.diffuse = o_albedo;
     gBuffer.specular = sRgbToLinear(specularColour * specularTextureColour);
     gBuffer.normal = o_normal;
     gBuffer.roughness = o_roughness;
+
     gBuffer.fuzzColour = fuzzColour;
     gBuffer.fuzzRoughness = fuzzRoughness;
+
+    if (dot(fuzzColour, fuzzColour) >= 0.001f)
+    {
+        gBufferSetFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT, 1);
+    }
 
     pushToStorageGBuffer(gBuffer, ivec2(0));
 }

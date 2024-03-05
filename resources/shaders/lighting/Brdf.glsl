@@ -87,6 +87,9 @@ vec3 evaluateDiffuseBrdf(GBuffer gBuffer, vec3 specular)
 
 vec3 evaluateClosure(GBuffer gBuffer, vec3 position, vec3 lightDirection)
 {
+    if (gBufferIsValid(gBuffer) == 0)
+        return vec3(0.f);
+
     const vec3 l = lightDirection;
     const vec3 n = gBuffer.normal;
     const vec3 v = normalize(camera.position - position);
@@ -101,7 +104,10 @@ vec3 evaluateClosure(GBuffer gBuffer, vec3 position, vec3 lightDirection)
     const vec3 specular = evaluateSpecularBrdf(gBuffer, fresnel, hDotN, vDotN, lDotN);
     const vec3 missingSpecular = evaluateMissingSpecularBrdf(gBuffer, fresnel, lDotN, vDotN);
     const vec3 diffuse = evaluateDiffuseBrdf(gBuffer, specular + missingSpecular);
-    const vec3 sheen = evalutateSheenBrdf(gBuffer, lDotN, vDotN, v);
+
+    vec3 sheen = vec3(0.f);
+    if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT) == 1)
+        sheen = evalutateSheenBrdf(gBuffer, lDotN, vDotN, v);
 
     // todo: Scale back the rest of the sheen brdf.
     return sheen + specular + missingSpecular + diffuse;

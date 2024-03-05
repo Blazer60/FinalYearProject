@@ -52,6 +52,8 @@ namespace engine
             ViewportImage { "Debug View",   []() -> const TextureBufferObject& { return graphics::renderer->getDebugBuffer(); } },
             ViewportImage { "White Furnace Test", []() -> const TextureBufferObject& { return graphics::renderer->whiteFurnaceTest(); } },
             ViewportImage { "Buffer Byte Count", []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::ByteCount, true); } },
+            ViewportImage { "Fuzz Colour", []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::FuzzColour, true); } },
+            ViewportImage { "Fuzz Roughness", []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::FuzzRoughness, false); } },
         };
     }
 

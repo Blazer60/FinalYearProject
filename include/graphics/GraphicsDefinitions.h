@@ -43,7 +43,7 @@ namespace graphics
 
     enum class gbuffer : uint8_t
     {
-        Normal, Roughness, Diffuse, Specular, Emissive, ByteCount
+        Normal, Roughness, Diffuse, Specular, Emissive, ByteCount, FuzzColour, FuzzRoughness
     };
     
     GLint toGLint(filter f);
