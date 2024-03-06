@@ -91,6 +91,8 @@ void Renderer::initTextureRenderBuffers()
     mDebugGeometryTextureBuffer      = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F,  graphics::filter::Linear,  graphics::wrap::ClampToEdge);
     mDebugWhiteFurnaceTextureBuffer  = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F,  graphics::filter::Nearest,  graphics::wrap::ClampToEdge);
 
+    mDebugTileOverlayBuffer = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16, graphics::filter::Linear, graphics::wrap::ClampToEdge);
+
     // Make sure that the framebuffers have been set up before calling this function.
     mGeometryFramebuffer->attach(mGBufferTexture.get(), 0, 0);
     mGeometryFramebuffer->attach(mGBufferTexture.get(), 1, 1);
@@ -1200,6 +1202,21 @@ const TextureBufferObject &Renderer::whiteFurnaceTest()
 
     graphics::popDebugGroup();
     return *mDebugWhiteFurnaceTextureBuffer;
+}
+
+const TextureBufferObject& Renderer::drawTileClassification()
+{
+    mDebugTileOverlayShader.bind();
+    mDebugTileOverlayBuffer->clear(glm::vec4(0.f, 0.f, 0.f, 0.2f));
+    mDebugTileOverlayShader.image("tileOverlay", mDebugTileOverlayBuffer->getId(), mDebugTileOverlayBuffer->getFormat(), 1, false, GL_WRITE_ONLY);
+
+    for (int i = 0; i < graphics::shaderVariationCount; ++i)
+    {
+        mDebugTileOverlayShader.set("shaderIndex", i);
+        graphics::dispatchComputeIndirect(mTileClassicationStorage.getId(), 4 * sizeof(uint32_t) * i);
+    }
+
+    return *mDebugTileOverlayBuffer;
 }
 
 float Renderer::getCurrentEV100() const

@@ -26,10 +26,10 @@ namespace engine
         std::function<TextureBufferObject const&()> requestTexture;
     };
 
-/**
- * @author Ryan Purse
- * @date 08/08/2023
- */
+    /**
+     * @author Ryan Purse
+     * @date 08/08/2023
+     */
     class Viewport
         : public ui::Drawable
     {
@@ -78,6 +78,7 @@ namespace engine
         int32_t mCurrentSelectedImage = 0;
         bool mForce1080p { false };
         bool mShowDebugOverlay { false };
+        bool mShowTileClassification { false };
         bool mIsSimulating { false };
 
         EditorCamera mEditorCamera;

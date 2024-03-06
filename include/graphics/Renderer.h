@@ -172,6 +172,7 @@ public:
     [[nodiscard]] const TextureBufferObject &getDebugBuffer() const;
     [[nodiscard]] const TextureBufferObject &getFromGBuffer(graphics::gbuffer type, bool gammaCorrect, const glm::vec4 &defaultValue=glm::vec4(0.f, 0.f, 0.f, 1.f));
     [[nodiscard]] const TextureBufferObject &whiteFurnaceTest();
+    [[nodiscard]] const TextureBufferObject &drawTileClassification();
 
     [[nodiscard]] std::vector<graphics::DirectionalLight> &getDirectionalLights();
 
@@ -321,6 +322,10 @@ protected:
         { file::shaderPath() / "classification/MaterialClassification.comp" }
     };
 
+    Shader mDebugTileOverlayShader {
+        { file::shaderPath() / "classification/DebugOverlay.comp" }
+    };
+
     std::vector<Shader> mAnalyticalShaderVariants;
     std::vector<graphics::shaderVariant> mShaderTable;
     graphics::Ubo mShaderTableUbo;
@@ -347,6 +352,7 @@ protected:
     std::unique_ptr<TextureBufferObject> mDebugWhiteFurnaceTextureBuffer;
     std::unique_ptr<TextureBufferObject> mLtcSheenTable;
     std::unique_ptr<TextureBufferObject> mSheenDirectionalAlbedoLut;
+    std::unique_ptr<TextureBufferObject> mDebugTileOverlayBuffer;
     graphics::ShaderStorageBufferObject mTileClassicationStorage;
 
     graphics::UniformBufferObject<CameraBlock> mCamera;

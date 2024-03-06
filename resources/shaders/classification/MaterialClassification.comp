@@ -1,17 +1,11 @@
 #version 460 core
 
 #include "../geometry/GBuffer.glsl"
+#include "ClassificationBuffer.glsl"
 
 layout(binding = 0, std140) uniform ShaderTable
 {
     uvec4 shaderTable[SHADER_TABLE_COUNT / 4];
-};
-
-layout(binding = 1, std430)
-buffer Classification
-{
-    uvec4 arguments[SHADER_VARIANT_COUNT];
-    uvec2 tileBuffers[][SHADER_VARIANT_COUNT];
 };
 
 shared uint orMaterialMask;

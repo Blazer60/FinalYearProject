@@ -113,6 +113,8 @@ namespace engine
         ImGui::Checkbox("Force 1080p", &mForce1080p);
         ImGui::SameLine();
         ImGui::Checkbox("Debug Overlay", &mShowDebugOverlay);
+        ImGui::SameLine();
+        ImGui::Checkbox("Tile Overlay", &mShowTileClassification);
 
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - 140.f);
@@ -156,6 +158,12 @@ namespace engine
         {
             ImGui::SetCursorPos(cursorPos);
             const TextureBufferObject &debugTexture = graphics::renderer->getDebugBuffer();
+            ImGui::Image(reinterpret_cast<void *>(debugTexture.getId()), regionSize, ImVec2(0, 1), ImVec2(1, 0));
+        }
+        if (mShowTileClassification)
+        {
+            ImGui::SetCursorPos(cursorPos);
+            const TextureBufferObject &debugTexture = graphics::renderer->drawTileClassification();
             ImGui::Image(reinterpret_cast<void *>(debugTexture.getId()), regionSize, ImVec2(0, 1), ImVec2(1, 0));
         }
 
