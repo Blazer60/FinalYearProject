@@ -45,7 +45,7 @@ namespace graphics
     {
         Normal, Roughness, Diffuse, Specular, Emissive, ByteCount, FuzzColour, FuzzRoughness
     };
-    
+
     GLint toGLint(filter f);
     GLint toMagGLint(filter f);
     GLint toGLint(wrap w);

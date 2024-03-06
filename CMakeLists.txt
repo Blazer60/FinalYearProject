@@ -76,6 +76,9 @@ add_library(${GRAPHICS_LIBRARY} STATIC
         include/graphics/buffers/Texture3DObject.h
         src/graphics/LtcSheenTable.cpp
         include/graphics/LtcSheenTable.h
+        resources/shaders/interfaces/GBufferFlags.h
+        src/graphics/buffers/Ubo.cpp
+        include/graphics/buffers/Ubo.h
 )
 
 target_include_directories(${GRAPHICS_LIBRARY} PUBLIC

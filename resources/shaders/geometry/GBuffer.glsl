@@ -11,11 +11,8 @@
 #define GBUFFER_UINT_COUNT 12
 #define STREAM_HEADER_BYTE_COUNT 1
 
-#define GBUFFER_FLAG_BYTE_COUNT 1
-#define GBUFFER_FLAG_MATERIAL_BIT 0
-#define GBUFFER_FLAG_FUZZ_BIT 1
-
 #include "../Maths.glsl"
+#include "../interfaces/GBufferFlags.h"
 
 layout(binding = 0, rgba32ui) uniform uimage2DArray storageGBuffer;
 

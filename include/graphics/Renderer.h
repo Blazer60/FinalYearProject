@@ -20,11 +20,13 @@
 #include "DebugGBufferBlock.h"
 #include "DirectionalLightBlock.h"
 #include "FileLoader.h"
+#include "GBufferFlags.h"
 #include "PointLightBlock.h"
 #include "ScreenSpaceReflectionsBlock.h"
 #include "ShaderStorageBufferObject.h"
 #include "SpotlightBlock.h"
 #include "Texture3DObject.h"
+#include "Ubo.h"
 
 
 /**
@@ -191,6 +193,7 @@ protected:
     std::unique_ptr<TextureBufferObject> generateBrdfAverageLut(uint32_t size);
     void setupLtcSheenTable();
     std::unique_ptr<TextureBufferObject> generateSheenLut(const glm::ivec2 &size);
+    void generateShaderTable();
 
     void directionalLightShadowMapping(const CameraSettings &cameraSettings);
     void pointLightShadowMapping();
@@ -317,6 +320,11 @@ protected:
     Shader mClassificationShader {
         { file::shaderPath() / "classification/MaterialClassification.comp" }
     };
+
+    std::vector<Shader> mAnalyticalShaderVariants;
+    std::vector<graphics::shaderVariant> mShaderTable;
+    graphics::Ubo mShaderTableUbo;
+
 
     SubMesh mFullscreenTriangle;
     SubMesh mUnitSphere;

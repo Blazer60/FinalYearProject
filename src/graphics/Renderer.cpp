@@ -13,6 +13,7 @@
 #include "Shader.h"
 #include "ProfileTimer.h"
 #include "FileLoader.h"
+#include "GBufferFlags.h"
 #include "LtcSheenTable.h"
 #include "ThreadGroupSizes.h"
 #include "shader/ShaderCompilation.h"
@@ -23,7 +24,8 @@ Renderer::Renderer() :
     mUnitSphere(primitives::invertedSphere()),
     mLine(primitives::line()),
     mGBufferStorage(sizeof(uint32_t) * 0, "GBuffer Storage Block"),
-    mTileClassicationStorage(0, "Tile Classification Storage")
+    mTileClassicationStorage(0, "Tile Classification Storage"),
+    mShaderTableUbo(sizeof(uint32_t) * graphics::shaderVariationCount)
 {
     // Blending texture data / enabling lerping.
     glEnable(GL_BLEND);
@@ -46,6 +48,8 @@ Renderer::Renderer() :
     initTextureRenderBuffers();
     bindBuffers();
     resizeTileClassificationBuffer();
+
+    generateShaderTable();
     
     setViewportSize();
     graphics::popDebugGroup();
@@ -115,6 +119,7 @@ void Renderer::bindBuffers()
     mSpotlightBlock.bindToSlot(++bindPoint);
     mSsrBlock.bindToSlot(++bindPoint);
     mDebugGBufferBlock.bindToSlot(++bindPoint);
+    mShaderTableUbo.bindToSlot(++bindPoint);
 
     mDirectionalLightShader.block("CameraBlock", mCamera.getBindPoint());
     mDirectionalLightShader.block("DirectionalLightBlock", mDirectionalLightBlock.getBindPoint());
@@ -135,6 +140,8 @@ void Renderer::bindBuffers()
 
     mIblShader.block("CameraBlock", mCamera.getBindPoint());
     mWhiteFurnaceTestShader.block("CameraBlock", mCamera.getBindPoint());
+
+    mClassificationShader.block("ShaderTable", mShaderTableUbo.getBindPoint());
 }
 
 void Renderer::detachTextureRenderBuffersFromFrameBuffers() const
@@ -1076,6 +1083,27 @@ std::unique_ptr<TextureBufferObject> Renderer::generateSheenLut(const glm::ivec2
     glDispatchCompute(groupSize.x, groupSize.y, 1);
 
     return lut;
+}
+
+void Renderer::generateShaderTable()
+{
+    mShaderTable.reserve(graphics::shaderVariationCount);
+    for (uint32_t flag = 0; flag < graphics::shaderVariationCount; ++flag)
+    {
+        if ((flag & graphics::ShaderFlagBit::SheenBit) > 0)
+            mShaderTable.push_back(graphics::shaderVariant::UberShader);
+        else if ((flag & graphics::ShaderFlagBit::MaterialBit) > 0)
+            mShaderTable.push_back(graphics::shaderVariant::BaseShader);
+        else if (flag == 0)
+            mShaderTable.push_back(graphics::shaderVariant::NoShader);
+    }
+
+    std::vector<uint32_t> buffer;
+    buffer.reserve(graphics::shaderVariationCount);
+    for (auto value : mShaderTable)
+        buffer.push_back(static_cast<uint32_t>(value));
+
+    mShaderTableUbo.set(buffer.data());
 }
 
 void Renderer::generateSkybox(std::string_view path, const glm::ivec2 desiredSize)
