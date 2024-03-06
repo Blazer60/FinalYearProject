@@ -31,4 +31,10 @@ namespace graphics
      */
     void pushDebugGroup(std::string_view message);
     void popDebugGroup();
+
+    /**
+     * @param buffer The buffer where numwork groups is held on the gpu
+     * @param offset The offset into the buffer - typically zero
+     */
+    void dispatchComputeIndirect(uint32_t buffer, int offset=0);
 }

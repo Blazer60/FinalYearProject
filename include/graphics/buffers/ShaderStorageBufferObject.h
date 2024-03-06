@@ -20,11 +20,15 @@ namespace graphics
     public:
         explicit ShaderStorageBufferObject(unsigned int size, const std::string &debugName="");
         void reserve(unsigned int size);
+        void resize(unsigned int size);
         void bindToSlot(unsigned int bindPoint);
         [[nodiscard]] unsigned int getBindPoint() const { return mBindPoint; }
+        [[nodiscard]] unsigned int getId() const { return mBufferId; }
 
         template<typename TData>
-        void write(const TData &data, unsigned int offset=0);
+        void write(TData *data, uint32_t size, unsigned int offset=0);
+
+        void zeroOut() const;
 
     protected:
         void nameBuffer() const;
@@ -36,8 +40,8 @@ namespace graphics
     };
 
     template<typename TData>
-    void ShaderStorageBufferObject::write(const TData &data, const unsigned int offset)
+    void ShaderStorageBufferObject::write(TData *data, const uint32_t size, const unsigned int offset)
     {
-        glNamedBufferSubData(mBufferId, offset, sizeof(TData), static_cast<const void*>(&data));
+        glNamedBufferSubData(mBufferId, offset, size, static_cast<const void*>(data));
     }
 }

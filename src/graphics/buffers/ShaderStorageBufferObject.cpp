@@ -28,10 +28,23 @@ namespace graphics
         nameBuffer();
     }
 
+    void ShaderStorageBufferObject::resize(unsigned int size)
+    {
+        mSize = size;
+        glNamedBufferData(mBufferId, mSize, static_cast<void*>(nullptr), GL_DYNAMIC_DRAW);
+        nameBuffer();
+    }
+
     void ShaderStorageBufferObject::bindToSlot(const unsigned int bindPoint)
     {
         mBindPoint = bindPoint;
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, mBindPoint, mBufferId);
+    }
+
+    void ShaderStorageBufferObject::zeroOut() const
+    {
+        const std::vector<uint32_t> zeros(mSize);
+        glNamedBufferSubData(mBufferId, 0, mSize, static_cast<const void*>(zeros.data()));
     }
 
     void ShaderStorageBufferObject::nameBuffer() const

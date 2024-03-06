@@ -198,6 +198,10 @@ protected:
     void shadeDistantLightProbe();
     void blurTexture(const TextureBufferObject &texture);
 
+    void resizeTileClassificationBuffer();
+    void tileScreenByShader();
+
+
     static void setViewportSize(const glm::ivec2 &size=window::bufferSize());
 
     std::vector<graphics::RenderQueueObject>        mRenderQueue;
@@ -310,6 +314,10 @@ protected:
         { file::shaderPath() / "geometry/DebugGBuffer.comp" }
     };
 
+    Shader mClassificationShader {
+        { file::shaderPath() / "classification/MaterialClassification.comp" }
+    };
+
     SubMesh mFullscreenTriangle;
     SubMesh mUnitSphere;
     SubMesh mLine;
@@ -331,6 +339,7 @@ protected:
     std::unique_ptr<TextureBufferObject> mDebugWhiteFurnaceTextureBuffer;
     std::unique_ptr<TextureBufferObject> mLtcSheenTable;
     std::unique_ptr<TextureBufferObject> mSheenDirectionalAlbedoLut;
+    graphics::ShaderStorageBufferObject mTileClassicationStorage;
 
     graphics::UniformBufferObject<CameraBlock> mCamera;
     graphics::UniformBufferObject<DirectionalLightBlock> mDirectionalLightBlock;

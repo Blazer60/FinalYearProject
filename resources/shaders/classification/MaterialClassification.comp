@@ -1,0 +1,57 @@
+#version 460 core
+
+#include "../geometry/GBuffer.glsl"
+
+#define NO_SHADER 0
+#define BASE_SHADER 1
+#define UBER_SHADER 2
+
+#define SHADER_VARIANT_COUNT 3
+
+uint shaderTable[] = {
+    NO_SHADER,      // 0b00 [No Flags]
+    BASE_SHADER,    // 0b01 [Just base brdf]
+    UBER_SHADER,    // 0b10 [Just sheen brdf]
+    UBER_SHADER     // 0b11 [All brdfs]
+};
+
+layout(binding = 1, std430)
+buffer Classification
+{
+    uvec4 arguments[SHADER_VARIANT_COUNT];
+    uvec2 tileBuffers[][SHADER_VARIANT_COUNT];
+};
+
+shared uint orMaterialMask;
+
+uint reduceMaterialMask(uint flags, uint groupIndex)
+{
+    if (groupIndex == 0)
+        orMaterialMask = 0;
+
+    groupMemoryBarrier();
+
+    atomicOr(orMaterialMask, flags);
+
+    groupMemoryBarrier();
+
+    return orMaterialMask;
+}
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+void main()
+{
+    const ivec2 id = ivec2(gl_GlobalInvocationID.xy);
+    const uint groupIndex = gl_LocalInvocationIndex;
+
+    GBuffer gBuffer = pullFromStorageGBuffer(id);
+
+    const uint orMask = reduceMaterialMask(gBuffer.flags, groupIndex);
+    const uint shaderIndex = shaderTable[orMask];
+
+    if (groupIndex == 0)
+    {
+        const uint tileIndex = atomicAdd(arguments[shaderIndex].x, 1);
+        tileBuffers[tileIndex][shaderIndex] = gl_WorkGroupID.xy;
+    }
+}

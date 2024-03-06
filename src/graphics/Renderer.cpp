@@ -22,7 +22,8 @@ Renderer::Renderer() :
     mFullscreenTriangle(primitives::fullscreenTriangle()),
     mUnitSphere(primitives::invertedSphere()),
     mLine(primitives::line()),
-    mGBufferStorage(sizeof(uint32_t) * 0, "GBuffer Storage Block")
+    mGBufferStorage(sizeof(uint32_t) * 0, "GBuffer Storage Block"),
+    mTileClassicationStorage(0, "Tile Classification Storage")
 {
     // Blending texture data / enabling lerping.
     glEnable(GL_BLEND);
@@ -44,6 +45,7 @@ Renderer::Renderer() :
     initFrameBuffers();
     initTextureRenderBuffers();
     bindBuffers();
+    resizeTileClassificationBuffer();
     
     setViewportSize();
     graphics::popDebugGroup();
@@ -267,6 +269,7 @@ void Renderer::render()
     {
         detachTextureRenderBuffersFromFrameBuffers();
         initTextureRenderBuffers();
+        resizeTileClassificationBuffer();
         mCurrentRenderBufferSize = window::bufferSize();
     }
     
@@ -321,7 +324,9 @@ void Renderer::render()
         
         PROFILE_SCOPE_END(geometryTimer);
         graphics::popDebugGroup();
-        
+
+        tileScreenByShader();
+
         directionalLightShadowMapping(camera);
         pointLightShadowMapping();
         spotlightShadowMapping();
@@ -811,6 +816,42 @@ void Renderer::blurTexture(const TextureBufferObject& texture)
     }
 
     glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
+    graphics::popDebugGroup();
+}
+
+void Renderer::resizeTileClassificationBuffer()
+{
+    const glm::ivec2 windowSize = window::bufferSize();
+    const glm::ivec2 tileCount = glm::ceil(static_cast<glm::vec2>(windowSize) / 16.f);
+    const uint32_t bufferSize = tileCount.x * tileCount.y * sizeof(uint32_t) * 2;
+
+    constexpr uint32_t shaderVariantCount = 3;
+    constexpr uint32_t indirectbufferSize = 4 * sizeof(uint32_t) * shaderVariantCount;
+    mTileClassicationStorage.resize(indirectbufferSize + shaderVariantCount * bufferSize);
+    mTileClassicationStorage.zeroOut();
+
+    mTileClassicationStorage.bindToSlot(1);
+}
+
+void Renderer::tileScreenByShader()
+{
+    PROFILE_FUNC();
+    graphics::pushDebugGroup("Tile Classification");
+
+    const std::vector<uint32_t> resetData {
+        0, 1, 1, 0,
+        0, 1, 1, 0,
+        0, 1, 1, 0
+    };
+
+    mTileClassicationStorage.write(resetData.data(), sizeof(uint32_t) * resetData.size());
+
+    mClassificationShader.bind();
+    mClassificationShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
+
+    const auto threadGroupSize = glm::ivec2(ceil(glm::vec2(mGBufferTexture->getSize()) / glm::vec2(16)));
+    glDispatchCompute(threadGroupSize.x, threadGroupSize.y, 1);
+
     graphics::popDebugGroup();
 }
 

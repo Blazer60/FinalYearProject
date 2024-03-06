@@ -12,7 +12,8 @@
 #define STREAM_HEADER_BYTE_COUNT 1
 
 #define GBUFFER_FLAG_BYTE_COUNT 1
-#define GBUFFER_FLAG_FUZZ_BIT 0
+#define GBUFFER_FLAG_MATERIAL_BIT 0
+#define GBUFFER_FLAG_FUZZ_BIT 1
 
 #include "../Maths.glsl"
 
@@ -240,6 +241,9 @@ int gBufferIsValid(GBuffer gBuffer)
 
 void pushToStorageGBuffer(GBuffer gBuffer, ivec2 coord)
 {
+    // So that later on we can tell if something is a sky pixel or not.
+    gBufferSetFlag(gBuffer, GBUFFER_FLAG_MATERIAL_BIT, 1);
+
     Stream stream;
     stream.byteOffset = STREAM_HEADER_BYTE_COUNT;
 

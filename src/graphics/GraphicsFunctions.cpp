@@ -42,4 +42,10 @@ namespace graphics
     {
         glPopDebugGroup();
     }
+
+    void dispatchComputeIndirect(const uint32_t buffer, const int offset)
+    {
+        glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, buffer);
+        glDispatchComputeIndirect(static_cast<GLintptr>(offset));
+    }
 }
