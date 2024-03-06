@@ -1,6 +1,5 @@
 #version 460 core
 
-#include "../interfaces/ThreadGroupSizes.h"
 #include "../Maths.glsl"
 
 layout(binding = 0) uniform sampler2D u_irradiance_texture;
@@ -33,7 +32,7 @@ vec3 sample_skybox_colour(vec2 uv)
     return colour * u_luminance_multiplier;
 }
 
-layout(local_size_x = FULLSCREEN_THREAD_GROUP_SIZE, local_size_y = FULLSCREEN_THREAD_GROUP_SIZE, local_size_z = 1) in;
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 void main()
 {
     const vec2 id = gl_GlobalInvocationID.xy;

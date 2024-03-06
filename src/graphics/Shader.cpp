@@ -26,6 +26,12 @@ Shader::Shader(const std::vector<std::filesystem::path>& paths, const std::vecto
     CreateShaderSource(paths, definitions);
 }
 
+Shader::Shader(Shader&& other) noexcept
+    : mDebugName(other.mDebugName), mId(other.mId), mCache(other.mCache)
+{
+    other.mId = 0;
+}
+
 Shader::~Shader()
 {
     if (mId != 0)

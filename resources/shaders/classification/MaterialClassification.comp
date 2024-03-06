@@ -35,7 +35,7 @@ void main()
     const uint orMask = reduceMaterialMask(gBuffer.flags, groupIndex);
     const uint shaderIndex = shaderTable[orMask / 4][orMask % 4];
 
-    if (groupIndex == 0)
+    if (groupIndex == 0 && orMask != 0)
     {
         const uint tileIndex = atomicAdd(arguments[shaderIndex].x, 1);
         tileBuffers[tileIndex][shaderIndex] = gl_WorkGroupID.xy;

@@ -195,6 +195,7 @@ protected:
     void setupLtcSheenTable();
     std::unique_ptr<TextureBufferObject> generateSheenLut(const glm::ivec2 &size);
     void generateShaderTable();
+    std::vector<Shader> makeShaderVariants(const std::filesystem::path &path);
 
     void directionalLightShadowMapping(const CameraSettings &cameraSettings);
     void pointLightShadowMapping();
@@ -234,7 +235,8 @@ protected:
     };
 
     Shader mIblShader {
-        { file::shaderPath() / "lighting/IBL.comp" }
+        { file::shaderPath() / "lighting/IBL.comp" },
+        { { "COMPUTE_SHEEN", 1 } }
     };
 
     Shader mWhiteFurnaceTestShader {
@@ -326,7 +328,8 @@ protected:
         { file::shaderPath() / "classification/DebugOverlay.comp" }
     };
 
-    std::vector<Shader> mAnalyticalShaderVariants;
+    std::vector<Shader> mIblShaderVariants;
+
     std::vector<graphics::shaderVariant> mShaderTable;
     graphics::Ubo mShaderTableUbo;
 
@@ -367,6 +370,7 @@ protected:
     float mCurrentEV100 { 10.f };
     float mIblLuminanceMultiplier { 1000.f };
     bool mHasSkybox = false;
+    bool mUseUberVariant = false;
 
 public:
     float mReflectionStepSize { 0.1f };

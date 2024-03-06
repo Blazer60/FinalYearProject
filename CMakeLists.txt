@@ -69,7 +69,6 @@ add_library(${GRAPHICS_LIBRARY} STATIC
         resources/shaders/interfaces/SpotlightBlock.h
         resources/shaders/interfaces/ScreenSpaceReflectionsBlock.h
         resources/shaders/interfaces/DebugGBufferBlock.h
-        resources/shaders/interfaces/ThreadGroupSizes.h
         src/graphics/buffers/ShaderStorageBufferObject.cpp
         include/graphics/buffers/ShaderStorageBufferObject.h
         src/graphics/buffers/Texture3DObject.cpp

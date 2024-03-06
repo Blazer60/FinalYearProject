@@ -27,7 +27,11 @@ namespace graphics
 class Shader
 {
 public:
+    Shader(Shader&) = delete;
+    Shader(const Shader&) = delete;
+
     explicit Shader(const std::vector<std::filesystem::path> &paths, const std::vector<graphics::Definition> &definitions={ });
+    Shader(Shader&& other) noexcept;
     virtual ~Shader();
     
     void bind() const;

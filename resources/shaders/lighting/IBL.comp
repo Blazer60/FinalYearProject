@@ -4,13 +4,27 @@
 #include "../Camera.glsl"
 #include "Brdf.glsl"
 #include "../Maths.glsl"
-#include "../interfaces/ThreadGroupSizes.h"
 
 #if !defined(WHITE_FURNACE_TEST)
     #define WHITE_FURNACE_TEST 0
 #endif
+
 #if WHITE_FURNACE_TEST > 0
     #include "../Colour.glsl"
+    #define COMPUTE_SHEEN 1
+#endif
+
+#if !defined(COMPUTE_SHEEN)
+    #define COMPUTE_SHEEN 0
+#endif
+
+#if !defined(TILED_RENDERING)
+    #define TILED_RENDERING 0
+#endif
+
+#if TILED_RENDERING > 0
+    #include "../classification/ClassificationBuffer.glsl"
+uniform int shaderIndex = 0;
 #endif
 
 layout(binding = 0) uniform sampler2D depthBufferTexture;
@@ -25,7 +39,9 @@ uniform float u_luminance_multiplier;
 
 #endif
 
+#if COMPUTE_SHEEN > 0
 layout(binding = 6) uniform sampler2D sheenLut;
+#endif
 
 layout(binding = 1, rgba16f) uniform image2D lighting;
 
@@ -44,11 +60,18 @@ vec3 reconstructSpecularMissing(vec3 f0, float nDotV, float roughness)
     return f0Average / denominator * thatSummationPartOnTheRight;
 }
 
-layout(local_size_x = FULLSCREEN_THREAD_GROUP_SIZE, local_size_y = FULLSCREEN_THREAD_GROUP_SIZE, local_size_z = 1) in;
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 void main()
 {
+#if TILED_RENDERING > 0
+    const uint tileIndex = gl_WorkGroupID.x;
+    const uvec2 workGroupId = tileBuffers[tileIndex][shaderIndex];
+
+    const uvec2 pixelCoord = workGroupId * gl_WorkGroupSize.xy + gl_LocalInvocationID.xy;
+    const vec2 id = vec2(pixelCoord);
+#else
     const vec2 id = gl_GlobalInvocationID.xy;
-    const vec2 dispatchSize = gl_NumWorkGroups.xy * gl_WorkGroupSize.xy;
+#endif
     const vec2 uv = (id - vec2(0.5f)) / textureSize(depthBufferTexture, 0);
     const float depth = texture(depthBufferTexture, uv).r;
     const vec3 position = positionFromDepth(uv, depth);
@@ -78,14 +101,17 @@ void main()
     const vec3 diffuse = evaluateDiffuseBrdf(gBuffer, specular + specMissing);
 
     vec3 sheen = vec3(0.f);
+#if COMPUTE_SHEEN > 0
     if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT) == 1)
     {
-#if WHITE_FURNACE_TEST > 0
+    #if WHITE_FURNACE_TEST > 0
         sheen = texture(sheenLut, vec2(vDotN, gBuffer.fuzzRoughness)).rrr;
-#else
+    #else
         sheen = gBuffer.fuzzColour * texture(sheenLut, vec2(vDotN, gBuffer.fuzzRoughness)).r;
-#endif
+    #endif
     }
+#endif
+
     // todo: specular + diffuse needs to be scaled back using the min-scale method. Possibly in the G channel as we need V right?
 
 #if WHITE_FURNACE_TEST > 0

@@ -15,7 +15,6 @@
 #include "FileLoader.h"
 #include "GBufferFlags.h"
 #include "LtcSheenTable.h"
-#include "ThreadGroupSizes.h"
 #include "shader/ShaderCompilation.h"
 
 Renderer::Renderer() :
@@ -25,7 +24,7 @@ Renderer::Renderer() :
     mLine(primitives::line()),
     mGBufferStorage(sizeof(uint32_t) * 0, "GBuffer Storage Block"),
     mTileClassicationStorage(0, "Tile Classification Storage"),
-    mShaderTableUbo(sizeof(uint32_t) * graphics::shaderVariationCount)
+    mShaderTableUbo(sizeof(uint32_t) * graphics::shaderFlagPermutations)
 {
     // Blending texture data / enabling lerping.
     glEnable(GL_BLEND);
@@ -35,6 +34,8 @@ Renderer::Renderer() :
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
     graphics::pushDebugGroup("Setup");
+
+    mIblShaderVariants = makeShaderVariants(file::shaderPath() / "lighting/IBL.comp");
 
     constexpr int lutSize = 32;
     mSpecularDirectionalAlbedoLut = generateBrdfLut(glm::ivec2(lutSize));
@@ -50,7 +51,8 @@ Renderer::Renderer() :
     resizeTileClassificationBuffer();
 
     generateShaderTable();
-    
+
+
     setViewportSize();
     graphics::popDebugGroup();
 }
@@ -141,6 +143,9 @@ void Renderer::bindBuffers()
     mDebugGBufferShader.block("DebugGBufferBlock", mDebugGBufferBlock.getBindPoint());
 
     mIblShader.block("CameraBlock", mCamera.getBindPoint());
+    for (auto &iblShader : mIblShaderVariants)
+        iblShader.block("CameraBlock", mCamera.getBindPoint());
+
     mWhiteFurnaceTestShader.block("CameraBlock", mCamera.getBindPoint());
 
     mClassificationShader.block("ShaderTable", mShaderTableUbo.getBindPoint());
@@ -343,10 +348,10 @@ void Renderer::render()
         // Reset the viewport back to the normal size once we've finished rendering all the shadows.
         glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
         
+        mLightTextureBuffer->clear();
+
         PROFILE_SCOPE_BEGIN(directionalLightTimer, "Directional Lighting");
         graphics::pushDebugGroup("Directional Lighting");
-        
-        mLightTextureBuffer->clear();
 
         mDirectionalLightShader.bind();
 
@@ -357,7 +362,7 @@ void Renderer::render()
         mDirectionalLightShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
         mDirectionalLightShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
 
-        const auto threadGroupSize = glm::ivec2(ceil(glm::vec2(mCurrentRenderBufferSize) / glm::vec2(FULLSCREEN_THREAD_GROUP_SIZE)));
+        const auto threadGroupSize = glm::ivec2(ceil(glm::vec2(mCurrentRenderBufferSize) / glm::vec2(16)));
 
         for (const graphics::DirectionalLight &directionalLight : mDirectionalLightQueue)
         {
@@ -787,20 +792,49 @@ void Renderer::shadeDistantLightProbe()
 
     graphics::pushDebugGroup("Distant Light Probe");
 
-    mIblShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
-    mIblShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
-    mIblShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
-    mIblShader.set("missingSpecularLutTexture", mSpecularMissingTextureBuffer->getId(), 1);
-    mIblShader.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut->getId(), 2);
-    mIblShader.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 3);
-    mIblShader.set("u_irradiance_texture", mIrradianceMap->getId(), 4);
-    mIblShader.set("u_pre_filter_texture", mPreFilterMap->getId(), 5);
-    mIblShader.set("sheenLut", mSheenDirectionalAlbedoLut->getId(), 6);
-    mIblShader.set("u_luminance_multiplier", mIblLuminanceMultiplier);
+    if (mUseUberVariant)
+    {
+        // todo: Do I need this as a seperate shader or should I make the tile-classification force all tiles to be the uber shader variant?
+        mIblShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
+        mIblShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
+        mIblShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
+        mIblShader.set("missingSpecularLutTexture", mSpecularMissingTextureBuffer->getId(), 1);
+        mIblShader.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut->getId(), 2);
+        mIblShader.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 3);
+        mIblShader.set("u_irradiance_texture", mIrradianceMap->getId(), 4);
+        mIblShader.set("u_pre_filter_texture", mPreFilterMap->getId(), 5);
+        mIblShader.set("sheenLut", mSheenDirectionalAlbedoLut->getId(), 6);
+        mIblShader.set("u_luminance_multiplier", mIblLuminanceMultiplier);
 
-    mIblShader.bind();
-    const auto threadGroupSize = glm::ivec2(ceil(glm::vec2(mLightTextureBuffer->getSize()) / glm::vec2(FULLSCREEN_THREAD_GROUP_SIZE)));
-    glDispatchCompute(threadGroupSize.x, threadGroupSize.y, 1);
+        mIblShader.bind();
+        const auto threadGroupSize = glm::ivec2(ceil(glm::vec2(mLightTextureBuffer->getSize()) / glm::vec2(16)));
+        glDispatchCompute(threadGroupSize.x, threadGroupSize.y, 1);
+    }
+    else
+    {
+        int i = 0;
+        for (auto &iblShader : mIblShaderVariants)
+        {
+            iblShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
+            iblShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
+            iblShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
+            iblShader.set("missingSpecularLutTexture", mSpecularMissingTextureBuffer->getId(), 1);
+            iblShader.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut->getId(), 2);
+            iblShader.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 3);
+            iblShader.set("u_irradiance_texture", mIrradianceMap->getId(), 4);
+            iblShader.set("u_pre_filter_texture", mPreFilterMap->getId(), 5);
+            if (i == 0)
+                iblShader.set("sheenLut", mSheenDirectionalAlbedoLut->getId(), 6);
+
+            iblShader.set("u_luminance_multiplier", mIblLuminanceMultiplier);
+            iblShader.set("shaderIndex", i);
+
+            iblShader.bind();
+
+            graphics::dispatchComputeIndirect(mTileClassicationStorage.getId(), 4 * sizeof(uint32_t) * i);
+            ++i;
+        }
+    }
 
     graphics::popDebugGroup();
 }
@@ -850,7 +884,6 @@ void Renderer::tileScreenByShader()
     const std::vector<uint32_t> resetData {
         0, 1, 1, 0,
         0, 1, 1, 0,
-        0, 1, 1, 0
     };
 
     mTileClassicationStorage.write(resetData.data(), sizeof(uint32_t) * resetData.size());
@@ -1089,23 +1122,43 @@ std::unique_ptr<TextureBufferObject> Renderer::generateSheenLut(const glm::ivec2
 
 void Renderer::generateShaderTable()
 {
-    mShaderTable.reserve(graphics::shaderVariationCount);
-    for (uint32_t flag = 0; flag < graphics::shaderVariationCount; ++flag)
+    mShaderTable.reserve(graphics::shaderFlagPermutations);
+    for (uint32_t flag = 0; flag < graphics::shaderFlagPermutations; ++flag)
     {
         if ((flag & graphics::ShaderFlagBit::SheenBit) > 0)
             mShaderTable.push_back(graphics::shaderVariant::UberShader);
         else if ((flag & graphics::ShaderFlagBit::MaterialBit) > 0)
             mShaderTable.push_back(graphics::shaderVariant::BaseShader);
-        else if (flag == 0)
-            mShaderTable.push_back(graphics::shaderVariant::NoShader);
+        else
+            mShaderTable.push_back(graphics::shaderVariant::UberShader);
     }
 
     std::vector<uint32_t> buffer;
-    buffer.reserve(graphics::shaderVariationCount);
+    buffer.reserve(graphics::shaderFlagPermutations);
     for (auto value : mShaderTable)
         buffer.push_back(static_cast<uint32_t>(value));
 
     mShaderTableUbo.set(buffer.data());
+}
+
+std::vector<Shader> Renderer::makeShaderVariants(const std::filesystem::path& path)
+{
+    std::vector<Shader> shaders;
+
+    const std::vector<graphics::Definition> uberShaderDefinitions {
+        { "TILED_RENDERING", 1 },
+        { "COMPUTE_SHEEN", 1 }
+    };
+
+    const std::vector<graphics::Definition> baseShaderDefinitions {
+        { "TILED_RENDERING", 1 },
+        { "COMPUTE_SHEEN", 0 }
+    };
+
+    shaders.push_back(Shader({ path }, uberShaderDefinitions));
+    shaders.push_back(Shader({ path }, baseShaderDefinitions));
+
+    return shaders;
 }
 
 void Renderer::generateSkybox(std::string_view path, const glm::ivec2 desiredSize)
@@ -1197,7 +1250,7 @@ const TextureBufferObject &Renderer::whiteFurnaceTest()
     mWhiteFurnaceTestShader.set("missingSpecularLutTexture", mSpecularMissingTextureBuffer->getId(), 3);
 
     const glm::vec2 screenSize = mDebugWhiteFurnaceTextureBuffer->getSize();
-    const glm::ivec2 numThreadGroups = glm::ceil(screenSize / glm::vec2(FULLSCREEN_THREAD_GROUP_SIZE));
+    const glm::ivec2 numThreadGroups = glm::ceil(screenSize / glm::vec2(16));
     glDispatchCompute(numThreadGroups.x, numThreadGroups.y, 1);
 
     graphics::popDebugGroup();
@@ -1213,7 +1266,7 @@ const TextureBufferObject& Renderer::drawTileClassification()
     for (int i = 0; i < graphics::shaderVariationCount; ++i)
     {
         mDebugTileOverlayShader.set("shaderIndex", i);
-        graphics::dispatchComputeIndirect(mTileClassicationStorage.getId(), 4 * sizeof(uint32_t) * i);
+        graphics::dispatchComputeIndirect(mTileClassicationStorage.getId(), 4u * sizeof(uint32_t) * i);
     }
 
     return *mDebugTileOverlayBuffer;

@@ -12,7 +12,7 @@
 #define GBUFFER_FLAG_MATERIAL_BIT 0
 #define GBUFFER_FLAG_FUZZ_BIT 1
 
-#define SHADER_VARIANT_COUNT 3
+#define SHADER_VARIANT_COUNT 2
 #define SHADER_TABLE_COUNT 4
 
 #if defined(GRAPHICS_INTERFACE)
@@ -21,13 +21,14 @@
 
 namespace graphics
 {
+    constexpr uint32_t shaderVariationCount = 2;
     enum class shaderVariant : uint8_t
     {
-        NoShader, UberShader, BaseShader, Count
+        UberShader, BaseShader
     };
 
     constexpr uint32_t shaderFlagCount = 2;
-    constexpr uint32_t shaderVariationCount = 1 << shaderFlagCount;
+    constexpr uint32_t shaderFlagPermutations = 1 << shaderFlagCount;
     enum class ShaderFlagBit : uint8_t
     {
         MaterialBit = 1 << GBUFFER_FLAG_MATERIAL_BIT,
