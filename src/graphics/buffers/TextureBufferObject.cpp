@@ -25,13 +25,19 @@ TextureBufferObject::TextureBufferObject(
 }
 
 TextureBufferObject::TextureBufferObject(
-    const glm::ivec2 &size, GLenum format, graphics::filter filterMode, graphics::wrap wrapMode,
-    uint32_t mipmapLevel)
+    const glm::ivec2 &size, const GLenum format, const graphics::filter filterMode,
+    const graphics::wrap wrapMode, const uint32_t mipmapLevel)
     :
-    mSize(size), mFormat(format), mMipMapLevels(mipmapLevel)
+    mFormat(format), mSize(size), mMipMapLevels(mipmapLevel),
+    mFilter(filterMode), mWrap(wrapMode)
 {
-    const auto wrap = toGLint(wrapMode);
-    init(graphics::toGLint(filterMode), graphics::toMagGLint(filterMode), wrap, wrap);
+    init();
+}
+
+TextureBufferObject::TextureBufferObject(const graphics::textureFormat format)
+    : mFormat(toGLenum(format))
+{
+
 }
 
 TextureBufferObject::~TextureBufferObject()
@@ -56,14 +62,43 @@ void TextureBufferObject::init(const GLint minFilter, const GLint magFilter, con
     glTextureStorage2D(mId, static_cast<int>(mMipMapLevels), mFormat, mSize.x, mSize.y);
 }
 
+void TextureBufferObject::init()
+{
+    if (const int maximumMipLevel = window::maximumMipLevel(); mMipMapLevels > maximumMipLevel)
+    {
+        WARN("A Texture Buffer Object requested % mip levels, but could make % mip levels. "
+             "This may cause undefined behaviour.", mMipMapLevels, maximumMipLevel);
+        mMipMapLevels = maximumMipLevel;
+    }
+
+    glCreateTextures(GL_TEXTURE_2D, 1, &mId);
+    glTextureParameteri(mId, GL_TEXTURE_MIN_FILTER, toGLint(mFilter));
+    glTextureParameteri(mId, GL_TEXTURE_MAG_FILTER, toMagGLint(mFilter));
+    glTextureParameteri(mId, GL_TEXTURE_WRAP_S, toGLint(mWrap));
+    glTextureParameteri(mId, GL_TEXTURE_WRAP_T, toGLint(mWrap));
+    glTextureStorage2D(mId, static_cast<int>(mMipMapLevels), mFormat, mSize.x, mSize.y);
+}
+
 void TextureBufferObject::deInit()
 {
-    glDeleteTextures(1, &mId);
+    if (mId != 0)
+        glDeleteTextures(1, &mId);
+    mId = 0;
 }
 
 unsigned int TextureBufferObject::getId() const
 {
     return mId;
+}
+
+void TextureBufferObject::resize(const glm::ivec2& newSize)
+{
+    if (mSize == newSize)
+        return;
+
+    deInit();
+    mSize = newSize;
+    init();
 }
 
 const glm::ivec2 &TextureBufferObject::getSize() const
@@ -96,7 +131,13 @@ uint32_t TextureBufferObject::getMipLevels() const
 
 void TextureBufferObject::clear(const glm::vec4 &clearColour) const
 {
-    glClearTexImage(mId, 0, GL_RGBA, GL_FLOAT, glm::value_ptr(clearColour));
+    if (mFormat == GL_DEPTH_COMPONENT32F)
+    {
+        constexpr float one = 1.f;
+        glClearTexImage(mId, 0, GL_DEPTH_COMPONENT, GL_FLOAT, &one);
+    }
+    else
+        glClearTexImage(mId, 0, GL_RGBA, GL_FLOAT, glm::value_ptr(clearColour));
 }
 
 void TextureBufferObject::setDebugName(const std::string& debugName) const

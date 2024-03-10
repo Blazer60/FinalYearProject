@@ -98,31 +98,62 @@ Cubemap::Cubemap(const std::vector<std::string> &paths)
     mFormat = GL_RGBA8;
 }
 
-Cubemap::Cubemap(const glm::ivec2 &size, GLenum format, int mipLevels)
-    : mSize(size), mFormat(format)
+void Cubemap::init()
 {
     glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &mId);
-    
-    glTextureStorage2D(mId, mipLevels, mFormat, mSize.x, mSize.y);
-    
-    if (mipLevels > 1)
+
+    glTextureStorage2D(mId, mMipLevels, mFormat, mSize.x, mSize.y);
+
+    if (mMipLevels > 1)
         glTextureParameteri(mId, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     else
         glTextureParameteri(mId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    
+
     glTextureParameteri(mId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTextureParameteri(mId, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTextureParameteri(mId, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTextureParameteri(mId, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    
-    if (mipLevels > 1)
+
+    if (mMipLevels > 1)
         glGenerateTextureMipmap(mId);
+}
+
+Cubemap::Cubemap(const glm::ivec2 &size, const GLenum format, const int mipLevels)
+    : mSize(size), mFormat(format), mMipLevels(mipLevels)
+{
+    init();
+}
+
+Cubemap::Cubemap(const graphics::textureFormat format)
+    : mFormat(toGLenum(format))
+{
+
+}
+
+Cubemap::Cubemap(const graphics::textureFormat format, const int mipLevels)
+    : mFormat(toGLenum(format)), mMipLevels(mipLevels)
+{
+}
+
+void Cubemap::deInit()
+{
+    if (mId != 0)
+        glDeleteTextures(1, &mId);
+    mId = 0;
 }
 
 Cubemap::~Cubemap()
 {
-    if (mId != 0)
-        glDeleteTextures(1, &mId);
+    deInit();
+}
+
+void Cubemap::resize(const glm::ivec2 newSize)
+{
+    if (mSize == newSize)
+        return;
+    deInit();
+    mSize = newSize;
+    init();
 }
 
 void Cubemap::setDebugName(std::string_view name) const

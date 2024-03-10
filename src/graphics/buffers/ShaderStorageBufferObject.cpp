@@ -30,6 +30,9 @@ namespace graphics
 
     void ShaderStorageBufferObject::resize(unsigned int size)
     {
+        if (size == mSize)
+            return;
+
         mSize = size;
         glNamedBufferData(mBufferId, mSize, static_cast<void*>(nullptr), GL_DYNAMIC_DRAW);
         nameBuffer();

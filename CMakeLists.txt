@@ -78,6 +78,19 @@ add_library(${GRAPHICS_LIBRARY} STATIC
         resources/shaders/interfaces/GBufferFlags.h
         src/graphics/buffers/Ubo.cpp
         include/graphics/buffers/Ubo.h
+        src/graphics/backend/Context.h
+        src/graphics/backend/RendererBackend.cpp
+        src/graphics/backend/RendererBackend.h
+        src/graphics/backend/MaterialRendering.cpp
+        src/graphics/backend/MaterialRendering.h
+        src/graphics/backend/TileClassification.cpp
+        src/graphics/backend/TileClassification.h
+        src/graphics/backend/ShadowMapping.cpp
+        src/graphics/backend/ShadowMapping.h
+        src/graphics/backend/LightShading.cpp
+        src/graphics/backend/LightShading.h
+        src/graphics/backend/AddSkybox.cpp
+        src/graphics/backend/AddSkybox.h
 )
 
 target_include_directories(${GRAPHICS_LIBRARY} PUBLIC

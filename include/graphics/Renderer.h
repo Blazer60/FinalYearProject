@@ -29,6 +29,16 @@
 #include "Ubo.h"
 
 
+namespace graphics
+{
+    class RendererBackend;
+}
+
+namespace graphics
+{
+    class Context;
+}
+
 /**
  * @author Ryan Purse
  * @date 14/07/2023
@@ -41,7 +51,7 @@ public:
     Renderer(Renderer &&) = delete;
     Renderer operator=(const Renderer&) = delete;
     Renderer operator=(Renderer&&) = delete;
-    ~Renderer() = default;
+    ~Renderer();
 
     /**
      * @brief Draws an element to the geometry buffer.
@@ -371,6 +381,8 @@ protected:
     float mIblLuminanceMultiplier { 1000.f };
     bool mHasSkybox = false;
     bool mUseUberVariant = false;
+
+    graphics::RendererBackend *mRendererBackend;
 
 public:
     float mReflectionStepSize { 0.1f };

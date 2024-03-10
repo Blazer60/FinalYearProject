@@ -22,7 +22,7 @@ namespace graphics
         DEBUG_GBUFFER_FUZZ_COLOUR, DEBUG_GBUFFER_FUZZ_ROUGHNESS
     };
 
-    constexpr GLenum formatToEnum[] { GL_RGBA16F, GL_RG16F, GL_R16F };
+    constexpr GLenum formatToEnum[] { GL_RGBA16F, GL_RG16F, GL_R16F, GL_DEPTH_COMPONENT32F, GL_RGBA16, GL_RGBA32UI };
     constexpr GLenum pixelFormatToEnum[] { GL_RED, GL_RG, GL_RGB, GL_RGBA, GL_DEPTH_COMPONENT, GL_STENCIL_INDEX };
 
     GLint toGLint(filter f)

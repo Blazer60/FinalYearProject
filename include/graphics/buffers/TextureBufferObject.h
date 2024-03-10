@@ -33,10 +33,13 @@ public:
     TextureBufferObject(
         const glm::ivec2 &size, GLenum format, graphics::filter filterMode, graphics::wrap wrapMode,
         uint32_t mipmapLevel = 1);
+
+    explicit TextureBufferObject(graphics::textureFormat format);
     
     virtual ~TextureBufferObject();
     
     [[nodiscard]] unsigned int getId() const;
+    void resize(const glm::ivec2 &newSize);
     [[nodiscard]] const glm::ivec2 &getSize() const;
     void setBorderColour(const glm::vec4 &colour) const;
     [[nodiscard]] GLenum getFormat() const;
@@ -47,10 +50,14 @@ public:
     void upload(const float *data, graphics::pixelFormat format=graphics::pixelFormat::Rgba) const;
 protected:
     void init(GLint minFilter, GLint magFilter, GLint wrapS, GLint wrapT);
+    void init();
     void deInit();
     
     unsigned int    mId           { 0 };
     GLenum          mFormat         { GL_RGB16 };
     glm::ivec2      mSize           { 1024 };
     uint32_t        mMipMapLevels   { 1 };
+
+    graphics::filter mFilter = graphics::filter::Linear;
+    graphics::wrap mWrap = graphics::wrap::ClampToEdge;
 };

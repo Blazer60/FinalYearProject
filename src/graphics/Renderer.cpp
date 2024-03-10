@@ -15,6 +15,7 @@
 #include "FileLoader.h"
 #include "GBufferFlags.h"
 #include "LtcSheenTable.h"
+#include "backend/RendererBackend.h"
 #include "shader/ShaderCompilation.h"
 
 Renderer::Renderer() :
@@ -24,7 +25,8 @@ Renderer::Renderer() :
     mLine(primitives::line()),
     mGBufferStorage(sizeof(uint32_t) * 0, "GBuffer Storage Block"),
     mTileClassicationStorage(0, "Tile Classification Storage"),
-    mShaderTableUbo(sizeof(uint32_t) * graphics::shaderFlagPermutations)
+    mShaderTableUbo(sizeof(uint32_t) * graphics::shaderFlagPermutations),
+    mRendererBackend(new graphics::RendererBackend())
 {
     // Blending texture data / enabling lerping.
     glEnable(GL_BLEND);
@@ -45,6 +47,7 @@ Renderer::Renderer() :
     setupLtcSheenTable();
     mSheenDirectionalAlbedoLut = generateSheenLut(glm::ivec2(lutSize));
 
+    mLightTextureBuffer = std::make_unique<TextureBufferObject>(graphics::textureFormat::Rgba16f);
     initFrameBuffers();
     initTextureRenderBuffers();
     bindBuffers();
@@ -82,7 +85,8 @@ void Renderer::initTextureRenderBuffers()
     mGBufferTexture = std::make_unique<TextureArrayObject>(window::bufferSize(), 3, GL_RGBA32UI, graphics::filter::Nearest, graphics::wrap::ClampToEdge);
     mDepthTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_DEPTH_COMPONENT32F,    graphics::filter::Nearest, graphics::wrap::ClampToBorder);
 
-    mLightTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F, graphics::filter::Nearest, graphics::wrap::ClampToEdge);
+    // mLightTextureBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F, graphics::filter::Nearest, graphics::wrap::ClampToEdge);
+    mLightTextureBuffer->resize(window::bufferSize());
     mCombinedLightingTextureBuffer   = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F,  graphics::filter::LinearMipmapLinear, graphics::wrap::ClampToEdge, 8);
     mPrimaryImageBuffer              = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F,  GL_NEAREST, GL_NEAREST);
     mAuxiliaryImageBuffer            = std::make_unique<TextureBufferObject>(window::bufferSize(), GL_RGBA16F,  GL_NEAREST, GL_NEAREST);
@@ -187,6 +191,11 @@ std::string Renderer::getVersion()
     return (reinterpret_cast<const char*>(glGetString(GL_VERSION)));
 }
 
+Renderer::~Renderer()
+{
+    delete mRendererBackend;
+}
+
 void Renderer::drawMesh(
     const uint32_t vao, const int32_t indicesCount, std::weak_ptr<Shader> shader,
     graphics::drawMode renderMode, const glm::mat4 &matrix,
@@ -275,321 +284,69 @@ void Renderer::submit(const graphics::Spotlight &spotLight)
 void Renderer::render()
 {
     PROFILE_FUNC();
-    graphics::pushDebugGroup("Render Pass");
     if (window::bufferSize().x <= 0 || window::bufferSize().y <= 0)
         return;
-    
-    if (mCurrentRenderBufferSize != window::bufferSize())
-    {
-        detachTextureRenderBuffersFromFrameBuffers();
-        initTextureRenderBuffers();
-        resizeTileClassificationBuffer();
-        mCurrentRenderBufferSize = window::bufferSize();
-    }
-    
+
     setViewportSize(window::bufferSize());
-    
-    for (CameraSettings &camera : mCameraQueue)
-    {
-        mCurrentEV100 = camera.eV100;
-        const float exposure = getCurrentExposure();
-        
-        PROFILE_SCOPE_BEGIN(geometryTimer, "Geometry Pass");
-        graphics::pushDebugGroup("Geometry Pass");
-        
-        mGeometryFramebuffer->bind();
-        // mGeometryFramebuffer->clear(camera.clearColour);
-        mGeometryFramebuffer->clear(0, camera.clearColour);
-        mGeometryFramebuffer->clear(1, camera.clearColour);
-        mGeometryFramebuffer->clear(2, camera.clearColour);
-        // mGeometryFramebuffer->clear(3, camera.clearColour);
-        // mGeometryFramebuffer->clear(4, camera.clearColour);
-        // mGeometryFramebuffer->clear(5, camera.clearColour);
-        mGeometryFramebuffer->clearDepthBuffer();
-        mGBufferTexture->clear();
 
-        const glm::mat4 cameraProjectionMatrix = glm::perspective(camera.fovY, window::aspectRatio(), camera.nearClipDistance, camera.farClipDistance);
-        const glm::mat4 vpMatrix = cameraProjectionMatrix * camera.viewMatrix;
+    mRendererBackend->copyQueues({
+        mRenderQueue,
+        mCameraQueue,
+        mDirectionalLightQueue,
+        mPointLightQueue,
+        mSpotlightQueue,
+        mDebugQueue,
+        mLineQueue
+    });
+    mRendererBackend->execute();
 
-        mCamera->viewMatrix = camera.viewMatrix;
-        mCamera->inverseVpMatrix = glm::inverse(vpMatrix);
-        mCamera->position = glm::vec3(glm::inverse(camera.viewMatrix) * glm::vec4(glm::vec3(0.f), 1.f));
-        mCamera->exposure = exposure;
-        mCamera->zNear = camera.nearClipDistance;
-        mCamera->zFar = camera.farClipDistance;
-        mCamera.updateGlsl();
-
-        for (const auto &rqo : mRenderQueue)
-        {
-            if (rqo.shader.expired())
-                continue;
-
-            const auto shader = rqo.shader.lock();
-            shader->bind();
-            shader->set("u_mvp_matrix", vpMatrix * rqo.matrix);
-            shader->set("u_model_matrix", rqo.matrix);
-            shader->block("CameraBlock", mCamera.getBindPoint());
-            // shader->image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_WRITE_ONLY);
-            // shader->set("storageGBufferSsbo", mGBufferStorage.getBindPoint());
-            rqo.onDraw();
-            glBindVertexArray(rqo.vao);
-            glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
-        }
-        
-        PROFILE_SCOPE_END(geometryTimer);
-        graphics::popDebugGroup();
-
-        tileScreenByShader();
-
-        directionalLightShadowMapping(camera);
-        pointLightShadowMapping();
-        spotlightShadowMapping();
-        
-        // Reset the viewport back to the normal size once we've finished rendering all the shadows.
-        glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
-        
-        mLightTextureBuffer->clear();
-
-        PROFILE_SCOPE_BEGIN(directionalLightTimer, "Directional Lighting");
-        graphics::pushDebugGroup("Directional Lighting");
-
-        mDirectionalLightShader.bind();
-
-        mDirectionalLightShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
-        mDirectionalLightShader.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut->getId(), 3);
-        mDirectionalLightShader.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 4);
-        mDirectionalLightShader.set("sheenTable", mLtcSheenTable->getId(), 5);
-        mDirectionalLightShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
-        mDirectionalLightShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
-
-        const auto threadGroupSize = glm::ivec2(ceil(glm::vec2(mCurrentRenderBufferSize) / glm::vec2(16)));
-
-        for (const graphics::DirectionalLight &directionalLight : mDirectionalLightQueue)
-        {
-            mDirectionalLightBlock->direction = glm::vec4(directionalLight.direction, 0.f);
-            mDirectionalLightBlock->intensity = glm::vec4(directionalLight.colourIntensity, 0.f);
-            std::copy(directionalLight.vpMatrices.begin(), directionalLight.vpMatrices.end(), std::begin(mDirectionalLightBlock->vpMatrices));
-            std::copy(directionalLight.cascadeDepths.begin(), directionalLight.cascadeDepths.end(), std::begin(mDirectionalLightBlock->cascadeDistances));
-            mDirectionalLightBlock->bias = directionalLight.shadowBias;
-            mDirectionalLightBlock->cascadeCount = static_cast<int>(directionalLight.cascadeDepths.size());
-
-            mDirectionalLightBlock.updateGlsl();
-            mDirectionalLightShader.set("u_shadow_map_texture", directionalLight.shadowMap->getId(), 1);
-
-            glDispatchCompute(threadGroupSize.x, threadGroupSize.y, 1);
-        }
-        
-        PROFILE_SCOPE_END(directionalLightTimer);
-        graphics::popDebugGroup();
-        PROFILE_SCOPE_BEGIN(pointLightTimer, "Point Lighting");
-        graphics::pushDebugGroup("Point Lighting");
-        
-        mPointLightShader.bind();
-        
-        mPointLightShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
-        mPointLightShader.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut->getId(), 3);
-        mPointLightShader.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 4);
-        mPointLightShader.set("sheenTable", mLtcSheenTable->getId(), 5);
-        mPointLightShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
-        mPointLightShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
-
-        for (const auto &pointLight : mPointLightQueue)
-        {
-            mPointLightBlock->position = glm::vec4(pointLight.position, 1.f);
-            mPointLightBlock->intensity = glm::vec4(pointLight.colourIntensity, 0.f);
-            mPointLightBlock->invSqrRadius = 1.f / (pointLight.radius * pointLight.radius);
-            mPointLightBlock->zFar = pointLight.radius;
-            mPointLightBlock->softnessRadius = pointLight.softnessRadius;
-            mPointLightBlock->bias = pointLight.bias;
-            const glm::mat4 pointLightModelMatrix = glm::translate(glm::mat4(1.f), pointLight.position) * glm::scale(glm::mat4(1.f), glm::vec3(pointLight.radius));
-            mPointLightBlock->mvpMatrix = vpMatrix * pointLightModelMatrix;
-            mPointLightBlock.updateGlsl();
-
-            mPointLightShader.set("u_shadow_map_texture", pointLight.shadowMap->getId(), 1);
-
-            glDispatchCompute(threadGroupSize.x, threadGroupSize.y, 1);
-        }
-        
-        
-        PROFILE_SCOPE_END(pointLightTimer);
-        graphics::popDebugGroup();
-        PROFILE_SCOPE_BEGIN(spotLightTimer, "Spot Light");
-        graphics::pushDebugGroup("Spot Light");
-        
-        mSpotlightShader.bind();
-        
-        mSpotlightShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 0);
-        mSpotlightShader.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut->getId(), 3);
-        mSpotlightShader.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 4);
-        mSpotlightShader.set("sheenTable", mLtcSheenTable->getId(), 5);
-        mSpotlightShader.image("storageGBuffer", mGBufferTexture->getId(), mGBufferTexture->getFormat(), 0, true, GL_READ_ONLY);
-        mSpotlightShader.image("lighting", mLightTextureBuffer->getId(), mLightTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
-
-        for (const graphics::Spotlight &spotLight : mSpotlightQueue)
-        {
-            mSpotlightShader.set("u_shadow_map_texture", spotLight.shadowMap->getId(), 1);
-
-            mSpotlightBlock->position = glm::vec4(spotLight.position, 1.f);
-            mSpotlightBlock->direction = glm::vec4(spotLight.direction, 0.f);
-            mSpotlightBlock->invSqrRadius = 1.f / (spotLight.radius * spotLight.radius);
-            mSpotlightBlock->intensity = glm::vec4(spotLight.colourIntensity, 0.f);
-            mSpotlightBlock->bias = spotLight.shadowBias;
-            mSpotlightBlock->zFar = spotLight.radius;
-            mSpotlightBlock->vpMatrix = spotLight.vpMatrix;
-            const float lightAngleScale = 1.f / glm::max(0.001f, (spotLight.cosInnerAngle - spotLight.cosOuterAngle));
-            const float lightAngleOffset = -spotLight.cosOuterAngle * lightAngleScale;
-            mSpotlightBlock->angleScale = lightAngleScale;
-            mSpotlightBlock->angleOffset = lightAngleOffset;
-
-            mSpotlightBlock.updateGlsl();
-
-            glDispatchCompute(threadGroupSize.x, threadGroupSize.y, 1);
-        }
-        
-        PROFILE_SCOPE_END(spotLightTimer);
-        graphics::popDebugGroup();
-
-        shadeDistantLightProbe();
-
-        // todo: ibl
-        // PROFILE_SCOPE_BEGIN(screenSpace, "Reflections");
-        // graphics::pushDebugGroup("Reflections");
+        // PROFILE_SCOPE_BEGIN(postProcessTimer, "Post-processing Stack");
+        // graphics::pushDebugGroup("Post-processing Pass");
         //
-        // const glm::mat4 scaleTextureSpace = glm::scale(glm::mat4(1.f), glm::vec3(0.5f, 0.5f, 1.f));
-        // const glm::mat4 translateTextureSpace = glm::translate(glm::mat4(1.f), glm::vec3(0.5f, 0.5f, 0.f));
-        // const glm::mat4 scaleFrameBufferSpace = glm::scale(glm::mat4(1.f), glm::vec3(mLightTextureBuffer->getSize().x, mLightTextureBuffer->getSize().y, 1));
+        // graphics::copyTexture2D(*mCombinedLightingTextureBuffer, *mPrimaryImageBuffer);
+        // for (std::unique_ptr<PostProcessLayer> &postProcessLayer : camera.postProcessStack)
+        // {
+        //     postProcessLayer->draw(mPrimaryImageBuffer.get(), mAuxiliaryImageBuffer.get());
+        //     graphics::copyTexture2D(*mAuxiliaryImageBuffer, *mPrimaryImageBuffer); // Yes this is bad. I'm lazy.
+        // }
         //
-        // const glm::mat4 viewToPixelCoordMatrix = scaleFrameBufferSpace * translateTextureSpace * scaleTextureSpace * cameraProjectionMatrix;
-        // mSsrBlock->projection = viewToPixelCoordMatrix;
-        // mSsrBlock->zNear = -camera.nearClipDistance;
-        // mSsrBlock->colourMaxLod = static_cast<int>(mDeferredLightingTextureBuffer->getMipLevels());
-        // mSsrBlock->luminanceMultiplier = mIblLuminanceMultiplier;
-        // mSsrBlock->maxDistanceFalloff = mRoughnessFallOff;
-        // mSsrBlock.updateGlsl();
-        //
-        // // Render at half-resolution for performance.
-        // glViewport(0, 0, mSsrDataTextureBuffer->getSize().x, mSsrDataTextureBuffer->getSize().y);
-        // mSsrFramebuffer->bind();
-        // mSsrFramebuffer->clear(glm::vec4(0.f));
-        // mScreenSpaceReflectionsShader->bind();
-        //
-        // mDepthTextureBuffer->setBorderColour(glm::vec4(0.f, 0.f, 0.f, 1.f));
-        //
-        // mScreenSpaceReflectionsShader->set("u_positionTexture", mPositionTextureBuffer->getId(), 0);
-        // mScreenSpaceReflectionsShader->set("u_normalTexture", mNormalTextureBuffer->getId(), 1);
-        // mScreenSpaceReflectionsShader->set("u_depthTexture", mDepthTextureBuffer->getId(), 2);
-        // mScreenSpaceReflectionsShader->set("u_roughnessTexture", mRoughnessTextureBuffer->getId(), 3);
-        //
-        // drawFullscreenTriangleNow();
-        //
-        // glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
-        //
-        // mReflectionFramebuffer->bind();
-        // mReflectionFramebuffer->clear(glm::vec4(0.f));
-        // mColourResolveShader->bind();
-        //
-        // mColourResolveShader->set("u_albedoTexture",             mAlbedoTextureBuffer->getId(),     0);
-        // mColourResolveShader->set("u_positionTexture",           mPositionTextureBuffer->getId(),   1);
-        // mColourResolveShader->set("u_normalTexture",             mNormalTextureBuffer->getId(),     2);
-        // mColourResolveShader->set("u_roughnessTexture",          mRoughnessTextureBuffer->getId(),  3);
-        // mColourResolveShader->set("u_metallicTexture",           mMetallicTextureBuffer->getId(),   4);
-        // mColourResolveShader->set("u_reflectionDataTexture",     mSsrDataTextureBuffer->getId(),    5);
-        // mColourResolveShader->set("u_colourTexture",             mDeferredLightingTextureBuffer->getId(), 6);
-        // mColourResolveShader->set("u_depthTexture",              mDepthTextureBuffer->getId(),      7);
-        // mColourResolveShader->set("u_irradianceTexture",         mIrradianceMap->getId(),           8);
-        // mColourResolveShader->set("u_pre_filterTexture",         mPreFilterMap->getId(),            9);
-        // mColourResolveShader->set("u_brdfLutTexture",            mBrdfLutTextureBuffer->getId(),    10);
-        // mColourResolveShader->set("u_emissiveTexture", mEmissiveTextureBuffer->getId(), 11);
-        //
-        // drawFullscreenTriangleNow();
-        //
-        // glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
-        //
-        // PROFILE_SCOPE_END(screenSpace);
+        // PROFILE_SCOPE_END(postProcessTimer);
         // graphics::popDebugGroup();
-        PROFILE_SCOPE_BEGIN(deferredTimer, "Skybox Pass");
-        graphics::pushDebugGroup("Combine + Skybox Pass");
-        
-        // Deferred Lighting step.
-        
-        // mDeferredLightFramebuffer->bind();
-        // mDeferredLightFramebuffer->clear(glm::vec4(glm::vec3(0.f), 0.f));
-        mCombinedLightingTextureBuffer->clear();
-        
-        mCombineLightingShader.bind();
-        
-        const glm::mat4 viewMatrixNoPosition = glm::mat4(glm::mat3(camera.viewMatrix));
-        const glm::mat4 inverseViewProjection = glm::inverse(cameraProjectionMatrix * viewMatrixNoPosition);
+        //
+        // PROFILE_SCOPE_BEGIN(debugView, "Debug View");
+        // graphics::pushDebugGroup("Debug View");
 
-        mCombineLightingShader.set("u_irradiance_texture", mLightTextureBuffer->getId(), 0);
-        // todo: emissive buffer should go straight in irradiance texture.
-        // mDeferredLightShader.set("u_emissive_texture", mEmissiveTextureBuffer->getId(), 1);
-        mCombineLightingShader.set("depthBufferTexture", mDepthTextureBuffer->getId(), 2);
-        mCombineLightingShader.set("u_skybox_texture", mHdrSkybox->getId(), 3);
-        mCombineLightingShader.set("u_reflection_texture", mReflectionTextureBuffer->getId(), 4);
-
-        mCombineLightingShader.set("u_inverse_vp_matrix", inverseViewProjection);
-        mCombineLightingShader.set("u_luminance_multiplier", mIblLuminanceMultiplier);
-        mCombineLightingShader.set("u_exposure", exposure);
-        mCombineLightingShader.image("lighting", mCombinedLightingTextureBuffer->getId(), mCombinedLightingTextureBuffer->getFormat(), 1, false, GL_READ_WRITE);
-
-        glDispatchCompute(threadGroupSize.x, threadGroupSize.y, 1);
-
-        blurTexture(*mCombinedLightingTextureBuffer);
-
-        PROFILE_SCOPE_END(deferredTimer);
-        graphics::popDebugGroup();
-        
-        PROFILE_SCOPE_BEGIN(postProcessTimer, "Post-processing Stack");
-        graphics::pushDebugGroup("Post-processing Pass");
-        
-        graphics::copyTexture2D(*mCombinedLightingTextureBuffer, *mPrimaryImageBuffer);
-        for (std::unique_ptr<PostProcessLayer> &postProcessLayer : camera.postProcessStack)
-        {
-            postProcessLayer->draw(mPrimaryImageBuffer.get(), mAuxiliaryImageBuffer.get());
-            graphics::copyTexture2D(*mAuxiliaryImageBuffer, *mPrimaryImageBuffer); // Yes this is bad. I'm lazy.
-        }
-        
-        PROFILE_SCOPE_END(postProcessTimer);
-        graphics::popDebugGroup();
-
-        PROFILE_SCOPE_BEGIN(debugView, "Debug View");
-        graphics::pushDebugGroup("Debug View");
-
-        glDisable(GL_CULL_FACE);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-        mDebugFramebuffer->bind();
-        mDebugFramebuffer->clear(glm::vec4(0.f));
-        mDebugShader.bind();
-
-        for (const auto & [vao, count, modelMatrix, colour] : mDebugQueue)
-        {
-            mDebugShader.set("u_mvp_matrix", vpMatrix * modelMatrix);
-            mDebugShader.set("u_colour", colour);
-            glBindVertexArray(vao);
-            glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
-        }
-
-        glEnable(GL_CULL_FACE);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-        mLineShader.bind();
-        mLineShader.set("u_mvp_matrix", vpMatrix);
-        glBindVertexArray(mLine.vao());
-        for (const auto &[startPosition, endPosition, colour] : mLineQueue)
-        {
-            mLineShader.set("u_locationA", startPosition);
-            mLineShader.set("u_locationB", endPosition);
-            mLineShader.set("u_colour",    colour);
-            glDrawElements(GL_LINES, mLine.indicesCount(), GL_UNSIGNED_INT, nullptr);
-        }
-
-        PROFILE_SCOPE_END(debugView);
-        graphics::popDebugGroup();
-    }
-
-    graphics::popDebugGroup();
+        // glDisable(GL_CULL_FACE);
+        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        //
+        // mDebugFramebuffer->bind();
+        // mDebugFramebuffer->clear(glm::vec4(0.f));
+        // mDebugShader.bind();
+        //
+        // for (const auto & [vao, count, modelMatrix, colour] : mDebugQueue)
+        // {
+        //     mDebugShader.set("u_mvp_matrix", vpMatrix * modelMatrix);
+        //     mDebugShader.set("u_colour", colour);
+        //     glBindVertexArray(vao);
+        //     glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
+        // }
+        //
+        // glEnable(GL_CULL_FACE);
+        // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        //
+        // mLineShader.bind();
+        // mLineShader.set("u_mvp_matrix", vpMatrix);
+        // glBindVertexArray(mLine.vao());
+        // for (const auto &[startPosition, endPosition, colour] : mLineQueue)
+        // {
+        //     mLineShader.set("u_locationA", startPosition);
+        //     mLineShader.set("u_locationB", endPosition);
+        //     mLineShader.set("u_colour",    colour);
+        //     glDrawElements(GL_LINES, mLine.indicesCount(), GL_UNSIGNED_INT, nullptr);
+        // }
+        //
+        // PROFILE_SCOPE_END(debugView);
+        // graphics::popDebugGroup();
 }
 
 void Renderer::directionalLightShadowMapping(const CameraSettings &cameraSettings)

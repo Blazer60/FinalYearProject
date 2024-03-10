@@ -33,7 +33,7 @@ namespace graphics
 
     enum class textureFormat : uint8_t
     {
-        Rgba16f, Rg16f, R16f
+        Rgba16f, Rg16f, R16f, D32f, Rgba16, Rgba32ui
     };
 
     enum class pixelFormat : uint8_t
