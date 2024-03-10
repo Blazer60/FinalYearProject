@@ -8,6 +8,7 @@
 #include "LightShadingPass.h"
 
 #include "Cubemap.h"
+#include "GBufferFlags.h"
 #include "GraphicsFunctions.h"
 #include "HdrTexture.h"
 #include "LtcSheenTable.h"
@@ -27,8 +28,7 @@ namespace graphics
         mSpotlightShader.block("CameraBlock", 0);
         mSpotlightShader.block("SpotlightBlock", 1);
 
-        mIblShader.block("CameraBlock", 0);
-        for (auto &ibl : mIblShaderVariants)
+        for (auto &[ibl, _] : mIblShaderVariants)
             ibl.block("CameraBlock", 0);
     }
 
@@ -149,7 +149,7 @@ namespace graphics
         popDebugGroup();
     }
 
-    void LightShadingPass::execute(const glm::ivec2 &size, Context &context, const Lut &lut, const Skybox &skybox)
+    void LightShadingPass::execute(Context &context, const Lut &lut, const Skybox &skybox)
     {
         PROFILE_FUNC();
         if (!skybox.isValid)
@@ -159,67 +159,69 @@ namespace graphics
 
         context.camera.bindToSlot(0);
 
-        if (mUseUberVariant)
-        {
-            // todo: Do I need this as a seperate shader or should I make the tile-classification force all tiles to be the uber shader variant?
-            mIblShader.image("storageGBuffer", context.gbuffer.getId(), context.gbuffer.getFormat(), 0, true, GL_READ_ONLY);
-            mIblShader.image("lighting", context.lightBuffer.getId(), context.lightBuffer.getFormat(), 1, false, GL_READ_WRITE);
-            mIblShader.set("depthBufferTexture", context.depthBuffer.getId(), 0);
-            mIblShader.set("missingSpecularLutTexture", lut.specularMissing.getId(), 1);
-            mIblShader.set("directionalAlbedoLut", lut.specularDirectionalAlbedo.getId(), 2);
-            mIblShader.set("directionalAlbedoAverageLut", lut.specularDirectionalAlbedoAverage.getId(), 3);
-            mIblShader.set("u_irradiance_texture", skybox.irradianceMap.getId(), 4);
-            mIblShader.set("u_pre_filter_texture", skybox.prefilterMap.getId(), 5);
-            mIblShader.set("sheenLut", lut.sheenDirectionalAlbedo.getId(), 6);
-            mIblShader.set("u_luminance_multiplier", skybox.luminanceMultiplier);
-
-            mIblShader.bind();
-            const auto threadGroupSize = glm::ivec2(ceil(glm::vec2(size) / glm::vec2(16)));
-            glDispatchCompute(threadGroupSize.x, threadGroupSize.y, 1);
-        }
-        else
-        {
-            int i = 0;
-            for (auto &iblShader : mIblShaderVariants)
-            {
-                iblShader.image("storageGBuffer", context.gbuffer.getId(), context.gbuffer.getFormat(), 0, true, GL_READ_ONLY);
-                iblShader.image("lighting", context.lightBuffer.getId(), context.lightBuffer.getFormat(), 1, false, GL_READ_WRITE);
-                iblShader.set("depthBufferTexture", context.depthBuffer.getId(), 0);
-                iblShader.set("missingSpecularLutTexture", lut.specularMissing.getId(), 1);
-                iblShader.set("directionalAlbedoLut", lut.specularDirectionalAlbedo.getId(), 2);
-                iblShader.set("directionalAlbedoAverageLut", lut.specularDirectionalAlbedoAverage.getId(), 3);
-                iblShader.set("u_irradiance_texture", skybox.irradianceMap.getId(), 4);
-                iblShader.set("u_pre_filter_texture", skybox.prefilterMap.getId(), 5);
-                if (i == 0)
-                    iblShader.set("sheenLut", lut.sheenDirectionalAlbedo.getId(), 6);
-
-                iblShader.set("u_luminance_multiplier", skybox.luminanceMultiplier);
-                iblShader.set("shaderIndex", i);
-
-                iblShader.bind();
-
-                dispatchComputeIndirect(context.tileClassificationStorage.getId(), 4 * sizeof(uint32_t) * i);
-                ++i;
-            }
-        }
+        for (auto &[shader, callback] : mIblShaderVariants)
+            callback(shader, context, lut, skybox);
 
         popDebugGroup();
     }
 
     void LightShadingPass::generateIblShaderVariants(const std::filesystem::path &path)
     {
-        const std::vector<graphics::Definition> uberShaderDefinitions {
+        int shaderIndex = 0;
+        const std::vector<Definition> uberShaderDefinitions {
             { "TILED_RENDERING", 1 },
             { "COMPUTE_SHEEN", 1 }
         };
 
-        const std::vector<graphics::Definition> baseShaderDefinitions {
+        mIblShaderVariants.push_back( IblShaderVariant { Shader({ path }, uberShaderDefinitions),
+            [shaderIndex](Shader &shader, const Context &context, const Lut &lut, const Skybox &skybox)
+            {
+                shader.image("storageGBuffer", context.gbuffer.getId(), context.gbuffer.getFormat(), 0, true, GL_READ_ONLY);
+                shader.image("lighting", context.lightBuffer.getId(), context.lightBuffer.getFormat(), 1, false, GL_READ_WRITE);
+                shader.set("depthBufferTexture", context.depthBuffer.getId(), 0);
+                shader.set("missingSpecularLutTexture", lut.specularMissing.getId(), 1);
+                shader.set("directionalAlbedoLut", lut.specularDirectionalAlbedo.getId(), 2);
+                shader.set("directionalAlbedoAverageLut", lut.specularDirectionalAlbedoAverage.getId(), 3);
+                shader.set("u_irradiance_texture", skybox.irradianceMap.getId(), 4);
+                shader.set("u_pre_filter_texture", skybox.prefilterMap.getId(), 5);
+
+                shader.set("sheenLut", lut.sheenDirectionalAlbedo.getId(), 6);
+
+                shader.set("u_luminance_multiplier", skybox.luminanceMultiplier);
+                shader.set("shaderIndex", shaderIndex);
+
+                shader.bind();
+
+                dispatchComputeIndirect(context.tileClassificationStorage.getId(), 4 * sizeof(uint32_t) * shaderIndex);
+            }
+        });
+        ++shaderIndex;
+
+        const std::vector<Definition> baseShaderDefinitions {
             { "TILED_RENDERING", 1 },
             { "COMPUTE_SHEEN", 0 }
         };
 
-        mIblShaderVariants.push_back(Shader({ path }, uberShaderDefinitions));
-        mIblShaderVariants.push_back(Shader({ path }, baseShaderDefinitions));
-    }
+        mIblShaderVariants.push_back(IblShaderVariant { Shader({ path }, baseShaderDefinitions),
+        [shaderIndex](Shader &shader, const Context &context, const Lut &lut, const Skybox &skybox)
+            {
+                shader.image("storageGBuffer", context.gbuffer.getId(), context.gbuffer.getFormat(), 0, true, GL_READ_ONLY);
+                shader.image("lighting", context.lightBuffer.getId(), context.lightBuffer.getFormat(), 1, false, GL_READ_WRITE);
+                shader.set("depthBufferTexture", context.depthBuffer.getId(), 0);
+                shader.set("missingSpecularLutTexture", lut.specularMissing.getId(), 1);
+                shader.set("directionalAlbedoLut", lut.specularDirectionalAlbedo.getId(), 2);
+                shader.set("directionalAlbedoAverageLut", lut.specularDirectionalAlbedoAverage.getId(), 3);
+                shader.set("u_irradiance_texture", skybox.irradianceMap.getId(), 4);
+                shader.set("u_pre_filter_texture", skybox.prefilterMap.getId(), 5);
 
+                shader.set("u_luminance_multiplier", skybox.luminanceMultiplier);
+                shader.set("shaderIndex", shaderIndex);
+
+                shader.bind();
+
+                dispatchComputeIndirect(context.tileClassificationStorage.getId(), 4 * sizeof(uint32_t) * shaderIndex);
+            }
+        });
+        ++shaderIndex;
+    }
 }

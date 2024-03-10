@@ -23,6 +23,12 @@
 
 namespace graphics
 {
+    struct IblShaderVariant
+    {
+        Shader shader;
+        std::function<void(Shader &, Context &, const Lut &, const Skybox &)> callback;
+    };
+
     /**
      * @author Ryan Purse
      * @date 10/03/2024
@@ -34,7 +40,7 @@ namespace graphics
         void execute(const glm::ivec2 &size, Context &context, const Lut &lut, const std::vector<DirectionalLight> &directionalLightQueue);
         void execute(const glm::ivec2 &size, Context &context, const Lut &lut, const std::vector<PointLight> &pointLightQueue);
         void execute(const glm::ivec2 &size, Context &context, const Lut &lut, const std::vector<Spotlight> &spotLightQueue);
-        void execute(const glm::ivec2 &size, Context &context, const Lut &lut, const Skybox &skybox);
+        void execute(Context &context, const Lut &lut, const Skybox &skybox);
     protected:
         void generateIblShaderVariants(const std::filesystem::path &path);
 
@@ -50,17 +56,10 @@ namespace graphics
             { file::shaderPath() / "lighting/SpotLight.comp" }
         };
 
-        Shader mIblShader {
-            { file::shaderPath() / "lighting/IBL.comp" },
-            { { "COMPUTE_SHEEN", 1 } }
-        };
-
-        std::vector<Shader> mIblShaderVariants;
+        std::vector<IblShaderVariant> mIblShaderVariants;
 
         UniformBufferObject<DirectionalLightBlock> mDirectionalLightBlock;
         UniformBufferObject<PointLightBlock> mPointLightBlock;
         UniformBufferObject<SpotlightBlock> mSpotlightBlock;
-
-        bool mUseUberVariant = false;
     };
 } // graphics
