@@ -18,7 +18,7 @@ namespace graphics
      * @author Ryan Purse
      * @date 09/03/2024
      */
-    class MaterialRendering
+    class MaterialRenderingPass
     {
     public:
         void execute(const glm::ivec2 &size, Context &context, const std::vector<RenderQueueObject> &renderQueue);

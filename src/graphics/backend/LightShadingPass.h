@@ -26,10 +26,10 @@ namespace graphics
      * @author Ryan Purse
      * @date 10/03/2024
      */
-    class LightShading
+    class LightShadingPass
     {
     public:
-        LightShading();
+        LightShadingPass();
         void execute(const glm::ivec2 &size, Context &context, const std::vector<DirectionalLight> &directionalLightQueue);
         void execute(const glm::ivec2 &size, Context &context, const std::vector<PointLight> &pointLightQueue);
         void execute(const glm::ivec2 &size, Context &context, const std::vector<Spotlight> &spotLightQueue);

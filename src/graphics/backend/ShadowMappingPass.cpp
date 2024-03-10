@@ -5,7 +5,7 @@
  */
 
 
-#include "ShadowMapping.h"
+#include "ShadowMappingPass.h"
 
 #include "Cubemap.h"
 #include "GraphicsFunctions.h"
@@ -13,7 +13,7 @@
 
 namespace graphics
 {
-    void ShadowMapping::execute(
+    void ShadowMappingPass::execute(
         const std::vector<RenderQueueObject>& renderQueue,
         std::vector<PointLight>& pointLightQueue)
     {
@@ -61,7 +61,7 @@ namespace graphics
         popDebugGroup();
     }
 
-    void ShadowMapping::execute(
+    void ShadowMappingPass::execute(
         const std::vector<RenderQueueObject>& renderQueue, const std::vector<Spotlight>& spotlightQueue)
     {
         PROFILE_FUNC();
@@ -98,7 +98,7 @@ namespace graphics
         popDebugGroup();
     }
 
-    void ShadowMapping::execute(
+    void ShadowMappingPass::execute(
         const CameraSettings& camera,
         const std::vector<RenderQueueObject> &renderQueue,
         std::vector<DirectionalLight>& directionalLightQueue)

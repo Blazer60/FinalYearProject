@@ -20,7 +20,7 @@ namespace graphics
      * @author Ryan Purse
      * @date 09/03/2024
      */
-    class ShadowMapping
+    class ShadowMappingPass
     {
     public:
         void execute(const std::vector<RenderQueueObject> &renderQueue, std::vector<PointLight> &pointLightQueue);

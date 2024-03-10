@@ -5,14 +5,14 @@
  */
 
 
-#include "MaterialRendering.h"
+#include "MaterialRenderingPass.h"
 
 #include "GraphicsFunctions.h"
 #include "WindowHelpers.h"
 
 namespace graphics
 {
-    void MaterialRendering::execute(const glm::ivec2 &size, Context &context, const std::vector<RenderQueueObject> &renderQueue)
+    void MaterialRenderingPass::execute(const glm::ivec2 &size, Context &context, const std::vector<RenderQueueObject> &renderQueue)
     {
         PROFILE_FUNC();
         pushDebugGroup("Material Rendering");

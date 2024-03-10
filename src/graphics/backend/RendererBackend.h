@@ -10,12 +10,12 @@
 #include "Context.h"
 #include "DebugPass.h"
 #include "GraphicsLighting.h"
-#include "LightShading.h"
-#include "MaterialRendering.h"
+#include "LightShadingPass.h"
+#include "MaterialRenderingPass.h"
 #include "Pch.h"
-#include "ShadowMapping.h"
+#include "ShadowMappingPass.h"
 #include "SkyboxPass.h"
-#include "TileClassification.h"
+#include "TileClassificationPass.h"
 
 namespace graphics
 {
@@ -54,10 +54,10 @@ namespace graphics
         Skybox mSkybox;
 
         Context mContext;
-        MaterialRendering mMaterialRendering;
-        TileClassification mTileClassification;
-        ShadowMapping mShadowMapping;
-        LightShading mLightShading;
+        MaterialRenderingPass mMaterialRendering;
+        TileClassificationPass mTileClassification;
+        ShadowMappingPass mShadowMapping;
+        LightShadingPass mLightShading;
         SkyboxPass mSkyboxPass;
         DebugPass mDebugPass;
 

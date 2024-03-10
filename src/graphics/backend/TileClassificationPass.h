@@ -20,10 +20,10 @@ namespace graphics
      * @author Ryan Purse
      * @date 09/03/2024
      */
-    class TileClassification
+    class TileClassificationPass
     {
     public:
-        TileClassification();
+        TileClassificationPass();
         void execute(const glm::ivec2 &size, Context &context);
     protected:
         void generateShaderTable();

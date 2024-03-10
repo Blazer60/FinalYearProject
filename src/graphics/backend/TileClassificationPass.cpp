@@ -5,19 +5,19 @@
  */
 
 
-#include "TileClassification.h"
+#include "TileClassificationPass.h"
 
 #include "GraphicsFunctions.h"
 
 namespace graphics
 {
-    TileClassification::TileClassification()
+    TileClassificationPass::TileClassificationPass()
     {
         generateShaderTable();
         mTileShader.block("ShaderTable", 0);
     }
 
-    void TileClassification::execute(const glm::ivec2& size, Context& context)
+    void TileClassificationPass::execute(const glm::ivec2& size, Context& context)
     {
         PROFILE_FUNC();
         pushDebugGroup("Tile Classification");
@@ -47,7 +47,7 @@ namespace graphics
         popDebugGroup();
     }
 
-    void TileClassification::generateShaderTable()
+    void TileClassificationPass::generateShaderTable()
     {
         mShaderTable.reserve(shaderFlagPermutations);
         for (uint32_t flag = 0; flag < shaderFlagPermutations; ++flag)

@@ -5,7 +5,7 @@
  */
 
 
-#include "LightShading.h"
+#include "LightShadingPass.h"
 
 #include "Cubemap.h"
 #include "GraphicsFunctions.h"
@@ -14,7 +14,7 @@
 
 namespace graphics
 {
-    LightShading::LightShading()
+    LightShadingPass::LightShadingPass()
     {
         generateIblShaderVariants(file::shaderPath() / "lighting/IBL.comp");
 
@@ -40,7 +40,7 @@ namespace graphics
             ibl.block("CameraBlock", 0);
     }
 
-    void LightShading::execute(
+    void LightShadingPass::execute(
         const glm::ivec2& size, Context& context, const std::vector<DirectionalLight>& directionalLightQueue)
     {
         PROFILE_FUNC();
@@ -77,7 +77,7 @@ namespace graphics
         popDebugGroup();
     }
 
-    void LightShading::execute(const glm::ivec2& size, Context& context, const std::vector<PointLight>& pointLightQueue)
+    void LightShadingPass::execute(const glm::ivec2& size, Context& context, const std::vector<PointLight>& pointLightQueue)
     {
         PROFILE_FUNC();
         pushDebugGroup("Point Lighting");
@@ -115,7 +115,7 @@ namespace graphics
         popDebugGroup();
     }
 
-    void LightShading::execute(const glm::ivec2& size, Context& context, const std::vector<Spotlight>& spotLightQueue)
+    void LightShadingPass::execute(const glm::ivec2& size, Context& context, const std::vector<Spotlight>& spotLightQueue)
     {
         PROFILE_FUNC();
         pushDebugGroup("Spot lighting");
@@ -157,7 +157,7 @@ namespace graphics
         popDebugGroup();
     }
 
-    void LightShading::execute(const glm::ivec2 &size, Context &context, const Skybox &skybox)
+    void LightShadingPass::execute(const glm::ivec2 &size, Context &context, const Skybox &skybox)
     {
         PROFILE_FUNC();
         if (!skybox.isValid)
@@ -214,7 +214,7 @@ namespace graphics
         popDebugGroup();
     }
 
-    void LightShading::generateSpecularDirectionalAlbedoLut(const glm::ivec2& size)
+    void LightShadingPass::generateSpecularDirectionalAlbedoLut(const glm::ivec2& size)
     {
         mSpecularDirectionalAlbedoLut.resize(size);
         mSpecularDirectionalAlbedoLut.setDebugName("Specular BRDF LUT");
@@ -228,7 +228,7 @@ namespace graphics
         glDispatchCompute(groupSize.x, groupSize.y, 1);
     }
 
-    void LightShading::generateSpecularDirectionalAlbedoAverageLut(const uint32_t size)
+    void LightShadingPass::generateSpecularDirectionalAlbedoAverageLut(const uint32_t size)
     {
         mSpecularDirectionalAlbedoAverageLut.resize(glm::ivec2(size, 1));
         mSpecularDirectionalAlbedoAverageLut.setDebugName("BRDF Average LUT");
@@ -243,7 +243,7 @@ namespace graphics
         glDispatchCompute(groupSize, 1, 1);
     }
 
-    void LightShading::generateSpecularMissingLut(const glm::ivec2& size)
+    void LightShadingPass::generateSpecularMissingLut(const glm::ivec2& size)
     {
         mSpecularMissingTextureBuffer.resize(size);
         mSpecularMissingTextureBuffer.setDebugName("Specular Missing LUT");
@@ -256,7 +256,7 @@ namespace graphics
         glDispatchCompute(groupSize.x, groupSize.y, 1);
     }
 
-    void LightShading::setupLtcSheenTable()
+    void LightShadingPass::setupLtcSheenTable()
     {
         mLtcSheenTable.resize(glm::ivec2(sheen::tableSize));
         mLtcSheenTable.setDebugName("LTC Sheen LUT");
@@ -265,7 +265,7 @@ namespace graphics
         mLtcSheenTable.upload(sheenData.data(), pixelFormat::Rgb);
     }
 
-    void LightShading::generateSheenLut(const glm::ivec2& size)
+    void LightShadingPass::generateSheenLut(const glm::ivec2& size)
     {
         mSheenDirectionalAlbedoLut.resize(size);
         mSheenDirectionalAlbedoLut.setDebugName("Sheen Directional Albedo");
@@ -278,7 +278,7 @@ namespace graphics
         glDispatchCompute(groupSize.x, groupSize.y, 1);
     }
 
-    void LightShading::generateIblShaderVariants(const std::filesystem::path &path)
+    void LightShadingPass::generateIblShaderVariants(const std::filesystem::path &path)
     {
         const std::vector<graphics::Definition> uberShaderDefinitions {
             { "TILED_RENDERING", 1 },
