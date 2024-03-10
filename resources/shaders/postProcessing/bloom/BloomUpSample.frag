@@ -2,8 +2,8 @@
 
 in vec2 v_uv;
 
-uniform sampler2D u_up_sample_texture;
-uniform sampler2D u_down_sample_texture;
+layout(binding = 0) uniform sampler2D u_up_sample_texture;
+layout(binding = 1) uniform sampler2D u_down_sample_texture;
 
 uniform int u_down_mip_level;
 uniform int u_up_mip_level;

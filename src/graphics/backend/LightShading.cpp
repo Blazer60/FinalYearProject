@@ -261,7 +261,6 @@ namespace graphics
         mLtcSheenTable.resize(glm::ivec2(sheen::tableSize));
         mLtcSheenTable.setDebugName("LTC Sheen LUT");
 
-        // todo: double check the missmatch in types here. It may not like it?
         const auto sheenData = sheen::data();
         mLtcSheenTable.upload(sheenData.data(), pixelFormat::Rgb);
     }

@@ -75,8 +75,6 @@ namespace graphics
             { file::shaderPath() / "brdf/SheenDirectionalAlbedo.comp" }
         };
 
-        // Todo: Irradiance and Prefilter maps need to be generated elsewhere and then feed int.
-
         std::vector<Shader> mIblShaderVariants;
 
         UniformBufferObject<DirectionalLightBlock> mDirectionalLightBlock;
