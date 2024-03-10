@@ -11,7 +11,7 @@
 #include "ProfileTimer.h"
 #include "GraphicsFunctions.h"
 
-void ColourGrading::onDraw(TextureBufferObject *imageInput, TextureBufferObject *imageOutput)
+void ColourGrading::onDraw(TextureBufferObject *imageInput, TextureBufferObject *imageOutput, graphics::Context *context)
 {
     PROFILE_FUNC();
     graphics::pushDebugGroup("Colour Grading Pass");

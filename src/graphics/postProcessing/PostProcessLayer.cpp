@@ -7,14 +7,14 @@
 
 #include "PostProcessLayer.h"
 #include "FramebufferObject.h"
-#include "TextureBufferObject.h"
+#include "../backend/Context.h"
 
 PostProcessLayer::PostProcessLayer()
     : mFramebuffer(std::make_unique<FramebufferObject>(GL_ONE, GL_ZERO, GL_ALWAYS))
 {
 }
 
-void PostProcessLayer::draw(TextureBufferObject *imageInput, TextureBufferObject *imageOutput)
+void PostProcessLayer::draw(TextureBufferObject *imageInput, TextureBufferObject *imageOutput, graphics::Context *context)
 {
-    onDraw(imageInput, imageOutput);
+    onDraw(imageInput, imageOutput, context);
 }

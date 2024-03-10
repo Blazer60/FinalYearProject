@@ -11,10 +11,11 @@
 #include "GraphicsState.h"
 #include "ProfileTimer.h"
 #include "GraphicsFunctions.h"
+#include "../../graphics/backend/Context.h"
 
 // todo: Something is causing a visual bug in the bloom pass.
 
-void BloomPass::onDraw(TextureBufferObject *imageInput, TextureBufferObject *imageOutput)
+void BloomPass::onDraw(TextureBufferObject *imageInput, TextureBufferObject *imageOutput, graphics::Context *context)
 {
     PROFILE_FUNC();
     graphics::pushDebugGroup("Bloom Pass");
@@ -29,7 +30,7 @@ void BloomPass::onDraw(TextureBufferObject *imageInput, TextureBufferObject *ima
     mFramebuffer->attach(mDownSampleTexture.get(), 0, 0);
     mPreFilter.bind();
     mPreFilter.set("u_texture", imageInput->getId(), 0);
-    mPreFilter.set("u_exposure", graphics::renderer->getCurrentExposure());
+    mPreFilter.set("u_exposure", context->camera->exposure);
     graphics::renderer->drawFullscreenTriangleNow();
     mFramebuffer->detach(0);
     

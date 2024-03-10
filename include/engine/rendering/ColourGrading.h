@@ -22,7 +22,7 @@ class ColourGrading
     : public PostProcessLayer, public ui::Drawable
 {
 protected:
-    void onDraw(TextureBufferObject *imageInput, TextureBufferObject *imageOutput) override;
+    void onDraw(TextureBufferObject *imageInput, TextureBufferObject *imageOutput, graphics::Context *context) override;
     void onDrawUi() override;
 
     Shader mShader { { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "postProcessing/colourGrading/ColourGrading.frag" } };

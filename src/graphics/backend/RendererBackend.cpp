@@ -37,6 +37,8 @@ namespace graphics
         mDirectionalLightQueue = std::move(queues.directionalLightQueue);
         mPointLightQueue = std::move(queues.pointLightQueue);
         mSpotlightQueue = std::move(queues.spotlightQueue);
+        mDebugQueue = std::move(queues.debugQueue);
+        mLineQueue = std::move(queues.lineQueue);
     }
 
     void RendererBackend::execute()
@@ -58,19 +60,20 @@ namespace graphics
             mTileClassification.execute(window::bufferSize(), mContext);
             mShadowMapping.execute(camera, mRenderQueue, mDirectionalLightQueue);
 
-            // Reset the viewport back to the normal size once we've finished rendering all the shadows.
-            glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);  // Todo: Probs don't need this here now right?
-
             mContext.lightBuffer.resize(window::bufferSize());
             mContext.lightBuffer.clear();
+
             mLightShading.execute(window::bufferSize(), mContext, mDirectionalLightQueue);
             mLightShading.execute(window::bufferSize(), mContext, mPointLightQueue);
             mLightShading.execute(window::bufferSize(), mContext, mSpotlightQueue);
-
             mLightShading.execute(window::bufferSize(), mContext, mSkybox);
+
             mSkyboxPass.execute(window::bufferSize(), mContext, mSkybox);
 
             executePostProcessStack(camera);
+
+            // For physics debugging.
+            mDebugPass.execute(window::bufferSize(), mContext, mDebugQueue, mLineQueue);
         }
 
         popDebugGroup();
@@ -79,6 +82,22 @@ namespace graphics
     void RendererBackend::setIblMultiplier(const float multiplier)
     {
         mSkybox.luminanceMultiplier = multiplier;
+    }
+
+    const TextureBufferObject& RendererBackend::queryGbuffer(
+        const gbuffer type, const bool gammaCorrect, const glm::vec4& defaultValue)
+    {
+        return mDebugPass.queryGBuffer(window::bufferSize(), mContext, type, gammaCorrect, defaultValue);
+    }
+
+    const TextureBufferObject& RendererBackend::tileOverlay()
+    {
+        return mDebugPass.tileOverlay(window::bufferSize(), mContext);
+    }
+
+    const TextureBufferObject& RendererBackend::getDebugBuffer()
+    {
+        return mDebugPass.getDebugOverlay();
     }
 
     void RendererBackend::setupCurrentCamera(const CameraSettings& camera)
@@ -106,7 +125,7 @@ namespace graphics
 
         for (const std::unique_ptr<PostProcessLayer>  &postProcessLayer : camera.postProcessStack)
         {
-            postProcessLayer->draw(&mContext.backBuffer, &mContext.auxilliaryBuffer);
+            postProcessLayer->draw(&mContext.backBuffer, &mContext.auxilliaryBuffer, &mContext);
             copyTexture2D(mContext.auxilliaryBuffer, mContext.backBuffer); // Yes this is bad. I'm lazy.
         }
 

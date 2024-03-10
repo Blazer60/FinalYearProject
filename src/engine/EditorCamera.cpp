@@ -15,7 +15,6 @@
 #include "EngineState.h"
 #include "EventHandler.h"
 #include "ProfileTimer.h"
-#include "ui/editor/RendererSettings.h"
 
 EditorCamera::EditorCamera()
 {
@@ -120,7 +119,6 @@ void EditorCamera::onDrawUi()
         return;
 
     ImGui::Begin("Renderer Settings", &showCameraSettings);
-    drawRendererSettings();
 
     if (ImGui::CollapsingHeader("Camera Details"))
     {

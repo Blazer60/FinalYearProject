@@ -14,19 +14,7 @@
 #include "Materials.h"
 #include "Mesh.h"
 #include "Shader.h"
-#include "UniformBufferObject.h"
-#include "WindowHelpers.h"
-#include "CameraBlock.h"
-#include "DebugGBufferBlock.h"
-#include "DirectionalLightBlock.h"
 #include "FileLoader.h"
-#include "GBufferFlags.h"
-#include "PointLightBlock.h"
-#include "ScreenSpaceReflectionsBlock.h"
-#include "ShaderStorageBufferObject.h"
-#include "SpotlightBlock.h"
-#include "Texture3DObject.h"
-#include "Ubo.h"
 
 
 namespace graphics
@@ -36,7 +24,7 @@ namespace graphics
 
 namespace graphics
 {
-    class Context;
+    struct Context;
 }
 
 /**
@@ -140,7 +128,7 @@ public:
     /**
      * Starts rendering everything that was submitted to the renderer this frame.
      */
-    void render();
+    void render() const;
 
     /**
      * @brief Resets the data fro the next round of rendering. This is split so that ImGui can display information
@@ -160,7 +148,7 @@ public:
      */
     [[nodiscard]] static std::string getVersion();
 
-    void generateSkybox(std::string_view path, glm::ivec2 desiredSize);
+    void generateSkybox(std::string_view path, glm::ivec2 desiredSize) const;
 
     /**
      * @brief Draws a triangle to the screen so that fullscreen passes can be performs without
@@ -177,218 +165,23 @@ public:
     [[nodiscard]] const TextureBufferObject &getPrimaryBuffer() const;
     [[nodiscard]] const TextureBufferObject &getLightBuffer() const;
     [[nodiscard]] const TextureBufferObject &getDepthBuffer() const;
-    [[nodiscard]] const TextureBufferObject &getSsrBuffer() const;
-    [[nodiscard]] const TextureBufferObject &getReflectionBuffer() const;
     [[nodiscard]] const TextureBufferObject &getDebugBuffer() const;
-    [[nodiscard]] const TextureBufferObject &getFromGBuffer(graphics::gbuffer type, bool gammaCorrect, const glm::vec4 &defaultValue=glm::vec4(0.f, 0.f, 0.f, 1.f));
+    [[nodiscard]] const TextureBufferObject &getFromGBuffer(graphics::gbuffer type, bool gammaCorrect, const glm::vec4 &defaultValue=glm::vec4(0.f, 0.f, 0.f, 1.f)) const;
     [[nodiscard]] const TextureBufferObject &whiteFurnaceTest();
-    [[nodiscard]] const TextureBufferObject &drawTileClassification();
-
-    [[nodiscard]] std::vector<graphics::DirectionalLight> &getDirectionalLights();
-
-    [[nodiscard]] float getCurrentEV100() const;
-    [[nodiscard]] float getCurrentExposure() const;
+    [[nodiscard]] const TextureBufferObject &drawTileClassification() const;
 
     void setIblMultiplier(float multiplier) const;
 
 protected:
-    void initFrameBuffers();
-    void initTextureRenderBuffers();
-    void bindBuffers();
-    void detachTextureRenderBuffersFromFrameBuffers() const;
-    std::unique_ptr<Cubemap> createCubemapFromHdrTexture(const HdrTexture *hdrTexture, const glm::ivec2 &size);
-    std::unique_ptr<Cubemap> generateIrradianceMap(const Cubemap *cubemap, const glm::ivec2 &size);
-    std::unique_ptr<Cubemap> generatePreFilterMap(const Cubemap *cubemap, const glm::ivec2 &size);
-    std::unique_ptr<TextureBufferObject> generateBrdfLut(const glm::ivec2 &size);
-    std::unique_ptr<TextureBufferObject> generateSpecularMissingLut(const glm::ivec2 &size);
-    std::unique_ptr<TextureBufferObject> generateBrdfAverageLut(uint32_t size);
-    void setupLtcSheenTable();
-    std::unique_ptr<TextureBufferObject> generateSheenLut(const glm::ivec2 &size);
-    void generateShaderTable();
-    std::vector<Shader> makeShaderVariants(const std::filesystem::path &path);
-
-    void directionalLightShadowMapping(const CameraSettings &cameraSettings);
-    void pointLightShadowMapping();
-    void spotlightShadowMapping();
-    void shadeDistantLightProbe();
-    void blurTexture(const TextureBufferObject &texture);
-
-    void resizeTileClassificationBuffer();
-    void tileScreenByShader();
-
-
-    static void setViewportSize(const glm::ivec2 &size=window::bufferSize());
-
-    std::vector<graphics::RenderQueueObject>        mRenderQueue;
-    std::vector<CameraSettings>                     mCameraQueue;
-    std::vector<graphics::DirectionalLight>         mDirectionalLightQueue;
-    std::vector<graphics::PointLight>               mPointLightQueue;
-    std::vector<graphics::Spotlight>                mSpotlightQueue;
-    std::vector<graphics::DebugQueueObject>         mDebugQueue;
-    std::vector<graphics::LineQueueObject>          mLineQueue;
-
-    std::unique_ptr<HdrTexture>  mHdrImage;
-    std::unique_ptr<Cubemap>     mHdrSkybox;
-    std::unique_ptr<Cubemap>     mIrradianceMap;
-    std::unique_ptr<Cubemap>     mPreFilterMap;
-
-    std::unique_ptr<FramebufferObject> mDeferredLightFramebuffer;
-    std::unique_ptr<FramebufferObject> mGeometryFramebuffer;
-    std::unique_ptr<FramebufferObject> mShadowFramebuffer;
-    std::unique_ptr<FramebufferObject> mSsrFramebuffer;
-    std::unique_ptr<FramebufferObject> mReflectionFramebuffer;
-    std::unique_ptr<FramebufferObject> mBlurFramebuffer;
-    std::unique_ptr<FramebufferObject> mDebugFramebuffer;
-
-    Shader mDirectionalLightShader {
-        { file::shaderPath() / "lighting/DirectionalLight.comp" }
-    };
-
-    Shader mIblShader {
-        { file::shaderPath() / "lighting/IBL.comp" },
-        { { "COMPUTE_SHEEN", 1 } }
-    };
-
-    Shader mWhiteFurnaceTestShader {
-        { file::shaderPath() / "lighting/IBL.comp" },
-        { { "WHITE_FURNACE_TEST" } }
-    };
-
-    Shader mIntegrateBrdfShader {
-        { file::shaderPath() / "brdf/GgxDirectionalAlbedo.comp" }
-    };
-
-    Shader mIntegrateSpecularMissing {
-        { file::shaderPath() / "brdf/GgxSpecMissing.comp" }
-    };
-
-    Shader mIntegrateBrdfAverageShader {
-        { file::shaderPath() / "brdf/GgxDirectionalAlbedoAverage.comp" }
-    };
-
-    Shader mIntegrateSheenShader {
-        { file::shaderPath() / "brdf/SheenDirectionalAlbedo.comp" }
-    };
-
-    Shader mCombineLightingShader {
-        { file::shaderPath() / "lighting/CombineOutput.comp" }
-    };
-
-    Shader mPointLightShader {
-        { file::shaderPath() / "lighting/PointLight.comp" }
-    };
-
-    Shader mSpotlightShader {
-        { file::shaderPath() / "lighting/SpotLight.comp" }
-    };
-
-    Shader mDirectionalLightShadowShader {
-        { file::shaderPath() / "shadow/Shadow.vert", file::shaderPath() / "shadow/Shadow.frag" }
-    };
-
-    Shader mPointLightShadowShader {
-        { file::shaderPath() / "shadow/PointShadow.vert", file::shaderPath() / "shadow/PointShadow.frag" }
-    };
-
-    Shader mSpotlightShadowShader {
-        { file::shaderPath() / "shadow/PointShadow.vert", file::shaderPath() / "shadow/PointShadow.frag" }
-    };
-
-    Shader mHdrToCubemapShader {
-        { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "cubemap/ToCubemap.frag" }
-    };
-
-    Shader mCubemapToIrradianceShader {
-        { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "cubemap/IrradianceMap.frag" }
-    };
-
-    Shader mPreFilterShader {
-        { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() /  "cubemap/PreFilter.frag" }
-    };
-
-    Shader mScreenSpaceReflectionsShader {
-        { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "ssr/SsrDda.frag" }
-    };
-
-    Shader mColourResolveShader {
-        { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "ssr/ColourResolve.frag" }
-    };
-
-    Shader mBlurShader {
-        { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "postProcessing/bloom/BloomDownSample.frag" }
-    };
-
-    Shader mDebugShader {
-        { file::shaderPath() / "geometry/debug/Debug.vert", file::shaderPath() / "geometry/debug/Debug.frag" }
-    };
-
-    Shader mLineShader {
-        { file::shaderPath() / "geometry/debug/Line.vert", file::shaderPath() / "geometry/debug/Line.frag" }
-    };
-
-    Shader mDebugGBufferShader {
-        { file::shaderPath() / "geometry/DebugGBuffer.comp" }
-    };
-
-    Shader mClassificationShader {
-        { file::shaderPath() / "classification/MaterialClassification.comp" }
-    };
-
-    Shader mDebugTileOverlayShader {
-        { file::shaderPath() / "classification/DebugOverlay.comp" }
-    };
-
-    std::vector<Shader> mIblShaderVariants;
-
-    std::vector<graphics::shaderVariant> mShaderTable;
-    graphics::Ubo mShaderTableUbo;
-
+    std::vector<graphics::RenderQueueObject> mRenderQueue;
+    std::vector<CameraSettings>              mCameraQueue;
+    std::vector<graphics::DirectionalLight>  mDirectionalLightQueue;
+    std::vector<graphics::PointLight>        mPointLightQueue;
+    std::vector<graphics::Spotlight>         mSpotlightQueue;
+    std::vector<graphics::DebugQueueObject>  mDebugQueue;
+    std::vector<graphics::LineQueueObject>   mLineQueue;
 
     SubMesh mFullscreenTriangle;
-    SubMesh mUnitSphere;
-    SubMesh mLine;
-
-    std::unique_ptr<TextureArrayObject> mGBufferTexture;
-    graphics::ShaderStorageBufferObject mGBufferStorage;
-    std::unique_ptr<TextureBufferObject> mDepthTextureBuffer;
-    std::unique_ptr<TextureBufferObject> mLightTextureBuffer;
-    std::unique_ptr<TextureBufferObject> mCombinedLightingTextureBuffer;
-    std::unique_ptr<TextureBufferObject> mSpecularDirectionalAlbedoLut;
-    std::unique_ptr<TextureBufferObject> mSpecularMissingTextureBuffer;
-    std::unique_ptr<TextureBufferObject> mSpecularDirectionalAlbedoAverageLut;
-    std::unique_ptr<TextureBufferObject> mPrimaryImageBuffer;
-    std::unique_ptr<TextureBufferObject> mAuxiliaryImageBuffer;
-    std::unique_ptr<TextureBufferObject> mSsrDataTextureBuffer;
-    std::unique_ptr<TextureBufferObject> mReflectionTextureBuffer;
-    std::unique_ptr<TextureBufferObject> mDebugTextureBuffer;
-    std::unique_ptr<TextureBufferObject> mDebugGeometryTextureBuffer;
-    std::unique_ptr<TextureBufferObject> mDebugWhiteFurnaceTextureBuffer;
-    std::unique_ptr<TextureBufferObject> mLtcSheenTable;
-    std::unique_ptr<TextureBufferObject> mSheenDirectionalAlbedoLut;
-    std::unique_ptr<TextureBufferObject> mDebugTileOverlayBuffer;
-    graphics::ShaderStorageBufferObject mTileClassicationStorage;
-
-    graphics::UniformBufferObject<CameraBlock> mCamera;
-    graphics::UniformBufferObject<DirectionalLightBlock> mDirectionalLightBlock;
-    graphics::UniformBufferObject<PointLightBlock> mPointLightBlock;
-    graphics::UniformBufferObject<SpotlightBlock> mSpotlightBlock;
-    graphics::UniformBufferObject<ScreenSpaceReflectionsBlock> mSsrBlock;
-    graphics::UniformBufferObject<DebugGBufferBlock> mDebugGBufferBlock;
-
-    glm::ivec2 mCurrentRenderBufferSize;
-
-    float mCurrentEV100 { 10.f };
-    float mIblLuminanceMultiplier { 1000.f };
-    bool mHasSkybox = false;
-    bool mUseUberVariant = false;
 
     graphics::RendererBackend *mRendererBackend;
-
-public:
-    float mReflectionStepSize { 0.1f };
-    int mReflectionMaxStepCount { 300 };
-    float mReflectionThicknessThreshold { 1.2f };
-    int mReflectionBinarySearchDepth { 10 };
-    float mRoughnessFallOff { 20.f };
-    float mReflectionDivideSize { 2.f };
 };

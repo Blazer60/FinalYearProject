@@ -93,6 +93,8 @@ add_library(${GRAPHICS_LIBRARY} STATIC
         src/graphics/backend/SkyboxPass.h
         src/graphics/Skybox.cpp
         src/graphics/Skybox.h
+        src/graphics/backend/DebugPass.cpp
+        src/graphics/backend/DebugPass.h
 )
 
 target_include_directories(${GRAPHICS_LIBRARY} PUBLIC
@@ -163,7 +165,6 @@ add_library(${ENGINE_LIBRARY}
         src/engine/ui/editor/Editor.cpp include/engine/ui/editor/Editor.h
         src/engine/ui/editor/LogWindow.cpp include/engine/ui/editor/LogWindow.h
         src/engine/ui/editor/ProfilerViewer.cpp include/engine/ui/editor/ProfilerViewer.h
-        src/engine/ui/editor/RendererSettings.cpp src/engine/ui/editor/RendererSettings.h
         src/engine/ui/editor/ResourceFolder.cpp include/engine/ui/editor/ResourceFolder.h
         src/engine/ui/editor/Viewport.cpp include/engine/ui/editor/Viewport.h
 

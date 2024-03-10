@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Context.h"
+#include "DebugPass.h"
 #include "GraphicsLighting.h"
 #include "LightShading.h"
 #include "MaterialRendering.h"
@@ -42,6 +43,9 @@ namespace graphics
         void copyQueues(Queues &&queues);
         void execute();
         void setIblMultiplier(float multiplier);
+        const TextureBufferObject& queryGbuffer(gbuffer type, bool gammaCorrect, const glm::vec4 &defaultValue);
+        const TextureBufferObject& tileOverlay();
+        const TextureBufferObject& getDebugBuffer();
 
     protected:
         void setupCurrentCamera(const CameraSettings &camera);
@@ -55,11 +59,14 @@ namespace graphics
         ShadowMapping mShadowMapping;
         LightShading mLightShading;
         SkyboxPass mSkyboxPass;
+        DebugPass mDebugPass;
 
         std::vector<RenderQueueObject> mRenderQueue;
         std::vector<CameraSettings> mCameraQueue;
         std::vector<DirectionalLight> mDirectionalLightQueue;
         std::vector<PointLight> mPointLightQueue;
         std::vector<Spotlight> mSpotlightQueue;
+        std::vector<DebugQueueObject> mDebugQueue;
+        std::vector<LineQueueObject> mLineQueue;
     };
 } // graphics

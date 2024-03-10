@@ -47,8 +47,6 @@ namespace engine
             ViewportImage { "Specular",     []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::Specular, true); } },
             ViewportImage { "Lighting",     []() -> const TextureBufferObject& { return graphics::renderer->getLightBuffer(); } },
             ViewportImage { "Roughness",    []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::Roughness, false); } },
-            ViewportImage { "SSR",          []() -> const TextureBufferObject& { return graphics::renderer->getSsrBuffer(); } },
-            ViewportImage { "Reflections",  []() -> const TextureBufferObject& { return graphics::renderer->getReflectionBuffer(); } },
             ViewportImage { "Debug View",   []() -> const TextureBufferObject& { return graphics::renderer->getDebugBuffer(); } },
             ViewportImage { "White Furnace Test", []() -> const TextureBufferObject& { return graphics::renderer->whiteFurnaceTest(); } },
             ViewportImage { "Buffer Byte Count", []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::ByteCount, true); } },

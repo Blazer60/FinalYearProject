@@ -24,8 +24,7 @@ class BloomPass
     : public PostProcessLayer, public ui::Drawable
 {
 protected:
-    void onDraw(TextureBufferObject *imageInput, TextureBufferObject *imageOutput) override;
-    
+    void onDraw(TextureBufferObject *imageInput, TextureBufferObject *imageOutput, graphics::Context *context) override;
     void onDrawUi() override;
     
     void generateAuxiliaryBuffers(const glm::ivec2 &size);

@@ -7,8 +7,12 @@
 
 #pragma once
 
-#include "Pch.h"
 #include "FramebufferObject.h"
+
+namespace graphics
+{
+    struct Context;
+}
 
 class TextureBufferObject;
 
@@ -22,10 +26,10 @@ public:
     PostProcessLayer();
     virtual ~PostProcessLayer() = default;
     
-    void draw(TextureBufferObject *imageInput, TextureBufferObject *imageOutput);
+    void draw(TextureBufferObject *imageInput, TextureBufferObject *imageOutput, graphics::Context *context);
 
 protected:
-    virtual void onDraw(TextureBufferObject *imageInput, TextureBufferObject *imageOutput) = 0;
+    virtual void onDraw(TextureBufferObject *imageInput, TextureBufferObject *imageOutput, graphics::Context *context) = 0;
     
     std::unique_ptr<FramebufferObject> mFramebuffer;
 };
