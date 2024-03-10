@@ -7,6 +7,7 @@
 
 #include "TileClassificationPass.h"
 
+#include "ContainerAlgorithms.h"
 #include "GraphicsFunctions.h"
 
 namespace graphics
@@ -22,17 +23,14 @@ namespace graphics
         PROFILE_FUNC();
         pushDebugGroup("Tile Classification");
 
-        // todo: auto generate this.
-        const std::vector<uint32_t> resetData {
-            0, 1, 1, 0,
-            0, 1, 1, 0,
-        };
+        const std::vector pattern = { 0u, 1u, 1u, 0u };
+        const std::vector resetData = containers::makePattern<uint32_t>(pattern.begin(), pattern.end(), shaderVariantCount);
 
         const glm::ivec2 tileCount = glm::ceil(static_cast<glm::vec2>(size) / static_cast<float>(mTileThreadGroupSize));
         const uint32_t bufferSize = 2u * sizeof(uint32_t) * tileCount.x * tileCount.y;
 
         context.tileClassificationStorage.resize(indirectBufferSize + shaderVariantCount * bufferSize);
-        context.tileClassificationStorage.zeroOut();
+        context.tileClassificationStorage.zeroOut();  // Technically don't have to do this. But it gets confusing when debugging.
         context.tileClassificationStorage.write(resetData.data(), sizeof(uint32_t) * resetData.size());
 
         context.tileClassificationStorage.bindToSlot(1);

@@ -26,4 +26,15 @@ namespace containers
 
         return oldSize - c.size();
     }
+
+    template<typename T, typename Tit>
+    std::vector<T> makePattern(const Tit &begin, const Tit &end, uint32_t count)
+    {
+        std::vector<T> result;
+        result.reserve(count * std::distance(begin, end));
+        for (uint32_t i = 0; i < count; ++i)
+            result.insert(result.end(), begin, end);
+
+        return result;
+    }
 }

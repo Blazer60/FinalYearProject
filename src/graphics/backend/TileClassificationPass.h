@@ -30,7 +30,7 @@ namespace graphics
 
     protected:
         void generateShaderTable();
-        static constexpr uint32_t shaderVariantCount = 3;
+        static constexpr uint32_t shaderVariantCount = 2;
         static constexpr uint32_t indirectBufferSize = 4 * sizeof(uint32_t) * shaderVariantCount;
         static constexpr uint32_t mTileThreadGroupSize = 16;
 
