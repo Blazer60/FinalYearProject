@@ -39,8 +39,10 @@ public:
     [[nodiscard]] glm::ivec2 getSize() const;
     [[nodiscard]] int32_t getLayerCount() const;
     [[nodiscard]] GLenum getFormat() const;
+    void setDebugName(const std::string &name);
     
 protected:
+    std::string mDebugName;
     uint32_t mId { 0 };
     GLenum mFormat { GL_RGB16 };
     glm::ivec2 mSize { 1024 };

@@ -89,8 +89,10 @@ add_library(${GRAPHICS_LIBRARY} STATIC
         src/graphics/backend/ShadowMapping.h
         src/graphics/backend/LightShading.cpp
         src/graphics/backend/LightShading.h
-        src/graphics/backend/AddSkybox.cpp
-        src/graphics/backend/AddSkybox.h
+        src/graphics/backend/SkyboxPass.cpp
+        src/graphics/backend/SkyboxPass.h
+        src/graphics/Skybox.cpp
+        src/graphics/Skybox.h
 )
 
 target_include_directories(${GRAPHICS_LIBRARY} PUBLIC

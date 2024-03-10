@@ -300,19 +300,6 @@ void Renderer::render()
     });
     mRendererBackend->execute();
 
-        // PROFILE_SCOPE_BEGIN(postProcessTimer, "Post-processing Stack");
-        // graphics::pushDebugGroup("Post-processing Pass");
-        //
-        // graphics::copyTexture2D(*mCombinedLightingTextureBuffer, *mPrimaryImageBuffer);
-        // for (std::unique_ptr<PostProcessLayer> &postProcessLayer : camera.postProcessStack)
-        // {
-        //     postProcessLayer->draw(mPrimaryImageBuffer.get(), mAuxiliaryImageBuffer.get());
-        //     graphics::copyTexture2D(*mAuxiliaryImageBuffer, *mPrimaryImageBuffer); // Yes this is bad. I'm lazy.
-        // }
-        //
-        // PROFILE_SCOPE_END(postProcessTimer);
-        // graphics::popDebugGroup();
-        //
         // PROFILE_SCOPE_BEGIN(debugView, "Debug View");
         // graphics::pushDebugGroup("Debug View");
 
@@ -920,15 +907,16 @@ std::vector<Shader> Renderer::makeShaderVariants(const std::filesystem::path& pa
 
 void Renderer::generateSkybox(std::string_view path, const glm::ivec2 desiredSize)
 {
-    mHdrImage = std::make_unique<HdrTexture>(path);
-    mHdrImage->setDebugName("HDRSkyboxImage");
-    mHdrSkybox = createCubemapFromHdrTexture(mHdrImage.get(), desiredSize);
-    mHdrSkybox->setDebugName("Skybox");
-    mIrradianceMap = generateIrradianceMap(mHdrSkybox.get(), desiredSize / 8);  // 8
-    mIrradianceMap->setDebugName("Irradiance");
-    mPreFilterMap = generatePreFilterMap(mHdrSkybox.get(), desiredSize / 4);  // 4
-    mPreFilterMap->setDebugName("Prefilter Map");
-    mHasSkybox = true;
+    mRendererBackend->generateSkybox(path, desiredSize);
+    // mHdrImage = std::make_unique<HdrTexture>(path);
+    // mHdrImage->setDebugName("HDRSkyboxImage");
+    // mHdrSkybox = createCubemapFromHdrTexture(mHdrImage.get(), desiredSize);
+    // mHdrSkybox->setDebugName("Skybox");
+    // mIrradianceMap = generateIrradianceMap(mHdrSkybox.get(), desiredSize / 8);  // 8
+    // mIrradianceMap->setDebugName("Irradiance");
+    // mPreFilterMap = generatePreFilterMap(mHdrSkybox.get(), desiredSize / 4);  // 4
+    // mPreFilterMap->setDebugName("Prefilter Map");
+    // mHasSkybox = true;
 }
 
 void Renderer::drawFullscreenTriangleNow() const
@@ -939,17 +927,17 @@ void Renderer::drawFullscreenTriangleNow() const
 
 const TextureBufferObject &Renderer::getPrimaryBuffer() const
 {
-    return *mPrimaryImageBuffer;
+    return mRendererBackend->getContext().backBuffer;
 }
 
 const TextureBufferObject &Renderer::getLightBuffer() const
 {
-    return *mLightTextureBuffer;
+    return mRendererBackend->getContext().lightBuffer;
 }
 
 const TextureBufferObject &Renderer::getDepthBuffer() const
 {
-    return *mDepthTextureBuffer;
+    return mRendererBackend->getContext().depthBuffer;
 }
 
 std::vector<graphics::DirectionalLight> &Renderer::getDirectionalLights()
@@ -1040,9 +1028,9 @@ float Renderer::getCurrentExposure() const
     return 1.f / maxLuminance;
 }
 
-void Renderer::setIblMultiplier(const float multiplier)
+void Renderer::setIblMultiplier(const float multiplier) const
 {
-    mIblLuminanceMultiplier = glm::abs(multiplier);
+    mRendererBackend->setIblMultiplier(glm::abs(multiplier));
 }
 
 void Renderer::rendererGuiNewFrame()

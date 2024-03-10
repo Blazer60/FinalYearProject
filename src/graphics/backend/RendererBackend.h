@@ -13,6 +13,7 @@
 #include "MaterialRendering.h"
 #include "Pch.h"
 #include "ShadowMapping.h"
+#include "SkyboxPass.h"
 #include "TileClassification.h"
 
 namespace graphics
@@ -35,18 +36,25 @@ namespace graphics
     class RendererBackend
     {
     public:
-        RendererBackend() = default;
+        RendererBackend();
+        const Context &getContext();
+        void generateSkybox(std::string_view path, const glm::ivec2 &size);
         void copyQueues(Queues &&queues);
         void execute();
+        void setIblMultiplier(float multiplier);
 
     protected:
         void setupCurrentCamera(const CameraSettings &camera);
+        void executePostProcessStack(const CameraSettings &camera);
+
+        Skybox mSkybox;
 
         Context mContext;
         MaterialRendering mMaterialRendering;
         TileClassification mTileClassification;
         ShadowMapping mShadowMapping;
         LightShading mLightShading;
+        SkyboxPass mSkyboxPass;
 
         std::vector<RenderQueueObject> mRenderQueue;
         std::vector<CameraSettings> mCameraQueue;

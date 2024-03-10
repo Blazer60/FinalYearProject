@@ -21,6 +21,9 @@ void TextureArrayObject::init()
 
     constexpr int mipMapLevels = 1;
     glTextureStorage3D(mId, mipMapLevels, mFormat, mSize.x, mSize.y, mLayers);
+
+    if (!mDebugName.empty())
+        glObjectLabel(GL_TEXTURE, mId, mDebugName.size(), mDebugName.data());
 }
 
 TextureArrayObject::TextureArrayObject(
@@ -85,4 +88,12 @@ int32_t TextureArrayObject::getLayerCount() const
 GLenum TextureArrayObject::getFormat() const
 {
     return mFormat;
+}
+
+void TextureArrayObject::setDebugName(const std::string& name)
+{
+    mDebugName = name;
+
+    if (mId != 0)
+        glObjectLabel(GL_TEXTURE, mId, mDebugName.size(), mDebugName.data());
 }

@@ -9,8 +9,10 @@
 
 #include "Context.h"
 #include "FileLoader.h"
+#include "GBufferFlags.h"
 #include "Pch.h"
 #include "Shader.h"
+#include "Ubo.h"
 
 namespace graphics
 {
@@ -24,6 +26,7 @@ namespace graphics
         TileClassification();
         void execute(const glm::ivec2 &size, Context &context);
     protected:
+        void generateShaderTable();
         static constexpr uint32_t shaderVariantCount = 3;
         static constexpr uint32_t indirectBufferSize = 4 * sizeof(uint32_t) * shaderVariantCount;
         static constexpr uint32_t mTileThreadGroupSize = 16;
@@ -31,6 +34,9 @@ namespace graphics
         Shader mTileShader {
             { file::shaderPath() / "classification/MaterialClassification.comp" }
         };
+
+        std::vector<shaderVariant> mShaderTable;
+        Ubo mShaderTableUbo = Ubo(shaderFlagPermutations * sizeof(uint32_t));
     };
 
 } // graphics

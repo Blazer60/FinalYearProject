@@ -13,6 +13,7 @@ namespace graphics
 {
     TileClassification::TileClassification()
     {
+        generateShaderTable();
         mTileShader.block("ShaderTable", 0);
     }
 
@@ -34,7 +35,8 @@ namespace graphics
         context.tileClassificationStorage.zeroOut();
         context.tileClassificationStorage.write(resetData.data(), sizeof(uint32_t) * resetData.size());
 
-        context.tileClassificationStorage.bindToSlot(0);
+        context.tileClassificationStorage.bindToSlot(1);
+        mShaderTableUbo.bindToSlot(0);
 
         mTileShader.bind();
         mTileShader.image("storageGBuffer", context.gbuffer.getId(), context.gbuffer.getFormat(),
@@ -43,5 +45,26 @@ namespace graphics
         glDispatchCompute(tileCount.x, tileCount.y, 1);
 
         popDebugGroup();
+    }
+
+    void TileClassification::generateShaderTable()
+    {
+        mShaderTable.reserve(shaderFlagPermutations);
+        for (uint32_t flag = 0; flag < shaderFlagPermutations; ++flag)
+        {
+            if ((flag & ShaderFlagBit::SheenBit) > 0)
+                mShaderTable.push_back(shaderVariant::UberShader);
+            else if ((flag & ShaderFlagBit::MaterialBit) > 0)
+                mShaderTable.push_back(shaderVariant::BaseShader);
+            else
+                mShaderTable.push_back(shaderVariant::UberShader);
+        }
+
+        std::vector<uint32_t> buffer;
+        buffer.reserve(shaderFlagPermutations);
+        for (auto value : mShaderTable)
+            buffer.push_back(static_cast<uint32_t>(value));
+
+        mShaderTableUbo.set(buffer.data());
     }
 }

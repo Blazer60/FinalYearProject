@@ -18,6 +18,7 @@
 #include "Shader.h"
 #include "SpotlightBlock.h"
 #include "../Primitives.h"
+#include "../Skybox.h"
 
 namespace graphics
 {
@@ -32,9 +33,7 @@ namespace graphics
         void execute(const glm::ivec2 &size, Context &context, const std::vector<DirectionalLight> &directionalLightQueue);
         void execute(const glm::ivec2 &size, Context &context, const std::vector<PointLight> &pointLightQueue);
         void execute(const glm::ivec2 &size, Context &context, const std::vector<Spotlight> &spotLightQueue);
-        void executeIbl(const glm::ivec2 &size, Context &context);
-
-        void generateSkybox(std::string_view path, glm::ivec2 size);
+        void execute(const glm::ivec2 &size, Context &context, const Skybox &skybox);
     protected:
         void generateSpecularDirectionalAlbedoLut(const glm::ivec2 &size);
         void generateSpecularDirectionalAlbedoAverageLut(uint32_t size);
@@ -42,11 +41,6 @@ namespace graphics
         void setupLtcSheenTable();
         void generateSheenLut(const glm::ivec2 &size);
         void generateIblShaderVariants(const std::filesystem::path &path);
-
-        void createCubemapFromHdrTexture(const HdrTexture& hdrImage, glm::ivec2 size);
-        void generateIrradianceMap(glm::ivec2 size);
-        void generatePrefilterMap(glm::ivec2 size);
-
 
         Shader mDirectionalLightShader {
             { file::shaderPath() / "lighting/DirectionalLight.comp" }
@@ -82,17 +76,6 @@ namespace graphics
         };
 
         // Todo: Irradiance and Prefilter maps need to be generated elsewhere and then feed int.
-        Shader mHdrToCubemapShader {
-            { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "cubemap/ToCubemap.frag" }
-        };
-
-        Shader mCubemapToIrradianceShader {
-            { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() / "cubemap/IrradianceMap.frag" }
-        };
-
-        Shader mPreFilterShader {
-            { file::shaderPath() / "FullscreenTriangle.vert", file::shaderPath() /  "cubemap/PreFilter.frag" }
-        };
 
         std::vector<Shader> mIblShaderVariants;
 
@@ -106,12 +89,6 @@ namespace graphics
         TextureBufferObject mLtcSheenTable = TextureBufferObject(textureFormat::Rgba16f);
         TextureBufferObject mSheenDirectionalAlbedoLut = TextureBufferObject(textureFormat::R16f);
 
-        Cubemap mHdrSkybox = Cubemap(textureFormat::Rgba16f);
-        Cubemap mIrradianceMap = Cubemap(textureFormat::Rgba16f);
-        Cubemap mPrefilterMap = Cubemap(textureFormat::Rgba16f, 5);
-
-        bool mHasSkybox = false;
         bool mUseUberVariant = false;
-        float mIblLuminanceMultiplier = 1000.f;
     };
 } // graphics

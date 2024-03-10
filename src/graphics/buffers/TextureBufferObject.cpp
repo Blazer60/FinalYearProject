@@ -60,6 +60,9 @@ void TextureBufferObject::init(const GLint minFilter, const GLint magFilter, con
     glTextureParameteri(mId, GL_TEXTURE_WRAP_S, wrapS);
     glTextureParameteri(mId, GL_TEXTURE_WRAP_T, wrapT);
     glTextureStorage2D(mId, static_cast<int>(mMipMapLevels), mFormat, mSize.x, mSize.y);
+
+    if (!mDebugName.empty())
+        glObjectLabel(GL_TEXTURE, mId, static_cast<GLsizei>(mDebugName.size()), mDebugName.data());
 }
 
 void TextureBufferObject::init()
@@ -77,6 +80,9 @@ void TextureBufferObject::init()
     glTextureParameteri(mId, GL_TEXTURE_WRAP_S, toGLint(mWrap));
     glTextureParameteri(mId, GL_TEXTURE_WRAP_T, toGLint(mWrap));
     glTextureStorage2D(mId, static_cast<int>(mMipMapLevels), mFormat, mSize.x, mSize.y);
+
+    if (!mDebugName.empty())
+        glObjectLabel(GL_TEXTURE, mId, static_cast<GLsizei>(mDebugName.size()), mDebugName.data());
 }
 
 void TextureBufferObject::deInit()
@@ -140,9 +146,11 @@ void TextureBufferObject::clear(const glm::vec4 &clearColour) const
         glClearTexImage(mId, 0, GL_RGBA, GL_FLOAT, glm::value_ptr(clearColour));
 }
 
-void TextureBufferObject::setDebugName(const std::string& debugName) const
+void TextureBufferObject::setDebugName(const std::string& debugName)
 {
-    glObjectLabel(GL_TEXTURE, mId, -1, debugName.data());
+    mDebugName = debugName;
+    if (mId != 0)
+        glObjectLabel(GL_TEXTURE, mId, -1, debugName.data());
 }
 
 void TextureBufferObject::upload(const float* data, const graphics::pixelFormat format) const

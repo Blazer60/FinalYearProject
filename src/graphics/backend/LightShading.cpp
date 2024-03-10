@@ -21,6 +21,7 @@ namespace graphics
         constexpr int lutSize = 32;
         generateSpecularDirectionalAlbedoLut(glm::ivec2(lutSize));
         generateSpecularDirectionalAlbedoAverageLut(lutSize);
+        generateSpecularMissingLut(glm::ivec2(lutSize));
 
         setupLtcSheenTable();
         generateSheenLut(glm::ivec2(lutSize));
@@ -83,7 +84,7 @@ namespace graphics
 
         mPointLightShader.bind();
         context.camera.bindToSlot(0);
-        mSpotlightBlock.bindToSlot(1);
+        mPointLightBlock.bindToSlot(1);
 
         mPointLightShader.set("depthBufferTexture", context.depthBuffer.getId(), 0);
         mPointLightShader.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut.getId(), 3);
@@ -156,10 +157,10 @@ namespace graphics
         popDebugGroup();
     }
 
-    void LightShading::executeIbl(const glm::ivec2& size, Context& context)
+    void LightShading::execute(const glm::ivec2 &size, Context &context, const Skybox &skybox)
     {
         PROFILE_FUNC();
-        if (!mHasSkybox)
+        if (!skybox.isValid)
             return;
 
         pushDebugGroup("Distant Light Probe");
@@ -175,10 +176,10 @@ namespace graphics
             mIblShader.set("missingSpecularLutTexture", mSpecularMissingTextureBuffer.getId(), 1);
             mIblShader.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut.getId(), 2);
             mIblShader.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut.getId(), 3);
-            mIblShader.set("u_irradiance_texture", mIrradianceMap.getId(), 4);
-            mIblShader.set("u_pre_filter_texture", mPrefilterMap.getId(), 5);
+            mIblShader.set("u_irradiance_texture", skybox.irradianceMap.getId(), 4);
+            mIblShader.set("u_pre_filter_texture", skybox.prefilterMap.getId(), 5);
             mIblShader.set("sheenLut", mSheenDirectionalAlbedoLut.getId(), 6);
-            mIblShader.set("u_luminance_multiplier", mIblLuminanceMultiplier);
+            mIblShader.set("u_luminance_multiplier", skybox.luminanceMultiplier);
 
             mIblShader.bind();
             const auto threadGroupSize = glm::ivec2(ceil(glm::vec2(size) / glm::vec2(16)));
@@ -195,12 +196,12 @@ namespace graphics
                 iblShader.set("missingSpecularLutTexture", mSpecularMissingTextureBuffer.getId(), 1);
                 iblShader.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut.getId(), 2);
                 iblShader.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut.getId(), 3);
-                iblShader.set("u_irradiance_texture", mIrradianceMap.getId(), 4);
-                iblShader.set("u_pre_filter_texture", mPrefilterMap.getId(), 5);
+                iblShader.set("u_irradiance_texture", skybox.irradianceMap.getId(), 4);
+                iblShader.set("u_pre_filter_texture", skybox.prefilterMap.getId(), 5);
                 if (i == 0)
                     iblShader.set("sheenLut", mSheenDirectionalAlbedoLut.getId(), 6);
 
-                iblShader.set("u_luminance_multiplier", mIblLuminanceMultiplier);
+                iblShader.set("u_luminance_multiplier", skybox.luminanceMultiplier);
                 iblShader.set("shaderIndex", i);
 
                 iblShader.bind();
@@ -211,16 +212,6 @@ namespace graphics
         }
 
         popDebugGroup();
-    }
-
-    void LightShading::generateSkybox(const std::string_view path, const glm::ivec2 size)
-    {
-        HdrTexture hdrImage(path);
-        hdrImage.setDebugName("HDR Skybox Image");
-        createCubemapFromHdrTexture(hdrImage, size);
-        generateIrradianceMap(size / 8);
-        generatePrefilterMap(size / 4);
-        mHasSkybox = true;
     }
 
     void LightShading::generateSpecularDirectionalAlbedoLut(const glm::ivec2& size)
@@ -255,6 +246,7 @@ namespace graphics
     void LightShading::generateSpecularMissingLut(const glm::ivec2& size)
     {
         mSpecularMissingTextureBuffer.resize(size);
+        mSpecularMissingTextureBuffer.setDebugName("Specular Missing LUT");
 
         mIntegrateSpecularMissing.bind();
         mIntegrateSpecularMissing.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut.getId(), 0);
@@ -303,118 +295,4 @@ namespace graphics
         mIblShaderVariants.push_back(Shader({ path }, baseShaderDefinitions));
     }
 
-    void LightShading::createCubemapFromHdrTexture(const HdrTexture& hdrImage, glm::ivec2 size)
-    {
-        mHdrSkybox.resize(size);
-
-        FramebufferObject auxiliaryFrameBuffer(GL_ONE, GL_ONE, GL_ALWAYS);
-
-        const glm::mat4 views[] = {
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
-        };
-
-        auxiliaryFrameBuffer.bind();
-        mHdrToCubemapShader.bind();
-        mHdrToCubemapShader.set("u_texture", hdrImage.getId(), 0);
-
-        glViewport(0, 0, size.x, size.y);
-
-        const SubMesh fullscreenTriangle = primitives::fullscreenTriangle();
-        glBindVertexArray(fullscreenTriangle.vao());
-
-        for (int i = 0; i < 6; ++i)
-        {
-            mHdrToCubemapShader.set("u_view_matrix", views[i]);
-            auxiliaryFrameBuffer.attach(&mHdrSkybox, 0, i);
-            auxiliaryFrameBuffer.clear(glm::vec4(glm::vec3(0.f), 1.f));
-
-            glDrawElements(GL_TRIANGLES, fullscreenTriangle.indicesCount(), GL_UNSIGNED_INT, nullptr);
-
-            auxiliaryFrameBuffer.detach(0);
-        }
-    }
-
-    void LightShading::generateIrradianceMap(const glm::ivec2 size)
-    {
-        mIrradianceMap.resize(size);
-
-        FramebufferObject auxiliaryFrameBuffer(GL_ONE, GL_ONE, GL_ALWAYS);
-
-        const glm::mat4 views[] = {
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
-        };
-
-        auxiliaryFrameBuffer.bind();
-        mCubemapToIrradianceShader.bind();
-        mCubemapToIrradianceShader.set("u_environment_texture", mHdrSkybox.getId(), 0);
-
-        glViewport(0, 0, size.x, size.y);
-
-        const auto fullscreenTriangle = primitives::fullscreenTriangle();
-        glBindVertexArray(fullscreenTriangle.vao());
-
-        for (int i = 0; i < 6; ++i)
-        {
-            mCubemapToIrradianceShader.set("u_view_matrix", views[i]);
-            auxiliaryFrameBuffer.attach(&mIrradianceMap, 0, i);
-            auxiliaryFrameBuffer.clear(glm::vec4(glm::vec3(0.f), 1.f));
-
-            glDrawElements(GL_TRIANGLES, fullscreenTriangle.indicesCount(), GL_UNSIGNED_INT, nullptr);
-
-            auxiliaryFrameBuffer.detach(0);
-        }
-    }
-
-    void LightShading::generatePrefilterMap(const glm::ivec2 size)
-    {
-        mPrefilterMap.resize(size);
-
-        FramebufferObject auxiliaryFrameBuffer(GL_ONE, GL_ONE, GL_ALWAYS);
-
-        const glm::mat4 views[] = {
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
-        };
-
-        auxiliaryFrameBuffer.bind();
-        mPreFilterShader.bind();
-        mPreFilterShader.set("u_environment_texture", mHdrSkybox.getId(), 0);
-
-        const auto fullscreenTriangle = primitives::fullscreenTriangle();
-        glBindVertexArray(fullscreenTriangle.vao());
-
-        for (int mip = 0; mip < mPrefilterMap.getMipLevels(); ++mip)
-        {
-            const glm::ivec2 mipSize = size >> mip;
-            glViewport(0, 0, mipSize.x, mipSize.y);
-
-            const float roughness = static_cast<float>(mip) / (static_cast<float>(mPrefilterMap.getMipLevels()) - 1.f);
-            mPreFilterShader.set("u_roughness", roughness);
-
-            for (int i = 0; i < 6; ++i)
-            {
-                mPreFilterShader.set("u_view_matrix", views[i]);
-                auxiliaryFrameBuffer.attach(&mPrefilterMap, 0, i, mip);
-                auxiliaryFrameBuffer.clear(glm::vec4(glm::vec3(0.f), 1.f));
-
-                glDrawElements(GL_TRIANGLES, fullscreenTriangle.indicesCount(), GL_UNSIGNED_INT, nullptr);
-
-                auxiliaryFrameBuffer.detach(0);
-            }
-        }
-    }
 }

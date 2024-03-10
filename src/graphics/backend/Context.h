@@ -30,7 +30,8 @@ namespace graphics
 
         TextureBufferObject depthBuffer = TextureBufferObject(textureFormat::D32f);
         TextureBufferObject lightBuffer = TextureBufferObject(textureFormat::Rgba16f);
-        TextureBufferObject backBuffer = TextureBufferObject(textureFormat::Rgba16);
+        TextureBufferObject backBuffer = TextureBufferObject(textureFormat::Rgba16f);
+        TextureBufferObject auxilliaryBuffer = TextureBufferObject(textureFormat::Rgba16f);
 
         ShaderStorageBufferObject tileClassificationStorage = ShaderStorageBufferObject(0, "Shader Storage Buffer Object");
 

@@ -1,5 +1,5 @@
 /**
- * @file AddSkybox.h
+ * @file SkyboxPass.h
  * @author Ryan Purse
  * @date 10/03/2024
  */
@@ -11,16 +11,18 @@
 #include "FileLoader.h"
 #include "Pch.h"
 
-namespace graphics {
+namespace graphics
+{
+    class Skybox;
 
     /**
      * @author Ryan Purse
      * @date 10/03/2024
      */
-    class AddSkybox 
+    class SkyboxPass
     {
     public:
-        void execute(const glm::ivec2 &size, Context &context);
+        void execute(const glm::ivec2& size, Context& context, const Skybox &skybox);
 
     protected:
         Shader mCombineLightingShader {

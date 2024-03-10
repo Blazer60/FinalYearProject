@@ -189,7 +189,7 @@ public:
     [[nodiscard]] float getCurrentEV100() const;
     [[nodiscard]] float getCurrentExposure() const;
 
-    void setIblMultiplier(float multiplier);
+    void setIblMultiplier(float multiplier) const;
 
 protected:
     void initFrameBuffers();

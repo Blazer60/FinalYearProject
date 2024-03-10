@@ -28,7 +28,7 @@ namespace graphics
         nameBuffer();
     }
 
-    void ShaderStorageBufferObject::resize(unsigned int size)
+    void ShaderStorageBufferObject::resize(const unsigned int size)
     {
         if (size == mSize)
             return;

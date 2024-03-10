@@ -12,6 +12,24 @@
 
 namespace graphics
 {
+    RendererBackend::RendererBackend()
+    {
+        mContext.gbuffer.setDebugName("GBuffer");
+        mContext.depthBuffer.setDebugName("Depth Buffer");
+        mContext.lightBuffer.setDebugName("Light Buffer");
+        mContext.backBuffer.setDebugName("Back Buffer");
+    }
+
+    const Context& RendererBackend::getContext()
+    {
+        return mContext;
+    }
+
+    void RendererBackend::generateSkybox(const std::string_view path, const glm::ivec2& size)
+    {
+        mSkybox.generate(path, size);
+    }
+
     void RendererBackend::copyQueues(Queues &&queues)
     {
         mRenderQueue = std::move(queues.renderQueue);
@@ -48,11 +66,19 @@ namespace graphics
             mLightShading.execute(window::bufferSize(), mContext, mDirectionalLightQueue);
             mLightShading.execute(window::bufferSize(), mContext, mPointLightQueue);
             mLightShading.execute(window::bufferSize(), mContext, mSpotlightQueue);
-            mLightShading.executeIbl(window::bufferSize(), mContext);
 
+            mLightShading.execute(window::bufferSize(), mContext, mSkybox);
+            mSkyboxPass.execute(window::bufferSize(), mContext, mSkybox);
+
+            executePostProcessStack(camera);
         }
 
         popDebugGroup();
+    }
+
+    void RendererBackend::setIblMultiplier(const float multiplier)
+    {
+        mSkybox.luminanceMultiplier = multiplier;
     }
 
     void RendererBackend::setupCurrentCamera(const CameraSettings& camera)
@@ -69,5 +95,21 @@ namespace graphics
         mContext.camera->zNear = camera.nearClipDistance;
         mContext.camera->zFar = camera.farClipDistance;
         mContext.camera.updateGlsl();
+    }
+
+    void RendererBackend::executePostProcessStack(const CameraSettings &camera)
+    {
+        PROFILE_FUNC();
+        pushDebugGroup("Post-processing Pass");
+
+        mContext.auxilliaryBuffer.resize(window::bufferSize());
+
+        for (const std::unique_ptr<PostProcessLayer>  &postProcessLayer : camera.postProcessStack)
+        {
+            postProcessLayer->draw(&mContext.backBuffer, &mContext.auxilliaryBuffer);
+            copyTexture2D(mContext.auxilliaryBuffer, mContext.backBuffer); // Yes this is bad. I'm lazy.
+        }
+
+        popDebugGroup();
     }
 }
