@@ -20,8 +20,11 @@
 class TextureBufferObject
 {
 public:
+    TextureBufferObject();
     explicit TextureBufferObject(const glm::ivec2 &size);
     explicit TextureBufferObject(TextureBufferObject &tex) = delete;
+    TextureBufferObject(TextureBufferObject&&other) noexcept;
+    TextureBufferObject &operator=(TextureBufferObject&&other) noexcept;
     
     /**
      * @see <a href="https://www.khronos.org/opengl/wiki/Image_Format">Image Formatting</a>

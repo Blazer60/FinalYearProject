@@ -43,6 +43,21 @@ namespace graphics
         glPopDebugGroup();
     }
 
+    void dispatchCompute(const glm::uvec3 size)
+    {
+        glDispatchCompute(size.x, size.y, size.z);
+    }
+
+    void dispatchCompute(const glm::uvec2 size)
+    {
+        glDispatchCompute(size.x, size.y, 1);
+    }
+
+    void dispatchCompute(const uint32_t size)
+    {
+        glDispatchCompute(size, 1, 1);
+    }
+
     void dispatchComputeIndirect(const uint32_t buffer, const int offset)
     {
         glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, buffer);

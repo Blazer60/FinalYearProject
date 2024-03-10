@@ -63,10 +63,10 @@ namespace graphics
             mContext.lightBuffer.resize(window::bufferSize());
             mContext.lightBuffer.clear();
 
-            mLightShading.execute(window::bufferSize(), mContext, mDirectionalLightQueue);
-            mLightShading.execute(window::bufferSize(), mContext, mPointLightQueue);
-            mLightShading.execute(window::bufferSize(), mContext, mSpotlightQueue);
-            mLightShading.execute(window::bufferSize(), mContext, mSkybox);
+            mLightShading.execute(window::bufferSize(), mContext, mPrecalcs, mDirectionalLightQueue);
+            mLightShading.execute(window::bufferSize(), mContext, mPrecalcs, mPointLightQueue);
+            mLightShading.execute(window::bufferSize(), mContext, mPrecalcs, mSpotlightQueue);
+            mLightShading.execute(window::bufferSize(), mContext, mPrecalcs, mSkybox);
 
             mSkyboxPass.execute(window::bufferSize(), mContext, mSkybox);
 
@@ -98,6 +98,11 @@ namespace graphics
     const TextureBufferObject& RendererBackend::getDebugBuffer()
     {
         return mDebugPass.getDebugOverlay();
+    }
+
+    const TextureBufferObject& RendererBackend::whtieFurnacetest()
+    {
+        return mDebugPass.whiteFurnaceTest(window::bufferSize(), mContext, mPrecalcs);
     }
 
     void RendererBackend::setupCurrentCamera(const CameraSettings& camera)

@@ -10,6 +10,7 @@
 #include "Context.h"
 #include "DebugGBufferBlock.h"
 #include "FileLoader.h"
+#include "LookUpTables.h"
 #include "Mesh.h"
 #include "Pch.h"
 #include "TextureBufferObject.h"
@@ -27,7 +28,7 @@ namespace graphics
         DebugPass();
         void execute(const glm::ivec2 &size, const Context &context, const std::vector<DebugQueueObject> &debugQueue, const std::vector<LineQueueObject> &lineQueue);
         TextureBufferObject &tileOverlay(const glm::ivec2 &size, const Context &context);
-        TextureBufferObject &whiteFurnaceTest(const glm::ivec2 &size, const Context &context);
+        TextureBufferObject &whiteFurnaceTest(const glm::ivec2& size, const Context& context, const Lut &lut);
         TextureBufferObject &queryGBuffer(
             const glm::ivec2 &size, const Context& context,
             gbuffer type, bool gammaCorrect, const glm::vec4& defaultValue);

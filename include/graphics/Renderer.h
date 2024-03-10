@@ -167,7 +167,7 @@ public:
     [[nodiscard]] const TextureBufferObject &getDepthBuffer() const;
     [[nodiscard]] const TextureBufferObject &getDebugBuffer() const;
     [[nodiscard]] const TextureBufferObject &getFromGBuffer(graphics::gbuffer type, bool gammaCorrect, const glm::vec4 &defaultValue=glm::vec4(0.f, 0.f, 0.f, 1.f)) const;
-    [[nodiscard]] const TextureBufferObject &whiteFurnaceTest();
+    [[nodiscard]] const TextureBufferObject &whiteFurnaceTest() const;
     [[nodiscard]] const TextureBufferObject &drawTileClassification() const;
 
     void setIblMultiplier(float multiplier) const;

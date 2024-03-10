@@ -10,10 +10,38 @@
 #include "WindowHelpers.h"
 #include "gtc/type_ptr.hpp"
 
+TextureBufferObject::TextureBufferObject()
+{
+    // Not a valid texture until init() is called.
+}
+
 TextureBufferObject::TextureBufferObject(const glm::ivec2 &size)
     : mSize(size)
 {
     init(GL_NEAREST, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+}
+
+TextureBufferObject::TextureBufferObject(TextureBufferObject&& other) noexcept
+    :
+    mDebugName(other.mDebugName), mId(other.mId), mFormat(other.mFormat),
+    mSize(other.mSize), mMipMapLevels(other.mMipMapLevels), mFilter(other.mFilter),
+    mWrap(other.mWrap)
+{
+    other.mId = 0;
+}
+
+TextureBufferObject& TextureBufferObject::operator=(TextureBufferObject&& other) noexcept
+{
+    mDebugName = other.mDebugName;
+    mId = other.mId;
+    mFormat = other.mFormat;
+    mSize = other.mSize;
+    mMipMapLevels = other.mMipMapLevels;
+    mFilter = other.mFilter;
+    mWrap = other.mWrap;
+    other.mId = 0;
+
+    return *this;
 }
 
 TextureBufferObject::TextureBufferObject(

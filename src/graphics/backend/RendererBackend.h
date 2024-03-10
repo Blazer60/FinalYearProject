@@ -11,6 +11,7 @@
 #include "DebugPass.h"
 #include "GraphicsLighting.h"
 #include "LightShadingPass.h"
+#include "LookUpTables.h"
 #include "MaterialRenderingPass.h"
 #include "Pch.h"
 #include "ShadowMappingPass.h"
@@ -46,11 +47,14 @@ namespace graphics
         const TextureBufferObject& queryGbuffer(gbuffer type, bool gammaCorrect, const glm::vec4 &defaultValue);
         const TextureBufferObject& tileOverlay();
         const TextureBufferObject& getDebugBuffer();
+        const TextureBufferObject& whtieFurnacetest();
 
     protected:
         void setupCurrentCamera(const CameraSettings &camera);
         void executePostProcessStack(const CameraSettings &camera);
 
+        static constexpr int lutSize = 32;
+        Lut mPrecalcs = precalculateLuts(lutSize);
         Skybox mSkybox;
 
         Context mContext;

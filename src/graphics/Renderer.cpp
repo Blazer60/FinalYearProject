@@ -222,9 +222,9 @@ const TextureBufferObject& Renderer::getFromGBuffer(const graphics::gbuffer type
     return mRendererBackend->queryGbuffer(type, gammaCorrect, defaultValue);
 }
 
-const TextureBufferObject &Renderer::whiteFurnaceTest()
+const TextureBufferObject &Renderer::whiteFurnaceTest() const
 {
-    return mRendererBackend->getDebugBuffer();
+    return mRendererBackend->whtieFurnacetest();
 }
 
 const TextureBufferObject& Renderer::drawTileClassification() const

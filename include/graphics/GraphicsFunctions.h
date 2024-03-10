@@ -32,6 +32,11 @@ namespace graphics
     void pushDebugGroup(std::string_view message);
     void popDebugGroup();
 
+
+    void dispatchCompute(glm::uvec3 size);
+    void dispatchCompute(glm::uvec2 size);
+    void dispatchCompute(uint32_t   size);
+
     /**
      * @param buffer The buffer where numwork groups is held on the gpu
      * @param offset The offset into the buffer - typically zero

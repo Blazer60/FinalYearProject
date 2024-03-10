@@ -58,43 +58,30 @@ add_library(${GRAPHICS_LIBRARY} STATIC
         src/graphics/buffers/TextureArrayObject.cpp include/graphics/buffers/TextureArrayObject.h
         src/graphics/buffers/TextureBufferObject.cpp include/graphics/buffers/TextureBufferObject.h
         src/graphics/postProcessing/PostProcessLayer.cpp include/graphics/postProcessing/PostProcessLayer.h
-        src/graphics/shader/ShaderCompilation.cpp
-        src/graphics/shader/ShaderCompilation.h
+        src/graphics/shader/ShaderCompilation.cpp src/graphics/shader/ShaderCompilation.h
         include/graphics/buffers/UniformBufferObject.h
         resources/shaders/interfaces/CameraBlock.h
-        src/graphics/shader/ShaderInformation.cpp
-        src/graphics/shader/ShaderInformation.h
+        src/graphics/shader/ShaderInformation.cpp src/graphics/shader/ShaderInformation.h
         resources/shaders/interfaces/DirectionalLightBlock.h
         resources/shaders/interfaces/PointLightBlock.h
         resources/shaders/interfaces/SpotlightBlock.h
         resources/shaders/interfaces/ScreenSpaceReflectionsBlock.h
         resources/shaders/interfaces/DebugGBufferBlock.h
-        src/graphics/buffers/ShaderStorageBufferObject.cpp
-        include/graphics/buffers/ShaderStorageBufferObject.h
-        src/graphics/buffers/Texture3DObject.cpp
-        include/graphics/buffers/Texture3DObject.h
-        src/graphics/LtcSheenTable.cpp
-        include/graphics/LtcSheenTable.h
+        src/graphics/buffers/ShaderStorageBufferObject.cpp include/graphics/buffers/ShaderStorageBufferObject.h
+        src/graphics/buffers/Texture3DObject.cpp include/graphics/buffers/Texture3DObject.h
+        src/graphics/LtcSheenTable.cpp include/graphics/LtcSheenTable.h
         resources/shaders/interfaces/GBufferFlags.h
-        src/graphics/buffers/Ubo.cpp
-        include/graphics/buffers/Ubo.h
+        src/graphics/buffers/Ubo.cpp include/graphics/buffers/Ubo.h
         src/graphics/backend/Context.h
-        src/graphics/backend/RendererBackend.cpp
-        src/graphics/backend/RendererBackend.h
-        src/graphics/backend/MaterialRendering.cpp
-        src/graphics/backend/MaterialRendering.h
-        src/graphics/backend/TileClassification.cpp
-        src/graphics/backend/TileClassification.h
-        src/graphics/backend/ShadowMapping.cpp
-        src/graphics/backend/ShadowMapping.h
-        src/graphics/backend/LightShading.cpp
-        src/graphics/backend/LightShading.h
-        src/graphics/backend/SkyboxPass.cpp
-        src/graphics/backend/SkyboxPass.h
-        src/graphics/Skybox.cpp
-        src/graphics/Skybox.h
-        src/graphics/backend/DebugPass.cpp
-        src/graphics/backend/DebugPass.h
+        src/graphics/backend/RendererBackend.cpp src/graphics/backend/RendererBackend.h
+        src/graphics/backend/MaterialRenderingPass.cpp src/graphics/backend/MaterialRenderingPass.h
+        src/graphics/backend/TileClassificationPass.cpp src/graphics/backend/TileClassificationPass.h
+        src/graphics/backend/ShadowMappingPass.cpp src/graphics/backend/ShadowMappingPass.h
+        src/graphics/backend/LightShadingPass.cpp src/graphics/backend/LightShadingPass.h
+        src/graphics/backend/SkyboxPass.cpp src/graphics/backend/SkyboxPass.h
+        src/graphics/Skybox.cpp src/graphics/Skybox.h
+        src/graphics/backend/DebugPass.cpp src/graphics/backend/DebugPass.h
+        src/graphics/backend/LookUpTables.cpp src/graphics/backend/LookUpTables.h
 )
 
 target_include_directories(${GRAPHICS_LIBRARY} PUBLIC

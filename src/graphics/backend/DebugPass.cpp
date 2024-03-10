@@ -10,6 +10,7 @@
 #include "DebugGBufferBlock.h"
 #include "GBufferFlags.h"
 #include "GraphicsFunctions.h"
+#include "LookUpTables.h"
 
 namespace graphics
 {
@@ -75,23 +76,23 @@ namespace graphics
         return mDebugOverlay;
     }
 
-    TextureBufferObject& DebugPass::whiteFurnaceTest(const glm::ivec2& size, const Context& context)
+    TextureBufferObject& DebugPass::whiteFurnaceTest(const glm::ivec2& size, const Context& context, const Lut &lut)
     {
         PROFILE_FUNC();
         pushDebugGroup("White Furnace Test");
+
+        mDebugTexture.resize(size);
 
         mWhiteFurnaceTestShader.bind();
         mWhiteFurnaceTestShader.image("storageGBuffer", context.gbuffer.getId(), context.gbuffer.getFormat(), 0, true, GL_READ_ONLY);
         mWhiteFurnaceTestShader.image("lighting", mDebugTexture.getId(), mDebugTexture.getFormat(), 1, false, GL_READ_WRITE);
         mWhiteFurnaceTestShader.set("depthBufferTexture", context.depthBuffer.getId(), 0);
 
-        // Todo: Link up these.
-        // mWhiteFurnaceTestShader.set("directionalAlbedoLut", mSpecularDirectionalAlbedoLut->getId(), 1);
-        // mWhiteFurnaceTestShader.set("directionalAlbedoAverageLut", mSpecularDirectionalAlbedoAverageLut->getId(), 2);
-        // mWhiteFurnaceTestShader.set("missingSpecularLutTexture", mSpecularMissingTextureBuffer->getId(), 3);
+        mWhiteFurnaceTestShader.set("directionalAlbedoLut", lut.specularDirectionalAlbedo.getId(), 1);
+        mWhiteFurnaceTestShader.set("directionalAlbedoAverageLut", lut.specularDirectionalAlbedoAverage.getId(), 2);
+        mWhiteFurnaceTestShader.set("missingSpecularLutTexture", lut.specularMissing.getId(), 3);
 
-        const glm::ivec2 numThreadGroups = glm::ceil(glm::vec2(size) / glm::vec2(16));
-        glDispatchCompute(numThreadGroups.x, numThreadGroups.y, 1);
+        dispatchCompute(glm::ceil(glm::vec2(size) / glm::vec2(16)));
 
         popDebugGroup();
         return mDebugTexture;
@@ -117,8 +118,7 @@ namespace graphics
         mDebugGBufferShader.image("storageGBuffer", context.gbuffer.getId(), context.gbuffer.getFormat(), 0, true, GL_READ_ONLY);
         mDebugGBufferShader.image("debug", mDebugTexture.getId(), mDebugTexture.getFormat(), 1, false, GL_WRITE_ONLY);
 
-        const glm::ivec2 numThreadGroups = glm::ceil(static_cast<glm::vec2>(size) / glm::vec2(DEBUG_GBUFFER_THREAD_SIZE));
-        glDispatchCompute(numThreadGroups.x, numThreadGroups.y, 1);
+        dispatchCompute(glm::ceil(static_cast<glm::vec2>(size) / glm::vec2(DEBUG_GBUFFER_THREAD_SIZE)));
 
         popDebugGroup();
 
