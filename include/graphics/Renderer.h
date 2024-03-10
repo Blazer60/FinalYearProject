@@ -172,6 +172,8 @@ public:
 
     void setIblMultiplier(float multiplier) const;
 
+    void setUseUberVariant(bool useUber) const;
+
 protected:
     std::vector<graphics::RenderQueueObject> mRenderQueue;
     std::vector<CameraSettings>              mCameraQueue;

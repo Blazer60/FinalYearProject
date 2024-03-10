@@ -36,7 +36,11 @@ namespace graphics
         context.tileClassificationStorage.write(resetData.data(), sizeof(uint32_t) * resetData.size());
 
         context.tileClassificationStorage.bindToSlot(1);
-        mShaderTableUbo.bindToSlot(0);
+
+        if (mUseUberVariant)
+            mUberShaderTable.bindToSlot(0);
+        else
+            mShaderTableUbo.bindToSlot(0);
 
         mTileShader.bind();
         mTileShader.image("storageGBuffer", context.gbuffer.getId(), context.gbuffer.getFormat(),
@@ -45,6 +49,11 @@ namespace graphics
         glDispatchCompute(tileCount.x, tileCount.y, 1);
 
         popDebugGroup();
+    }
+
+    void TileClassificationPass::setUseUberVariant(const bool useUber)
+    {
+        mUseUberVariant = useUber;
     }
 
     void TileClassificationPass::generateShaderTable()
@@ -60,11 +69,17 @@ namespace graphics
                 mShaderTable.push_back(shaderVariant::UberShader);
         }
 
-        std::vector<uint32_t> buffer;
-        buffer.reserve(shaderFlagPermutations);
-        for (auto value : mShaderTable)
-            buffer.push_back(static_cast<uint32_t>(value));
+        {
+            std::vector<uint32_t> buffer;
+            buffer.reserve(shaderFlagPermutations);
+            for (auto value : mShaderTable)
+                buffer.push_back(static_cast<uint32_t>(value));
 
-        mShaderTableUbo.set(buffer.data());
+            mShaderTableUbo.set(buffer.data());
+        }
+        {
+            const std::vector<uint32_t> buffer(shaderFlagPermutations);
+            mUberShaderTable.set(buffer.data());
+        }
     }
 }

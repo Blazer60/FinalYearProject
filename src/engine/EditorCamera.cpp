@@ -14,6 +14,7 @@
 #include "Editor.h"
 #include "EngineState.h"
 #include "EventHandler.h"
+#include "GraphicsState.h"
 #include "ProfileTimer.h"
 
 EditorCamera::EditorCamera()
@@ -119,6 +120,8 @@ void EditorCamera::onDrawUi()
         return;
 
     ImGui::Begin("Renderer Settings", &showCameraSettings);
+    if (ImGui::Checkbox("Use Uber variant for tile classification?", &mUseUberVariant))
+        graphics::renderer->setUseUberVariant(mUseUberVariant);
 
     if (ImGui::CollapsingHeader("Camera Details"))
     {

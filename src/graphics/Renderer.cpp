@@ -237,6 +237,11 @@ void Renderer::setIblMultiplier(const float multiplier) const
     mRendererBackend->setIblMultiplier(glm::abs(multiplier));
 }
 
+void Renderer::setUseUberVariant(const bool useUber) const
+{
+    mRendererBackend->setUseUberVariant(useUber);
+}
+
 void Renderer::rendererGuiNewFrame()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

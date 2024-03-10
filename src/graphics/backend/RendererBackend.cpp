@@ -105,6 +105,11 @@ namespace graphics
         return mDebugPass.whiteFurnaceTest(window::bufferSize(), mContext, mPrecalcs);
     }
 
+    void RendererBackend::setUseUberVariant(const bool useUber)
+    {
+        mTileClassification.setUseUberVariant(useUber);
+    }
+
     void RendererBackend::setupCurrentCamera(const CameraSettings& camera)
     {
         const float exposure = 1.f / (1.2f * glm::pow(2.f, camera.eV100));

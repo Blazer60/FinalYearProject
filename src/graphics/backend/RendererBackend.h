@@ -49,6 +49,8 @@ namespace graphics
         const TextureBufferObject& getDebugBuffer();
         const TextureBufferObject& whtieFurnacetest();
 
+        void setUseUberVariant(bool useUber);
+
     protected:
         void setupCurrentCamera(const CameraSettings &camera);
         void executePostProcessStack(const CameraSettings &camera);

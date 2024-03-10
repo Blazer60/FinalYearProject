@@ -70,6 +70,7 @@ protected:
     float       mRotationSpeed          { 0.1f };
     float       mSpeed                  { 30.f };
     glm::dvec2  mPanAngles              { 0.f };
+    bool        mUseUberVariant         { false };
 
     // Input linkage.
     bool        mDoMoveAction           { false };

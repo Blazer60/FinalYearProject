@@ -25,6 +25,9 @@ namespace graphics
     public:
         TileClassificationPass();
         void execute(const glm::ivec2 &size, Context &context);
+
+        void setUseUberVariant(bool useUber);
+
     protected:
         void generateShaderTable();
         static constexpr uint32_t shaderVariantCount = 3;
@@ -36,7 +39,10 @@ namespace graphics
         };
 
         std::vector<shaderVariant> mShaderTable;
+
+        bool mUseUberVariant = false;
         Ubo mShaderTableUbo = Ubo(shaderFlagPermutations * sizeof(uint32_t));
+        Ubo mUberShaderTable = Ubo(shaderFlagPermutations * sizeof(uint32_t));
     };
 
 } // graphics
