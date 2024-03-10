@@ -25,7 +25,7 @@ void BloomPass::onDraw(TextureBufferObject *imageInput, TextureBufferObject *ima
     // pre-filter pass.
     graphics::pushDebugGroup("Prefilter Pass + 1 Downsample");
     const glm::ivec2 downSampleSize = mDownSampleTexture->getSize();
-    glViewport(0, 0, downSampleSize.x, downSampleSize.y);
+    graphics::setViewport(downSampleSize);
     mFramebuffer->attach(mDownSampleTexture.get(), 0, 0);
     mPreFilter.bind();
     mPreFilter.set("u_texture", imageInput->getId(), 0);
@@ -41,7 +41,7 @@ void BloomPass::onDraw(TextureBufferObject *imageInput, TextureBufferObject *ima
     mDownSample.set("u_texture", mDownSampleTexture->getId(), 0);
     for (int i = 1; i < mMipLevelCount; ++i)
     {
-        glViewport(0, 0, downSampleSize.x >> i, downSampleSize.y >> i);
+        graphics::setViewport(downSampleSize >> i);
         mDownSample.set("u_mip_level", i - 1);
         mFramebuffer->attach(mDownSampleTexture.get(), 0, i);
         graphics::renderer->drawFullscreenTriangleNow();
@@ -57,7 +57,7 @@ void BloomPass::onDraw(TextureBufferObject *imageInput, TextureBufferObject *ima
     mUpSample.set("u_scale", mBloomScale);
 
     // first pass uses the two smallest mips from the down-sample.
-    glViewport(0, 0, upSampleSize.x >> (count - 1), upSampleSize.y >> (count - 1));
+    graphics::setViewport(upSampleSize >> (count - 1));
     mUpSample.set("u_up_sample_texture", mDownSampleTexture->getId(), 0);
     mUpSample.set("u_down_sample_texture", mDownSampleTexture->getId(), 1);
     mUpSample.set("u_up_mip_level", count - 1);
@@ -70,7 +70,7 @@ void BloomPass::onDraw(TextureBufferObject *imageInput, TextureBufferObject *ima
     mUpSample.set("u_up_sample_texture", mUpSampleTexture->getId(), 0);  // Up-sample texture changes to the correct one.
     for (int i = count - 2; i >= 0; --i)
     {
-        glViewport(0, 0, upSampleSize.x >> i, upSampleSize.y >> i);
+        graphics::setViewport(upSampleSize >> i);
         mUpSample.set("u_up_mip_level", i + 1);
         mUpSample.set("u_down_mip_level", i - 1);
         
@@ -82,7 +82,7 @@ void BloomPass::onDraw(TextureBufferObject *imageInput, TextureBufferObject *ima
 
     // composite stage.
     graphics::pushDebugGroup("Composite Pass");
-    glViewport(0, 0, imageOutput->getSize().x, imageOutput->getSize().y);
+    graphics::setViewport(imageOutput->getSize());
     mComposite.bind();
     mComposite.set("u_original", imageInput->getId(), 0);
     mComposite.set("u_bloom", mUpSampleTexture->getId(), 1);

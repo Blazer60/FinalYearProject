@@ -29,8 +29,7 @@ namespace graphics
         mFramebuffer.attachDepthBuffer(&context.depthBuffer);
         mFramebuffer.bind();
 
-        // Todo: make this a helper function.
-        glViewport(0, 0, size.x, size.y);
+        setViewport(size);
 
         // Bind Uniform Buffer Objects. Can this be done at a global level?
         context.camera.bindToSlot(0);

@@ -32,6 +32,7 @@ namespace graphics
     void pushDebugGroup(std::string_view message);
     void popDebugGroup();
 
+    void setViewport(glm::ivec2 size);
 
     void dispatchCompute(glm::uvec3 size);
     void dispatchCompute(glm::uvec2 size);

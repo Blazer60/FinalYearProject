@@ -43,6 +43,11 @@ namespace graphics
         glPopDebugGroup();
     }
 
+    void setViewport(const glm::ivec2 size)
+    {
+        glViewport(0, 0, size.x, size.y);
+    }
+
     void dispatchCompute(const glm::uvec3 size)
     {
         glDispatchCompute(size.x, size.y, size.z);
