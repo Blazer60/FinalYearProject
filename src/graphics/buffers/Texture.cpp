@@ -15,6 +15,7 @@
 #include "FileLoader.h"
 
 Texture::Texture(const std::filesystem::path &path)
+    : mPath(path)
 {
     stbi_set_flip_vertically_on_load(true);
     if (path.empty())

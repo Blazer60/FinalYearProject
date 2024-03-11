@@ -160,6 +160,10 @@ add_library(${ENGINE_LIBRARY}
         include/engine/Engine.h
         src/engine/loader/Loader.cpp
         include/engine/loader/Loader.h
+        src/engine/rendering/UberMaterial.cpp
+        include/engine/rendering/UberMaterial.h
+        src/engine/rendering/UberLayer.cpp
+        include/engine/rendering/UberLayer.h
 )
 
 target_include_directories(${ENGINE_LIBRARY} PUBLIC

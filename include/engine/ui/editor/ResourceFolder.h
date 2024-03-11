@@ -9,6 +9,8 @@
 
 #include "Pch.h"
 #include "Drawable.h"
+#include "FileLoader.h"
+#include "Texture.h"
 
 namespace engine
 {
@@ -43,8 +45,18 @@ namespace engine
         bool isShowing { true };
     protected:
         void onDrawUi() override;
+
+        void drawDragDropSource(const std::filesystem::path&path, const std::string&name);
+
         void drawDirectory(const std::filesystem::path &path);
-        
+        void drawContents();
+        void drawContentItem(const std::filesystem::directory_entry& item);
+
+        std::filesystem::path mSelectedFolder = file::resourcePath();
         std::filesystem::path mDragDropPath;
+
+        Texture mFolderIconTexture = Texture(file::texturePath() / "FolderIcon.png");
+        Texture mUnknownIconTexture = Texture(file::texturePath() / "ObjectIcon.png");
+        float mItemSize = 100.f;
     };
 } // engine
