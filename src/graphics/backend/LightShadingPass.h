@@ -29,6 +29,12 @@ namespace graphics
         std::function<void(Shader &, Context &, const Lut &, const Skybox &)> callback;
     };
 
+    struct LightShaderVariant
+    {
+        Shader shader;
+        std::function<void(Shader &, Context &, const Lut &)> callback;
+    };
+
     /**
      * @author Ryan Purse
      * @date 10/03/2024
@@ -43,20 +49,12 @@ namespace graphics
         void execute(Context &context, const Lut &lut, const Skybox &skybox);
     protected:
         void generateIblShaderVariants(const std::filesystem::path &path);
-
-        Shader mDirectionalLightShader {
-            { file::shaderPath() / "lighting/DirectionalLight.comp" }
-        };
-
-        Shader mPointLightShader {
-            { file::shaderPath() / "lighting/PointLight.comp" }
-        };
-
-        Shader mSpotlightShader {
-            { file::shaderPath() / "lighting/SpotLight.comp" }
-        };
+        std::vector<LightShaderVariant> generateLightShaderVariants(const std::filesystem::path &path);
 
         std::vector<IblShaderVariant> mIblShaderVariants;
+        std::vector<LightShaderVariant> mDirectionalLightShaderVariants;
+        std::vector<LightShaderVariant> mPointLightShaderVariants;
+        std::vector<LightShaderVariant> mSpotlightShaderVariants;
 
         UniformBufferObject<DirectionalLightBlock> mDirectionalLightBlock;
         UniformBufferObject<PointLightBlock> mPointLightBlock;

@@ -1,10 +1,5 @@
 #version 460
 
-#include "../geometry/GBuffer.glsl"
-#include "../Camera.glsl"
-#include "Brdf.glsl"
-#include "../Maths.glsl"
-
 #if !defined(WHITE_FURNACE_TEST)
     #define WHITE_FURNACE_TEST 0
 #endif
@@ -21,11 +16,19 @@
 #if !defined(TILED_RENDERING)
     #define TILED_RENDERING 0
 #endif
+#if !defined(SHADER_INDEX)
+    #define SHADER_INDEX 0
+#endif
 
 #if TILED_RENDERING > 0
     #include "../classification/ClassificationBuffer.glsl"
-uniform int shaderIndex = 0;
 #endif
+
+#include "../geometry/GBuffer.glsl"
+#include "../Camera.glsl"
+#include "Brdf.glsl"
+#include "../Maths.glsl"
+
 
 layout(binding = 0) uniform sampler2D depthBufferTexture;
 layout(binding = 1) uniform sampler2D missingSpecularLutTexture;
@@ -65,7 +68,7 @@ void main()
 {
 #if TILED_RENDERING > 0
     const uint tileIndex = gl_WorkGroupID.x;
-    const uvec2 workGroupId = tileBuffers[tileIndex][shaderIndex];
+    const uvec2 workGroupId = tileBuffers[tileIndex][SHADER_INDEX];
 
     const uvec2 pixelCoord = workGroupId * gl_WorkGroupSize.xy + gl_LocalInvocationID.xy;
     const vec2 id = vec2(pixelCoord);

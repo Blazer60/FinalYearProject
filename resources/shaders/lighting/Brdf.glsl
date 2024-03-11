@@ -7,7 +7,10 @@
 
 layout(binding = 2) uniform sampler2D directionalAlbedoLut;
 layout(binding = 3) uniform sampler2D directionalAlbedoAverageLut;
+
+#if COMPUTE_SHEEN > 0
 layout(binding = 4) uniform sampler2D sheenTable;
+#endif
 
 float directionalAlbedoWhite(vec2 uv)
 {
@@ -26,6 +29,7 @@ float distributionOriginal(vec3 s)
     return 1.f / PI * max(0.f, s.z);
 }
 
+#if COMPUTE_SHEEN > 0
 vec3 evalutateSheenBrdf(GBuffer gBuffer, float nDotL, float nDotV, vec3 v)
 {
     const float alpha = sqrt(gBuffer.fuzzRoughness);
@@ -55,6 +59,7 @@ vec3 evalutateSheenBrdf(GBuffer gBuffer, float nDotL, float nDotV, vec3 v)
 
     return gBuffer.fuzzColour * sheenValue / nDotV;
 }
+#endif
 
 vec3 evaluateMissingSpecularBrdf(GBuffer gBuffer, vec3 fresnel, float lDotN, float vDotN)
 {
@@ -106,8 +111,10 @@ vec3 evaluateClosure(GBuffer gBuffer, vec3 position, vec3 lightDirection)
     const vec3 diffuse = evaluateDiffuseBrdf(gBuffer, specular + missingSpecular);
 
     vec3 sheen = vec3(0.f);
+#if COMPUTE_SHEEN > 0
     if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT) == 1)
         sheen = evalutateSheenBrdf(gBuffer, lDotN, vDotN, v);
+#endif
 
     // todo: Scale back the rest of the sheen brdf.
     return sheen + specular + missingSpecular + diffuse;
