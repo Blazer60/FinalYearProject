@@ -20,6 +20,7 @@ namespace file
     std::filesystem::path texturePath();
     
     std::filesystem::path makeRelativeToResourcePath(const std::filesystem::path &path);
+    std::filesystem::path constructAbsolutePath(const std::string &relativePath);
     
     bool hasImageExtension(const std::string &extension);
     bool hasImageExtension(const std::filesystem::path &path);
@@ -35,4 +36,7 @@ namespace file
 
     bool hasMaterialLayerExtension(const std::string &extenstion);
     bool hasMaterialLayerExtension(const std::filesystem::path& path);
+
+    bool hasMaterialExtension(const std::string &extenstion);
+    bool hasMaterialExtension(const std::filesystem::path& path);
 }

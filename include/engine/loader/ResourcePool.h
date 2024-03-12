@@ -21,6 +21,7 @@
 #include "PhysicsMeshBuffer.h"
 #include "Texture.h"
 #include "UberLayer.h"
+#include "UberMaterial.h"
 
 namespace engine
 {
@@ -46,6 +47,8 @@ namespace engine
 
         [[nodiscard]] std::shared_ptr<UberLayer> loadMaterialLayer(const std::filesystem::path&path);
 
+        [[nodiscard]] std::shared_ptr<UberMaterial> loadMaterial(const std::filesystem::path&path);
+
     protected:
         // If we make sharedResource class, we can kill this when it only has a single use (here).
         std::unordered_map<std::string, std::shared_ptr<Shader>> mShaders;
@@ -54,6 +57,7 @@ namespace engine
         std::unordered_map<std::string, std::shared_ptr<AudioBuffer>> mAudioBuffers;
         std::unordered_map<std::string, std::shared_ptr<physics::MeshColliderBuffer>> mMeshColliders;
         std::unordered_map<std::string, std::shared_ptr<UberLayer>> mMaterialLayers;
+        std::unordered_map<std::string, std::shared_ptr<UberMaterial>> mMaterials;
     };
     
     

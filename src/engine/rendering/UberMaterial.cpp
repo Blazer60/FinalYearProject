@@ -7,6 +7,8 @@
 
 #include "UberMaterial.h"
 
+#include <yaml-cpp/yaml.h>
+
 #include "Loader.h"
 #include "ResourceFolder.h"
 #include "Ui.h"
@@ -16,6 +18,10 @@ namespace engine
     UberMaterial::UberMaterial(const std::filesystem::path& path)
         : mName(path.filename().string()), mPath(path)
     {
+        if (std::filesystem::exists(mPath))
+            loadFromDisk();
+        else  // So that it creates an entry immediately.
+            saveToDisk();
     }
 
     void UberMaterial::onDrawUi()
@@ -33,6 +39,62 @@ namespace engine
                 mLayers.push_back(load::materialLayer(path));
             }
             ImGui::EndDragDropTarget();
+        }
+    }
+
+    void UberMaterial::saveToDisk() const
+    {
+        if (mPath.empty())
+        {
+            WARN("The material does not have a valid path! It cannot be saved.");
+            return;
+        }
+
+        if (!exists(mPath.parent_path()) && !mPath.parent_path().empty())
+        {
+            if (!std::filesystem::create_directories(mPath.parent_path()))
+            {
+                WARN("Could not save material! Check that it's parent path is valid.");
+                return;
+            }
+        }
+
+        YAML::Emitter out;
+        out << YAML::BeginMap;
+        out << YAML::Key << "MaterialLayers" << YAML::Value << YAML::BeginSeq;
+        for (const auto & materialLayer : mLayers)
+        {
+            if (materialLayer != nullptr)
+                out << file::makeRelativeToResourcePath(materialLayer->path()).string();
+        }
+        out << YAML::EndSeq;
+        out << YAML::EndMap;
+
+        std::ofstream fileOutput(mPath);
+        fileOutput << out.c_str();
+        fileOutput.close();
+
+        MESSAGE("Material saved to: %", mPath);
+    }
+
+    void UberMaterial::loadFromDisk()
+    {
+        std::ifstream stream(mPath);
+        std::stringstream stringstream;
+        stringstream << stream.rdbuf();
+        stream.close();
+
+        const YAML::Node data = YAML::Load(stringstream.str());
+        const YAML::Node materialLayers = data["MaterialLayers"];
+
+        if (materialLayers.IsDefined() && materialLayers.IsSequence())
+        {
+            for (auto layer : materialLayers)
+            {
+                const std::string relativePath = layer.as<std::string>();
+                const std::filesystem::path fullPath = file::constructAbsolutePath(relativePath);
+                mLayers.push_back(load::materialLayer(fullPath));
+            }
         }
     }
 

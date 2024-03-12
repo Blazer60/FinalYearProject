@@ -53,13 +53,17 @@ namespace engine
         internalClean(mTextures);
         internalClean(mAudioBuffers);
         internalClean(mMeshColliders);
+        internalClean(mMaterials);  // Always clean this first to release material layers.
         internalClean(mMaterialLayers);
     }
 
     void ResourcePool::saveAllAssets()
     {
-        for (auto [_, materialLayer] : mMaterialLayers)
+        for (auto &[_, materialLayer] : mMaterialLayers)
             materialLayer->saveToDisk();
+
+        for (auto &[_, material] : mMaterials)
+            material->saveToDisk();
     }
 
     std::shared_ptr<Shader> ResourcePool::loadShader(
@@ -187,5 +191,19 @@ namespace engine
         auto materialLayer = std::make_shared<UberLayer>(path);
         mMaterialLayers[hashName] = materialLayer;
         return materialLayer;
+    }
+
+    std::shared_ptr<UberMaterial> ResourcePool::loadMaterial(const std::filesystem::path& path)
+    {
+        const std::string hashName = path.string();
+        if (const auto it = mMaterials.find(hashName); it != mMaterials.end())
+            return it->second;
+
+        if (path.empty())
+            return { };
+
+        auto material = std::make_shared<UberMaterial>(path);
+        mMaterials[hashName] = material;
+        return material;
     }
 }

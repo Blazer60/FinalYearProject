@@ -113,7 +113,12 @@ namespace file
     {
         return relative(path, resourcePath());
     }
-    
+
+    std::filesystem::path constructAbsolutePath(const std::string& relativePath)
+    {
+        return (resourcePath() / relativePath).lexically_normal();
+    }
+
     bool hasImageExtension(const std::string &extension)
     {
         const char *whiteList[] = { ".jpg", ".jpeg", ".bmp", ".png", ".tif", ".hdr" };
@@ -168,6 +173,16 @@ namespace file
     bool hasMaterialLayerExtension(const std::filesystem::path& path)
     {
         return hasMaterialLayerExtension(path.extension().string());
+    }
+
+    bool hasMaterialExtension(const std::string& extenstion)
+    {
+        return extenstion == ".mpcy";
+    }
+
+    bool hasMaterialExtension(const std::filesystem::path& path)
+    {
+        return hasMaterialExtension(path.extension().string());
     }
 }
 

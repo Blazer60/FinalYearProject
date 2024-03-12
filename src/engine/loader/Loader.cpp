@@ -121,4 +121,9 @@ namespace load
     {
         return engine::resourcePool->loadMaterialLayer(path);
     }
+
+    std::shared_ptr<engine::UberMaterial> material(const std::filesystem::path& path)
+    {
+        return engine::resourcePool->loadMaterial(path);
+    }
 }

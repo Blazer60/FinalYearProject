@@ -97,18 +97,80 @@ namespace engine
         }
     }
 
+    void ResourceFolder::drawMaterialLayerModal(bool toggleMaterialLayerPopup)
+    {
+        if (toggleMaterialLayerPopup)
+        {
+            ImGui::OpenPopup("Create Material Layer");
+            mNewFileName = "";
+        }
+
+        // Always center this window when appearing
+        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+        if (ImGui::BeginPopupModal("Create Material Layer", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            if (toggleMaterialLayerPopup)
+                ImGui::SetKeyboardFocusHere();
+            if (ui::inputText("File Name", &mNewFileName, ImGuiInputTextFlags_EnterReturnsTrue) || ImGui::Button("Create"))
+            {
+                editor->setUberLayer(load::materialLayer(mSelectedFolder / format::string("%.mlpcy", mNewFileName)));
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel") || ImGui::IsKeyPressed(ImGuiKey_Escape))
+                ImGui::CloseCurrentPopup();
+
+            ImGui::EndPopup();
+        }
+    }
+
+    void ResourceFolder::drawMaterialModal(bool toggleMaterialPopup)
+    {
+        if (toggleMaterialPopup)
+        {
+            ImGui::OpenPopup("Create Material");
+            mNewFileName = "";
+        }
+
+        // Always center this window when appearing
+        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+        if (ImGui::BeginPopupModal("Create Material", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            if (toggleMaterialPopup)
+                ImGui::SetKeyboardFocusHere();
+            if (ui::inputText("File Name", &mNewFileName, ImGuiInputTextFlags_EnterReturnsTrue) || ImGui::Button("Create"))
+            {
+                editor->setUberMaterial(load::material(mSelectedFolder / format::string("%.mpcy", mNewFileName)));
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel") || ImGui::IsKeyPressed(ImGuiKey_Escape))
+                ImGui::CloseCurrentPopup();
+
+            ImGui::EndPopup();
+        }
+
+    }
+
     void ResourceFolder::drawContents()
     {
-        bool togglePopup = false;
+        bool toggleMaterialLayerPopup = false;
+        bool toggleMaterialPopup = false;
         if (ImGui::BeginMenuBar())
         {
             if (ImGui::BeginMenu("Create"))
             {
                 if (ImGui::MenuItem("Material"))
-                    editor->setUberMaterial(std::make_unique<UberMaterial>("idk"));  // todo: This needs to use load like a material layer.
+                {
+                    toggleMaterialPopup = true;
+                }
                 if (ImGui::MenuItem("Material Layer"))
                 {
-                    togglePopup = true;
+                    toggleMaterialLayerPopup = true;
                 }
 
                 ImGui::EndMenu();
@@ -122,31 +184,8 @@ namespace engine
         }
 
 
-        if (togglePopup)
-        {
-            ImGui::OpenPopup("Create Material Layer");
-            mNewFileName = "";
-        }
-
-        // Always center this window when appearing
-        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
-        if (ImGui::BeginPopupModal("Create Material Layer", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-        {
-            if (togglePopup)
-                ImGui::SetKeyboardFocusHere();
-            if (ui::inputText("File Name", &mNewFileName, ImGuiInputTextFlags_EnterReturnsTrue) || ImGui::Button("Create"))
-            {
-                editor->setUberLayer(load::materialLayer(mSelectedFolder / format::string("%.mlpcy", mNewFileName)));
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Cancel") || ImGui::IsKeyPressed(ImGuiKey_Escape))
-                ImGui::CloseCurrentPopup();
-
-            ImGui::EndPopup();
-        }
+        drawMaterialLayerModal(toggleMaterialLayerPopup);
+        drawMaterialModal(toggleMaterialPopup);
 
         ImGui::SetNextItemWidth(100.f);
         ImGui::SliderFloat("Size", &mItemSize, 32, 256);
@@ -202,6 +241,8 @@ namespace engine
             mSelectedFolder = path;
         else
         {
+            if (file::hasMaterialExtension(path))
+                editor->setUberMaterial(load::material(path));
             if (file::hasMaterialLayerExtension(path))
                 editor->setUberLayer(load::materialLayer(path));
             if (file::hasSceneExtension(path))

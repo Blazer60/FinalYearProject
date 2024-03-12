@@ -51,6 +51,11 @@ namespace engine
         void drawDragDropSource(const std::filesystem::path&path, const std::string&name);
 
         void drawDirectory(const std::filesystem::path &path);
+
+        void drawMaterialLayerModal(bool toggleMaterialLayerPopup);
+
+        void drawMaterialModal(bool toggleMaterialPopup);
+
         void drawContents();
         void drawContentItem(const std::filesystem::directory_entry& item);
         void userSelectAction(const std::filesystem::path &path);

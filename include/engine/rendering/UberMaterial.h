@@ -23,8 +23,10 @@ namespace engine
     public:
         explicit UberMaterial(const std::filesystem::path &path);
         void onDrawUi() override;
+        void saveToDisk() const;
 
     protected:
+        void loadFromDisk();
         void drawMaterialLayerArray();
 
         void moveElementInPlace(int srcIndex, int dstIndex);
