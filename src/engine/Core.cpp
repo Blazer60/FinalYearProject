@@ -279,6 +279,8 @@ namespace engine
 
         // We don't clean between scene loads since we want to cache as much as possible between them.
         mResourcePool->clean();
+        // An asset may be held by one or more engine handles. This is the last place to save before going out of scope.
+        mResourcePool->saveAllAssets();
 
         destroy::windowIcon(mWindowIcon);
 

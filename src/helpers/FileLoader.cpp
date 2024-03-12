@@ -159,5 +159,15 @@ namespace file
     {
         return hasSoundExtension(path.extension().string());
     }
+
+    bool hasMaterialLayerExtension(const std::string& extenstion)
+    {
+        return extenstion == ".mlpcy";
+    }
+
+    bool hasMaterialLayerExtension(const std::filesystem::path& path)
+    {
+        return hasMaterialLayerExtension(path.extension().string());
+    }
 }
 

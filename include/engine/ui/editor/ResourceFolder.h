@@ -51,6 +51,7 @@ namespace engine
         void drawDirectory(const std::filesystem::path &path);
         void drawContents();
         void drawContentItem(const std::filesystem::directory_entry& item);
+        void userSelectAction(const std::filesystem::path &path);
 
         std::filesystem::path mSelectedFolder = file::resourcePath();
         std::filesystem::path mDragDropPath;

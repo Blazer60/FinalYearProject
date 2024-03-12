@@ -23,8 +23,13 @@ namespace engine
     {
     public:
         explicit UberLayer(const std::filesystem::path &path);
+        ~UberLayer() override;
         void onDrawUi() override;
+        // Saving is handled by the resource pool once the last instance has gone out of scope.
+        void saveToDisk() const;
     protected:
+        void loadFromDisk();
+
         std::string mName;
         std::filesystem::path mPath;
 

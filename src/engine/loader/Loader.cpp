@@ -116,4 +116,9 @@ namespace load
         for (auto &componentNode : actorNode["Components"])
             engine::serializer->loadComponent(componentNode, actor);
     }
+
+    std::shared_ptr<engine::UberLayer> materialLayer(const std::filesystem::path& path)
+    {
+        return engine::resourcePool->loadMaterialLayer(path);
+    }
 }

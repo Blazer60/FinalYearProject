@@ -26,7 +26,26 @@ namespace engine
             map.erase(hashName);
         }
     }
-    
+
+    template<typename>
+    void internalClean(std::unordered_map<std::string, std::shared_ptr<UberLayer>> &map)
+    {
+        std::vector<std::string> toDelete;
+        for (auto &[hashName, value] : map)
+        {
+            if (value.use_count() <= 1)
+            {
+                value->saveToDisk();
+                toDelete.push_back(hashName);
+            }
+        }
+        for (const std::string &hashName : toDelete)
+        {
+            MESSAGE("Cleaning up %", hashName);
+            map.erase(hashName);
+        }
+    }
+
     void ResourcePool::clean()
     {
         internalClean(mShaders);
@@ -34,8 +53,15 @@ namespace engine
         internalClean(mTextures);
         internalClean(mAudioBuffers);
         internalClean(mMeshColliders);
+        internalClean(mMaterialLayers);
     }
-    
+
+    void ResourcePool::saveAllAssets()
+    {
+        for (auto [_, materialLayer] : mMaterialLayers)
+            materialLayer->saveToDisk();
+    }
+
     std::shared_ptr<Shader> ResourcePool::loadShader(
         const std::filesystem::path &vertexPath,
         const std::filesystem::path &fragmentPath)
@@ -147,5 +173,19 @@ namespace engine
 
         mMeshColliders[hashName] = meshColliderBuffer;
         return meshColliderBuffer;
+    }
+
+    std::shared_ptr<UberLayer> ResourcePool::loadMaterialLayer(const std::filesystem::path& path)
+    {
+        const std::string hashName = path.string();
+        if (const auto it = mMaterialLayers.find(hashName); it != mMaterialLayers.end())
+            return it->second;
+
+        if (path.empty())
+            return { };
+
+        auto materialLayer = std::make_shared<UberLayer>(path);
+        mMaterialLayers[hashName] = materialLayer;
+        return materialLayer;
     }
 }

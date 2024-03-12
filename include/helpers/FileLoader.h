@@ -32,4 +32,7 @@ namespace file
 
     bool hasSoundExtension(const std::string &extenstion);
     bool hasSoundExtension(const std::filesystem::path& path);
+
+    bool hasMaterialLayerExtension(const std::string &extenstion);
+    bool hasMaterialLayerExtension(const std::filesystem::path& path);
 }

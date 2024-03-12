@@ -7,9 +7,11 @@
 
 #include "ResourceFolder.h"
 
+#include "Core.h"
 #include "Editor.h"
 #include "EngineState.h"
 #include "FileLoader.h"
+#include "Loader.h"
 #include "Ui.h"
 
 namespace engine
@@ -86,7 +88,7 @@ namespace engine
             if (ImGui::Selectable(pathName.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
             {
                 if (ImGui::IsMouseDoubleClicked(0))
-                    MESSAGE("Double Clicked! Todo!");
+                    userSelectAction(path);
             }
             drawDragDropSource(path, pathName);
         }
@@ -104,7 +106,6 @@ namespace engine
                 if (ImGui::MenuItem("Material Layer"))
                 {
                     togglePopup = true;
-                    MESSAGE("Todo!");
                 }
 
                 ImGui::EndMenu();
@@ -134,9 +135,7 @@ namespace engine
                 ImGui::SetKeyboardFocusHere();
             if (ui::inputText("File Name", &mNewFileName, ImGuiInputTextFlags_EnterReturnsTrue) || ImGui::Button("Create"))
             {
-                // Todo: This needs to be through a load function and then passed to the editor.
-                // Todo: Save/Load from disk: look in disk before creating a new one.
-                editor->setUberLayer(std::make_shared<UberLayer>(mSelectedFolder / format::string("%.mlpcy", mNewFileName)));
+                editor->setUberLayer(load::materialLayer(mSelectedFolder / format::string("%.mlpcy", mNewFileName)));
                 ImGui::CloseCurrentPopup();
             }
             ImGui::SameLine();
@@ -160,9 +159,7 @@ namespace engine
             ImGui::BeginChild(id.c_str(), ImVec2(mItemSize, mItemSize), false, ImGuiWindowFlags_NoScrollbar);
             if (ImGui::IsMouseDoubleClicked(0) && ImGui::IsWindowHovered())
             {
-                const bool isDirectory = status(item).type() == std::filesystem::file_type::directory;
-                if (isDirectory)
-                    mSelectedFolder = item.path();
+                userSelectAction(item.path());
             }
             drawDragDropSource(item.path(), item.path().filename().string());
             drawContentItem(item);
@@ -194,5 +191,18 @@ namespace engine
 
         ImGui::SetCursorPosX(glm::max(0.f, ImGui::GetContentRegionAvail().x / 2.f - nameSize.x / 2.f));
         ImGui::Text(name.c_str());
+    }
+
+    void ResourceFolder::userSelectAction(const std::filesystem::path& path)
+    {
+        if (const std::filesystem::directory_entry entry(path); is_directory(entry))
+            mSelectedFolder = path;
+        else
+        {
+            if (file::hasMaterialLayerExtension(path))
+                editor->setUberLayer(load::materialLayer(path));
+            if (file::hasSceneExtension(path))
+                core->setScene(load::scene(path), path);
+        }
     }
 }

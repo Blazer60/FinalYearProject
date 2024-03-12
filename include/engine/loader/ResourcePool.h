@@ -20,6 +20,7 @@
 #include "AudioSource.h"
 #include "PhysicsMeshBuffer.h"
 #include "Texture.h"
+#include "UberLayer.h"
 
 namespace engine
 {
@@ -31,6 +32,7 @@ namespace engine
     {
     public:
         void clean();
+        void saveAllAssets();
         [[nodiscard]] std::shared_ptr<Shader> loadShader(const std::filesystem::path &vertexPath, const std::filesystem::path &fragmentPath);
         
         template<typename TVertex>
@@ -41,7 +43,9 @@ namespace engine
         [[nodiscard]] std::shared_ptr<AudioBuffer> loadAudioBuffer(const std::filesystem::path &path);
 
         [[nodiscard]] std::shared_ptr<physics::MeshColliderBuffer> loadPhysicsMesh(const std::filesystem::path &path);
-    
+
+        [[nodiscard]] std::shared_ptr<UberLayer> loadMaterialLayer(const std::filesystem::path&path);
+
     protected:
         // If we make sharedResource class, we can kill this when it only has a single use (here).
         std::unordered_map<std::string, std::shared_ptr<Shader>> mShaders;
@@ -49,6 +53,7 @@ namespace engine
         std::unordered_map<std::string, std::shared_ptr<Texture>> mTextures;
         std::unordered_map<std::string, std::shared_ptr<AudioBuffer>> mAudioBuffers;
         std::unordered_map<std::string, std::shared_ptr<physics::MeshColliderBuffer>> mMeshColliders;
+        std::unordered_map<std::string, std::shared_ptr<UberLayer>> mMaterialLayers;
     };
     
     

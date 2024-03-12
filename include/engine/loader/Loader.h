@@ -95,6 +95,8 @@ namespace load
      */
     template<typename TVertex>
     SubMesh primitive(const std::filesystem::path &path);
+
+    std::shared_ptr<engine::UberLayer> materialLayer(const std::filesystem::path &path);
 }
 
 // Implementations.
