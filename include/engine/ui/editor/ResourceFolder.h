@@ -33,6 +33,8 @@ namespace engine
      * @brief The name for places that accept sounds from imgui payloads.
      */
     extern const char *resourceSoundPayload;
+
+    extern const char *resourceMaterialLayerPayload;
     
 /**
  * @author Ryan Purse

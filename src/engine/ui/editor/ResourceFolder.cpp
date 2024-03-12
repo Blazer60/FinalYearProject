@@ -20,6 +20,7 @@ namespace engine
     const char *resourceModelPayload = "ResourceModelPayload";
     const char *resourceScenePayload = "ResourceScenePayload";
     const char *resourceSoundPayload = "ResourceSoundPayload";
+    const char *resourceMaterialLayerPayload = "ResourceMaterialLayerPayload";
 
     void ResourceFolder::onDrawUi()
     {
@@ -56,6 +57,8 @@ namespace engine
                 ImGui::SetDragDropPayload(resourceScenePayload, &mDragDropPath, sizeof(mDragDropPath));
             else if (file::hasSoundExtension(mDragDropPath))
                 ImGui::SetDragDropPayload(resourceSoundPayload, &mDragDropPath, sizeof(mDragDropPath));
+            else if (file::hasMaterialLayerExtension(mDragDropPath))
+                ImGui::SetDragDropPayload(resourceMaterialLayerPayload, &mDragDropPath, sizeof(mDragDropPath));
 
             ImGui::Text("%s", name.c_str());
             ImGui::EndDragDropSource();
@@ -102,7 +105,7 @@ namespace engine
             if (ImGui::BeginMenu("Create"))
             {
                 if (ImGui::MenuItem("Material"))
-                    MESSAGE("Todo!");
+                    editor->setUberMaterial(std::make_unique<UberMaterial>("idk"));  // todo: This needs to use load like a material layer.
                 if (ImGui::MenuItem("Material Layer"))
                 {
                     togglePopup = true;

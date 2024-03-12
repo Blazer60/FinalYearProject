@@ -24,11 +24,6 @@ namespace engine
             saveToDisk();
     }
 
-    UberLayer::~UberLayer()
-    {
-        // saveToDisk();  // todo: move to the editor when you click off of it.
-    }
-
     void UberLayer::onDrawUi()
     {
         ui::inputText("##name", &mName);

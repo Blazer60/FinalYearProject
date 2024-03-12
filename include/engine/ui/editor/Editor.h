@@ -19,6 +19,7 @@
 #include "ResourceFolder.h"
 #include "ProfilerViewer.h"
 #include "UberLayer.h"
+#include "UberMaterial.h"
 
 namespace engine
 {
@@ -101,6 +102,7 @@ namespace engine
 
         void relinkSelectedActor();
         void setUberLayer(std::shared_ptr<UberLayer> layer);
+        void setUberMaterial(std::shared_ptr<UberMaterial> material);
     protected:
         void onDrawUi() override;
         void drawSceneHierarchyPanel();
@@ -126,6 +128,7 @@ namespace engine
         UUID mSelectedActorId { 0 };
 
         std::shared_ptr<UberLayer> mUberLayer;
+        std::shared_ptr<UberMaterial> mUberMaterial;
 
         std::vector<ActorDetails> mMenuList;
         std::vector<std::unique_ptr<ComponentDetails>> mComponentList;

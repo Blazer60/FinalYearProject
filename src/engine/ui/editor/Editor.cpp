@@ -314,6 +314,8 @@ namespace engine
                 drawActorDetails();
                 break;
             case selectedType::Material:
+                if (mUberMaterial != nullptr)
+                    ui::draw(mUberMaterial);
                 break;
             case selectedType::MaterialLayer:
                 if (mUberLayer != nullptr)
@@ -419,6 +421,12 @@ namespace engine
     {
         mUberLayer = std::move(layer);
         mSelectedType = selectedType::MaterialLayer;
+    }
+
+    void Editor::setUberMaterial(std::shared_ptr<UberMaterial> material)
+    {
+        mUberMaterial = std::move(material);
+        mSelectedType = selectedType::Material;
     }
 
     void Editor::drawSceneSettings()
