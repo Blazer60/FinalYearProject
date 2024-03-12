@@ -16,6 +16,9 @@
 
 #include <utility>
 
+#include "ContainerAlgorithms.h"
+#include "Ui.h"
+
 namespace engine
 {
     MeshRenderer::MeshRenderer(SharedMesh &&mesh, std::string path)
@@ -67,9 +70,23 @@ namespace engine
                 }
             }
             
-            
+
+            ImGui::BeginGroup();
+            drawMaterialArray();
+            ImGui::EndGroup();
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(resourceMaterialPayload))
+                {
+                    const std::filesystem::path path = *static_cast<std::filesystem::path*>(payload->Data);
+                    mUberMaterials.push_back(load::material(path));
+                }
+                ImGui::EndDragDropTarget();
+            }
+
             ImGui::TreePop();
         }
+
         ImGui::PopID();
     }
     
@@ -99,12 +116,85 @@ namespace engine
             }
         }
     }
-    
+
+    void MeshRenderer::drawMaterialArray()
+    {
+        const auto name = format::string("Materials %/%", mUberMaterials.size(),  mMeshes->size());
+        const auto originalCursorPos = ImGui::GetCursorPos();
+        const auto PlusMarkposition = ImVec2(ImGui::GetContentRegionAvail().x - ui::resetButtonWidth(), originalCursorPos.y);
+
+        ImGui::Text(name.c_str());
+        ImGui::SetCursorPos(PlusMarkposition);
+
+        const auto plusId = format::string(" + ##%", name);
+        if (ImGui::Button(plusId.c_str()))
+            mUberMaterials.push_back(nullptr);
+
+        for (int i = 0; i < mUberMaterials.size();)
+        {
+            if (!drawMaterialElement(i))
+                ++i;
+        }
+    }
+
+    bool MeshRenderer::drawMaterialElement(int index)
+    {
+        const std::string name = mUberMaterials[index] != nullptr ? mUberMaterials[index]->name() : format::string("Empty##%", index);
+
+        auto &style = ImGui::GetStyle();
+        ImGui::BeginGroup();
+        const auto originalCursorPos = ImGui::GetCursorPos();
+        const auto xMarkposition = ImVec2(ImGui::GetContentRegionAvail().x - ui::resetButtonWidth(), originalCursorPos.y);
+
+        ImGui::SetCursorPosY(originalCursorPos.y + style.FramePadding.y);
+        ImGui::TextColored(ImVec4(0.3f, 0.3f, 0.3f, 1.f), "%2i", index);
+        ImGui::SameLine();
+        ImGui::SetCursorPosY(originalCursorPos.y + style.FramePadding.y);
+        ImGui::Selectable(name.c_str(), false, 0, ImVec2(ImGui::GetContentRegionAvail().x - ui::resetButtonWidth() - 3.f * style.FramePadding.x - 3.f * style.ItemSpacing.x, 0));
+
+        constexpr auto arrayPayLoadId = "ARRAY_PAYLOAD_MATERIALS";
+        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+        {
+            ImGui::SetDragDropPayload(arrayPayLoadId, &index, sizeof(int));
+            ImGui::Text(name.c_str());
+            ImGui::EndDragDropSource();
+        }
+        if (ImGui::BeginDragDropTarget())
+        {
+            if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(arrayPayLoadId))
+                containers::moveInPlace(mUberMaterials, *static_cast<int*>(payload->Data), index);
+
+            if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(resourceMaterialPayload))
+            {
+                const std::filesystem::path path = *static_cast<std::filesystem::path*>(payload->Data);
+                mUberMaterials[index] = load::material(path);
+            }
+
+            ImGui::EndDragDropTarget();
+        }
+
+        const auto xMark = format::string(" X ##%", index);
+        ImGui::SetCursorPos(xMarkposition);
+        const bool result = ImGui::Button(xMark.c_str());
+        if (result)
+        {
+            mUberMaterials.erase(mUberMaterials.begin() + index);
+        }
+        ImGui::EndGroup();
+        return result;
+
+    }
+
     void MeshRenderer::addMaterial(const std::shared_ptr<MaterialSubComponent> &material)
     {
         mMaterials.push_back(material);
     }
-    
+
+    void MeshRenderer::addUMaterial(std::shared_ptr<UberMaterial> material)
+    {
+        mUberMaterials.push_back(std::move(material));
+    }
+
     void MeshRenderer::onPreRender()
     {
         if (mMaterials.empty() || mMeshes->empty())

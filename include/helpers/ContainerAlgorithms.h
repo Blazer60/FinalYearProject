@@ -37,4 +37,23 @@ namespace containers
 
         return result;
     }
+
+    template<typename T>
+    void moveInPlace(std::vector<T> &vector, const int srcIndex, const int dstIndex)
+    {
+        if (srcIndex < dstIndex)
+        {
+            const auto lhs = vector.begin() + srcIndex;
+            const auto pivot = lhs + 1;
+            const auto rhs = vector.begin() + dstIndex + 1;
+            std::rotate(lhs, pivot, rhs);
+        }
+        else
+        {
+            const auto lhs = vector.begin() + dstIndex;
+            const auto pivot = vector.begin() + srcIndex;
+            const auto rhs = pivot + 1;
+            std::rotate(lhs, pivot, rhs);
+        }
+    }
 }

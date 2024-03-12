@@ -24,6 +24,8 @@ Actors:
             SpecularMap: ""
             FuzzColour: [0, 0, 0]
             FuzzRoughness: 1
+        UMaterials:
+          []
     Children:
       []
   - Name: Diffuse 0.2
@@ -50,6 +52,8 @@ Actors:
             SpecularMap: ""
             FuzzColour: [0, 0, 0]
             FuzzRoughness: 1
+        UMaterials:
+          []
     Children:
       []
   - Name: Diffuse 0.3
@@ -76,6 +80,8 @@ Actors:
             SpecularMap: ""
             FuzzColour: [0, 0, 0]
             FuzzRoughness: 1
+        UMaterials:
+          []
     Children:
       []
   - Name: Diffuse 0.4
@@ -102,6 +108,8 @@ Actors:
             SpecularMap: ""
             FuzzColour: [0, 0, 0]
             FuzzRoughness: 1
+        UMaterials:
+          []
     Children:
       []
   - Name: Diffuse 0.5
@@ -128,6 +136,8 @@ Actors:
             SpecularMap: ""
             FuzzColour: [0, 0, 0]
             FuzzRoughness: 1
+        UMaterials:
+          []
     Children:
       []
   - Name: Diffuse 0.6
@@ -154,6 +164,8 @@ Actors:
             SpecularMap: ""
             FuzzColour: [0, 0, 0]
             FuzzRoughness: 1
+        UMaterials:
+          []
     Children:
       []
   - Name: Diffuse 0.7
@@ -180,6 +192,8 @@ Actors:
             SpecularMap: ""
             FuzzColour: [0, 0, 0]
             FuzzRoughness: 1
+        UMaterials:
+          []
     Children:
       []
   - Name: Diffuse 0.8
@@ -206,6 +220,8 @@ Actors:
             SpecularMap: ""
             FuzzColour: [0, 0, 0]
             FuzzRoughness: 1
+        UMaterials:
+          []
     Children:
       []
   - Name: Diffuse 0.9
@@ -232,6 +248,8 @@ Actors:
             SpecularMap: ""
             FuzzColour: [0, 0, 0]
             FuzzRoughness: 1
+        UMaterials:
+          []
     Children:
       []
   - Name: Diffuse 1.0
@@ -258,6 +276,8 @@ Actors:
             SpecularMap: ""
             FuzzColour: [0, 0, 0]
             FuzzRoughness: 1
+        UMaterials:
+          []
     Children:
       []
   - Name: Specular 0.1
@@ -284,6 +304,8 @@ Actors:
             SpecularMap: ""
             FuzzColour: [0, 0, 0]
             FuzzRoughness: 1
+        UMaterials:
+          []
     Children:
       []
   - Name: Specular 0.2
@@ -310,6 +332,8 @@ Actors:
             SpecularMap: ""
             FuzzColour: [0, 0, 0]
             FuzzRoughness: 1
+        UMaterials:
+          []
     Children:
       []
   - Name: Specular 0.3
@@ -336,6 +360,8 @@ Actors:
             SpecularMap: ""
             FuzzColour: [0, 0, 0]
             FuzzRoughness: 1
+        UMaterials:
+          []
     Children:
       []
   - Name: Specular 0.4
@@ -362,6 +388,8 @@ Actors:
             SpecularMap: ""
             FuzzColour: [0, 0, 0]
             FuzzRoughness: 1
+        UMaterials:
+          []
     Children:
       []
   - Name: Specular 0.5
@@ -388,6 +416,8 @@ Actors:
             SpecularMap: ""
             FuzzColour: [0, 0, 0]
             FuzzRoughness: 1
+        UMaterials:
+          - materials\Red.mpcy
     Children:
       []
   - Name: Specular 0.6
@@ -414,6 +444,8 @@ Actors:
             SpecularMap: ""
             FuzzColour: [0, 0, 0]
             FuzzRoughness: 1
+        UMaterials:
+          []
     Children:
       []
   - Name: Specular 0.7
@@ -440,6 +472,8 @@ Actors:
             SpecularMap: ""
             FuzzColour: [0, 0, 0]
             FuzzRoughness: 1
+        UMaterials:
+          []
     Children:
       []
   - Name: Specular 0.8
@@ -466,6 +500,8 @@ Actors:
             SpecularMap: ""
             FuzzColour: [0, 0, 0]
             FuzzRoughness: 1
+        UMaterials:
+          []
     Children:
       []
   - Name: Specular 0.9
@@ -492,6 +528,8 @@ Actors:
             SpecularMap: ""
             FuzzColour: [0, 0, 0]
             FuzzRoughness: 1
+        UMaterials:
+          []
     Children:
       []
   - Name: Specular 1.0
@@ -518,6 +556,8 @@ Actors:
             SpecularMap: ""
             FuzzColour: [0, 0, 0]
             FuzzRoughness: 1
+        UMaterials:
+          []
     Children:
       []
   - Name: Skylight

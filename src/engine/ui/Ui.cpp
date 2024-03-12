@@ -59,7 +59,7 @@ namespace ui
             if (isMainBuffer)
                 window::setBufferSize(glm::ivec2(regionSize.x, regionSize.y));
             
-            ImGui::Image(reinterpret_cast<void *>(texture.getId()), regionSize, ImVec2(0, 1), ImVec2(1, 0));
+            ImGui::Image(reinterpret_cast<void *>(static_cast<size_t>(texture.getId())), regionSize, ImVec2(0, 1), ImVec2(1, 0));
         }
         
         ImGui::End();
@@ -117,7 +117,7 @@ namespace ui
                 }
             }
             
-            ImGui::Image(reinterpret_cast<void *>(texture.getId()), regionSize, ImVec2(0, 1), ImVec2(1, 0));
+            ImGui::Image(reinterpret_cast<void *>(static_cast<size_t>(texture.getId())), regionSize, ImVec2(0, 1), ImVec2(1, 0));
         }
         
         ImGui::End();
@@ -157,16 +157,16 @@ namespace ui
         return result;
     }
     
-    void image(uint32_t id, const glm::vec2 &size)
+    void image(const uint32_t id, const glm::vec2 &size)
     {
-        ImVec2 imSize { size.x, size.y };
-        ImGui::Image(reinterpret_cast<void *>(id), imSize, ImVec2(0, 1), ImVec2(1, 0));
+        const ImVec2 imSize { size.x, size.y };
+        ImGui::Image(reinterpret_cast<void *>(static_cast<size_t>(id)), imSize, ImVec2(0, 1), ImVec2(1, 0));
     }
     
     bool imageButton(std::string_view imguiId, uint32_t glId, const glm::vec2 &size)
     {
-        ImVec2 imSize { size.x, size.y };
-        return ImGui::ImageButton(imguiId.data(), reinterpret_cast<void *>(glId), imSize, ImVec2(0, 1), ImVec2(1, 0));
+        const ImVec2 imSize { size.x, size.y };
+        return ImGui::ImageButton(imguiId.data(), reinterpret_cast<void *>(static_cast<size_t>(glId)), imSize, ImVec2(0, 1), ImVec2(1, 0));
     }
 
     void textureThumbnail(const std::string& name, std::shared_ptr<Texture>& texture)

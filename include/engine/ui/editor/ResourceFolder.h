@@ -17,25 +17,27 @@ namespace engine
     /**
      * @brief The name for places that accept images from imgui in the resource folder.
      */
-    extern const char *resourceImagePayload;
+    extern const char *const resourceImagePayload;
     
     /**
      * @brief The name for places that accept models from imgui payloads. See MeshRenderer for an example.
      */
-    extern const char *resourceModelPayload;
+    extern const char *const resourceModelPayload;
     
     /**
      * @brief The name for places that accept scenes from imgui payloads.
      */
-    extern const char *resourceScenePayload;
+    extern const char *const resourceScenePayload;
 
     /**
      * @brief The name for places that accept sounds from imgui payloads.
      */
-    extern const char *resourceSoundPayload;
+    extern const char *const resourceSoundPayload;
 
-    extern const char *resourceMaterialLayerPayload;
-    
+    extern const char *const resourceMaterialLayerPayload;
+
+    extern const char *const resourceMaterialPayload;
+
 /**
  * @author Ryan Purse
  * @date 25/10/2023

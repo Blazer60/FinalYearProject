@@ -102,6 +102,17 @@ namespace engine
                         standardMaterial->setFuzzRoughness(materialNode["FuzzRoughness"].as<float>());
                 }
             }
+
+            const YAML::Node uMaterialNode = node["UMaterials"];
+            if (uMaterialNode.IsDefined() && uMaterialNode.IsSequence())
+            {
+                for (auto material : uMaterialNode)
+                {
+                    const std::string relativePath = material.as<std::string>();
+                    const std::filesystem::path fullPath = file::constructAbsolutePath(relativePath);
+                    meshRenderer->addUMaterial(load::material(fullPath));
+                }
+            }
         });
         
         serializer->pushLoadComponent("DirectionalLight", [](const YAML::Node &node, Ref<Actor> actor) {
@@ -243,6 +254,11 @@ void serializeComponent(YAML::Emitter &out, engine::MeshRenderer *meshRenderer)
 
         out << YAML::EndMap;
     }
+    out << YAML::EndSeq;
+
+    out << YAML::Key << "UMaterials" << YAML::Value << YAML::BeginSeq;
+    for (const auto &uberMaterial : meshRenderer->mUberMaterials)
+        out << file::makeRelativeToResourcePath(uberMaterial->path()).string();
     out << YAML::EndSeq;
 }
 

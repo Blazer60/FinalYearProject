@@ -140,7 +140,8 @@ namespace engine
         const ImVec2 regionSize = mForce1080p ? ImVec2(1920.f, 1080.f) : ImGui::GetContentRegionAvail();
         window::setBufferSize(glm::ivec2(regionSize.x, regionSize.y));
         const TextureBufferObject &texture = mViewportImages[mCurrentSelectedImage].requestTexture();
-        ImGui::Image(reinterpret_cast<void *>(texture.getId()), regionSize, ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::Image(reinterpret_cast<void *>(static_cast<size_t>(texture.getId())), regionSize, ImVec2(0, 1), ImVec2(1, 0));
+
         if (ImGui::BeginDragDropTarget())
         {
             if (const ImGuiPayload *payload0 = ImGui::AcceptDragDropPayload(resourceModelPayload))
@@ -156,13 +157,13 @@ namespace engine
         {
             ImGui::SetCursorPos(cursorPos);
             const TextureBufferObject &debugTexture = graphics::renderer->getDebugBuffer();
-            ImGui::Image(reinterpret_cast<void *>(debugTexture.getId()), regionSize, ImVec2(0, 1), ImVec2(1, 0));
+            ImGui::Image(reinterpret_cast<void *>(static_cast<size_t>(debugTexture.getId())), regionSize, ImVec2(0, 1), ImVec2(1, 0));
         }
         if (mShowTileClassification)
         {
             ImGui::SetCursorPos(cursorPos);
             const TextureBufferObject &debugTexture = graphics::renderer->drawTileClassification();
-            ImGui::Image(reinterpret_cast<void *>(debugTexture.getId()), regionSize, ImVec2(0, 1), ImVec2(1, 0));
+            ImGui::Image(reinterpret_cast<void *>(static_cast<size_t>(debugTexture.getId())), regionSize, ImVec2(0, 1), ImVec2(1, 0));
         }
 
         mIsHovered = ImGui::IsWindowHovered();
@@ -213,7 +214,7 @@ namespace engine
         window::setBufferSize(glm::ivec2(regionSize.x, regionSize.y));
 
         const TextureBufferObject &texture = graphics::renderer->getPrimaryBuffer();
-        ImGui::Image(reinterpret_cast<void *>(texture.getId()), regionSize, ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::Image(reinterpret_cast<void *>(static_cast<size_t>(texture.getId())), regionSize, ImVec2(0, 1), ImVec2(1, 0));
 
         ImGui::EndChild();
     }

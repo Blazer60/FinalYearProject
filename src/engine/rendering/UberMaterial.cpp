@@ -9,6 +9,7 @@
 
 #include <yaml-cpp/yaml.h>
 
+#include "ContainerAlgorithms.h"
 #include "Loader.h"
 #include "ResourceFolder.h"
 #include "Ui.h"
@@ -118,24 +119,6 @@ namespace engine
         }
     }
 
-    void UberMaterial::moveElementInPlace(const int srcIndex, const int dstIndex)
-    {
-        if (srcIndex < dstIndex)
-        {
-            const auto lhs = mLayers.begin() + srcIndex;
-            const auto pivot = lhs + 1;
-            const auto rhs = mLayers.begin() + dstIndex + 1;
-            std::rotate(lhs, pivot, rhs);
-        }
-        else
-        {
-            const auto lhs = mLayers.begin() + dstIndex;
-            const auto pivot = mLayers.begin() + srcIndex;
-            const auto rhs = pivot + 1;
-            std::rotate(lhs, pivot, rhs);
-        }
-    }
-
     bool UberMaterial::drawMaterialLayerElement(const int index)
     {
         const std::string name = mLayers[index] != nullptr ? mLayers[index]->name() : format::string("Empty##%", index);
@@ -149,7 +132,7 @@ namespace engine
         ImGui::TextColored(ImVec4(0.3f, 0.3f, 0.3f, 1.f), "%2i", index);
         ImGui::SameLine();
         ImGui::SetCursorPosY(originalCursorPos.y + style.FramePadding.y);
-        ImGui::Selectable(name.c_str(), false, 0, ImVec2(ImGui::GetContentRegionAvail().x - ui::resetButtonWidth() - style.FramePadding.x - style.ItemSpacing.x, 0));
+        ImGui::Selectable(name.c_str(), false, 0, ImVec2(ImGui::GetContentRegionAvail().x - ui::resetButtonWidth() - 2.f * style.FramePadding.x - 2.f * style.ItemSpacing.x, 0));
 
         constexpr auto arrayPayLoadId = "ARRAY_PAYLOAD";
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
@@ -161,7 +144,7 @@ namespace engine
         if (ImGui::BeginDragDropTarget())
         {
             if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(arrayPayLoadId))
-                moveElementInPlace(*static_cast<int*>(payload->Data), index);
+                containers::moveInPlace(mLayers, *static_cast<int*>(payload->Data), index);
 
             if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(resourceMaterialLayerPayload))
             {

@@ -30,16 +30,20 @@ namespace engine
         MeshRenderer(SharedMesh &&mesh, std::string path);
         ~MeshRenderer() override = default;
         void addMaterial(const std::shared_ptr<MaterialSubComponent> &material);
-        
+        void addUMaterial(std::shared_ptr<UberMaterial> material);
+
     protected:
         void onDrawUi() override;
         void onPreRender() override;
         void drawMeshOptions();
-        
+        void drawMaterialArray();
+        bool drawMaterialElement(int index);
+
         // An ideal world with have all of these with an equal length. Some mesh renderers can have multiple meshes
         // but only a single material.
         SharedMesh                                          mMeshes;
         std::vector<std::shared_ptr<MaterialSubComponent>>  mMaterials;
+        std::vector<std::shared_ptr<UberMaterial>> mUberMaterials;
         
         bool mIsShowing { true };
         

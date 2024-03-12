@@ -22,14 +22,15 @@ namespace engine
     {
     public:
         explicit UberMaterial(const std::filesystem::path &path);
+        std::string name() const { return mName; }
+        std::filesystem::path path() const { return mPath; };
         void onDrawUi() override;
         void saveToDisk() const;
+
 
     protected:
         void loadFromDisk();
         void drawMaterialLayerArray();
-
-        void moveElementInPlace(int srcIndex, int dstIndex);
 
         bool drawMaterialLayerElement(int index);
         std::string mName;
