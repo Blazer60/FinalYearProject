@@ -106,19 +106,14 @@ namespace engine
         ui::draw(mProfilerViewer);
         drawSceneSettings();
         drawSceneHierarchyPanel();
-        drawActorDetails();
-        
+        drawDetailsPanel();
+
         if (mMoveSourceActor != nullptr)
             moveActors();
     }
     
     void Editor::drawActorDetails()
     {
-        PROFILE_FUNC();
-        if (!mShowDetailsPanel)
-            return;
-
-        ImGui::Begin("Details", &mShowDetailsPanel);
         if (mSelectedActor.isValid())
         {
             ui::draw(mSelectedActor.get());
@@ -130,7 +125,6 @@ namespace engine
                     ui::draw(component.get());
             }
         }
-        ImGui::End();
     }
     
     void Editor::drawSceneHierarchyPanel()
@@ -262,6 +256,7 @@ namespace engine
     {
         mSelectedActor = actor;
         mSelectedActorId = actor->getId();
+        mSelectedType = selectedType::Actor;
     }
 
     void Editor::drawSceneHierarchyForActor(Ref<Actor> actor)
@@ -305,7 +300,29 @@ namespace engine
             ImGui::TreePop();
         }
     }
-    
+
+    void Editor::drawDetailsPanel()
+    {
+        PROFILE_FUNC();
+        if (!mShowDetailsPanel)
+            return;
+
+        ImGui::Begin("Details", &mShowDetailsPanel);
+        switch (mSelectedType)
+        {
+            case selectedType::Actor:
+                drawActorDetails();
+                break;
+            case selectedType::Material:
+                break;
+            case selectedType::MaterialLayer:
+                if (mUberLayer != nullptr)
+                    ui::draw(mUberLayer);
+                break;
+        }
+        ImGui::End();
+    }
+
     void Editor::moveActors()
     {
         auto actorToMove = core->getScene()->getActor(mMoveSourceActor->getId());
@@ -396,6 +413,12 @@ namespace engine
     void Editor::relinkSelectedActor()
     {
         mSelectedActor = core->getScene()->getActor(mSelectedActorId, false);
+    }
+
+    void Editor::setUberLayer(std::shared_ptr<UberLayer> layer)
+    {
+        mUberLayer = std::move(layer);
+        mSelectedType = selectedType::MaterialLayer;
     }
 
     void Editor::drawSceneSettings()

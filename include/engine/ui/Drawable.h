@@ -54,4 +54,10 @@ namespace ui
     {
         draw(property.get());
     }
+
+    template<typename T>
+    void draw(std::shared_ptr<T> &property)
+    {
+        draw(property.get());
+    }
 }

@@ -58,5 +58,6 @@ namespace engine
         Texture mFolderIconTexture = Texture(file::texturePath() / "FolderIcon.png");
         Texture mUnknownIconTexture = Texture(file::texturePath() / "ObjectIcon.png");
         float mItemSize = 100.f;
+        std::string mNewFileName;
     };
 } // engine

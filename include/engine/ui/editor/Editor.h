@@ -18,6 +18,7 @@
 #include "EngineMemory.h"
 #include "ResourceFolder.h"
 #include "ProfilerViewer.h"
+#include "UberLayer.h"
 
 namespace engine
 {
@@ -59,11 +60,16 @@ namespace engine
             return actor->hasComponent<T>();
         }
     };
+
+    enum class selectedType : uint8_t
+    {
+        Actor, Material, MaterialLayer
+    };
     
-/**
- * @author Ryan Purse
- * @date 08/08/2023
- */
+    /**
+     * @author Ryan Purse
+     * @date 08/08/2023
+     */
     class Editor
         : public ui::Drawable
     {
@@ -94,10 +100,12 @@ namespace engine
         void addUpdateAction(const std::function<void()> &callback);
 
         void relinkSelectedActor();
+        void setUberLayer(std::shared_ptr<UberLayer> layer);
     protected:
         void onDrawUi() override;
         void drawSceneHierarchyPanel();
         void drawSceneHierarchyForActor(Ref<Actor> actor);
+        void drawDetailsPanel();
         void drawActorDetails();
         void drawAddComponentCombo();
         void drawSceneSettings();
@@ -112,8 +120,13 @@ namespace engine
         LogWindow mLogWindow;
         ResourceFolder mResourceFolder;
         ProfilerViewer mProfilerViewer;
+
+        selectedType mSelectedType = selectedType::Actor;
         Ref<Actor> mSelectedActor;
         UUID mSelectedActorId { 0 };
+
+        std::shared_ptr<UberLayer> mUberLayer;
+
         std::vector<ActorDetails> mMenuList;
         std::vector<std::unique_ptr<ComponentDetails>> mComponentList;
 

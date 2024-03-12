@@ -7,8 +7,15 @@
 
 #include "Ui.h"
 
+#include <memory>
+
 #include "Drawable.h"
+#include "Editor.h"
+#include "EngineState.h"
+#include "FileExplorer.h"
 #include "imgui.h"
+#include "Loader.h"
+#include "ResourceFolder.h"
 #include "WindowHelpers.h"
 
 namespace ui
@@ -32,7 +39,12 @@ namespace ui
         
         return 0;
     }
-    
+
+    void colourEdit(const std::string &id, glm::vec3& colour)
+    {
+        ImGui::ColorEdit3(id.c_str(), glm::value_ptr(colour), colourPickerFlags);
+    }
+
     void showTextureBuffer(const std::string &name, const TextureBufferObject &texture, bool *show, bool isMainBuffer)
     {
         if (show && !*show)
@@ -156,7 +168,126 @@ namespace ui
         ImVec2 imSize { size.x, size.y };
         return ImGui::ImageButton(imguiId.data(), reinterpret_cast<void *>(glId), imSize, ImVec2(0, 1), ImVec2(1, 0));
     }
-    
+
+    void textureThumbnail(const std::string& name, std::shared_ptr<Texture>& texture)
+    {
+        auto buttonId = format::string("##%", name);
+        if (ui::imageButton(buttonId, texture->id(), glm::vec2(ImGui::GetTextLineHeight())))
+        {
+            engine::editor->addUpdateAction([&]() {
+                const std::string result = openFileDialog();
+                if (result.empty())
+                    return;
+
+                texture = load::texture(result);
+            });
+        }
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal) && ImGui::BeginTooltip())
+        {
+            const std::string toolTip = format::string("% Texture - %", name, texture->path().string());
+            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 30.f);
+            ImGui::Text("%s", toolTip.c_str());
+            ImGui::PopTextWrapPos();
+            ui::image(texture->id(), glm::vec3(300.f));
+            ImGui::EndTooltip();
+        }
+        if (ImGui::BeginDragDropTarget())
+        {
+            if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(engine::resourceImagePayload))
+            {
+                std::filesystem::path path = *reinterpret_cast<std::filesystem::path*>(payload->Data);
+                engine::editor->addUpdateAction([&, path]() {
+                    texture = load::texture(path);
+                });
+            }
+        }
+    }
+
+    float resetButtonWidth()
+    {
+        const auto &style = ImGui::GetStyle();
+        const auto xMark = " X ";
+        const float buttonWidth = ImGui::CalcTextSize(xMark, 0, true).x + style.FramePadding.x + style.ItemSpacing.x;
+        return buttonWidth;
+    }
+
+    void resetButton(const std::string& name, std::shared_ptr<Texture>& texture)
+    {
+        const auto xMark = format::string(" X ##%", name);
+        const float position = ImGui::GetContentRegionAvail().x - resetButtonWidth();
+        ImGui::SameLine(position);
+        if (ImGui::Button(xMark.c_str()))
+        {
+            engine::editor->addUpdateAction([&]() {
+                texture = std::make_shared<Texture>("");
+            });
+        }
+    }
+
+    void texture(const std::string& name, std::shared_ptr<Texture>& texture)
+    {
+        ImGui::PushID(name.c_str());
+        auto &style = ImGui::GetStyle();
+        ImGui::BeginGroup();
+
+        ui::textureThumbnail(name, texture);
+
+        ImGui::SameLine();
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + style.FramePadding.y);
+        ImGui::Text(name.c_str());
+
+        resetButton(name, texture);
+
+        ImGui::EndGroup();
+        ImGui::PopID();
+    }
+
+    void textureColourEdit(const std::string& name, std::shared_ptr<Texture>& texture, glm::vec3& colour)
+    {
+        ImGui::PushID(name.c_str());
+        auto &style = ImGui::GetStyle();
+        ImGui::BeginGroup();
+        const float width = ImGui::GetContentRegionAvail().x;
+
+        ui::textureThumbnail(name, texture);
+
+        ImGui::SameLine();
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + style.FramePadding.y);
+        ImGui::Text(name.c_str());
+
+        ImGui::SameLine(width / 2.f);
+        ui::colourEdit(format::string("##%", name), colour);
+
+        resetButton(name, texture);
+
+        ImGui::EndGroup();
+        ImGui::PopID();
+    }
+
+    void textureSliderFloat(const std::string& name, std::shared_ptr<Texture>& texture, float& value)
+    {
+        ImGui::PushID(name.c_str());
+        auto &style = ImGui::GetStyle();
+        ImGui::BeginGroup();
+        const float width = ImGui::GetContentRegionAvail().x;
+
+        ui::textureThumbnail(name, texture);
+
+        ImGui::SameLine();
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + style.FramePadding.y);
+        ImGui::Text(name.c_str());
+
+        const auto hidden = format::string("##Slider%", name);
+        ImGui::SameLine(width / 2.f);
+        ImGui::SetNextItemWidth(width / 2.f - resetButtonWidth() - style.FramePadding.x - style.ItemSpacing.x);
+        ImGui::SliderFloat(hidden.c_str(), &value, 0.f, 1.f);
+
+        resetButton(name, texture);
+
+        ImGui::EndGroup();
+        ImGui::PopID();
+    }
+
     glm::ivec2 fitToRegion(const glm::ivec2 &imageSize, const glm::ivec2 &maxSize, const glm::ivec2 &padding)
     {
         ImVec2 regionSize = ImGui::GetContentRegionAvail();

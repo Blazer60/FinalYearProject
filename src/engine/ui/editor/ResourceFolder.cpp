@@ -6,6 +6,9 @@
 
 
 #include "ResourceFolder.h"
+
+#include "Editor.h"
+#include "EngineState.h"
 #include "FileLoader.h"
 #include "Ui.h"
 
@@ -91,6 +94,7 @@ namespace engine
 
     void ResourceFolder::drawContents()
     {
+        bool togglePopup = false;
         if (ImGui::BeginMenuBar())
         {
             if (ImGui::BeginMenu("Create"))
@@ -98,7 +102,10 @@ namespace engine
                 if (ImGui::MenuItem("Material"))
                     MESSAGE("Todo!");
                 if (ImGui::MenuItem("Material Layer"))
+                {
+                    togglePopup = true;
                     MESSAGE("Todo!");
+                }
 
                 ImGui::EndMenu();
             }
@@ -108,6 +115,35 @@ namespace engine
             ImGui::SameLine(ImGui::GetContentRegionAvail().x - width);
             ImGui::Text(folderName.c_str());
             ImGui::EndMenuBar();
+        }
+
+
+        if (togglePopup)
+        {
+            ImGui::OpenPopup("Create Material Layer");
+            mNewFileName = "";
+        }
+
+        // Always center this window when appearing
+        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+        if (ImGui::BeginPopupModal("Create Material Layer", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            if (togglePopup)
+                ImGui::SetKeyboardFocusHere();
+            if (ui::inputText("File Name", &mNewFileName, ImGuiInputTextFlags_EnterReturnsTrue) || ImGui::Button("Create"))
+            {
+                // Todo: This needs to be through a load function and then passed to the editor.
+                // Todo: Save/Load from disk: look in disk before creating a new one.
+                editor->setUberLayer(std::make_shared<UberLayer>(mSelectedFolder / format::string("%.mlpcy", mNewFileName)));
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel") || ImGui::IsKeyPressed(ImGuiKey_Escape))
+                ImGui::CloseCurrentPopup();
+
+            ImGui::EndPopup();
         }
 
         ImGui::SetNextItemWidth(100.f);
