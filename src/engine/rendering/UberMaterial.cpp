@@ -78,6 +78,62 @@ namespace engine
         MESSAGE("Material saved to: %", mPath);
     }
 
+    void UberMaterial::onPreRender()
+    {
+        PROFILE_FUNC();
+        graphics::pushDebugGroup(format::string("% material", mName));
+
+        // todo: A way to not call this every frame. Could be quite slow?
+        std::vector<std::shared_ptr<Texture>> validTextures;
+        glm::uvec2 maxTextureSize = glm::uvec2(0);
+        auto addIfValid = [&, this](const std::shared_ptr<Texture> &tex) {
+            if (tex->id() > 0)
+            {
+                validTextures.push_back(tex);
+                const glm::uvec2 size = tex->size();
+                maxTextureSize = glm::max(maxTextureSize, size);
+                const int index = static_cast<int>(mData.textureArrayData.size());
+                mData.textureArrayData.push_back(graphics::TextureData { size.x, size.y } );
+                return index;
+            }
+
+            return -1;
+        };
+
+        mData.textureArrayData.clear();
+        mData.layers.resize(mLayers.size());
+        for (int i = 0; i < mLayers.size(); ++i)
+        {
+            graphics::LayerData& layerData = mData.layers[i];
+            const UberLayer &layer = *mLayers[i];
+
+            layerData.roughness = layer.mRoughness;
+            layerData.sheenRoughness = layer.mSheenRoughness;
+            layerData.diffuseColour = glm::vec4(layer.mDiffuseColour, 1.f);
+            layerData.specularColour = glm::vec4(layer.mDiffuseColour, 1.f);
+            layerData.sheenColour = glm::vec4(layer.mDiffuseColour, 1.f);
+
+            layerData.diffuseTextureIndex = addIfValid(layer.mDiffuseTexture);
+            layerData.specularTextureIndex = addIfValid(layer.mSpecularTexture);
+            layerData.roughnessTextureIndex = addIfValid(layer.mRoughnessTexture);
+            layerData.normalTextureIndex = addIfValid(layer.mNormalTexture);
+            layerData.sheenTextureIndex = addIfValid(layer.mSheenTexture);
+            layerData.sheenRoughnessTextureIndex = addIfValid(layer.mSheenRoughnessTexture);
+        }
+
+        mTextureArray.resize(maxTextureSize, static_cast<int32_t>(validTextures.size()));
+        int index = 0;
+        for (const std::shared_ptr<Texture> &texture : validTextures)
+        {
+            // todo: fucking mips. smh.
+            graphics::copyTexture2D(*texture, mTextureArray, index++);
+        }
+        mTextureArray.setDebugName(format::string("Uber Material %", mName));
+        mData.textureArrayId = mTextureArray.getId();
+
+        graphics::popDebugGroup();
+    }
+
     void UberMaterial::loadFromDisk()
     {
         std::ifstream stream(mPath);

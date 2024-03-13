@@ -65,12 +65,12 @@ namespace engine
 
         YAML::Emitter out;
         out << YAML::BeginMap;
-        out << YAML::Key << "DiffuseTexturePath"        << YAML::Value << mDiffuseTexture->path().string();
-        out << YAML::Key << "SpecularTexturePath"       << YAML::Value << mSpecularTexture->path().string();
-        out << YAML::Key << "NormalTexturePath"         << YAML::Value << mNormalTexture->path().string();
-        out << YAML::Key << "RoughnessTexturePath"      << YAML::Value << mRoughnessTexture->path().string();
-        out << YAML::Key << "SheenTexturePath"          << YAML::Value << mSheenTexture->path().string();
-        out << YAML::Key << "SheenRoughnessTexturePath" << YAML::Value << mSheenRoughnessTexture->path().string();
+        out << YAML::Key << "DiffuseTexturePath"        << YAML::Value << file::makeRelativeToResourcePath(mDiffuseTexture->path()).string();
+        out << YAML::Key << "SpecularTexturePath"       << YAML::Value << file::makeRelativeToResourcePath(mSpecularTexture->path()).string();
+        out << YAML::Key << "NormalTexturePath"         << YAML::Value << file::makeRelativeToResourcePath(mNormalTexture->path()).string();
+        out << YAML::Key << "RoughnessTexturePath"      << YAML::Value << file::makeRelativeToResourcePath(mRoughnessTexture->path()).string();
+        out << YAML::Key << "SheenTexturePath"          << YAML::Value << file::makeRelativeToResourcePath(mSheenTexture->path()).string();
+        out << YAML::Key << "SheenRoughnessTexturePath" << YAML::Value << file::makeRelativeToResourcePath(mSheenRoughnessTexture->path()).string();
 
         out << YAML::Key << "DiffuseColour"     << YAML::Value << mDiffuseColour;
         out << YAML::Key << "SpecularColour"    << YAML::Value << mSpecularColour;
@@ -90,12 +90,15 @@ namespace engine
     {
         std::ifstream stream(mPath);
         std::stringstream stringstream;
-        stringstream << stringstream.rdbuf();
+        stringstream << stream.rdbuf();
         stream.close();
 
         auto tryLoadAsTexture = [](const YAML::Node &node) {
             if (node.IsDefined())
-                return load::texture(node.as<std::string>());
+            {
+                if (const std::string relativePath = node.as<std::string>(); !relativePath.empty())
+                    return load::texture(file::constructAbsolutePath(relativePath));
+            }
             return load::texture("");
         };
 

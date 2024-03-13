@@ -8,6 +8,8 @@
 #pragma once
 
 #include "Drawable.h"
+#include "GraphicsFunctions.h"
+#include "MaterialData.h"
 #include "Pch.h"
 #include "UberLayer.h"
 
@@ -27,6 +29,7 @@ namespace engine
         void onDrawUi() override;
         void saveToDisk() const;
 
+        void onPreRender();
 
     protected:
         void loadFromDisk();
@@ -37,5 +40,7 @@ namespace engine
         std::filesystem::path mPath;
 
         std::vector<std::shared_ptr<UberLayer>> mLayers;
+        TextureArrayObject mTextureArray = TextureArrayObject(graphics::textureFormat::Rgba8);
+        graphics::MaterialData mData;
     };
 } // engine

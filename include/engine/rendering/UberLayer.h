@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "Callback.h"
 #include "Drawable.h"
 #include "FileLoader.h"
 #include "Pch.h"
@@ -21,6 +22,7 @@ namespace engine
     class UberLayer
         : public ui::Drawable
     {
+        friend class UberMaterial;
     public:
         explicit UberLayer(const std::filesystem::path &path);
         std::string name() const { return mName; }

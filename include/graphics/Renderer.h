@@ -15,6 +15,7 @@
 #include "Mesh.h"
 #include "Shader.h"
 #include "FileLoader.h"
+#include "MaterialData.h"
 
 
 namespace graphics
@@ -40,6 +41,16 @@ public:
     Renderer operator=(const Renderer&) = delete;
     Renderer operator=(Renderer&&) = delete;
     ~Renderer();
+
+    /**
+     * @brief Draws an element to the geometry buffer.
+     * @param vao Vertex Array Object
+     * @param indiciesCount The number of indices that make up the geometry.
+     * @param matrix The model matrix for this object (used for shadow mapping).
+     * @param material The material the geometry will be drawn with.
+     */
+    void drawMesh(uint32_t vao, int32_t indiciesCount, const glm::mat4 &matrix, const graphics::MaterialData &material);
+    void drawMesh(const SubMesh &surface, const glm::mat4 &matrix, const graphics::MaterialData &material);
 
     /**
      * @brief Draws an element to the geometry buffer.
@@ -182,6 +193,9 @@ protected:
     std::vector<graphics::Spotlight>         mSpotlightQueue;
     std::vector<graphics::DebugQueueObject>  mDebugQueue;
     std::vector<graphics::LineQueueObject>   mLineQueue;
+
+    std::vector<graphics::GeometryObject>    mGeometryQueue;
+    std::vector<graphics::MaterialData>      mMaterialQueue;
 
     SubMesh mFullscreenTriangle;
 

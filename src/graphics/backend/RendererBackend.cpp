@@ -39,6 +39,8 @@ namespace graphics
         mSpotlightQueue = std::move(queues.spotlightQueue);
         mDebugQueue = std::move(queues.debugQueue);
         mLineQueue = std::move(queues.lineQueue);
+        mGeometryQueue = std::move(queues.geometryQueue);
+        mMaterialQueue = std::move(queues.materialQueue);
     }
 
     void RendererBackend::execute()

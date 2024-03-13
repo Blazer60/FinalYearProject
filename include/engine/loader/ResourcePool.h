@@ -34,6 +34,7 @@ namespace engine
     public:
         void clean();
         void saveAllAssets();
+        void updateMaterials();
         [[nodiscard]] std::shared_ptr<Shader> loadShader(const std::filesystem::path &vertexPath, const std::filesystem::path &fragmentPath);
         
         template<typename TVertex>

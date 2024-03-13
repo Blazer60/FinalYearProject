@@ -33,7 +33,7 @@ namespace graphics
 
     enum class textureFormat : uint8_t
     {
-        Rgba16f, Rg16f, R16f, D32f, Rgba16, Rgba32ui
+        Rgba16f, Rg16f, R16f, D32f, Rgba16, Rgba32ui, Rgba8
     };
 
     enum class pixelFormat : uint8_t
@@ -61,6 +61,16 @@ namespace graphics
         GLenum drawMode;
         glm::mat4 matrix;
         DrawCallback onDraw;
+    };
+
+    struct GeometryObject
+    {
+        GeometryObject(const uint32_t vao, const int32_t indicesCount, const glm::mat4 &matrix)
+            : vao(vao), indicesCount(indicesCount), matrix(matrix) { }
+
+        uint32_t vao = 0;
+        int32_t indicesCount = 0;
+        glm::mat4 matrix = glm::mat4(1.f);
     };
 
     struct DebugQueueObject

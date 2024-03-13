@@ -25,7 +25,11 @@ public:
      * @param layers - The number of textures in the array.
      */
     TextureArrayObject(const glm::ivec2 &size, int32_t layers, GLenum format, graphics::filter filterMode, graphics::wrap wrapMode);
+    explicit TextureArrayObject(graphics::textureFormat format);
     TextureArrayObject(graphics::textureFormat format, int32_t layers);
+
+    TextureArrayObject(TextureArrayObject&other) = delete;
+    TextureArrayObject operator=(TextureArrayObject&other) noexcept = delete;
 
     void deInit();
 
@@ -36,6 +40,7 @@ public:
     
     [[nodiscard]] uint32_t getId() const;
     void resize(const glm::ivec2 &newSize);
+    void resize(const glm::ivec2 &newSize, int32_t layers);
     [[nodiscard]] glm::ivec2 getSize() const;
     [[nodiscard]] int32_t getLayerCount() const;
     [[nodiscard]] GLenum getFormat() const;

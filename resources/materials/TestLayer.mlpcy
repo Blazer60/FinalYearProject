@@ -1,8 +1,8 @@
-DiffuseTexturePath: ""
+DiffuseTexturePath: models\leatherBall\TexturesCom_Leather_Tufted_New_1K_albedo.png
 SpecularTexturePath: ""
-NormalTexturePath: ""
-RoughnessTexturePath: ""
-SheenTexturePath: ""
+NormalTexturePath: models\leatherBall\TexturesCom_Leather_Tufted_New_1K_normal.png
+RoughnessTexturePath: models\leatherBall\TexturesCom_Leather_Tufted_New_1K_roughness.png
+SheenTexturePath: textures\hdr\norway\Norway.hdr
 SheenRoughnessTexturePath: ""
 DiffuseColour: [0.800000012, 0.800000012, 0.800000012]
 SpecularColour: [0.200000003, 0.200000003, 0.200000003]

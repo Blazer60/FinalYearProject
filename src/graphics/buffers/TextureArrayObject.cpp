@@ -10,6 +10,17 @@
 
 void TextureArrayObject::init()
 {
+    if (mSize == glm::ivec2(0))
+    {
+        WARN("Texture array trying to be initialised with no size! No texture will be made.");
+        return;
+    }
+    if (mLayers <= 0)
+    {
+        WARN("Texture array has no layers! No texture will be made.");
+        return;
+    }
+
     const auto filter = toGLint(mFilter);
     const auto wrap = toGLint(mWrap);
 
@@ -31,6 +42,12 @@ TextureArrayObject::TextureArrayObject(
     : mFormat(format), mSize(size), mLayers(layers), mFilter(filterMode), mWrap(wrapMode)
 {
     init();
+}
+
+TextureArrayObject::TextureArrayObject(const graphics::textureFormat format)
+    : mFormat(toGLenum(format))
+{
+
 }
 
 TextureArrayObject::TextureArrayObject(const graphics::textureFormat format, const int32_t layers)
@@ -62,6 +79,17 @@ void TextureArrayObject::resize(const glm::ivec2& newSize)
 
     deInit();
     mSize = newSize;
+    init();
+}
+
+void TextureArrayObject::resize(const glm::ivec2& newSize, int32_t layers)
+{
+    if (mSize == newSize && mLayers == layers)
+        return;
+
+    deInit();
+    mSize = newSize;
+    mLayers = layers;
     init();
 }
 

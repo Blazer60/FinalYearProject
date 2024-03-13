@@ -66,6 +66,20 @@ namespace engine
             material->saveToDisk();
     }
 
+    void ResourcePool::updateMaterials()
+    {
+        // I have no idea where else to do this since I only want to update every material onece.
+        // This is the only container that stores unique instances.
+        // All instances here "should" be in use. Otherwise, they get cleaned up.
+        PROFILE_FUNC();
+        graphics::pushDebugGroup("Material Packing");
+
+        for (auto &[_, material] : mMaterials)
+            material->onPreRender();
+
+        graphics::popDebugGroup();
+    }
+
     std::shared_ptr<Shader> ResourcePool::loadShader(
         const std::filesystem::path &vertexPath,
         const std::filesystem::path &fragmentPath)

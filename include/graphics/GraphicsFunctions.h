@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Pch.h"
+#include "Texture.h"
 
 #include "TextureBufferObject.h"
 #include "TextureArrayObject.h"
@@ -23,6 +24,7 @@ namespace graphics
      * @param destination - the image you want to paste into.
      */
     void copyTexture2D(const TextureBufferObject &source, const TextureBufferObject &destination);
+    void copyTexture2D(const Texture &source, const TextureArrayObject &destination, int destinationIndex);
     
     /**
      * @brief Pushes a grouping for debuggers like RenderDoc. For instance, we can wrap our geometry calls to see how

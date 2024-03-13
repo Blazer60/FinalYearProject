@@ -82,6 +82,8 @@ add_library(${GRAPHICS_LIBRARY} STATIC
         src/graphics/Skybox.cpp src/graphics/Skybox.h
         src/graphics/backend/DebugPass.cpp src/graphics/backend/DebugPass.h
         src/graphics/backend/LookUpTables.cpp src/graphics/backend/LookUpTables.h
+        src/graphics/MaterialData.cpp
+        include/graphics/MaterialData.h
 )
 
 target_include_directories(${GRAPHICS_LIBRARY} PUBLIC

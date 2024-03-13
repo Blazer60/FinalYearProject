@@ -53,6 +53,18 @@ Renderer::~Renderer()
 }
 
 void Renderer::drawMesh(
+    const uint32_t vao, int32_t indiciesCount, const glm::mat4& matrix, const graphics::MaterialData& material)
+{
+    mGeometryQueue.emplace_back(vao, indiciesCount, matrix);
+    mMaterialQueue.push_back(material);
+}
+
+void Renderer::drawMesh(const SubMesh& surface, const glm::mat4& matrix, const graphics::MaterialData& material)
+{
+    drawMesh(surface.vao(), surface.indicesCount(), matrix, material);
+}
+
+void Renderer::drawMesh(
     const uint32_t vao, const int32_t indicesCount, std::weak_ptr<Shader> shader,
     graphics::drawMode renderMode, const glm::mat4 &matrix,
     const graphics::DrawCallback &onDraw)
@@ -150,7 +162,9 @@ void Renderer::render() const
         mPointLightQueue,
         mSpotlightQueue,
         mDebugQueue,
-        mLineQueue
+        mLineQueue,
+        mGeometryQueue,
+        mMaterialQueue
     });
     mRendererBackend->execute();
 }
@@ -184,6 +198,14 @@ void Renderer::clear()
     const uint64_t lineQueueCount = mLineQueue.size();
     mLineQueue.clear();
     mLineQueue.reserve(lineQueueCount);
+
+    const uint64_t geometryCount = mGeometryQueue.size();
+    mGeometryQueue.clear();
+    mGeometryQueue.reserve(geometryCount);
+
+    const uint64_t materialCount = mMaterialQueue.size();
+    mMaterialQueue.clear();
+    mMaterialQueue.reserve(materialCount);
 }
 
 void Renderer::generateSkybox(const std::string_view path, const glm::ivec2 desiredSize) const

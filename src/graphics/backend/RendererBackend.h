@@ -12,6 +12,7 @@
 #include "GraphicsLighting.h"
 #include "LightShadingPass.h"
 #include "LookUpTables.h"
+#include "MaterialData.h"
 #include "MaterialRenderingPass.h"
 #include "Pch.h"
 #include "ShadowMappingPass.h"
@@ -29,6 +30,9 @@ namespace graphics
         std::vector<Spotlight> spotlightQueue;
         std::vector<DebugQueueObject> debugQueue;
         std::vector<LineQueueObject> lineQueue;
+
+        std::vector<GeometryObject> geometryQueue;
+        std::vector<MaterialData> materialQueue;
     };
 
     /**
@@ -74,5 +78,8 @@ namespace graphics
         std::vector<Spotlight> mSpotlightQueue;
         std::vector<DebugQueueObject> mDebugQueue;
         std::vector<LineQueueObject> mLineQueue;
+
+        std::vector<GeometryObject> mGeometryQueue;
+        std::vector<MaterialData> mMaterialQueue;
     };
 } // graphics

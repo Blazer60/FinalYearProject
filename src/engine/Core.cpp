@@ -332,6 +332,7 @@ namespace engine
             mScene->update();
             mEditor->update();
 
+            mResourcePool->updateMaterials();  // Calls material onPreRender() function.
             mEditor->preRender();
             mScene->preRender();
             mPhysics->renderDebugShapes();

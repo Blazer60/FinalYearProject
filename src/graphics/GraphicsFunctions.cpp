@@ -22,17 +22,32 @@ namespace graphics
     
     void copyTexture2D(const TextureBufferObject &source, const TextureBufferObject &destination)
     {
-        const int x = 0;
-        const int y = 0;
-        const int z = 0;
-        const int mipLevel = 0;
-        const int sourceDepth = 1;
+        constexpr int x = 0;
+        constexpr int y = 0;
+        constexpr int z = 0;
+        constexpr int mipLevel = 0;
+        constexpr int sourceDepth = 1;
         glCopyImageSubData(
             source.getId(), GL_TEXTURE_2D, mipLevel, x, y, z,
             destination.getId(), GL_TEXTURE_2D, mipLevel, x, y, z,
             destination.getSize().x, destination.getSize().y, sourceDepth);
     }
-    
+
+    void copyTexture2D(const Texture& source, const TextureArrayObject& destination, const int destinationIndex)
+    {
+        constexpr int x = 0;
+        constexpr int y = 0;
+        constexpr int z = 0;
+        constexpr int mipLevel = 0;
+        constexpr int sourceDepth = 1;
+
+        glCopyImageSubData(
+            source.id(), GL_TEXTURE_2D, mipLevel, x, y, z,
+            destination.getId(), GL_TEXTURE_2D_ARRAY, mipLevel, x, y, destinationIndex,
+            source.size().x, source.size().y, sourceDepth
+            );
+    }
+
     void pushDebugGroup(std::string_view message)
     {
         glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, message.data());
