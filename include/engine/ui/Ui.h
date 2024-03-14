@@ -35,9 +35,12 @@ namespace ui
 
     float resetButtonWidth();
     void resetButton(const std::string& name, std::shared_ptr<Texture>& texture);
-    void texture(const std::string& name, std::shared_ptr<Texture>& texture);
-    void textureColourEdit(const std::string &name, std::shared_ptr<Texture> &texture, glm::vec3 &colour);
-    void textureSliderFloat(const std::string &name, std::shared_ptr<Texture> &texture, float &value);
+    void rowTexture(const std::string& name, std::shared_ptr<Texture>& texture);
+    void rowTextureColourEdit(const std::string &name, std::shared_ptr<Texture> &texture, glm::vec3 &colour);
+    void rowTextureSliderFloat(const std::string &name, std::shared_ptr<Texture> &texture, float &value);
     
     glm::ivec2 fitToRegion(const glm::ivec2 &imageSize, const glm::ivec2 &maxSize, const glm::ivec2 &padding=glm::ivec2(50));
+
+    bool closeButton(const char *label);
+    ImVec2 closebuttonSize();
 }

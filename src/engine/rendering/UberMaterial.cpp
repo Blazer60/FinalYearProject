@@ -104,6 +104,9 @@ namespace engine
         mData.layers.resize(mLayers.size());
         for (int i = 0; i < mLayers.size(); ++i)
         {
+            if (mLayers[i] == nullptr)
+                continue;
+
             graphics::LayerData& layerData = mData.layers[i];
             const UberLayer &layer = *mLayers[i];
 
@@ -175,20 +178,9 @@ namespace engine
         }
     }
 
-    bool UberMaterial::drawMaterialLayerElement(const int index)
+    void UberMaterial::drawMaterialLayerElementColumn(const std::string name, const int index)
     {
-        const std::string name = mLayers[index] != nullptr ? mLayers[index]->name() : format::string("Empty##%", index);
-
-        auto &style = ImGui::GetStyle();
-        ImGui::BeginGroup();
-        const auto originalCursorPos = ImGui::GetCursorPos();
-        const auto xMarkposition = ImVec2(ImGui::GetContentRegionAvail().x - ui::resetButtonWidth(), originalCursorPos.y);
-
-        ImGui::SetCursorPosY(originalCursorPos.y + style.FramePadding.y);
-        ImGui::TextColored(ImVec4(0.3f, 0.3f, 0.3f, 1.f), "%2i", index);
-        ImGui::SameLine();
-        ImGui::SetCursorPosY(originalCursorPos.y + style.FramePadding.y);
-        ImGui::Selectable(name.c_str(), false, 0, ImVec2(ImGui::GetContentRegionAvail().x - ui::resetButtonWidth() - 2.f * style.FramePadding.x - 2.f * style.ItemSpacing.x, 0));
+        const bool selected = ImGui::TreeNodeEx(name.c_str());
 
         constexpr auto arrayPayLoadId = "ARRAY_PAYLOAD";
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
@@ -211,14 +203,47 @@ namespace engine
             ImGui::EndDragDropTarget();
         }
 
-        const auto xMark = format::string(" X ##%", index);
-        ImGui::SetCursorPos(xMarkposition);
-        const bool result = ImGui::Button(xMark.c_str());
-        if (result)
+        if (selected)
         {
-            mLayers.erase(mLayers.begin() + index);
+            ui::draw(mLayers[index]);
+            ImGui::TreePop();
         }
-        ImGui::EndGroup();
+    }
+
+    bool UberMaterial::drawMaterialLayerElement(const int index)
+    {
+        const std::string name = mLayers[index] != nullptr ? mLayers[index]->name() : format::string("Empty##%", index);
+
+        bool result = false;
+        const std::string tableName = format::string("%Table", name);
+        if (ImGui::BeginTable(tableName.c_str(), 3, ImGuiTableFlags_RowBg))
+        {
+            auto &style = ImGui::GetStyle();
+            float textSizing = ImGui::CalcTextSize("00").x; // + style.ItemSpacing.x + style.CellPadding.x;
+            ImGui::TableSetupColumn("Index", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed, textSizing);
+            ImGui::TableSetupColumn("Contents", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableSetupColumn("Delete Button", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed, ui::closebuttonSize().x);
+
+            if (ImGui::TableNextColumn())
+            {
+                ImGui::TextColored(ImVec4(0.3f, 0.3f, 0.3f, 1.f), "%2i", index);
+            }
+            if (ImGui::TableNextColumn())
+            {
+                drawMaterialLayerElementColumn(name, index);
+            }
+            if (ImGui::TableNextColumn())
+            {
+                result = ui::closeButton("Close innit");
+                if (result)
+                {
+                    mLayers.erase(mLayers.begin() + index);
+                }
+            }
+
+            ImGui::EndTable();
+        }
+
         return result;
     }
 } // engine

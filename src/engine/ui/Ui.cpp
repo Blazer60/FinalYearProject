@@ -7,6 +7,7 @@
 
 #include "Ui.h"
 
+#include <imgui_internal.h>
 #include <memory>
 
 #include "Drawable.h"
@@ -215,10 +216,7 @@ namespace ui
 
     void resetButton(const std::string& name, std::shared_ptr<Texture>& texture)
     {
-        const auto xMark = format::string(" X ##%", name);
-        const float position = ImGui::GetContentRegionAvail().x - resetButtonWidth();
-        ImGui::SameLine(position);
-        if (ImGui::Button(xMark.c_str()))
+        if (ui::closeButton("Delete Button"))
         {
             engine::editor->addUpdateAction([&]() {
                 texture = std::make_shared<Texture>("");
@@ -226,67 +224,81 @@ namespace ui
         }
     }
 
-    void texture(const std::string& name, std::shared_ptr<Texture>& texture)
+    void rowTexture(const std::string& name, std::shared_ptr<Texture>& texture)
     {
         ImGui::PushID(name.c_str());
-        auto &style = ImGui::GetStyle();
-        ImGui::BeginGroup();
+        if (ImGui::TableNextColumn())
+        {
+            ui::textureThumbnail(name, texture);
+        }
+        if (ImGui::TableNextColumn())
+        {
+            const auto &style = ImGui::GetStyle();
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + style.FramePadding.y);
+            ImGui::Text(name.c_str());
+        }
+        if (ImGui::TableNextColumn())
+        {
 
-        ui::textureThumbnail(name, texture);
+        }
+        if (ImGui::TableNextColumn())
+        {
+            resetButton(name, texture);
+        }
 
-        ImGui::SameLine();
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + style.FramePadding.y);
-        ImGui::Text(name.c_str());
-
-        resetButton(name, texture);
-
-        ImGui::EndGroup();
         ImGui::PopID();
     }
 
-    void textureColourEdit(const std::string& name, std::shared_ptr<Texture>& texture, glm::vec3& colour)
+    void rowTextureColourEdit(const std::string& name, std::shared_ptr<Texture>& texture, glm::vec3& colour)
     {
         ImGui::PushID(name.c_str());
-        auto &style = ImGui::GetStyle();
-        ImGui::BeginGroup();
-        const float width = ImGui::GetContentRegionAvail().x;
+        if (ImGui::TableNextColumn())
+        {
+            ui::textureThumbnail(name, texture);
+        }
+        if (ImGui::TableNextColumn())
+        {
+            const auto &style = ImGui::GetStyle();
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + style.FramePadding.y);
+            ImGui::Text(name.c_str());
+        }
+        if (ImGui::TableNextColumn())
+        {
+            ui::colourEdit(format::string("##%", name), colour);
+        }
+        if (ImGui::TableNextColumn())
+        {
+            resetButton(name, texture);
+        }
 
-        ui::textureThumbnail(name, texture);
-
-        ImGui::SameLine();
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + style.FramePadding.y);
-        ImGui::Text(name.c_str());
-
-        ImGui::SameLine(width / 2.f);
-        ui::colourEdit(format::string("##%", name), colour);
-
-        resetButton(name, texture);
-
-        ImGui::EndGroup();
         ImGui::PopID();
     }
 
-    void textureSliderFloat(const std::string& name, std::shared_ptr<Texture>& texture, float& value)
+    void rowTextureSliderFloat(const std::string& name, std::shared_ptr<Texture>& texture, float& value)
     {
         ImGui::PushID(name.c_str());
-        auto &style = ImGui::GetStyle();
-        ImGui::BeginGroup();
-        const float width = ImGui::GetContentRegionAvail().x;
 
-        ui::textureThumbnail(name, texture);
+        if (ImGui::TableNextColumn())
+        {
+            ui::textureThumbnail(name, texture);
+        }
+        if (ImGui::TableNextColumn())
+        {
+            const auto &style = ImGui::GetStyle();
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + style.FramePadding.y);
+            ImGui::Text(name.c_str());
+        }
+        if (ImGui::TableNextColumn())
+        {
+            const auto hidden = format::string("##Slider%", name);
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+            ImGui::SliderFloat(hidden.c_str(), &value, 0.f, 1.f);
+        }
+        if (ImGui::TableNextColumn())
+        {
+            resetButton(name, texture);
+        }
 
-        ImGui::SameLine();
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + style.FramePadding.y);
-        ImGui::Text(name.c_str());
-
-        const auto hidden = format::string("##Slider%", name);
-        ImGui::SameLine(width / 2.f);
-        ImGui::SetNextItemWidth(width / 2.f - resetButtonWidth() - style.FramePadding.x - style.ItemSpacing.x);
-        ImGui::SliderFloat(hidden.c_str(), &value, 0.f, 1.f);
-
-        resetButton(name, texture);
-
-        ImGui::EndGroup();
         ImGui::PopID();
     }
 
@@ -338,5 +350,24 @@ namespace ui
         }
         
         return { regionSize.x, regionSize.y };
+    }
+
+    bool closeButton(const char *label)
+    {
+        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        if (window->SkipItems)
+            return false;
+
+        const ImGuiID id = window->GetID(label);
+        const ImGuiID close_button_id = ImGui::GetIDWithSeed("#CLOSE", NULL, id);
+        if (ImGui::CloseButton(close_button_id, window->DC.CursorPos))
+            return true;
+        return false;
+    }
+
+    ImVec2 closebuttonSize()
+    {
+        const ImGuiContext &g = *GImGui;
+        return ImVec2(g.FontSize + 2.f * g.Style.FramePadding.x, g.FontSize + 2.f * g.Style.FramePadding.y);
     }
 }

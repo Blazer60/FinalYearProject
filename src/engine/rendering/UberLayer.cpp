@@ -26,24 +26,25 @@ namespace engine
 
     void UberLayer::onDrawUi()
     {
-        ui::inputText("##name", &mName);
-        const auto name = format::string("%", mPath);
-        ImGui::TextColored(ImVec4(0.3f, 0.3f, 0.3f, 1.f), name.c_str());
-
-        ImGui::SeparatorText("Default Settings");
-        ui::textureColourEdit("Diffuse", mDiffuseTexture, mDiffuseColour);
-        ui::textureColourEdit("Specular", mSpecularTexture, mSpecularColour);
-        ui::texture("Normal Map", mNormalTexture);
-        ui::textureSliderFloat("Roughness", mRoughnessTexture, mRoughness);
-
-        ImGui::SeparatorText("Sheen Settings");
-        ui::textureColourEdit("Sheen Colour", mSheenTexture, mSheenColour);
-        ui::textureSliderFloat("Sheen Roughness", mSheenRoughnessTexture, mSheenRoughness);
-
-        if (ImGui::Button("Save"))
+        if (ImGui::BeginTable("Default Settings Table", 4))
         {
-            MESSAGE("Todo: Save to disk");
+            ImGui::TableSetupColumn("Texture Button", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed);
+            ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed);
+            ImGui::TableSetupColumn("Slider Or Value", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableSetupColumn("Close Button", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed, ui::closebuttonSize().x);
+
+            ui::rowTextureColourEdit("diffuse", mDiffuseTexture, mDiffuseColour);
+            ui::rowTextureColourEdit("specular", mSpecularTexture, mSpecularColour);
+            ui::rowTexture("normal map", mNormalTexture);
+            ui::rowTextureSliderFloat("roughness", mRoughnessTexture, mRoughness);
+            ui::rowTextureColourEdit("Sheen Colour", mSheenTexture, mSheenColour);
+            ui::rowTextureSliderFloat("Sheen Roughness", mSheenRoughnessTexture, mSheenRoughness);
+            ImGui::EndTable();
         }
+        const auto name = format::string("%", mPath);
+        ImGui::PushTextWrapPos(ImGui::GetContentRegionAvail().x);
+        ImGui::TextColored(ImVec4(0.3f, 0.3f, 0.3f, 1.f), name.c_str());
+        ImGui::PopTextWrapPos();
     }
 
     void UberLayer::saveToDisk() const

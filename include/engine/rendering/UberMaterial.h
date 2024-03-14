@@ -36,12 +36,14 @@ namespace engine
         void loadFromDisk();
         void drawMaterialLayerArray();
 
+        void drawMaterialLayerElementColumn(std::string name, int index);
+
         bool drawMaterialLayerElement(int index);
         std::string mName;
         std::filesystem::path mPath;
 
         std::vector<std::shared_ptr<UberLayer>> mLayers;
-        TextureArrayObject mTextureArray = TextureArrayObject(graphics::textureFormat::Rgba8);
+        TextureArrayObject mTextureArray = TextureArrayObject(graphics::textureFormat::Rgba8, graphics::filter::LinearMipmapLinear);
         graphics::MaterialData mData;
     };
 } // engine

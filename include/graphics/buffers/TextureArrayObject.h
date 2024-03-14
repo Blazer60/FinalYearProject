@@ -26,6 +26,7 @@ public:
      */
     TextureArrayObject(const glm::ivec2 &size, int32_t layers, GLenum format, graphics::filter filterMode, graphics::wrap wrapMode);
     explicit TextureArrayObject(graphics::textureFormat format);
+    TextureArrayObject(graphics::textureFormat format, graphics::filter filter);
     TextureArrayObject(graphics::textureFormat format, int32_t layers);
 
     TextureArrayObject(TextureArrayObject&other) = delete;

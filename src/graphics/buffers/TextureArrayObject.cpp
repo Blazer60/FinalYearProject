@@ -21,12 +21,11 @@ void TextureArrayObject::init()
         return;
     }
 
-    const auto filter = toGLint(mFilter);
     const auto wrap = toGLint(mWrap);
 
     glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &mId);
-    glTextureParameteri(mId, GL_TEXTURE_MIN_FILTER, filter);
-    glTextureParameteri(mId, GL_TEXTURE_MAG_FILTER, filter);
+    glTextureParameteri(mId, GL_TEXTURE_MIN_FILTER, toGLint(mFilter));
+    glTextureParameteri(mId, GL_TEXTURE_MAG_FILTER, toMagGLint(mFilter));
     glTextureParameteri(mId, GL_TEXTURE_WRAP_S, wrap);
     glTextureParameteri(mId, GL_TEXTURE_WRAP_T, wrap);
 
@@ -48,6 +47,11 @@ TextureArrayObject::TextureArrayObject(const graphics::textureFormat format)
     : mFormat(toGLenum(format))
 {
 
+}
+
+TextureArrayObject::TextureArrayObject(const graphics::textureFormat format, const graphics::filter filter)
+    : mFormat(toGLenum(format)), mFilter(filter)
+{
 }
 
 TextureArrayObject::TextureArrayObject(const graphics::textureFormat format, const int32_t layers)
