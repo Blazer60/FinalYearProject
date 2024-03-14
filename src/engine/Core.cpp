@@ -224,16 +224,16 @@ namespace engine
 
     void Core::configureUiThemeColours(ImGuiStyle &style)
     {
-        const ImVec4 background = ImVec4(0.16f, 0.16f, 0.17f, 1.f);
-        const ImVec4 accentBackground = ImVec4(0.196f, 0.212f, 0.197f, 1.f);
-        
-        const ImVec4 primary        = ImVec4(0.2f, 0.2f, 0.21f, 1.f);
-        const ImVec4 primaryHovered = ImVec4(0.3f, 0.3f, 0.32f, 1.f);
-        const ImVec4 primaryActive  = ImVec4(0.4f, 0.4f, 0.48f, 1.f);
-        
-        const ImVec4 accent         = ImVec4(0.09f, 0.32f, 0.14f, 1.f);
-        const ImVec4 accentHovered  = ImVec4(0.14f, 0.47f, 0.2f, 1.f);
-        const ImVec4 accentActive   = ImVec4(0.18f, 0.62f, 0.27f, 1.f);
+        constexpr ImVec4 background = ImVec4(0.16f, 0.16f, 0.17f, 1.f);
+        constexpr ImVec4 accentBackground = ImVec4(0.196f, 0.212f, 0.197f, 1.f);
+
+        constexpr ImVec4 primary        = ImVec4(0.2f, 0.2f, 0.21f, 1.f);
+        constexpr ImVec4 primaryHovered = ImVec4(0.3f, 0.3f, 0.32f, 1.f);
+        constexpr ImVec4 primaryActive  = ImVec4(0.4f, 0.4f, 0.48f, 1.f);
+
+        constexpr ImVec4 accent         = ImVec4(0.09f, 0.32f, 0.14f, 1.f);
+        constexpr ImVec4 accentHovered  = ImVec4(0.14f, 0.47f, 0.2f, 1.f);
+        constexpr ImVec4 accentActive   = ImVec4(0.18f, 0.62f, 0.27f, 1.f);
         
         style.Colors[ImGuiCol_Text]     = ImVec4(0.85f, 0.85f, 0.85f, 1.f);
         style.Colors[ImGuiCol_WindowBg] = background;
@@ -270,6 +270,9 @@ namespace engine
         
         style.Colors[ImGuiCol_DockingPreview] = accentHovered;
         style.Colors[ImGuiCol_DragDropTarget] = accent;
+
+        style.Colors[ImGuiCol_TableRowBg] = background;
+        style.Colors[ImGuiCol_TableRowBgAlt] = ImVec4(0.17f, 0.17f, 0.17f, 1.f);
     }
     
     Core::~Core()

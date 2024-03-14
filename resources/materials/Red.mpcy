@@ -1,2 +1,3 @@
 MaterialLayers:
   - materials\TestLayer.mlpcy
+  - materials\AnotherLayer.mlpcy

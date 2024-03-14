@@ -36,7 +36,7 @@ namespace engine
         void loadFromDisk();
         void drawMaterialLayerArray();
 
-        void drawMaterialLayerElementColumn(std::string name, int index);
+        void drawMaterialLayerElementColumn(const std::string&name, int index);
 
         bool drawMaterialLayerElement(int index);
         std::string mName;
