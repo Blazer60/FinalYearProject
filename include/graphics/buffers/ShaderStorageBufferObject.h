@@ -18,6 +18,7 @@ namespace graphics
     class ShaderStorageBufferObject
     {
     public:
+        explicit ShaderStorageBufferObject(const std::string &debugName="");
         explicit ShaderStorageBufferObject(unsigned int size, const std::string &debugName="");
         void reserve(unsigned int size);
         void resize(unsigned int size);

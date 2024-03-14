@@ -22,6 +22,7 @@ namespace graphics
 
         int32_t diffuseTextureIndex = -1;
         int32_t specularTextureIndex = -1;
+
         int32_t normalTextureIndex = -1;
         int32_t roughnessTextureIndex = -1;
         int32_t sheenTextureIndex = -1;

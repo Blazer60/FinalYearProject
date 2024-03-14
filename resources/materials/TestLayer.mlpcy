@@ -1,11 +1,11 @@
-DiffuseTexturePath: models\leatherBall\TexturesCom_Leather_Tufted_New_1K_albedo.png
+DiffuseTexturePath: models\stoneFloor\TexturesCom_TileStones_1K_albedo.png
 SpecularTexturePath: ""
-NormalTexturePath: models\leatherBall\TexturesCom_Leather_Tufted_New_1K_normal.png
-RoughnessTexturePath: models\leatherBall\TexturesCom_Leather_Tufted_New_1K_roughness.png
-SheenTexturePath: textures\hdr\norway\Norway.hdr
+NormalTexturePath: models\stoneFloor\TexturesCom_TileStones_1K_normal.png
+RoughnessTexturePath: models\stoneFloor\TexturesCom_TileStones_1K_roughness.png
+SheenTexturePath: ""
 SheenRoughnessTexturePath: ""
-DiffuseColour: [0.800000012, 0.800000012, 0.800000012]
-SpecularColour: [0.200000003, 0.200000003, 0.200000003]
-Roughness: 0.899999976
-SheenColour: [0, 0, 0]
-SheenRoughness: 0.5
+DiffuseColour: [0.999924779, 1, 0.999899983]
+SpecularColour: [0.0981393233, 0.0981323346, 0.0981421471]
+Roughness: 1
+SheenColour: [9.99966942e-05, 9.9989993e-05, 9.99999975e-05]
+SheenRoughness: 0

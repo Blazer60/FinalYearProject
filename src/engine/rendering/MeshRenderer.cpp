@@ -197,15 +197,25 @@ namespace engine
 
     void MeshRenderer::onPreRender()
     {
-        if (mMaterials.empty() || mMeshes->empty())
+        if (mMeshes->empty() || mUberMaterials.empty())
             return;
-        
-        for (int i = 0; i < glm::max(mMaterials.size(), mMeshes->size()); ++i)
+
+        for (int i = 0; i < mMeshes->size(); ++i)
         {
             const int meshIndex = glm::min(i, static_cast<int>(mMeshes->size() - 1));
-            const int materialIndex = glm::min(i, static_cast<int>(mMaterials.size() - 1));
-            graphics::renderer->drawMesh(*(*mMeshes)[meshIndex], mMaterials[materialIndex]->getMaterial(), getWorldTransform());
+            const int materialIndex = glm::min(i, static_cast<int>(mUberMaterials.size() - 1));
+            graphics::renderer->drawMesh(*(*mMeshes)[meshIndex], getWorldTransform(), mUberMaterials[materialIndex]->getData());
         }
+
+        // if (mMaterials.empty() || mMeshes->empty())
+        //     return;
+        //
+        // for (int i = 0; i < glm::max(mMaterials.size(), mMeshes->size()); ++i)
+        // {
+        //     const int meshIndex = glm::min(i, static_cast<int>(mMeshes->size() - 1));
+        //     const int materialIndex = glm::min(i, static_cast<int>(mMaterials.size() - 1));
+        //     graphics::renderer->drawMesh(*(*mMeshes)[meshIndex], mMaterials[materialIndex]->getMaterial(), getWorldTransform());
+        // }
     }
 }
 

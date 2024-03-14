@@ -9,7 +9,6 @@ in vec3 v_normal_ws;
 in mat3 v_tbn_matrix;
 in vec3 v_camera_position_ts;
 in vec3 v_position_ts;
-in vec2 vScreenUv;
 
 uniform vec3 u_ambient_colour;
 uniform sampler2D u_diffuse_texture;

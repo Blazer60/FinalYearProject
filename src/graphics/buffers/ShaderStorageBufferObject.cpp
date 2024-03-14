@@ -9,6 +9,14 @@
 
 namespace graphics
 {
+    ShaderStorageBufferObject::ShaderStorageBufferObject(const std::string& debugName)
+        : mDebugName(debugName), mSize(0)
+    {
+        glCreateBuffers(1, &mBufferId);
+
+        nameBuffer();
+    }
+
     ShaderStorageBufferObject::ShaderStorageBufferObject(const unsigned int size, const std::string& debugName)
         : mDebugName(debugName), mSize(size)
     {

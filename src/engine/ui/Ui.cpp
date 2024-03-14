@@ -188,6 +188,8 @@ namespace ui
             ImGui::PushTextWrapPos(ImGui::GetFontSize() * 30.f);
             ImGui::Text("%s", toolTip.c_str());
             ImGui::PopTextWrapPos();
+            const std::string sizeText = format::string("Size: %", texture->size());
+            ImGui::Text("%s", sizeText.c_str());
             ui::image(texture->id(), glm::vec3(300.f));
             ImGui::EndTooltip();
         }

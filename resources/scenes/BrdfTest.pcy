@@ -572,3 +572,31 @@ Actors:
         Path: textures\hdr\unfinished_office_4k.hdr
     Children:
       []
+  - Name: UV Checker
+    UUID: 6213078574435407571
+    position: [-1.20000005, 8.59911251, 1.43051147e-06]
+    rotation: [0.725384295, 0.688344121, 0, 0]
+    scale: [1, 0.99999994, 0.99999994]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\Plane.glb
+        Materials:
+          - MaterialType: StandardMaterial
+            Albedo: [1, 1, 1]
+            Specular: [0, 0, 0]
+            Roughness: 1
+            Metallic: 0
+            Emissive: [0, 0, 0]
+            HeightScale: 0.100000001
+            DiffuseMap: ""
+            NormalMap: ""
+            HeightMap: ""
+            RoughnessMap: ""
+            MetallicMap: ""
+            SpecularMap: ""
+            FuzzColour: [0, 0, 0]
+            FuzzRoughness: 1
+        UMaterials:
+          - materials\Red.mpcy
+    Children:
+      []

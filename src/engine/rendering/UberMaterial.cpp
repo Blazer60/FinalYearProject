@@ -110,8 +110,8 @@ namespace engine
             layerData.roughness = layer.mRoughness;
             layerData.sheenRoughness = layer.mSheenRoughness;
             layerData.diffuseColour = glm::vec4(layer.mDiffuseColour, 1.f);
-            layerData.specularColour = glm::vec4(layer.mDiffuseColour, 1.f);
-            layerData.sheenColour = glm::vec4(layer.mDiffuseColour, 1.f);
+            layerData.specularColour = glm::vec4(layer.mSpecularColour, 1.f);
+            layerData.sheenColour = glm::vec4(layer.mSheenColour, 1.f);
 
             layerData.diffuseTextureIndex = addIfValid(layer.mDiffuseTexture);
             layerData.specularTextureIndex = addIfValid(layer.mSpecularTexture);

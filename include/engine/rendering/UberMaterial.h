@@ -30,6 +30,7 @@ namespace engine
         void saveToDisk() const;
 
         void onPreRender();
+        graphics::MaterialData getData() { return mData; }
 
     protected:
         void loadFromDisk();

@@ -58,7 +58,8 @@ namespace graphics
         {
             setupCurrentCamera(camera);
 
-            mMaterialRendering.execute(window::bufferSize(), mContext, mRenderQueue);
+            // mMaterialRendering.execute(window::bufferSize(), mContext, mRenderQueue);
+            mMaterialRendering.execute(window::bufferSize(), mContext, mGeometryQueue, mMaterialQueue);
             mTileClassification.execute(window::bufferSize(), mContext);
             mShadowMapping.execute(camera, mRenderQueue, mDirectionalLightQueue);
 
