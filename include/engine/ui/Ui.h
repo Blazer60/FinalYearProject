@@ -42,5 +42,6 @@ namespace ui
     glm::ivec2 fitToRegion(const glm::ivec2 &imageSize, const glm::ivec2 &maxSize, const glm::ivec2 &padding=glm::ivec2(50));
 
     bool closeButton(const char *label);
-    ImVec2 closebuttonSize();
+    bool plusButton(const char *label);
+    ImVec2 buttonSize();
 }

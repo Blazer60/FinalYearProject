@@ -162,13 +162,13 @@ namespace engine
     {
         const auto name = "Material Layers";
         const auto originalCursorPos = ImGui::GetCursorPos();
-        const auto PlusMarkposition = ImVec2(ImGui::GetContentRegionAvail().x - ui::resetButtonWidth(), originalCursorPos.y);
+        const auto PlusMarkposition = ImVec2(ImGui::GetContentRegionAvail().x - ui::buttonSize().x, originalCursorPos.y);
 
         ImGui::Text(name);
         ImGui::SetCursorPos(PlusMarkposition);
 
         const auto plusId = format::string(" + ##%", name);
-        if (ImGui::Button(plusId.c_str()))
+        if (ui::plusButton(plusId.c_str()))
             mLayers.push_back(nullptr);
 
         if (ImGui::BeginTable("Layers Table", 3, ImGuiTableFlags_RowBg))
@@ -176,7 +176,7 @@ namespace engine
             const float textSizing = ImGui::CalcTextSize("00").x;
             ImGui::TableSetupColumn("Index", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed, textSizing);
             ImGui::TableSetupColumn("Contents", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthStretch);
-            ImGui::TableSetupColumn("Delete Button", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed, ui::closebuttonSize().x);
+            ImGui::TableSetupColumn("Delete Button", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed, ui::buttonSize().x);
 
             for (int i = 0; i < mLayers.size();)
             {

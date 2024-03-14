@@ -214,6 +214,7 @@ target_compile_definitions(${ENGINE_LIBRARY} PUBLIC
         GLEW_STATIC
         YAML_CPP_STATIC_DEFINE  # Forces YAML to be built statically regardless of cmake settings. see yaml-cpp/dll.h
         B3_DEBUG=0
+        IMGUI_DEFINE_MATH_OPERATORS=1
         )
 target_compile_definitions(${ENGINE_LIBRARY} PRIVATE
         ENGINE_BUILD
