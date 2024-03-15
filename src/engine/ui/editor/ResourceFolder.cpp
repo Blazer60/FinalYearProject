@@ -23,6 +23,11 @@ namespace engine
     const char *const resourceMaterialLayerPayload = "ResourceMaterialLayerPayload";
     const char *const resourceMaterialPayload = "ResourcematerialPayload";
 
+    ResourceFolder::ResourceFolder()
+    {
+        changeContentsFolder(mSelectedFolder);
+    }
+
     void ResourceFolder::onDrawUi()
     {
         if (!isShowing)
@@ -80,10 +85,21 @@ namespace engine
                 flags |= ImGuiTreeNodeFlags_Selected;
             const bool isOpen = ImGui::TreeNodeEx(pathName.c_str(), flags);
             if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
-                mSelectedFolder = path;
+                changeContentsFolder(path);
             if (isOpen)
             {
-                for (const std::filesystem::directory_entry &item : std::filesystem::directory_iterator(path))
+                std::vector<std::filesystem::directory_entry> fileEntries;
+                for (const auto &item : std::filesystem::directory_iterator(path))
+                    fileEntries.push_back(item);
+
+                std::stable_sort(fileEntries.begin(), fileEntries.end(),
+                    [](const std::filesystem::directory_entry &lhs, const std::filesystem::directory_entry &rhs) -> bool
+                    {
+                        return static_cast<int>(status(lhs).type()) > static_cast<int>(status(rhs).type());
+                    }
+                );
+
+                for (const std::filesystem::directory_entry &item : fileEntries)
                     drawDirectory(item.path());
                 
                 ImGui::TreePop();
@@ -165,6 +181,11 @@ namespace engine
         bool toggleMaterialPopup = false;
         if (ImGui::BeginMenuBar())
         {
+            if (mSelectedFolder != file::resourcePath() && ui::backButton("Go Back a file"))
+                changeContentsFolder(mSelectedFolder.parent_path());
+
+            ImGui::SetNextItemWidth(100.f);
+            ImGui::SliderFloat("##Size", &mItemSize, 32, 256);
             if (ImGui::BeginMenu("Create"))
             {
                 if (ImGui::MenuItem("Material"))
@@ -179,9 +200,9 @@ namespace engine
                 ImGui::EndMenu();
             }
 
-            const auto folderName = format::string("%", mSelectedFolder);
+            const auto folderName = format::string("%", file::makeRelativeToResourcePath(mSelectedFolder));
             const float width = ImGui::CalcTextSize(folderName.c_str()).x;
-            ImGui::SameLine(ImGui::GetContentRegionAvail().x - width);
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - width - ImGui::GetScrollX() - 2 * ImGui::GetStyle().ItemSpacing.x);
             ImGui::Text(folderName.c_str());
             ImGui::EndMenuBar();
         }
@@ -201,8 +222,6 @@ namespace engine
             }
         );
 
-        ImGui::SetNextItemWidth(100.f);
-        ImGui::SliderFloat("Size", &mItemSize, 32, 256);
         const float width = ImGui::GetContentRegionAvail().x;
         auto &style = ImGui::GetStyle();
         const float itemWidth = mItemSize + style.CellPadding.x + style.ItemSpacing.x;
@@ -252,11 +271,27 @@ namespace engine
         ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
 
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - mItemSize) / 2.f);
         if (isDirectory)
+        {
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - mItemSize) / 2.f);
             ui::image(mFolderIconTexture.id(), glm::vec2(mItemSize));
+        }
+        else if (file::hasImageExtension(item.path()) && mTextureIcons.count(name) > 0)
+        {
+            const auto &image = mTextureIcons.at(name);
+            const glm::vec2 size = ui::fitToRegion(image->size(), glm::vec2(mItemSize), glm::ivec2(0));
+
+            if (size.y < mItemSize)
+                ImGui::Dummy(ImVec2(0, mItemSize - size.y));
+
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - size.x) / 2.f);
+            ui::image(image->id(), size);
+        }
         else
+        {
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - mItemSize) / 2.f);
             ui::image(mUnknownIconTexture.id(), glm::vec2(mItemSize));
+        }
 
         ImGui::PopStyleVar(2);
 
@@ -270,7 +305,7 @@ namespace engine
     void ResourceFolder::userSelectAction(const std::filesystem::path& path)
     {
         if (const std::filesystem::directory_entry entry(path); is_directory(entry))
-            mSelectedFolder = path;
+            changeContentsFolder(path);
         else
         {
             if (file::hasMaterialExtension(path))
@@ -279,6 +314,18 @@ namespace engine
                 editor->setUberLayer(load::materialLayer(path));
             if (file::hasSceneExtension(path))
                 core->setScene(load::scene(path), path);
+        }
+    }
+
+    void ResourceFolder::changeContentsFolder(const std::filesystem::path& path)
+    {
+        mSelectedFolder = path;
+
+        mTextureIcons.clear();
+        for (const auto &item : std::filesystem::directory_iterator(mSelectedFolder))
+        {
+            if (file::hasImageExtension(item))
+                mTextureIcons[item.path().filename().string()] = load::texture(item.path());
         }
     }
 }

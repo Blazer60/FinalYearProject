@@ -21,7 +21,7 @@
 
 namespace ui
 {
-    enum class buttonType : uint8_t { Cross, Plus };
+    enum class buttonType : uint8_t { Cross, Plus, LeftArrow };
     bool button_impl(const ImGuiID id, const ImVec2 &pos, const buttonType type)
     {
         using namespace ImGui;
@@ -66,6 +66,11 @@ namespace ui
         {
             window->DrawList->AddLine(center + ImVec2(+cross_extent, +cross_extent), center + ImVec2(-cross_extent, -cross_extent), cross_col, 1.0f);
             window->DrawList->AddLine(center + ImVec2(+cross_extent, -cross_extent), center + ImVec2(-cross_extent, +cross_extent), cross_col, 1.0f);
+        }
+        else if (type == buttonType::LeftArrow)
+        {
+            window->DrawList->AddLine(center - ImVec2(cross_extent / 2.f ,0), center + ImVec2(cross_extent, -cross_extent) - ImVec2(cross_extent / 2.f ,0), cross_col, 2.0f);
+            window->DrawList->AddLine(center - ImVec2(cross_extent / 2.f ,0), center + ImVec2(cross_extent, +cross_extent) - ImVec2(cross_extent / 2.f ,0), cross_col, 2.0f);
         }
 
         return pressed;
@@ -424,6 +429,17 @@ namespace ui
         const ImGuiID id = window->GetID(label);
         const ImGuiID openButtonId = ImGui::GetIDWithSeed("#OPEN", NULL, id);
         return button_impl(openButtonId, window->DC.CursorPos, buttonType::Plus);
+    }
+
+    bool backButton(const char* label)
+    {
+        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        if (window->SkipItems)
+            return false;
+
+        const ImGuiID id = window->GetID(label);
+        const ImGuiID openButtonId = ImGui::GetIDWithSeed("#BACK", NULL, id);
+        return button_impl(openButtonId, window->DC.CursorPos, buttonType::LeftArrow);
     }
 
     ImVec2 buttonSize()

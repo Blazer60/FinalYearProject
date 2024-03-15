@@ -46,21 +46,20 @@ namespace engine
         : public ui::Drawable
     {
     public:
+        ResourceFolder();
         bool isShowing { true };
     protected:
         void onDrawUi() override;
 
         void drawDragDropSource(const std::filesystem::path&path, const std::string&name);
-
         void drawDirectory(const std::filesystem::path &path);
-
         void drawMaterialLayerModal(bool toggleMaterialLayerPopup);
-
         void drawMaterialModal(bool toggleMaterialPopup);
-
         void drawContents();
         void drawContentItem(const std::filesystem::directory_entry& item);
         void userSelectAction(const std::filesystem::path &path);
+
+        void changeContentsFolder(const std::filesystem::path &path);
 
         std::filesystem::path mSelectedFolder = file::resourcePath();
         std::filesystem::path mDragDropPath;
@@ -69,5 +68,7 @@ namespace engine
         Texture mUnknownIconTexture = Texture(file::texturePath() / "ObjectIcon.png");
         float mItemSize = 100.f;
         std::string mNewFileName;
+
+        std::unordered_map<std::string, std::shared_ptr<Texture>> mTextureIcons;
     };
 } // engine
