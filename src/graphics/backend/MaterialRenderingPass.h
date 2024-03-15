@@ -40,5 +40,6 @@ namespace graphics
 
         ShaderStorageBufferObject mMaterialShaderStorage = ShaderStorageBufferObject("Material Shader Storage");
         ShaderStorageBufferObject mTextureDataShaderStorage = ShaderStorageBufferObject("Texture Data Shader Storage");
+        ShaderStorageBufferObject mMaskShaderStorage = ShaderStorageBufferObject("Mask Shader Storage");
     };
 } // graphics

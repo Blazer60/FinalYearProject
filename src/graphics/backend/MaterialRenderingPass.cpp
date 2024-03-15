@@ -86,6 +86,7 @@ namespace graphics
         context.camera.bindToSlot(0);
         mMaterialShaderStorage.bindToSlot(1);
         mTextureDataShaderStorage.bindToSlot(2);
+        mMaskShaderStorage.bindToSlot(3);
 
         mMaterialShader.bind();
         mMaterialShader.block("CameraBlock", context.camera.getBindPoint());
@@ -105,6 +106,9 @@ namespace graphics
 
             mTextureDataShaderStorage.resize(sizeof(TextureData) * material.textureArrayData.size());
             mTextureDataShaderStorage.write(material.textureArrayData.data(), sizeof(TextureData) * material.textureArrayData.size());
+
+            mMaskShaderStorage.resize(sizeof(MaskData) * material.masks.size());
+            mMaskShaderStorage.write(material.masks.data(), sizeof(MaskData) * material.masks.size());
 
             glBindVertexArray(geometry.vao);
             glDrawElements(GL_TRIANGLES, geometry.indicesCount, GL_UNSIGNED_INT, nullptr);

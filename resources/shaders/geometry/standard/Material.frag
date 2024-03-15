@@ -18,6 +18,12 @@ buffer TextureDataArray
     TextureData[] textureData;
 };
 
+layout(binding = 3, std430)
+buffer MaskDataArray
+{
+    MaskData[] masks;
+};
+
 in vec2 v_uv;
 in vec3 v_position_ws;
 in vec3 v_normal_ws;
@@ -64,7 +70,6 @@ void main()
 {
     GBuffer gBuffer = gBufferCreate();
 
-    // todo: link up textures to doulbe check that they work.
     LayerData material = layers[0];
 
     gBuffer.diffuse         = sampleColour(material.diffuseColour, v_uv, material.diffuseTextureIndex);
@@ -77,6 +82,40 @@ void main()
     if (dot(gBuffer.fuzzColour, gBuffer.fuzzColour) >= 0.001f)
     {
         gBufferSetFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT, 1);
+    }
+
+    // There should be one less mask that there are layers. If not, we can just skip them.
+    for (int i = 0; i < min(layers.length() - 1, masks.length()); ++i)
+    {
+        const LayerData material = layers[i + 1];
+        const MaskData mask = masks[i];
+        const float alpha = mask.alpha * sampleTexture(v_uv, mask.textureIndex).r;
+
+        GBuffer nextGBuffer = gBufferCreate();
+
+        nextGBuffer.diffuse         = sampleColour(material.diffuseColour, v_uv, material.diffuseTextureIndex);
+        nextGBuffer.specular        = sampleColour(material.specularColour, v_uv, material.specularTextureIndex);
+        nextGBuffer.normal          = sampleNormal(v_normal_ws, v_uv, material.normalTextureIndex);
+        nextGBuffer.roughness       = sampleValue(material.roughness, v_uv, material.roughnessTextureIndex);
+        nextGBuffer.fuzzColour      = sampleColour(material.sheenColour, v_uv, material.sheenTextureIndex);
+        nextGBuffer.fuzzRoughness   = sampleValue(material.sheenRoughness, v_uv, material.sheenRoughnessTextureIndex);
+
+        if (dot(nextGBuffer.fuzzColour, nextGBuffer.fuzzColour) >= 0.001f)
+        {
+            gBufferSetFlag(nextGBuffer, GBUFFER_FLAG_FUZZ_BIT, 1);
+        }
+
+        // Blendables.
+        gBuffer.diffuse         = mix(gBuffer.diffuse, nextGBuffer.diffuse, alpha);
+        gBuffer.specular        = mix(gBuffer.specular, nextGBuffer.specular, alpha);
+        gBuffer.normal          = normalize(mix(gBuffer.normal, nextGBuffer.normal, alpha));
+        gBuffer.roughness       = mix(gBuffer.roughness, nextGBuffer.roughness, alpha);
+        gBuffer.fuzzColour      = mix(gBuffer.fuzzColour, nextGBuffer.fuzzColour, alpha);
+        gBuffer.fuzzRoughness   = mix(gBuffer.fuzzRoughness, nextGBuffer.fuzzRoughness, alpha);
+
+        // Flags.
+        const int fuzzFlagBit = gBufferHasFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT) | gBufferHasFlag(nextGBuffer, GBUFFER_FLAG_FUZZ_BIT);
+        gBufferSetFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT, fuzzFlagBit);
     }
 
     pushToStorageGBuffer(gBuffer, ivec2(0));

@@ -15,6 +15,12 @@ struct LayerData
     int sheenRoughnessTextureIndex;
 };
 
+struct MaskData
+{
+    float alpha;
+    int textureIndex;
+};
+
 struct TextureData
 {
     uint width;

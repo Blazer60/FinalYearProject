@@ -139,13 +139,16 @@ namespace engine
         };
 
         mData.textureArrayData.clear();
-        mData.layers.resize(mLayers.size());
+
+        mData.layers.clear();
+        mData.layers.reserve(mLayers.size());
+
         for (int i = 0; i < mLayers.size(); ++i)
         {
             if (mLayers[i] == nullptr)
                 continue;
 
-            graphics::LayerData& layerData = mData.layers[i];
+            graphics::LayerData& layerData = mData.layers.emplace_back();;
             const UberLayer &layer = *mLayers[i];
 
             layerData.roughness = layer.mRoughness;
@@ -160,6 +163,20 @@ namespace engine
             layerData.normalTextureIndex = addIfValid(layer.mNormalTexture);
             layerData.sheenTextureIndex = addIfValid(layer.mSheenTexture);
             layerData.sheenRoughnessTextureIndex = addIfValid(layer.mSheenRoughnessTexture);
+        }
+
+        mData.masks.clear();
+        mData.masks.reserve(mMasks.size());
+        for (int i = 0; i < mMasks.size(); ++i)
+        {
+            if (mMasks[i] == nullptr)
+                continue;
+
+            auto &[alpha, maskTextureIndex] = mData.masks.emplace_back();;
+            const UberMask &mask = *mMasks[i];
+
+            alpha = mask.mAlphaThreshold;
+            maskTextureIndex = addIfValid(mask.mMaskTexture);
         }
 
         mTextureArray.resize(maxTextureSize, static_cast<int32_t>(validTextures.size()));

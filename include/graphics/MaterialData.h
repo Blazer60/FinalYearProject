@@ -29,6 +29,12 @@ namespace graphics
         int32_t sheenRoughnessTextureIndex = -1;
     };
 
+    struct MaskData
+    {
+        float alpha = 0.5f;
+        int32_t maskTextureIndex = -1;
+    };
+
     struct TextureData
     {
         uint32_t width;
@@ -44,6 +50,7 @@ namespace graphics
         uint32_t textureArrayId = 0;
         std::vector<TextureData> textureArrayData;
         std::vector<LayerData> layers;
+        std::vector<MaskData> masks;
         // flags.
     };
 } // graphics
