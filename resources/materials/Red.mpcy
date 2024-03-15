@@ -1,3 +1,6 @@
 MaterialLayers:
   - materials\TestLayer.mlpcy
   - materials\AnotherLayer.mlpcy
+MaskLayers:
+  - Texture: models\leatherBall\TexturesCom_Leather_Tufted_New_1K_albedo.png
+    Alpha: 0.462000012

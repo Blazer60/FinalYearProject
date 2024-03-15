@@ -166,6 +166,8 @@ add_library(${ENGINE_LIBRARY}
         include/engine/rendering/UberMaterial.h
         src/engine/rendering/UberLayer.cpp
         include/engine/rendering/UberLayer.h
+        src/engine/rendering/UberMask.cpp
+        include/engine/rendering/UberMask.h
 )
 
 target_include_directories(${ENGINE_LIBRARY} PUBLIC

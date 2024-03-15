@@ -44,4 +44,6 @@ namespace ui
     bool closeButton(const char *label);
     bool plusButton(const char *label);
     ImVec2 buttonSize();
+
+    bool seperatorTextButton(const std::string &name);
 }

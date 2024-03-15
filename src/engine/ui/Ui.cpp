@@ -253,6 +253,8 @@ namespace ui
                     texture = load::texture(path);
                 });
             }
+
+            ImGui::EndDragDropTarget();
         }
     }
 
@@ -428,5 +430,24 @@ namespace ui
     {
         const ImGuiContext &g = *GImGui;
         return ImVec2(g.FontSize + 2.f * g.Style.FramePadding.x, g.FontSize + 2.f * g.Style.FramePadding.y);
+    }
+
+    bool seperatorTextButton(const std::string& name)
+    {
+        bool buttonClicked = false;
+        const std::string tableName = format::string("SeperatorTable%", name);
+        if (ImGui::BeginTable(tableName.c_str(), 2))
+        {
+            ImGui::TableSetupColumn("Seperator", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableSetupColumn("Adder Button", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed, ui::buttonSize().x);
+
+            if (ImGui::TableNextColumn())
+                ImGui::SeparatorText(name.c_str());
+            if (ImGui::TableNextColumn())
+                buttonClicked = ui::plusButton("Add Plus Button");
+
+            ImGui::EndTable();
+        }
+        return buttonClicked;
     }
 }

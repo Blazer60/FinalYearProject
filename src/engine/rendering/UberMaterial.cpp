@@ -25,6 +25,28 @@ namespace engine
             saveToDisk();
     }
 
+    void UberMaterial::drawMaskArray()
+    {
+        if (ui::seperatorTextButton(format::string("Masks (%/%)", mMasks.size(), mLayers.size() - 1)))
+            mMasks.emplace_back(std::make_unique<UberMask>());
+
+        if (ImGui::BeginTable("Mask Table", 3))
+        {
+            const float textSizing = ImGui::CalcTextSize("00").x;
+            ImGui::TableSetupColumn("Index", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed, textSizing);
+            ImGui::TableSetupColumn("Contents", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableSetupColumn("Delete Button", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed, ui::buttonSize().x);
+
+            for (int i = 0; i < mMasks.size();)
+            {
+                if (!drawMaskLayerElement(i))
+                    ++i;
+            }
+
+            ImGui::EndTable();
+        }
+    }
+
     void UberMaterial::onDrawUi()
     {
         ImGui::Text(mName.c_str());
@@ -41,6 +63,10 @@ namespace engine
             }
             ImGui::EndDragDropTarget();
         }
+
+        ImGui::BeginGroup();
+        drawMaskArray();
+        ImGui::EndGroup();
     }
 
     void UberMaterial::saveToDisk() const
@@ -67,6 +93,18 @@ namespace engine
         {
             if (materialLayer != nullptr)
                 out << file::makeRelativeToResourcePath(materialLayer->path()).string();
+        }
+        out << YAML::EndSeq;
+        out << YAML::Key << "MaskLayers" << YAML::Value << YAML::BeginSeq;
+        for (const std::unique_ptr<UberMask> &mask : mMasks)
+        {
+            if (mask != nullptr)
+            {
+                out << YAML::BeginMap;
+                out << YAML::Key << "Texture" << YAML::Value << file::makeRelativeToResourcePath(mask->mMaskTexture->path()).string();
+                out << YAML::Key << "Alpha" << YAML::Value << mask->mAlphaThreshold;
+                out << YAML::EndMap;
+            }
         }
         out << YAML::EndSeq;
         out << YAML::EndMap;
@@ -156,22 +194,34 @@ namespace engine
                 mLayers.push_back(load::materialLayer(fullPath));
             }
         }
+
+        const YAML::Node maskLayers = data["MaskLayers"];
+        if (maskLayers.IsDefined() && maskLayers.IsSequence())
+        {
+            for (const auto &maskNode : maskLayers)
+            {
+                auto &mask = mMasks.emplace_back(std::make_unique<UberMask>());
+                if (const YAML::Node textureNode = maskNode["Texture"]; textureNode.IsDefined())
+                {
+                    const std::string relativePath = textureNode.as<std::string>();
+                    const std::filesystem::path fullPath = file::constructAbsolutePath(relativePath);
+                    mask->mMaskTexture = load::texture(fullPath);
+                }
+                if (const YAML::Node alphaNode = maskNode["Alpha"]; alphaNode.IsDefined())
+                {
+                    const float alpha = alphaNode.as<float>();
+                    mask->mAlphaThreshold = alpha;
+                }
+            }
+        }
     }
 
     void UberMaterial::drawMaterialLayerArray()
     {
-        const auto name = "Material Layers";
-        const auto originalCursorPos = ImGui::GetCursorPos();
-        const auto PlusMarkposition = ImVec2(ImGui::GetContentRegionAvail().x - ui::buttonSize().x, originalCursorPos.y);
-
-        ImGui::Text(name);
-        ImGui::SetCursorPos(PlusMarkposition);
-
-        const auto plusId = format::string(" + ##%", name);
-        if (ui::plusButton(plusId.c_str()))
+        if (ui::seperatorTextButton(format::string("Layers (%)", mLayers.size())))
             mLayers.push_back(nullptr);
 
-        if (ImGui::BeginTable("Layers Table", 3, ImGuiTableFlags_RowBg))
+        if (ImGui::BeginTable("Layers Table", 3))
         {
             const float textSizing = ImGui::CalcTextSize("00").x;
             ImGui::TableSetupColumn("Index", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed, textSizing);
@@ -243,6 +293,39 @@ namespace engine
             result = ui::closeButton("Close innit");
             if (result)
                 mLayers.erase(mLayers.begin() + index);
+        }
+        ImGui::PopID();
+
+        return result;
+    }
+
+    bool UberMaterial::drawMaskLayerElement(const int index)
+    {
+        const std::string name = format::string("Mask %", index);
+
+        bool result = false;
+        ImGui::PushID(name.c_str());
+        if (ImGui::TableNextColumn())
+        {
+            const auto &style = ImGui::GetStyle();
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + style.FramePadding.y);
+            ImGui::TextColored(ImVec4(0.3f, 0.3f, 0.3f, 1.f), "%2i", index);
+        }
+        if (ImGui::TableNextColumn())
+        {
+            const auto &style = ImGui::GetStyle();
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + style.FramePadding.y);
+            if (ImGui::TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth))
+            {
+                ui::draw(mMasks[index]);
+                ImGui::TreePop();
+            }
+        }
+        if (ImGui::TableNextColumn())
+        {
+            result = ui::closeButton("Close");
+            if (result)
+                mMasks.erase(mMasks.begin() + index);
         }
         ImGui::PopID();
 
