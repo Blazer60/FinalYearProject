@@ -190,28 +190,56 @@ namespace engine
         drawMaterialLayerModal(toggleMaterialLayerPopup);
         drawMaterialModal(toggleMaterialPopup);
 
+        std::vector<std::filesystem::directory_entry> fileEntries;
+        for (const auto &item : std::filesystem::directory_iterator(mSelectedFolder))
+            fileEntries.push_back(item);
+
+        std::stable_sort(fileEntries.begin(), fileEntries.end(),
+            [](const std::filesystem::directory_entry &lhs, const std::filesystem::directory_entry &rhs) -> bool
+            {
+                return static_cast<int>(status(lhs).type()) > static_cast<int>(status(rhs).type());
+            }
+        );
+
         ImGui::SetNextItemWidth(100.f);
         ImGui::SliderFloat("Size", &mItemSize, 32, 256);
         const float width = ImGui::GetContentRegionAvail().x;
         auto &style = ImGui::GetStyle();
         const float itemWidth = mItemSize + style.CellPadding.x + style.ItemSpacing.x;
-        const int maxItemsPerRow = glm::max(1, static_cast<int>(glm::floor(width / itemWidth)));
+        const int maxItemsPerRow = glm::max(1, static_cast<int>(glm::floor(width / itemWidth) - 1));
+        const bool spanFullWidth = fileEntries.size() > maxItemsPerRow;
 
-        int i = 0;
-        for (const std::filesystem::directory_entry &item : std::filesystem::directory_iterator(mSelectedFolder))
+        const int tableFlags = spanFullWidth ? ImGuiTableFlags_SizingStretchSame : ImGuiTableFlags_None;
+        if (ImGui::BeginTable("Contents Folder Table", maxItemsPerRow, tableFlags))
         {
-            auto id = format::string("##id%", i++);
-            ImGui::BeginChild(id.c_str(), ImVec2(mItemSize, mItemSize), false, ImGuiWindowFlags_NoScrollbar);
-            if (ImGui::IsMouseDoubleClicked(0) && ImGui::IsWindowHovered())
+            if (!spanFullWidth)
             {
-                userSelectAction(item.path());
+                for (int i = 0; i < maxItemsPerRow; ++i)
+                {
+                    const std::string columnId = format::string("Column %", i);
+                    ImGui::TableSetupColumn(columnId.c_str(), ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize, itemWidth);
+                }
             }
-            drawDragDropSource(item.path(), item.path().filename().string());
-            drawContentItem(item);
-            ImGui::EndChild();
 
-            if (i % maxItemsPerRow != 0)
-                ImGui::SameLine(static_cast<float>(i % maxItemsPerRow) / static_cast<float>(maxItemsPerRow) * width);
+            for (const std::filesystem::directory_entry &item : fileEntries)
+            {
+                if (ImGui::TableNextColumn())
+                {
+                    const float posBefore = ImGui::GetCursorPos().y;
+                    drawContentItem(item);
+                    const float posAfter = ImGui::GetCursorPos().y;
+                    const float height = posAfter - posBefore;
+                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() - height);
+
+                    const std::string cellId = format::string("Cell%", item.path());
+                    ImGui::InvisibleButton(cellId.c_str(), ImVec2(ImGui::GetContentRegionAvail().x, height));
+                    drawDragDropSource(item.path(), item.path().filename().string());
+                    if (ImGui::IsMouseDoubleClicked(0) && ImGui::IsItemActive())
+                        userSelectAction(item.path());
+                }
+            }
+
+            ImGui::EndTable();
         }
     }
 
@@ -220,22 +248,23 @@ namespace engine
         const bool isDirectory = status(item).type() == std::filesystem::file_type::directory;
 
         const std::string name = item.path().filename().string();
-        const ImVec2 nameSize = ImGui::CalcTextSize(name.c_str());
-        const float imageHeight = ImGui::GetContentRegionAvail().y - nameSize.y;
 
         ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
 
-        ImGui::SetCursorPosX((mItemSize - imageHeight) / 2.f);
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - mItemSize) / 2.f);
         if (isDirectory)
-            ui::image(mFolderIconTexture.id(), glm::vec2(imageHeight));
+            ui::image(mFolderIconTexture.id(), glm::vec2(mItemSize));
         else
-            ui::image(mUnknownIconTexture.id(), glm::vec2(imageHeight));
+            ui::image(mUnknownIconTexture.id(), glm::vec2(mItemSize));
 
         ImGui::PopStyleVar(2);
 
-        ImGui::SetCursorPosX(glm::max(0.f, ImGui::GetContentRegionAvail().x / 2.f - nameSize.x / 2.f));
+        const float textWidth = ImGui::CalcTextSize(name.c_str()).x;
+        ImGui::SetCursorPosX(glm::max(ImGui::GetCursorPosX(), ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - textWidth) / 2.f));
+        ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x);
         ImGui::Text(name.c_str());
+        ImGui::PopTextWrapPos();
     }
 
     void ResourceFolder::userSelectAction(const std::filesystem::path& path)
