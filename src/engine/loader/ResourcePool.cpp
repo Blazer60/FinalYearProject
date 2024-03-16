@@ -27,8 +27,7 @@ namespace engine
         }
     }
 
-    template<typename>
-    void internalClean(std::unordered_map<std::string, std::shared_ptr<UberLayer>> &map)
+    void internalCleanLayers(std::unordered_map<std::string, std::shared_ptr<UberLayer>> &map)
     {
         std::vector<std::string> toDelete;
         for (auto &[hashName, value] : map)
@@ -41,7 +40,25 @@ namespace engine
         }
         for (const std::string &hashName : toDelete)
         {
-            MESSAGE("Cleaning up %", hashName);
+            MESSAGE("Cleaning up material layer %", hashName);
+            map.erase(hashName);
+        }
+    }
+
+    void internalCleanMaterials(std::unordered_map<std::string, std::shared_ptr<UberMaterial>> &map)
+    {
+        std::vector<std::string> toDelete;
+        for (auto &[hashName, value] : map)
+        {
+            if (value.use_count() <= 1)
+            {
+                value->saveToDisk();
+                toDelete.push_back(hashName);
+            }
+        }
+        for (const std::string &hashName : toDelete)
+        {
+            MESSAGE("Cleaning up material %", hashName);
             map.erase(hashName);
         }
     }
@@ -53,8 +70,8 @@ namespace engine
         internalClean(mTextures);
         internalClean(mAudioBuffers);
         internalClean(mMeshColliders);
-        internalClean(mMaterials);  // Always clean this first to release material layers.
-        internalClean(mMaterialLayers);
+        internalCleanMaterials(mMaterials);  // Always clean this first to release material layers.
+        internalCleanLayers(mMaterialLayers);
     }
 
     void ResourcePool::saveAllAssets()

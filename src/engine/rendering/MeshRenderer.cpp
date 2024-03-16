@@ -45,32 +45,9 @@ namespace engine
             else
             {
                 ImGui::Checkbox("Show", &mIsShowing);
-                
                 drawMeshOptions();
-                for (auto &material : mMaterials)
-                    ui::draw(material.get());
-                
-                if (ImGui::Button("Add Material"))
-                {
-                    // todo: How do we add different types of materials? - Most likely references them off disk.
-                    auto standardMaterial = std::make_shared<StandardMaterialSubComponent>();
-                    standardMaterial->attachShader(
-                        load::shader(
-                            file::shaderPath() / "geometry/standard/Standard.vert",
-                            file::shaderPath() / "geometry/standard/Standard.frag"));
-                    mMaterials.push_back(standardMaterial);
-                }
-                if (!mMaterials.empty())
-                {
-                    ImGui::SameLine();
-                    if (ImGui::Button("Delete last Material"))
-                    {
-                        mMaterials.erase(--mMaterials.end());
-                    }
-                }
             }
             
-
             ImGui::BeginGroup();
             drawMaterialArray();
             ImGui::EndGroup();
@@ -185,11 +162,6 @@ namespace engine
 
     }
 
-    void MeshRenderer::addMaterial(const std::shared_ptr<MaterialSubComponent> &material)
-    {
-        mMaterials.push_back(material);
-    }
-
     void MeshRenderer::addUMaterial(std::shared_ptr<UberMaterial> material)
     {
         mUberMaterials.push_back(std::move(material));
@@ -197,25 +169,46 @@ namespace engine
 
     void MeshRenderer::onPreRender()
     {
-        if (mMeshes->empty() || mUberMaterials.empty())
+        if (!mIsShowing || mMeshes->empty())
             return;
 
-        for (int i = 0; i < mMeshes->size(); ++i)
-        {
-            const int meshIndex = glm::min(i, static_cast<int>(mMeshes->size() - 1));
-            const int materialIndex = glm::min(i, static_cast<int>(mUberMaterials.size() - 1));
-            graphics::renderer->drawMesh(*(*mMeshes)[meshIndex], getWorldTransform(), mUberMaterials[materialIndex]->getData());
-        }
+        auto submit = [this](const SubMesh &surface, const std::shared_ptr<UberMaterial> &material) {
+            if (material != nullptr)
+            {
+                graphics::renderer->drawMesh(
+                    surface,
+                    getWorldTransform(),
+                    material->getData());
+            }
+            else
+            {
+                graphics::renderer->drawMesh(
+                    surface,
+                    getWorldTransform(),
+                    core->getDefaultLitMaterial()->getData());
+            }
+        };
 
-        // if (mMaterials.empty() || mMeshes->empty())
-        //     return;
-        //
-        // for (int i = 0; i < glm::max(mMaterials.size(), mMeshes->size()); ++i)
-        // {
-        //     const int meshIndex = glm::min(i, static_cast<int>(mMeshes->size() - 1));
-        //     const int materialIndex = glm::min(i, static_cast<int>(mMaterials.size() - 1));
-        //     graphics::renderer->drawMesh(*(*mMeshes)[meshIndex], mMaterials[materialIndex]->getMaterial(), getWorldTransform());
-        // }
+        if (!mUberMaterials.empty())
+        {
+            for (int i = 0; i < mMeshes->size(); ++i)
+            {
+                const int meshIndex = glm::min(i, static_cast<int>(mMeshes->size() - 1));
+                const int materialIndex = glm::min(i, static_cast<int>(mUberMaterials.size() - 1));
+                submit(*(*mMeshes)[meshIndex], mUberMaterials[materialIndex]);
+            }
+        }
+        else
+        {
+            // Fallback on the engine's default lit material just so that meshes are actually shown.
+            for (int i = 0; i < mMeshes->size(); ++i)
+            {
+                graphics::renderer->drawMesh(
+                    *(*mMeshes)[i],
+                    getWorldTransform(),
+                    core->getDefaultLitMaterial()->getData());
+            }
+        }
     }
 }
 

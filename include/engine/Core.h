@@ -70,6 +70,7 @@ namespace engine
         [[nodiscard]] std::string getSceneName();
         [[nodiscard]] std::filesystem::path getScenePath() const;
         [[nodiscard]] btDiscreteDynamicsWorld *getPhysicsWorld() const;
+        [[nodiscard]] const std::shared_ptr<UberMaterial> &getDefaultLitMaterial() const;
         [[nodiscard]] bool isInPlayMode() const;
         void setScenePath(std::filesystem::path path);
 
@@ -101,6 +102,7 @@ namespace engine
         std::unique_ptr<Editor>         mEditor;
         std::unique_ptr<PhysicsCore>    mPhysics;
         RootEventHandler                mEventHandler;
+        std::shared_ptr<UberMaterial>   mDefaultLitMaterial;
 
         ImGuiIO *mGuiIo         { nullptr };
         bool     mIsRunning     { true };

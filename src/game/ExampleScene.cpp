@@ -11,16 +11,8 @@
 
 void createDefaultMesh(Ref<engine::Actor> actor, const std::filesystem::path& path)
 {
-    const std::shared_ptr<Shader> shader = load::shader(
-        file::shaderPath() / "geometry/standard/Standard.vert",
-        file::shaderPath() / "geometry/standard/Standard.frag");
-
     // Spawning an actor with a custom mesh.
     Ref<engine::MeshRenderer> meshRenderer = actor->addComponent(load::meshRenderer<StandardVertex>(path));
-    const auto material = std::make_shared<engine::StandardMaterialSubComponent>();
-    material->attachShader(shader);
-    material->setAmbientColour(engine::vec3(1.f));
-    meshRenderer->addMaterial(material);
 }
 
 ExampleScene::ExampleScene()
@@ -28,14 +20,6 @@ ExampleScene::ExampleScene()
     // Spawning an actor with a custom mesh.
     Ref<engine::Actor> meshActor = spawnActor<engine::Actor>("Mesh Renderer Example");
     Ref<engine::MeshRenderer> meshRenderer = meshActor->addComponent(load::meshRenderer<StandardVertex>(file::modelPath() / "utahTeapot/UtahTeapot.glb"));
-    const auto material = std::make_shared<engine::StandardMaterialSubComponent>();
-    const std::shared_ptr<Shader> shader = load::shader(
-        file::shaderPath() / "geometry/standard/Standard.vert",
-        file::shaderPath() / "geometry/standard/Standard.frag");
-    material->attachShader(shader);
-    material->setAmbientColour(engine::vec3(0.f, 0.3f, 0.f));
-    material->setRoughness(0.5f);
-    meshRenderer->addMaterial(material);
     meshActor->position = engine::vec3(-7.f, 1.f, -30.f);
 
     // Creating physics objects.
@@ -62,8 +46,6 @@ ExampleScene::ExampleScene()
     // Custom material.
     Ref<engine::Actor> materialActor = spawnActor<engine::Actor>("Custom Material Example");
     Ref<engine::MeshRenderer> materialMesh = materialActor->addComponent(load::meshRenderer<StandardVertex>(file::modelPath() / "MaterialBall.glb"));
-    const auto customMaterial = std::make_shared<Lava>();
-    materialMesh->addMaterial(customMaterial);
     materialActor->position = engine::vec3(7.f, 1.f, -30.f);
 }
 

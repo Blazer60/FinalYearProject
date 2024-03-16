@@ -27,7 +27,7 @@ namespace engine
 
     void UberMaterial::drawMaskArray()
     {
-        if (ui::seperatorTextButton(format::string("Masks (%/%)", mMasks.size(), mLayers.size() - 1)))
+        if (ui::seperatorTextButton(format::string("Masks (%/%)", mMasks.size(), glm::max(0, static_cast<int>(mLayers.size() - 1)))))
             mMasks.emplace_back(std::make_unique<UberMask>());
 
         if (ImGui::BeginTable("Mask Table", 3))
@@ -179,14 +179,17 @@ namespace engine
             maskTextureIndex = addIfValid(mask.mMaskTexture);
         }
 
-        mTextureArray.resize(maxTextureSize, static_cast<int32_t>(validTextures.size()));
-        int index = 0;
-        for (const std::shared_ptr<Texture> &texture : validTextures)
+        if (!validTextures.empty())
         {
-            // todo: fucking mips. smh.
-            graphics::copyTexture2D(*texture, mTextureArray, index++);
+            mTextureArray.resize(maxTextureSize, static_cast<int32_t>(validTextures.size()));
+            int index = 0;
+            for (const std::shared_ptr<Texture> &texture : validTextures)
+            {
+                // todo: fucking mips. smh.
+                graphics::copyTexture2D(*texture, mTextureArray, index++);
+            }
+            mTextureArray.setDebugName(format::string("Uber Material %", mName));
         }
-        mTextureArray.setDebugName(format::string("Uber Material %", mName));
         mData.textureArrayId = mTextureArray.getId();
 
         graphics::popDebugGroup();

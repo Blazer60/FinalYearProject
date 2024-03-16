@@ -1,0 +1,4 @@
+MaterialLayers:
+  - models\defaultObjects\WhiteLayer.mlpcy
+MaskLayers:
+  []

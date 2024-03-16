@@ -30,7 +30,7 @@ void Spammer::onBegin()
     
     // Should error here.
     WARN("The next error should occur.");
-    mMeshRenderer->addMaterial(std::make_shared<engine::StandardMaterialSubComponent>());
+    mMeshRenderer->addUMaterial(std::make_shared<engine::UberMaterial>(""));
 }
 
 void Spammer::onUpdate()

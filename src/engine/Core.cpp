@@ -93,6 +93,8 @@ namespace engine
         mResourcePool = std::make_unique<ResourcePool>();
         resourcePool = mResourcePool.get();
 
+        mDefaultLitMaterial = load::material(file::modelPath() / "defaultObjects/DefaultWhite.mpcy");
+
         initOpenAL();
         
         mSerializer = std::make_unique<Serializer>();
@@ -409,6 +411,11 @@ namespace engine
     btDiscreteDynamicsWorld* Core::getPhysicsWorld() const
     {
         return mPhysics->dynamicsWorld.get();
+    }
+
+    const std::shared_ptr<UberMaterial>& Core::getDefaultLitMaterial() const
+    {
+        return mDefaultLitMaterial;
     }
 
     std::string Core::getSceneName()

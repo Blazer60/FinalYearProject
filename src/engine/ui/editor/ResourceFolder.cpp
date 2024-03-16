@@ -287,6 +287,16 @@ namespace engine
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - size.x) / 2.f);
             ui::image(image->id(), size);
         }
+        else if (file::hasMaterialExtension(item.path()))
+        {
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - mItemSize) / 2.f);
+            ui::image(mMaterialIconTexture.id(), glm::vec2(mItemSize));
+        }
+        else if (file::hasMaterialLayerExtension(item.path()))
+        {
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - mItemSize) / 2.f);
+            ui::image(mLayerIconTexture.id(), glm::vec2(mItemSize));
+        }
         else
         {
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - mItemSize) / 2.f);

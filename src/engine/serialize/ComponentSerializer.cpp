@@ -38,70 +38,8 @@ namespace engine
 
         serializer->pushLoadComponent("MeshRenderer", [](const YAML::Node &node, Ref<Actor> actor) {
             const std::filesystem::path relativePath = node["MeshPath"].as<std::string>();
-            Ref<engine::MeshRenderer> meshRenderer = actor->addComponent(
+            Ref<MeshRenderer> meshRenderer = actor->addComponent(
                 load::meshRenderer<StandardVertex>(file::resourcePath() / relativePath));
-
-            if (!node["Materials"].IsDefined())
-                return;
-            
-            for (const auto &materialNode : node["Materials"])
-            {
-                if (!materialNode["MaterialType"].IsDefined())
-                    continue;
-
-                const auto materialType = materialNode["MaterialType"].as<std::string>();
-                
-                if (materialType == "StandardMaterial")
-                {
-                    auto standardMaterial = std::make_shared<engine::StandardMaterialSubComponent>();
-                    standardMaterial->attachShader(load::shader(
-                        file::shaderPath() / "geometry/standard/Standard.vert",
-                        file::shaderPath() / "geometry/standard/Standard.frag"));
-                    meshRenderer->addMaterial(standardMaterial);
-                    
-                    standardMaterial->setAmbientColour(materialNode["Albedo"].as<glm::vec3>());
-                    standardMaterial->setRoughness(materialNode["Roughness"].as<float>());
-                    standardMaterial->setMetallic(materialNode["Metallic"].as<float>());
-                    standardMaterial->setEmissive(materialNode["Emissive"].as<glm::vec3>());
-                    standardMaterial->setHeightScale(materialNode["HeightScale"].as<float>());
-                    
-                    const auto diffuseRelativePath = materialNode["DiffuseMap"].as<std::string>();
-                    if (!diffuseRelativePath.empty())
-                        standardMaterial->setDiffuseMap(file::resourcePath() / diffuseRelativePath);
-                    
-                    const auto normalRelativePath = materialNode["NormalMap"].as<std::string>();
-                    if (!normalRelativePath.empty())
-                        standardMaterial->setNormalMap(file::resourcePath() / normalRelativePath);
-                    
-                    const auto heightRelativePath = materialNode["HeightMap"].as<std::string>();
-                    if (!heightRelativePath.empty())
-                        standardMaterial->setHeightMap(file::resourcePath() / heightRelativePath);
-                    
-                    const auto roughnessRelativePath = materialNode["RoughnessMap"].as<std::string>();
-                    if (!roughnessRelativePath.empty())
-                        standardMaterial->setRoughnessMap(file::resourcePath() / roughnessRelativePath);
-                    
-                    const auto metallicRelativePath = materialNode["MetallicMap"].as<std::string>();
-                    if (!metallicRelativePath.empty())
-                        standardMaterial->setMetallicMap(file::resourcePath() / metallicRelativePath);
-
-                    if (materialNode["Specular"].IsDefined())
-                        standardMaterial->setSpecularColour(materialNode["Specular"].as<glm::vec3>());
-
-                    if (materialNode["SpecularMap"].IsDefined())
-                    {
-                        const auto specularMapRelativePath = materialNode["SpecularMap"].as<std::string>();
-                        if (!specularMapRelativePath.empty())
-                            standardMaterial->setSpecularMap(file::resourcePath() / specularMapRelativePath);
-                    }
-
-                    if (materialNode["FuzzColour"].IsDefined())
-                        standardMaterial->setFuzzColour(materialNode["FuzzColour"].as<glm::vec3>());
-
-                    if (materialNode["FuzzRoughness"].IsDefined())
-                        standardMaterial->setFuzzRoughness(materialNode["FuzzRoughness"].as<float>());
-                }
-            }
 
             const YAML::Node uMaterialNode = node["UMaterials"];
             if (uMaterialNode.IsDefined() && uMaterialNode.IsSequence())
@@ -227,35 +165,6 @@ void serializeComponent(YAML::Emitter &out, engine::MeshRenderer *meshRenderer)
     out << YAML::Key << "Component" << YAML::Value << "MeshRenderer";
     out << YAML::Key << "MeshPath" << YAML::Value << file::makeRelativeToResourcePath(meshRenderer->mMeshPath).string();
     
-    out << YAML::Key << "Materials" << YAML::Value << YAML::BeginSeq;
-    for (const auto &iMaterial : meshRenderer->mMaterials)
-    {
-        out << YAML::BeginMap;
-
-        if (auto standardMaterial = dynamic_cast<engine::StandardMaterialSubComponent*>(iMaterial.get());
-            standardMaterial != nullptr)
-        {
-            out << YAML::Key << "MaterialType" << YAML::Value << "StandardMaterial";
-            out << YAML::Key << "Albedo"       << YAML::Value << standardMaterial->mMaterial.diffuseColour;
-            out << YAML::Key << "Specular"     << YAML::Value << standardMaterial->mMaterial.specularColour;
-            out << YAML::Key << "Roughness"    << YAML::Value << standardMaterial->mMaterial.roughness;
-            out << YAML::Key << "Metallic"     << YAML::Value << standardMaterial->mMaterial.metallic;
-            out << YAML::Key << "Emissive"     << YAML::Value << standardMaterial->mMaterial.emissive;
-            out << YAML::Key << "HeightScale" << YAML::Value << standardMaterial->mMaterial.heightScale;
-            out << YAML::Key << "DiffuseMap"   << YAML::Value << file::makeRelativeToResourcePath(standardMaterial->mDiffuseMapPath).string();
-            out << YAML::Key << "NormalMap"    << YAML::Value << file::makeRelativeToResourcePath(standardMaterial->mNormalMapPath).string();
-            out << YAML::Key << "HeightMap"    << YAML::Value << file::makeRelativeToResourcePath(standardMaterial->mHeightMapPath).string();
-            out << YAML::Key << "RoughnessMap" << YAML::Value << file::makeRelativeToResourcePath(standardMaterial->mRoughnessMapPath).string();
-            out << YAML::Key << "MetallicMap"  << YAML::Value << file::makeRelativeToResourcePath(standardMaterial->mMetallicMapPath).string();
-            out << YAML::Key << "SpecularMap"  << YAML::Value << file::makeRelativeToResourcePath(standardMaterial->mSpecularMapPath).string();
-            out << YAML::Key << "FuzzColour"   << YAML::Value << standardMaterial->mMaterial.fuzzColour;
-            out << YAML::Key << "FuzzRoughness" << YAML::Value << standardMaterial->mMaterial.fuzzRoughness;
-        }
-
-        out << YAML::EndMap;
-    }
-    out << YAML::EndSeq;
-
     out << YAML::Key << "UMaterials" << YAML::Value << YAML::BeginSeq;
     for (const auto &uberMaterial : meshRenderer->mUberMaterials)
         out << file::makeRelativeToResourcePath(uberMaterial->path()).string();

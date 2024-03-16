@@ -8,24 +8,8 @@ Actors:
     Components:
       - Component: MeshRenderer
         MeshPath: models\blueSphere\BlueSphere.obj
-        Materials:
-          - MaterialType: StandardMaterial
-            Albedo: [1, 1, 1]
-            Specular: [0.156862751, 0.156862751, 0.156862751]
-            Roughness: 0.100000001
-            Metallic: 0
-            Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
-            DiffuseMap: ""
-            NormalMap: ""
-            HeightMap: ""
-            RoughnessMap: ""
-            MetallicMap: ""
-            SpecularMap: ""
-            FuzzColour: [0, 0, 0]
-            FuzzRoughness: 1
         UMaterials:
-          []
+          - materials\graphics\matDiffuse0.1.mpcy
     Children:
       []
   - Name: Diffuse 0.2
@@ -36,24 +20,8 @@ Actors:
     Components:
       - Component: MeshRenderer
         MeshPath: models\blueSphere\BlueSphere.obj
-        Materials:
-          - MaterialType: StandardMaterial
-            Albedo: [1, 1, 1]
-            Specular: [0.156862751, 0.156862751, 0.156862751]
-            Roughness: 0.200000003
-            Metallic: 0
-            Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
-            DiffuseMap: ""
-            NormalMap: ""
-            HeightMap: ""
-            RoughnessMap: ""
-            MetallicMap: ""
-            SpecularMap: ""
-            FuzzColour: [0, 0, 0]
-            FuzzRoughness: 1
         UMaterials:
-          []
+          - materials\graphics\matDiffuse0.2.mpcy
     Children:
       []
   - Name: Diffuse 0.3
@@ -64,24 +32,8 @@ Actors:
     Components:
       - Component: MeshRenderer
         MeshPath: models\blueSphere\BlueSphere.obj
-        Materials:
-          - MaterialType: StandardMaterial
-            Albedo: [1, 1, 1]
-            Specular: [0.156862751, 0.156862751, 0.156862751]
-            Roughness: 0.300000012
-            Metallic: 0
-            Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
-            DiffuseMap: ""
-            NormalMap: ""
-            HeightMap: ""
-            RoughnessMap: ""
-            MetallicMap: ""
-            SpecularMap: ""
-            FuzzColour: [0, 0, 0]
-            FuzzRoughness: 1
         UMaterials:
-          []
+          - materials\graphics\matDiffuse0.3.mpcy
     Children:
       []
   - Name: Diffuse 0.4
@@ -92,24 +44,8 @@ Actors:
     Components:
       - Component: MeshRenderer
         MeshPath: models\blueSphere\BlueSphere.obj
-        Materials:
-          - MaterialType: StandardMaterial
-            Albedo: [1, 1, 1]
-            Specular: [0.156862751, 0.156862751, 0.156862751]
-            Roughness: 0.400000006
-            Metallic: 0
-            Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
-            DiffuseMap: ""
-            NormalMap: ""
-            HeightMap: ""
-            RoughnessMap: ""
-            MetallicMap: ""
-            SpecularMap: ""
-            FuzzColour: [0, 0, 0]
-            FuzzRoughness: 1
         UMaterials:
-          []
+          - materials\graphics\matDiffuse0.4.mpcy
     Children:
       []
   - Name: Diffuse 0.5
@@ -120,24 +56,8 @@ Actors:
     Components:
       - Component: MeshRenderer
         MeshPath: models\blueSphere\BlueSphere.obj
-        Materials:
-          - MaterialType: StandardMaterial
-            Albedo: [1, 1, 1]
-            Specular: [0.156862751, 0.156862751, 0.156862751]
-            Roughness: 0.5
-            Metallic: 0
-            Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
-            DiffuseMap: ""
-            NormalMap: ""
-            HeightMap: ""
-            RoughnessMap: ""
-            MetallicMap: ""
-            SpecularMap: ""
-            FuzzColour: [0, 0, 0]
-            FuzzRoughness: 1
         UMaterials:
-          []
+          - materials\graphics\matDiffuse0.5.mpcy
     Children:
       []
   - Name: Diffuse 0.6
@@ -148,24 +68,8 @@ Actors:
     Components:
       - Component: MeshRenderer
         MeshPath: models\blueSphere\BlueSphere.obj
-        Materials:
-          - MaterialType: StandardMaterial
-            Albedo: [1, 1, 1]
-            Specular: [0.156862751, 0.156862751, 0.156862751]
-            Roughness: 0.600000024
-            Metallic: 0
-            Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
-            DiffuseMap: ""
-            NormalMap: ""
-            HeightMap: ""
-            RoughnessMap: ""
-            MetallicMap: ""
-            SpecularMap: ""
-            FuzzColour: [0, 0, 0]
-            FuzzRoughness: 1
         UMaterials:
-          []
+          - materials\graphics\matDiffuse0.6.mpcy
     Children:
       []
   - Name: Diffuse 0.7
@@ -176,24 +80,8 @@ Actors:
     Components:
       - Component: MeshRenderer
         MeshPath: models\blueSphere\BlueSphere.obj
-        Materials:
-          - MaterialType: StandardMaterial
-            Albedo: [1, 1, 1]
-            Specular: [0.156862751, 0.156862751, 0.156862751]
-            Roughness: 0.699999988
-            Metallic: 0
-            Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
-            DiffuseMap: ""
-            NormalMap: ""
-            HeightMap: ""
-            RoughnessMap: ""
-            MetallicMap: ""
-            SpecularMap: ""
-            FuzzColour: [0, 0, 0]
-            FuzzRoughness: 1
         UMaterials:
-          []
+          - materials\graphics\matDiffuse0.7.mpcy
     Children:
       []
   - Name: Diffuse 0.8
@@ -204,24 +92,8 @@ Actors:
     Components:
       - Component: MeshRenderer
         MeshPath: models\blueSphere\BlueSphere.obj
-        Materials:
-          - MaterialType: StandardMaterial
-            Albedo: [1, 1, 1]
-            Specular: [0.156862751, 0.156862751, 0.156862751]
-            Roughness: 0.699999988
-            Metallic: 0
-            Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
-            DiffuseMap: ""
-            NormalMap: ""
-            HeightMap: ""
-            RoughnessMap: ""
-            MetallicMap: ""
-            SpecularMap: ""
-            FuzzColour: [0, 0, 0]
-            FuzzRoughness: 1
         UMaterials:
-          []
+          - materials\graphics\matDiffuse0.8.mpcy
     Children:
       []
   - Name: Diffuse 0.9
@@ -232,24 +104,8 @@ Actors:
     Components:
       - Component: MeshRenderer
         MeshPath: models\blueSphere\BlueSphere.obj
-        Materials:
-          - MaterialType: StandardMaterial
-            Albedo: [1, 1, 1]
-            Specular: [0.156862751, 0.156862751, 0.156862751]
-            Roughness: 0.899999976
-            Metallic: 0
-            Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
-            DiffuseMap: ""
-            NormalMap: ""
-            HeightMap: ""
-            RoughnessMap: ""
-            MetallicMap: ""
-            SpecularMap: ""
-            FuzzColour: [0, 0, 0]
-            FuzzRoughness: 1
         UMaterials:
-          []
+          - materials\graphics\matDiffuse0.9.mpcy
     Children:
       []
   - Name: Diffuse 1.0
@@ -260,24 +116,8 @@ Actors:
     Components:
       - Component: MeshRenderer
         MeshPath: models\blueSphere\BlueSphere.obj
-        Materials:
-          - MaterialType: StandardMaterial
-            Albedo: [1, 1, 1]
-            Specular: [0.156862751, 0.156862751, 0.156862751]
-            Roughness: 1
-            Metallic: 0
-            Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
-            DiffuseMap: ""
-            NormalMap: ""
-            HeightMap: ""
-            RoughnessMap: ""
-            MetallicMap: ""
-            SpecularMap: ""
-            FuzzColour: [0, 0, 0]
-            FuzzRoughness: 1
         UMaterials:
-          []
+          - materials\graphics\matDiffuse1.0.mpcy
     Children:
       []
   - Name: Specular 0.1
@@ -288,24 +128,8 @@ Actors:
     Components:
       - Component: MeshRenderer
         MeshPath: models\blueSphere\BlueSphere.obj
-        Materials:
-          - MaterialType: StandardMaterial
-            Albedo: [0.156862751, 0.156862751, 0.156862751]
-            Specular: [1, 0.999973178, 0.999899983]
-            Roughness: 0.100000001
-            Metallic: 1
-            Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
-            DiffuseMap: ""
-            NormalMap: ""
-            HeightMap: ""
-            RoughnessMap: ""
-            MetallicMap: ""
-            SpecularMap: ""
-            FuzzColour: [0, 0, 0]
-            FuzzRoughness: 1
         UMaterials:
-          []
+          - materials\graphics\matSpecular0.1.mpcy
     Children:
       []
   - Name: Specular 0.2
@@ -316,24 +140,8 @@ Actors:
     Components:
       - Component: MeshRenderer
         MeshPath: models\blueSphere\BlueSphere.obj
-        Materials:
-          - MaterialType: StandardMaterial
-            Albedo: [0.156862751, 0.156862751, 0.156862751]
-            Specular: [1, 0.999899983, 0.999899983]
-            Roughness: 0.200000003
-            Metallic: 1
-            Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
-            DiffuseMap: ""
-            NormalMap: ""
-            HeightMap: ""
-            RoughnessMap: ""
-            MetallicMap: ""
-            SpecularMap: ""
-            FuzzColour: [0, 0, 0]
-            FuzzRoughness: 1
         UMaterials:
-          []
+          - materials\graphics\matSpecular0.2.mpcy
     Children:
       []
   - Name: Specular 0.3
@@ -344,24 +152,8 @@ Actors:
     Components:
       - Component: MeshRenderer
         MeshPath: models\blueSphere\BlueSphere.obj
-        Materials:
-          - MaterialType: StandardMaterial
-            Albedo: [0.156862751, 0.156862751, 0.156862751]
-            Specular: [1, 0.999899983, 0.999899983]
-            Roughness: 0.300000012
-            Metallic: 1
-            Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
-            DiffuseMap: ""
-            NormalMap: ""
-            HeightMap: ""
-            RoughnessMap: ""
-            MetallicMap: ""
-            SpecularMap: ""
-            FuzzColour: [0, 0, 0]
-            FuzzRoughness: 1
         UMaterials:
-          []
+          - materials\graphics\matSpecular0.3.mpcy
     Children:
       []
   - Name: Specular 0.4
@@ -372,24 +164,8 @@ Actors:
     Components:
       - Component: MeshRenderer
         MeshPath: models\blueSphere\BlueSphere.obj
-        Materials:
-          - MaterialType: StandardMaterial
-            Albedo: [0.156862751, 0.156862751, 0.156862751]
-            Specular: [1, 0.999899983, 0.999899983]
-            Roughness: 0.400000006
-            Metallic: 1
-            Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
-            DiffuseMap: ""
-            NormalMap: ""
-            HeightMap: ""
-            RoughnessMap: ""
-            MetallicMap: ""
-            SpecularMap: ""
-            FuzzColour: [0, 0, 0]
-            FuzzRoughness: 1
         UMaterials:
-          []
+          - materials\graphics\matSpecular0.4.mpcy
     Children:
       []
   - Name: Specular 0.5
@@ -400,24 +176,8 @@ Actors:
     Components:
       - Component: MeshRenderer
         MeshPath: models\blueSphere\BlueSphere.obj
-        Materials:
-          - MaterialType: StandardMaterial
-            Albedo: [0.156862751, 0.156862751, 0.156862751]
-            Specular: [1, 0.999899983, 0.999899983]
-            Roughness: 0.5
-            Metallic: 1
-            Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
-            DiffuseMap: ""
-            NormalMap: ""
-            HeightMap: ""
-            RoughnessMap: ""
-            MetallicMap: ""
-            SpecularMap: ""
-            FuzzColour: [0, 0, 0]
-            FuzzRoughness: 1
         UMaterials:
-          - materials\Red.mpcy
+          - materials\graphics\matSpecular0.5.mpcy
     Children:
       []
   - Name: Specular 0.6
@@ -428,24 +188,8 @@ Actors:
     Components:
       - Component: MeshRenderer
         MeshPath: models\blueSphere\BlueSphere.obj
-        Materials:
-          - MaterialType: StandardMaterial
-            Albedo: [0.156862751, 0.156862751, 0.156862751]
-            Specular: [1, 0.999899983, 0.999899983]
-            Roughness: 0.600000024
-            Metallic: 1
-            Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
-            DiffuseMap: ""
-            NormalMap: ""
-            HeightMap: ""
-            RoughnessMap: ""
-            MetallicMap: ""
-            SpecularMap: ""
-            FuzzColour: [0, 0, 0]
-            FuzzRoughness: 1
         UMaterials:
-          []
+          - materials\graphics\matSpecular0.6.mpcy
     Children:
       []
   - Name: Specular 0.7
@@ -456,24 +200,8 @@ Actors:
     Components:
       - Component: MeshRenderer
         MeshPath: models\blueSphere\BlueSphere.obj
-        Materials:
-          - MaterialType: StandardMaterial
-            Albedo: [0.156862751, 0.156862751, 0.156862751]
-            Specular: [1, 0.999899983, 0.999899983]
-            Roughness: 0.699999988
-            Metallic: 1
-            Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
-            DiffuseMap: ""
-            NormalMap: ""
-            HeightMap: ""
-            RoughnessMap: ""
-            MetallicMap: ""
-            SpecularMap: ""
-            FuzzColour: [0, 0, 0]
-            FuzzRoughness: 1
         UMaterials:
-          []
+          - materials\graphics\matSpecular0.7.mpcy
     Children:
       []
   - Name: Specular 0.8
@@ -484,24 +212,8 @@ Actors:
     Components:
       - Component: MeshRenderer
         MeshPath: models\blueSphere\BlueSphere.obj
-        Materials:
-          - MaterialType: StandardMaterial
-            Albedo: [0.156862751, 0.156862751, 0.156862751]
-            Specular: [1, 0.999899983, 0.999899983]
-            Roughness: 0.800000012
-            Metallic: 1
-            Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
-            DiffuseMap: ""
-            NormalMap: ""
-            HeightMap: ""
-            RoughnessMap: ""
-            MetallicMap: ""
-            SpecularMap: ""
-            FuzzColour: [0, 0, 0]
-            FuzzRoughness: 1
         UMaterials:
-          []
+          - materials\graphics\matSpecular0.8.mpcy
     Children:
       []
   - Name: Specular 0.9
@@ -512,24 +224,8 @@ Actors:
     Components:
       - Component: MeshRenderer
         MeshPath: models\blueSphere\BlueSphere.obj
-        Materials:
-          - MaterialType: StandardMaterial
-            Albedo: [0.156862751, 0.156862751, 0.156862751]
-            Specular: [1, 0.999899983, 0.999899983]
-            Roughness: 0.899999976
-            Metallic: 1
-            Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
-            DiffuseMap: ""
-            NormalMap: ""
-            HeightMap: ""
-            RoughnessMap: ""
-            MetallicMap: ""
-            SpecularMap: ""
-            FuzzColour: [0, 0, 0]
-            FuzzRoughness: 1
         UMaterials:
-          []
+          - materials\graphics\matSpecular0.9.mpcy
     Children:
       []
   - Name: Specular 1.0
@@ -540,24 +236,8 @@ Actors:
     Components:
       - Component: MeshRenderer
         MeshPath: models\blueSphere\BlueSphere.obj
-        Materials:
-          - MaterialType: StandardMaterial
-            Albedo: [0.156862751, 0.156862751, 0.156862751]
-            Specular: [1, 0.999899983, 0.999899983]
-            Roughness: 1
-            Metallic: 1
-            Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
-            DiffuseMap: ""
-            NormalMap: ""
-            HeightMap: ""
-            RoughnessMap: ""
-            MetallicMap: ""
-            SpecularMap: ""
-            FuzzColour: [0, 0, 0]
-            FuzzRoughness: 1
         UMaterials:
-          []
+          - materials\graphics\matSpecular1.0.mpcy
     Children:
       []
   - Name: Skylight
@@ -580,23 +260,7 @@ Actors:
     Components:
       - Component: MeshRenderer
         MeshPath: models\Plane.glb
-        Materials:
-          - MaterialType: StandardMaterial
-            Albedo: [1, 1, 1]
-            Specular: [0, 0, 0]
-            Roughness: 1
-            Metallic: 0
-            Emissive: [0, 0, 0]
-            HeightScale: 0.100000001
-            DiffuseMap: ""
-            NormalMap: ""
-            HeightMap: ""
-            RoughnessMap: ""
-            MetallicMap: ""
-            SpecularMap: ""
-            FuzzColour: [0, 0, 0]
-            FuzzRoughness: 1
         UMaterials:
-          - materials\Red.mpcy
+          - models\defaultObjects\DefaultWhite.mpcy
     Children:
       []

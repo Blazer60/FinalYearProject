@@ -224,12 +224,6 @@ namespace engine
         Ref<Actor> actor = core->getScene()->spawnActor<Actor>(name);
         actor->position = mViewport.getCamera()->getEndOfBoomArmPosition();
         auto model = actor->addComponent(load::meshRenderer<StandardVertex>(path));
-        auto material = std::make_shared<StandardMaterialSubComponent>();
-        material->attachShader(load::shader(
-            file::shaderPath() / "geometry/standard/Standard.vert",
-            file::shaderPath() / "geometry/standard/Standard.frag"));
-        model->addMaterial(material);
-        
         return actor;
     }
     
@@ -444,11 +438,6 @@ namespace engine
         Ref<Actor> actor = core->getScene()->spawnActor<engine::Actor>("Model");
         actor->position = mViewport.getCamera()->getEndOfBoomArmPosition();
         Ref<MeshRenderer> meshRenderer = actor->addComponent(load::meshRenderer<StandardVertex>(path));
-        auto material = std::make_shared<StandardMaterialSubComponent>();
-        material->attachShader(load::shader(
-            file::shaderPath() / "geometry/standard/Standard.vert",
-            file::shaderPath() / "geometry/standard/Standard.frag"));
-        meshRenderer->addMaterial(material);
 
         setSelectedActor(actor);
     }
