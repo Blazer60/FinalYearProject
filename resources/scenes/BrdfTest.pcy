@@ -261,6 +261,6 @@ Actors:
       - Component: MeshRenderer
         MeshPath: models\Plane.glb
         UMaterials:
-          - models\defaultObjects\DefaultWhite.mpcy
+          - materials\Red.mpcy
     Children:
       []

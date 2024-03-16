@@ -11,6 +11,7 @@
 #include "GraphicsFunctions.h"
 #include "MaterialData.h"
 #include "Pch.h"
+#include "TexturePool.h"
 #include "UberLayer.h"
 #include "UberMask.h"
 
@@ -39,17 +40,18 @@ namespace engine
     protected:
         void loadFromDisk();
         void drawMaterialLayerArray();
-
         void drawMaterialLayerElementColumn(const std::string&name, int index);
-
         bool drawMaterialLayerElement(int index);
         bool drawMaskLayerElement(int index);
+
+        void addNewMaterialLayer(std::shared_ptr<UberLayer> layer);
+
         std::string mName;
         std::filesystem::path mPath;
 
         std::vector<std::shared_ptr<UberLayer>> mLayers;
         std::vector<std::unique_ptr<UberMask>> mMasks;
-        TextureArrayObject mTextureArray = TextureArrayObject(graphics::textureFormat::Rgba8, graphics::filter::LinearMipmapLinear);
+        graphics::TexturePool mTexturePool = graphics::TexturePool(mName, graphics::textureFormat::Rgba8);
         graphics::MaterialData mData;
     };
 } // engine

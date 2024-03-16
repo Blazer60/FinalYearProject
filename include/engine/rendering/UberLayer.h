@@ -10,8 +10,10 @@
 #include "Callback.h"
 #include "Drawable.h"
 #include "FileLoader.h"
+#include "MaterialData.h"
 #include "Pch.h"
 #include "Texture.h"
+#include "TexturePool.h"
 
 namespace engine
 {
@@ -23,6 +25,7 @@ namespace engine
         : public ui::Drawable
     {
         friend class UberMaterial;
+        typedef std::function<void(graphics::TexturePool&, graphics::LayerData&)> UpdateFunc;
     public:
         explicit UberLayer(const std::filesystem::path &path);
         std::string name() const { return mName; }
@@ -50,6 +53,8 @@ namespace engine
         float     mRoughness = 0.9f;
         glm::vec3 mSheenColour = glm::vec3(0.f);
         float     mSheenRoughness = 0.5f;
+
+        std::vector<UpdateFunc> mLayerUpdates;
     };
 
 } // engine

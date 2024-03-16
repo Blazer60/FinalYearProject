@@ -26,6 +26,8 @@ namespace engine
 
     void UberLayer::onDrawUi()
     {
+        mLayerUpdates.clear();
+
         if (ImGui::BeginTable("Default Settings Table", 4))
         {
             ImGui::TableSetupColumn("Texture Button", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed);
@@ -33,12 +35,86 @@ namespace engine
             ImGui::TableSetupColumn("Slider Or Value", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthStretch);
             ImGui::TableSetupColumn("Close Button", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed, ui::buttonSize().x);
 
-            ui::rowTextureColourEdit("diffuse", mDiffuseTexture, mDiffuseColour);
-            ui::rowTextureColourEdit("specular", mSpecularTexture, mSpecularColour);
-            ui::rowTexture("normal map", mNormalTexture);
-            ui::rowTextureSliderFloat("roughness", mRoughnessTexture, mRoughness);
-            ui::rowTextureColourEdit("Sheen Colour", mSheenTexture, mSheenColour);
-            ui::rowTextureSliderFloat("Sheen Roughness", mSheenRoughnessTexture, mSheenRoughness);
+            if (const ui::EditFlags flags = ui::rowTextureColourEdit("diffuse", mDiffuseTexture, mDiffuseColour); flags > 0)
+            {
+                if ((flags & ui::EditFlags::Value) > 0)
+                {
+                    mLayerUpdates.push_back([this](graphics::TexturePool &, graphics::LayerData &layer) {
+                        layer.diffuseColour = glm::vec4(mDiffuseColour, 1.f);
+                    });
+                }
+                if ((flags & ui::EditFlags::Texture) > 0)
+                {
+                    mLayerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                        texturePool.removeTexture(layer.diffuseTextureIndex);
+                        layer.diffuseTextureIndex = texturePool.addTexture(*mDiffuseTexture);
+                    });
+                }
+            }
+            if (const ui::EditFlags flags = ui::rowTextureColourEdit("specular", mSpecularTexture, mSpecularColour); flags > 0)
+            {
+                if ((flags & ui::EditFlags::Value) > 0)
+                {
+                    mLayerUpdates.push_back([this](graphics::TexturePool &, graphics::LayerData &layer) {
+                        layer.specularColour = glm::vec4(mSpecularColour, 1.f);
+                    });
+                }
+            }
+            if (ui::rowTexture("normal map", mNormalTexture) == ui::EditFlags::Texture)
+            {
+                mLayerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                    texturePool.removeTexture(layer.normalTextureIndex);
+                    layer.normalTextureIndex = texturePool.addTexture(*mNormalTexture);
+                });
+            }
+            if (const ui::EditFlags flags = ui::rowTextureSliderFloat("roughness", mRoughnessTexture, mRoughness); flags > 0)
+            {
+                if ((flags & ui::EditFlags::Value) > 0)
+                {
+                    mLayerUpdates.push_back([this](graphics::TexturePool &, graphics::LayerData &layer) {
+                        layer.roughness = mRoughness;
+                    });
+                }
+                if ((flags & ui::EditFlags::Texture) > 0)
+                {
+                    mLayerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                        texturePool.removeTexture(layer.roughnessTextureIndex);
+                        layer.roughnessTextureIndex = texturePool.addTexture(*mRoughnessTexture);
+                    });
+                }
+            }
+            if (const ui::EditFlags flags = ui::rowTextureColourEdit("Sheen Colour", mSheenTexture, mSheenColour); flags > 0)
+            {
+                if ((flags & ui::EditFlags::Value) > 0)
+                {
+                    mLayerUpdates.push_back([this](graphics::TexturePool &, graphics::LayerData &layer) {
+                        layer.sheenColour = glm::vec4(mSheenColour, 1.f);
+                    });
+                }
+                if ((flags & ui::EditFlags::Texture) > 0)
+                {
+                    mLayerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                        texturePool.removeTexture(layer.sheenTextureIndex);
+                        layer.sheenTextureIndex = texturePool.addTexture(*mSheenTexture);
+                    });
+                }
+            }
+            if (const ui::EditFlags flags = ui::rowTextureSliderFloat("Sheen Roughness", mSheenRoughnessTexture, mSheenRoughness); flags > 0)
+            {
+                if ((flags & ui::EditFlags::Value) > 0)
+                {
+                    mLayerUpdates.push_back([this](graphics::TexturePool &, graphics::LayerData &layer) {
+                        layer.sheenRoughness = mSheenRoughness;
+                    });
+                }
+                if ((flags & ui::EditFlags::Texture) > 0)
+                {
+                    mLayerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                        texturePool.removeTexture(layer.sheenRoughnessTextureIndex);
+                        layer.sheenRoughnessTextureIndex = texturePool.addTexture(*mSheenRoughnessTexture);
+                    });
+                }
+            }
             ImGui::EndTable();
         }
         const auto name = format::string("%", mPath);

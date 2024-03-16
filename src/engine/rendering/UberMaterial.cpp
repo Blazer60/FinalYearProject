@@ -59,7 +59,7 @@ namespace engine
             if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(resourceMaterialLayerPayload))
             {
                 const std::filesystem::path path = *static_cast<std::filesystem::path*>(payload->Data);
-                mLayers.push_back(load::materialLayer(path));
+                addNewMaterialLayer(load::materialLayer(path));
             }
             ImGui::EndDragDropTarget();
         }
@@ -119,80 +119,22 @@ namespace engine
     void UberMaterial::onPreRender()
     {
         PROFILE_FUNC();
-        graphics::pushDebugGroup(format::string("% material", mName));
 
-        // todo: A way to not call this every frame. Could be quite slow?
-        std::vector<std::shared_ptr<Texture>> validTextures;
-        glm::uvec2 maxTextureSize = glm::uvec2(0);
-        auto addIfValid = [&, this](const std::shared_ptr<Texture> &tex) {
-            if (tex->id() > 0)
-            {
-                validTextures.push_back(tex);
-                const glm::uvec2 size = tex->size();
-                maxTextureSize = glm::max(maxTextureSize, size);
-                const int index = static_cast<int>(mData.textureArrayData.size());
-                mData.textureArrayData.push_back(graphics::TextureData { size.x, size.y } );
-                return index;
-            }
+        mData.layers.resize(mLayers.size());
 
-            return -1;
-        };
-
-        mData.textureArrayData.clear();
-
-        mData.layers.clear();
-        mData.layers.reserve(mLayers.size());
-
+        bool anyChanges = false;
         for (int i = 0; i < mLayers.size(); ++i)
         {
-            if (mLayers[i] == nullptr)
-                continue;
-
-            graphics::LayerData& layerData = mData.layers.emplace_back();;
-            const UberLayer &layer = *mLayers[i];
-
-            layerData.roughness = layer.mRoughness;
-            layerData.sheenRoughness = layer.mSheenRoughness;
-            layerData.diffuseColour = glm::vec4(layer.mDiffuseColour, 1.f);
-            layerData.specularColour = glm::vec4(layer.mSpecularColour, 1.f);
-            layerData.sheenColour = glm::vec4(layer.mSheenColour, 1.f);
-
-            layerData.diffuseTextureIndex = addIfValid(layer.mDiffuseTexture);
-            layerData.specularTextureIndex = addIfValid(layer.mSpecularTexture);
-            layerData.roughnessTextureIndex = addIfValid(layer.mRoughnessTexture);
-            layerData.normalTextureIndex = addIfValid(layer.mNormalTexture);
-            layerData.sheenTextureIndex = addIfValid(layer.mSheenTexture);
-            layerData.sheenRoughnessTextureIndex = addIfValid(layer.mSheenRoughnessTexture);
+            anyChanges |= !mLayers[i]->mLayerUpdates.empty();
+            for (auto &action : mLayers[i]->mLayerUpdates)
+                action(mTexturePool, mData.layers[i]);
         }
 
-        mData.masks.clear();
-        mData.masks.reserve(mMasks.size());
-        for (int i = 0; i < mMasks.size(); ++i)
+        if (anyChanges)
         {
-            if (mMasks[i] == nullptr)
-                continue;
-
-            auto &[alpha, maskTextureIndex] = mData.masks.emplace_back();;
-            const UberMask &mask = *mMasks[i];
-
-            alpha = mask.mAlphaThreshold;
-            maskTextureIndex = addIfValid(mask.mMaskTexture);
+            mData.textureArrayId = mTexturePool.id();
+            mData.textureArrayData = mTexturePool.data();
         }
-
-        if (!validTextures.empty())
-        {
-            mTextureArray.resize(maxTextureSize, static_cast<int32_t>(validTextures.size()));
-            int index = 0;
-            for (const std::shared_ptr<Texture> &texture : validTextures)
-            {
-                // todo: fucking mips. smh.
-                graphics::copyTexture2D(*texture, mTextureArray, index++);
-            }
-            mTextureArray.setDebugName(format::string("Uber Material %", mName));
-        }
-        mData.textureArrayId = mTextureArray.getId();
-
-        graphics::popDebugGroup();
     }
 
     void UberMaterial::loadFromDisk()
@@ -211,7 +153,7 @@ namespace engine
             {
                 const std::string relativePath = layer.as<std::string>();
                 const std::filesystem::path fullPath = file::constructAbsolutePath(relativePath);
-                mLayers.push_back(load::materialLayer(fullPath));
+                addNewMaterialLayer(load::materialLayer(fullPath));
             }
         }
 
@@ -239,7 +181,7 @@ namespace engine
     void UberMaterial::drawMaterialLayerArray()
     {
         if (ui::seperatorTextButton(format::string("Layers (%)", mLayers.size())))
-            mLayers.push_back(nullptr);
+            addNewMaterialLayer(nullptr);
 
         if (ImGui::BeginTable("Layers Table", 3))
         {
@@ -350,5 +292,30 @@ namespace engine
         ImGui::PopID();
 
         return result;
+    }
+
+    void UberMaterial::addNewMaterialLayer(std::shared_ptr<UberLayer> layer)
+    {
+        auto &layerData = mData.layers.emplace_back();
+        if (layer == nullptr)
+            return;
+
+        layerData.roughness         = layer->mRoughness;
+        layerData.sheenRoughness    = layer->mSheenRoughness;
+        layerData.diffuseColour     = glm::vec4(layer->mDiffuseColour, 1.f);
+        layerData.specularColour    = glm::vec4(layer->mSpecularColour, 1.f);
+        layerData.sheenColour       = glm::vec4(layer->mSheenColour, 1.f);
+
+        layerData.diffuseTextureIndex           = mTexturePool.addTexture(*layer->mDiffuseTexture);
+        layerData.specularTextureIndex          = mTexturePool.addTexture(*layer->mSpecularTexture);
+        layerData.roughnessTextureIndex         = mTexturePool.addTexture(*layer->mRoughnessTexture);
+        layerData.normalTextureIndex            = mTexturePool.addTexture(*layer->mNormalTexture);
+        layerData.sheenTextureIndex             = mTexturePool.addTexture(*layer->mSheenTexture);
+        layerData.sheenRoughnessTextureIndex    = mTexturePool.addTexture(*layer->mSheenRoughnessTexture);
+
+        mLayers.push_back(std::move(layer));
+
+        mData.textureArrayId = mTexturePool.id();
+        mData.textureArrayData = mTexturePool.data();
     }
 } // engine

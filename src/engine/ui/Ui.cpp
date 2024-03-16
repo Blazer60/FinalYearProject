@@ -225,18 +225,17 @@ namespace ui
         return ImGui::ImageButton(imguiId.data(), reinterpret_cast<void *>(static_cast<size_t>(glId)), imSize, ImVec2(0, 1), ImVec2(1, 0));
     }
 
-    void textureThumbnail(const std::string& name, std::shared_ptr<Texture>& texture)
+    bool textureThumbnail(const std::string& name, std::shared_ptr<Texture>& texture)
     {
-        auto buttonId = format::string("##%", name);
+        bool result = false;
+        const std::string buttonId = format::string("##%", name);
         if (ui::imageButton(buttonId, texture->id(), glm::vec2(ImGui::GetTextLineHeight())))
         {
-            engine::editor->addUpdateAction([&]() {
-                const std::string result = openFileDialog();
-                if (result.empty())
-                    return;
-
-                texture = load::texture(result);
-            });
+            if (const std::string path = openFileDialog(); !path.empty())
+            {
+                texture = load::texture(path);
+                result = true;
+            }
         }
         if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal) && ImGui::BeginTooltip())
         {
@@ -253,14 +252,15 @@ namespace ui
         {
             if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(engine::resourceImagePayload))
             {
-                std::filesystem::path path = *reinterpret_cast<std::filesystem::path*>(payload->Data);
-                engine::editor->addUpdateAction([&, path]() {
-                    texture = load::texture(path);
-                });
+                std::filesystem::path const path = *static_cast<std::filesystem::path*>(payload->Data);
+                texture = load::texture(path);
+                result = true;
             }
 
             ImGui::EndDragDropTarget();
         }
+
+        return result;
     }
 
     float resetButtonWidth()
@@ -271,22 +271,25 @@ namespace ui
         return buttonWidth;
     }
 
-    void resetButton(const std::string& name, std::shared_ptr<Texture>& texture)
+    bool resetButton(const std::string& name, std::shared_ptr<Texture>& texture)
     {
         if (ui::closeButton("Delete Button"))
         {
-            engine::editor->addUpdateAction([&]() {
-                texture = std::make_shared<Texture>("");
-            });
+            texture = std::make_shared<Texture>("");
+            return true;
         }
+        return false;
     }
 
-    void rowTexture(const std::string& name, std::shared_ptr<Texture>& texture)
+    EditFlags rowTexture(const std::string& name, std::shared_ptr<Texture>& texture)
     {
+        EditFlags result = EditFlags::None;
+
         ImGui::PushID(name.c_str());
         if (ImGui::TableNextColumn())
         {
-            ui::textureThumbnail(name, texture);
+            if (ui::textureThumbnail(name, texture))
+                result = result | EditFlags::Texture;
         }
         if (ImGui::TableNextColumn())
         {
@@ -300,18 +303,23 @@ namespace ui
         }
         if (ImGui::TableNextColumn())
         {
-            resetButton(name, texture);
+            if (resetButton(name, texture))
+                result = result | EditFlags::Texture;
         }
 
         ImGui::PopID();
+        return result;
     }
 
-    void rowTextureColourEdit(const std::string& name, std::shared_ptr<Texture>& texture, glm::vec3& colour)
+    EditFlags rowTextureColourEdit(const std::string& name, std::shared_ptr<Texture>& texture, glm::vec3& colour)
     {
+        EditFlags result = EditFlags::None;
+
         ImGui::PushID(name.c_str());
         if (ImGui::TableNextColumn())
         {
-            ui::textureThumbnail(name, texture);
+            if (ui::textureThumbnail(name, texture))
+                result = result | EditFlags::Texture;
         }
         if (ImGui::TableNextColumn())
         {
@@ -322,22 +330,29 @@ namespace ui
         if (ImGui::TableNextColumn())
         {
             ui::colourEdit(format::string("##%", name), colour);
+            if (ImGui::IsItemEdited())
+                result = result | EditFlags::Value;
         }
         if (ImGui::TableNextColumn())
         {
-            resetButton(name, texture);
+            if (resetButton(name, texture))
+                result = result | EditFlags::Texture;
         }
 
         ImGui::PopID();
+
+        return result;
     }
 
-    void rowTextureSliderFloat(const std::string& name, std::shared_ptr<Texture>& texture, float& value)
+    EditFlags rowTextureSliderFloat(const std::string& name, std::shared_ptr<Texture>& texture, float& value)
     {
+        EditFlags result = EditFlags::None;
         ImGui::PushID(name.c_str());
 
         if (ImGui::TableNextColumn())
         {
-            ui::textureThumbnail(name, texture);
+            if (ui::textureThumbnail(name, texture))
+                result = result | EditFlags::Texture;
         }
         if (ImGui::TableNextColumn())
         {
@@ -350,13 +365,17 @@ namespace ui
             const auto hidden = format::string("##Slider%", name);
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
             ImGui::SliderFloat(hidden.c_str(), &value, 0.f, 1.f);
+            if (ImGui::IsItemEdited())
+                result = result | EditFlags::Value;
         }
         if (ImGui::TableNextColumn())
         {
-            resetButton(name, texture);
+            if (resetButton(name, texture))
+                result = result | EditFlags::Texture;
         }
 
         ImGui::PopID();
+        return result;
     }
 
     glm::ivec2 fitToRegion(const glm::ivec2 &imageSize, const glm::ivec2 &maxSize, const glm::ivec2 &padding)

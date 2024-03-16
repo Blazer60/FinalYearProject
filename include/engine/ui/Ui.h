@@ -31,13 +31,36 @@ namespace ui
     
     void image(uint32_t id, const glm::vec2 &size);
     bool imageButton(std::string_view imguiId, uint32_t glId, const glm::vec2 &size);
-    void textureThumbnail(const std::string &name, std::shared_ptr<Texture> &texture);
+    bool textureThumbnail(const std::string &name, std::shared_ptr<Texture> &texture);
+
+    enum class EditFlags : uint8_t
+    {
+        None        = 0,
+        Value       = 1 << 0,
+        Texture     = 1 << 1,
+    };
+
+    inline EditFlags operator|(EditFlags lhs, EditFlags rhs)
+    {
+        return static_cast<EditFlags>(static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
+    }
+
+    inline int operator&(EditFlags lhs, EditFlags rhs)
+    {
+        return static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs);
+    }
+
+    inline bool operator>(EditFlags lhs, const int rhs)
+    {
+        return static_cast<int>(lhs) > rhs;
+    }
+
 
     float resetButtonWidth();
-    void resetButton(const std::string& name, std::shared_ptr<Texture>& texture);
-    void rowTexture(const std::string& name, std::shared_ptr<Texture>& texture);
-    void rowTextureColourEdit(const std::string &name, std::shared_ptr<Texture> &texture, glm::vec3 &colour);
-    void rowTextureSliderFloat(const std::string &name, std::shared_ptr<Texture> &texture, float &value);
+    bool resetButton(const std::string& name, std::shared_ptr<Texture>& texture);
+    EditFlags rowTexture(const std::string& name, std::shared_ptr<Texture>& texture);
+    EditFlags rowTextureColourEdit(const std::string &name, std::shared_ptr<Texture> &texture, glm::vec3 &colour);
+    EditFlags rowTextureSliderFloat(const std::string &name, std::shared_ptr<Texture> &texture, float &value);
     
     glm::ivec2 fitToRegion(const glm::ivec2 &imageSize, const glm::ivec2 &maxSize, const glm::ivec2 &padding=glm::ivec2(50));
 

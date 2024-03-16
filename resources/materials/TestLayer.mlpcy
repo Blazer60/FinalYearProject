@@ -1,11 +1,11 @@
-DiffuseTexturePath: models\stoneFloor\TexturesCom_TileStones_1K_albedo.png
+DiffuseTexturePath: ""
 SpecularTexturePath: ""
-NormalTexturePath: models\stoneFloor\TexturesCom_TileStones_1K_normal.png
-RoughnessTexturePath: models\stoneFloor\TexturesCom_TileStones_1K_roughness.png
+NormalTexturePath: ""
+RoughnessTexturePath: ""
 SheenTexturePath: ""
 SheenRoughnessTexturePath: ""
-DiffuseColour: [0.999924779, 1, 0.999899983]
-SpecularColour: [0.0981393233, 0.0981323346, 0.0981421471]
-Roughness: 1
-SheenColour: [9.99966942e-05, 9.9989993e-05, 9.99999975e-05]
+DiffuseColour: [0.308090746, 0.0920344815, 0.0843878984]
+SpecularColour: [0.940566897, 0.100232184, 0.119789295]
+Roughness: 0.35800001
+SheenColour: [9.99999975e-05, 9.9989993e-05, 9.99906188e-05]
 SheenRoughness: 0
