@@ -47,7 +47,7 @@ namespace load
         }
 
         const auto sceneName = data["Scene"].as<std::string>();
-        MESSAGE("loading scene: %", sceneName);
+        MESSAGE_VERBOSE("loading scene: %", sceneName);
 
         auto scene = engine::serializer->loadScene(data);
 

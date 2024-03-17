@@ -167,7 +167,7 @@ namespace engine
         fileOutput << out.c_str();
         fileOutput.close();
 
-        MESSAGE("Material Layer save to: %", mPath);
+        MESSAGE_VERBOSE("Material Layer save to: %", mPath);
     }
 
     void UberLayer::loadFromDisk()

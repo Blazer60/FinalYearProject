@@ -23,13 +23,13 @@ Texture::Texture(const std::filesystem::path &path)
     
     if (!std::filesystem::exists(path))
     {
-        WARN("File % does not exist.\nAborting texture generation", path);
+        ERROR("File % does not exist.\nAborting texture generation", path);
         return;
     }
     
     if (!file::hasImageExtension(path))
     {
-        WARN("Incompatible format for %. No texture will be loaded.", path);
+        ERROR("Extension not supported for path: %. No texture will be loaded.", path);
         return;
     }
     

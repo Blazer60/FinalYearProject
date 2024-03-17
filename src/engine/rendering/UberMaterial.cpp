@@ -113,7 +113,7 @@ namespace engine
         fileOutput << out.c_str();
         fileOutput.close();
 
-        MESSAGE("Material saved to: %", mPath);
+        MESSAGE_VERBOSE("Material saved to: %", mPath);
     }
 
     void UberMaterial::onPreRender()
@@ -172,9 +172,11 @@ namespace engine
                 auto mask = std::make_unique<UberMask>();
                 if (const YAML::Node textureNode = maskNode["Texture"]; textureNode.IsDefined())
                 {
-                    const std::string relativePath = textureNode.as<std::string>();
-                    const std::filesystem::path fullPath = file::constructAbsolutePath(relativePath);
-                    mask->mMaskTexture = load::texture(fullPath);
+                    if (const std::string relativePath = textureNode.as<std::string>(); !relativePath.empty())
+                    {
+                        const std::filesystem::path fullPath = file::constructAbsolutePath(relativePath);
+                        mask->mMaskTexture = load::texture(fullPath);
+                    }
                 }
                 if (const YAML::Node alphaNode = maskNode["Alpha"]; alphaNode.IsDefined())
                 {

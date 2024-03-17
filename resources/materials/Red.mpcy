@@ -2,5 +2,5 @@ MaterialLayers:
   - materials\TestLayer.mlpcy
   - materials\AnotherLayer.mlpcy
 MaskLayers:
-  - Texture: .
+  - Texture: ""
     Alpha: 0

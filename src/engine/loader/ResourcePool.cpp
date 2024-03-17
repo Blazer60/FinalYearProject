@@ -22,7 +22,7 @@ namespace engine
         }
         for (const std::string &hashName : toDelete)
         {
-            MESSAGE("Cleaning up %", hashName);
+            MESSAGE_VERBOSE("Cleaning up %", hashName);
             map.erase(hashName);
         }
     }
@@ -40,7 +40,7 @@ namespace engine
         }
         for (const std::string &hashName : toDelete)
         {
-            MESSAGE("Cleaning up material layer %", hashName);
+            MESSAGE_VERBOSE("Cleaning up material layer %", hashName);
             map.erase(hashName);
         }
     }
@@ -58,7 +58,7 @@ namespace engine
         }
         for (const std::string &hashName : toDelete)
         {
-            MESSAGE("Cleaning up material %", hashName);
+            MESSAGE_VERBOSE("Cleaning up material %", hashName);
             map.erase(hashName);
         }
     }
@@ -155,7 +155,7 @@ namespace engine
 
         if (scene == nullptr)
         {
-            WARN("Could not load model with path %\n%", path, importer.GetErrorString());
+            ERROR("Could not load model with path %\n%", path, importer.GetErrorString());
             return { };
         }
 

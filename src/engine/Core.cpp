@@ -76,7 +76,7 @@ namespace engine
             bool success = Renderer::debugMessageCallback(forwardOpenGlCallback);
             if (!success)
                 WARN("Unable to enable debugging. Check if the openGl version is greater than 4.3.");
-            MESSAGE(Renderer::getVersion());
+            MESSAGE_VERBOSE(Renderer::getVersion());
         }
         
         if (!initImGui())

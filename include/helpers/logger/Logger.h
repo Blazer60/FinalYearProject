@@ -23,14 +23,15 @@ namespace debug
     typedef int Severity;
     enum Severity_
     {
-        Severity_Unknown        = 0b0000001,
-        Severity_Notification   = 0b0000010,
-        Severity_Warning        = 0b0000100,
-        Severity_Minor          = 0b0001000,
-        Severity_Major          = 0b0010000,
-        Severity_Fatal          = 0b0100000,
-        Severity_Error          = 0b0111000,
-        Severity_Verbose        = 0b1000000,
+        Severity_Unknown        = 1 << 0,
+        Severity_Notification   = 1 << 1,
+        Severity_Verbose        = 1 << 2,
+        Severity_Warning        = 1 << 3,
+        Severity_Minor          = 1 << 4,
+        Severity_Major          = 1 << 5,
+        Severity_Fatal          = 1 << 6,
+
+        Severity_Error          = Severity_Minor | Severity_Major | Severity_Fatal,
     };
     
     enum OutputSourceFlag_

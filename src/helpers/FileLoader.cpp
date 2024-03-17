@@ -31,8 +31,8 @@ namespace file
             data::modelPath = path;
             return true;
         }
-        
-        WARN("Could not find the model folder in %", data::resourcePath.string());
+
+        ERROR("Could not find the model folder in %", data::resourcePath.string());
         return false;
     }
     
@@ -45,7 +45,7 @@ namespace file
             return true;
         }
         
-        WARN("Could not find the shader folder in %", data::resourcePath.string());
+        ERROR("Could not find the shader folder in %", data::resourcePath.string());
         return false;
     }
     
@@ -58,21 +58,21 @@ namespace file
             return true;
         }
         
-        WARN("Could not find the textures folder in %", data::resourcePath.string());
+        ERROR("Could not find the textures folder in %", data::resourcePath.string());
         return false;
     }
     
     bool findResourceFolder()
     {
         auto currentWorkingDirectory = std::filesystem::current_path();
-        MESSAGE("cwd: %", currentWorkingDirectory.string());
+        MESSAGE_VERBOSE("cwd: %", currentWorkingDirectory.string());
         for (const auto &relativePaths : searchPaths)
         {
             auto path = (currentWorkingDirectory / relativePaths / "resources").lexically_normal();
-            MESSAGE("Trying Path: %", path.string());
+            MESSAGE_VERBOSE("Trying Path: %", path.string());
             if (exists(path))
             {
-                MESSAGE("Found directory: %", path.string());
+                MESSAGE_VERBOSE("Found directory: %", path.string());
                 data::resourcePath = path;
                 bool foundAll = true;
                 foundAll |= findModelFolder();
@@ -80,12 +80,12 @@ namespace file
                 foundAll |= findTextureFolder();
                 
                 if (foundAll)
-                    MESSAGE("Found all paths to resources.");
+                    MESSAGE_VERBOSE("Found all paths to resources.");
                 return foundAll;
             }
         }
         
-        WARN("Could not find the resource folder. This may cause errors in the rest of the code.");
+        ERROR("Could not find the resource folder. This may cause errors in the rest of the code.");
         return false;
     }
     

@@ -33,7 +33,7 @@ namespace graphics
 
         const glm::ivec2 newSize = glm::max(getMaxTextureSize(), textureSize);
         const int32_t newCount = glm::max(dstIndex + 1, findLastUsedSlot());
-        MESSAGE("Adding Texture to index %. Size: % -> %. Count: % -> %", dstIndex, mSize, newSize, mLayerCount, newCount);
+        MESSAGE_VERBOSE("Adding Texture to index %. Size: % -> %. Count: % -> %", dstIndex, mSize, newSize, mLayerCount, newCount);
         reinitialise(newSize, newCount);
 
         constexpr int x = 0;
@@ -58,7 +58,7 @@ namespace graphics
         if (index == -1)
             return;
 
-        MESSAGE("Deleting Texture at index %. Count: %", index, mLayerCount);
+        MESSAGE_VERBOSE("Deleting Texture at index %. Count: %", index, mLayerCount);
         mData[index] = { };
     }
 
