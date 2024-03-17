@@ -22,11 +22,15 @@ struct LayerData
 #define PASSTHROUGH_FLAG_SHEEN 16
 #define PASSTHROUGH_FLAG_SHEEN_ROUGHNESS 32
 
+#define OPERATION_LERP 0
+#define OPERATION_THRESHOLD 1
+
 struct MaskData
 {
     float alpha;
     int textureIndex;
     uint passthroughFlags;
+    uint operation;
 };
 
 struct TextureData

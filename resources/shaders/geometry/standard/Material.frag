@@ -31,6 +31,17 @@ in mat3 v_tbn_matrix;
 in vec3 v_camera_position_ts;
 in vec3 v_position_ts;
 
+float sampleMask(vec2 uv, int index)
+{
+    if (index == -1)
+        return 1.f;
+
+    TextureData data = textureData[index];
+    const vec2 maxDimensions = textureSize(textures, 0).xy;
+    const vec2 actualUv = uv * vec2(data.width, data.height) / maxDimensions;
+    return texture(textures, vec3(actualUv, index)).r;
+}
+
 vec4 sampleTexture(vec2 uv, int index)
 {
     if (index == -1)
@@ -66,22 +77,26 @@ vec3 sampleNormal(vec3 normal, vec2 uv, int index)
     return normalize(v_tbn_matrix * (2.f * textureNormal - vec3(1.f)));
 }
 
-vec3 blend(vec3 a, vec3 b, float alpha, bool passthrough)
+vec3 blend(vec3 a, vec3 b, float textureValue, float alpha, uint operation, bool passthrough)
 {
     if (passthrough)
-    {
         return a;
-    }
-    return mix(a, b, alpha);
+    if (operation == OPERATION_LERP)
+        return mix(a, b, textureValue * alpha);
+    else if (operation == OPERATION_THRESHOLD)
+        return textureValue < alpha ? a : b;
+    return vec3(1.f, 0.f, 1.f);
 }
 
-float blend(float a, float b, float alpha, bool passthrough)
+float blend(float a, float b, float textureValue, float alpha, uint operation, bool passthrough)
 {
     if (passthrough)
-    {
         return a;
-    }
-    return mix(a, b, alpha);
+    if (operation == OPERATION_LERP)
+        return mix(a, b, textureValue * alpha);
+    else if (operation == OPERATION_THRESHOLD)
+        return textureValue < alpha ? a : b;
+    return -1.f;
 }
 
 void main()
@@ -107,7 +122,7 @@ void main()
     {
         const LayerData material = layers[i + 1];
         const MaskData mask = masks[i];
-        const float alpha = mask.alpha * sampleTexture(v_uv, mask.textureIndex).r;
+        const float textureValue = sampleMask(v_uv, mask.textureIndex).r;
 
         GBuffer nextGBuffer = gBufferCreate();
 
@@ -124,14 +139,15 @@ void main()
         }
 
         // Blendables.
-        gBuffer.diffuse    = blend(gBuffer.diffuse,   nextGBuffer.diffuse,   alpha, (mask.passthroughFlags & PASSTHROUGH_FLAG_DIFFUSE)   > 0);
-        gBuffer.specular   = blend(gBuffer.specular,  nextGBuffer.specular,  alpha, (mask.passthroughFlags & PASSTHROUGH_FLAG_SPECULAR)  > 0);
-        gBuffer.normal     = blend(gBuffer.normal,    nextGBuffer.normal,    alpha, (mask.passthroughFlags & PASSTHROUGH_FLAG_NORMAL)    > 0);
-        gBuffer.roughness  = blend(gBuffer.roughness, nextGBuffer.roughness, alpha, (mask.passthroughFlags & PASSTHROUGH_FLAG_ROUGHNESS) > 0);
+        gBuffer.diffuse    = blend(gBuffer.diffuse,   nextGBuffer.diffuse,   textureValue, mask.alpha, mask.operation, (mask.passthroughFlags & PASSTHROUGH_FLAG_DIFFUSE)   > 0);
+        gBuffer.specular   = blend(gBuffer.specular,  nextGBuffer.specular,  textureValue, mask.alpha, mask.operation, (mask.passthroughFlags & PASSTHROUGH_FLAG_SPECULAR)  > 0);
+        gBuffer.normal     = blend(gBuffer.normal,    nextGBuffer.normal,    textureValue, mask.alpha, mask.operation, (mask.passthroughFlags & PASSTHROUGH_FLAG_NORMAL)    > 0);
+        gBuffer.roughness  = blend(gBuffer.roughness, nextGBuffer.roughness, textureValue, mask.alpha, mask.operation, (mask.passthroughFlags & PASSTHROUGH_FLAG_ROUGHNESS) > 0);
 
-        gBuffer.fuzzColour    = blend(gBuffer.fuzzColour,    nextGBuffer.fuzzColour,    alpha, (mask.passthroughFlags & PASSTHROUGH_FLAG_SHEEN)           > 0);
-        gBuffer.fuzzRoughness = blend(gBuffer.fuzzRoughness, nextGBuffer.fuzzRoughness, alpha, (mask.passthroughFlags & PASSTHROUGH_FLAG_SHEEN_ROUGHNESS) > 0);
+        gBuffer.fuzzColour    = blend(gBuffer.fuzzColour,    nextGBuffer.fuzzColour,    textureValue, mask.alpha, mask.operation, (mask.passthroughFlags & PASSTHROUGH_FLAG_SHEEN)           > 0);
+        gBuffer.fuzzRoughness = blend(gBuffer.fuzzRoughness, nextGBuffer.fuzzRoughness, textureValue, mask.alpha, mask.operation, (mask.passthroughFlags & PASSTHROUGH_FLAG_SHEEN_ROUGHNESS) > 0);
 
+        // The normal is handled in the worst way possible. Should really be using a slerp.
         gBuffer.normal = normalize(gBuffer.normal);
 
         // Flags.

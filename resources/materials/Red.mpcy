@@ -5,3 +5,4 @@ MaskLayers:
   - Texture: textures\CheckerBoard.png
     Alpha: 1
     Passthrough: 0
+    Operation: 1

@@ -11,6 +11,52 @@
 
 namespace engine
 {
+    void UberMask::drawPassthroughOptions()
+    {
+        ImGui::SeparatorText("Parameter passthrough");
+        auto flagCheckbox = [](graphics::PassthroughFlags &flags, graphics::PassthroughFlags flag) {
+            const std::string name = graphics::to_string(flag);
+            return ImGui::CheckboxFlags(name.c_str(), reinterpret_cast<unsigned int*>(&flags), static_cast<unsigned int>(flag));
+        };
+
+        bool hasFlagUpdated = false;
+        for (int i = 0; i < graphics::passthroughFlagCount; ++i)
+            hasFlagUpdated |= flagCheckbox(mPassThroughFlags, static_cast<graphics::PassthroughFlags>(1 << i));
+
+        if (hasFlagUpdated)
+        {
+            mMaskUpdates.push_back([this](graphics::TexturePool &, graphics::MaskData &mask) {
+                mask.passthroughFlags = static_cast<uint32_t>(mPassThroughFlags);
+            });
+        }
+    }
+
+    void UberMask::drawOperationOptions()
+    {
+        auto radio = [](graphics::MaskOp &operation, const graphics::MaskOp maskOp) {
+            const std::string name = graphics::to_string(maskOp);
+            const bool editied = ImGui::RadioButton(name.c_str(), operation == maskOp);
+            if (editied)
+                operation = maskOp;
+            return editied;
+        };
+
+        bool hasChanged = false;
+        for (int i = 0; i < graphics::maskOpCount; ++i)
+        {
+            if (i != 0)
+                ImGui::SameLine();
+            hasChanged |= radio(mMaskOperation, static_cast<graphics::MaskOp>(i));
+        }
+
+        if (hasChanged)
+        {
+            mMaskUpdates.push_back([this](graphics::TexturePool &, graphics::MaskData &mask) {
+                mask.maskOp = static_cast<uint32_t>(mMaskOperation);
+            });
+        }
+    }
+
     void UberMask::onDrawUi()
     {
         mMaskUpdates.clear();
@@ -43,22 +89,8 @@ namespace engine
             ImGui::EndTable();
         }
 
-        ImGui::SeparatorText("Parameter passthrough");
-        auto flagCheckbox = [](graphics::PassthroughFlags &flags, graphics::PassthroughFlags flag) {
-            const std::string name = graphics::to_string(flag);
-            return ImGui::CheckboxFlags(name.c_str(), reinterpret_cast<unsigned int*>(&flags), static_cast<unsigned int>(flag));
-        };
-
-        bool hasFlagUpdated = false;
-        for (int i = 0; i < graphics::passthroughFlagCount; ++i)
-            hasFlagUpdated |= flagCheckbox(mPassThroughFlags, static_cast<graphics::PassthroughFlags>(1 << i));
-
-        if (hasFlagUpdated)
-        {
-            mMaskUpdates.push_back([this](graphics::TexturePool &, graphics::MaskData &mask) {
-                mask.passthroughFlags = static_cast<uint32_t>(mPassThroughFlags);
-            });
-        }
+        drawOperationOptions();
+        drawPassthroughOptions();
 
         ImGui::PopID();
     }

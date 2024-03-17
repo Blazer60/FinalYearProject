@@ -104,6 +104,7 @@ namespace engine
                 out << YAML::Key << "Texture" << YAML::Value << file::makeRelativeToResourcePath(mask->mMaskTexture->path()).string();
                 out << YAML::Key << "Alpha" << YAML::Value << mask->mAlphaThreshold;
                 out << YAML::Key << "Passthrough" << YAML::Value << static_cast<unsigned int>(mask->mPassThroughFlags);
+                out << YAML::Key << "Operation" << YAML::Value << static_cast<unsigned int>(mask->mMaskOperation);
                 out << YAML::EndMap;
             }
         }
@@ -185,10 +186,9 @@ namespace engine
                     mask->mAlphaThreshold = alpha;
                 }
                 if (const YAML::Node flagsNode = maskNode["Passthrough"]; flagsNode.IsDefined())
-                {
-                    const auto flags = static_cast<graphics::PassthroughFlags>(flagsNode.as<unsigned int>());
-                    mask->mPassThroughFlags = flags;
-                }
+                    mask->mPassThroughFlags = static_cast<graphics::PassthroughFlags>(flagsNode.as<unsigned int>());
+                if (const YAML::Node operationNode = maskNode["Operation"]; operationNode.IsDefined())
+                    mask->mMaskOperation = static_cast<graphics::MaskOp>(operationNode.as<unsigned int>());
                 addMask(std::move(mask));
             }
         }
@@ -327,6 +327,8 @@ namespace engine
 
         maskData.alpha = mask->mAlphaThreshold;
         maskData.maskTextureIndex = mTexturePool.addTexture(*mask->mMaskTexture);
+        maskData.passthroughFlags = static_cast<uint32_t>(mask->mPassThroughFlags);
+        maskData.maskOp = static_cast<uint32_t>(mask->mMaskOperation);
 
         mMasks.push_back(std::move(mask));
 

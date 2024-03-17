@@ -26,12 +26,18 @@ namespace engine
         typedef std::function<void(graphics::TexturePool&, graphics::MaskData&)> UpdateFunc;
     public:
         UberMask() = default;
+
+        void drawPassthroughOptions();
+
+        void drawOperationOptions();
+
         void onDrawUi() override;
 
     protected:
         std::shared_ptr<Texture> mMaskTexture = std::make_shared<Texture>("");
         float mAlphaThreshold = 0;
         graphics::PassthroughFlags mPassThroughFlags = graphics::PassthroughFlags::None;
+        graphics::MaskOp mMaskOperation = graphics::MaskOp::Threshold;
         std::vector<UpdateFunc> mMaskUpdates;
     };
 }

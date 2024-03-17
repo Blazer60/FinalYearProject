@@ -12,10 +12,21 @@
 
 namespace graphics
 {
+    constexpr uint8_t maskOpCount = 2;
     enum class MaskOp : uint8_t
     {
-        Lerp, HeaveSide,
+        Lerp, Threshold,
     };
+
+    inline std::string to_string(const MaskOp maskOp)
+    {
+        switch (maskOp)
+        {
+            case MaskOp::Lerp: return "Lerp";
+            case MaskOp::Threshold: return "Threshold";
+            default: return "unknown";
+        }
+    }
 
     constexpr uint8_t passthroughFlagCount = 6;
     enum class PassthroughFlags : uint8_t
@@ -66,6 +77,7 @@ namespace graphics
         float alpha = 0.5f;
         int32_t maskTextureIndex = -1;
         uint32_t passthroughFlags = 0;
+        uint32_t maskOp = 0;
     };
 
     struct TextureData
