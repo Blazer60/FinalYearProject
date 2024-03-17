@@ -73,7 +73,7 @@ namespace debug
     void Logger::logToQueue(std::string_view message, const char file[], int line, Severity severity)
     {
         if ((sources & OutputSourceFlag_Queue))
-            messages.emplace_back(Message { line, severity, std::string(file), std::string(message) });
+            messages.emplace_back(Message { line, severity, std::filesystem::path(file), std::string(message) });
     }
 
     void Logger::openglCallBack(

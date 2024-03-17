@@ -33,13 +33,17 @@ namespace engine
             ImGui::SameLine();
             ImGui::Checkbox("Show Errors", &mShowErrors);
             ImGui::SameLine();
+            ImGui::Checkbox("Show Verbose", &mShowVerbose);
+            ImGui::SameLine();
             ImGui::Checkbox("Collapse", &mCollapse);
             ui::drawToolTip("Messages from the same source are collapsed into one message. If ticked, only the most recent message is shown.");
 
             mUniqueMessages.clear();
 
-            if (ImGui::BeginTable("Log Table", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable))
+            if (ImGui::BeginTable("Log Table", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable))
             {
+                ImGui::TableSetupColumn("Line");
+                ImGui::TableSetupColumn("File");
                 ImGui::TableSetupColumn("Severity");
                 ImGui::TableSetupColumn("Details");
                 ImGui::TableHeadersRow();
@@ -60,7 +64,7 @@ namespace engine
     
     void LogWindow::drawMessageUi(const debug::Message &message)
     {
-        const std::string id = std::to_string(message.line) + message.file;
+        const std::string id = std::to_string(message.line) + message.file.string();
         if (mCollapse)
         {
             if (mUniqueMessages.count(id) > 0)
@@ -69,11 +73,17 @@ namespace engine
         
         if (message.severity == debug::Severity_Notification && mShowNotifications ||
             message.severity == debug::Severity_Warning && mShowWarnings ||
-            ((message.severity & debug::Severity_Error) > 0 && mShowErrors))
+            ((message.severity & debug::Severity_Error) > 0 && mShowErrors) ||
+            (message.severity & debug::Severity_Verbose) > 0 && mShowVerbose)
         {
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
             ImGui::PushStyleColor(ImGuiCol_Text, getSeverityColour(message.severity));
+            ImGui::Text("%i", message.line);
+            ImGui::TableNextColumn();
+            const std::string fileName = message.file.filename().string();
+            ImGui::Text("%s", fileName.c_str());
+            ImGui::TableNextColumn();
             ImGui::Text("%s", debug::logger->toStringView(message.severity).data());
             ImGui::TableNextColumn();
             ImGui::Text("%s", message.message.c_str());
@@ -96,6 +106,8 @@ namespace engine
             case debug::Severity_Minor:
             case debug::Severity_Major:
                 return mErrorColour;
+            case debug::Severity_Verbose:
+                return mVerboseColour;
         }
     }
 }

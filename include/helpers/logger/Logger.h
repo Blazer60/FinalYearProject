@@ -23,13 +23,14 @@ namespace debug
     typedef int Severity;
     enum Severity_
     {
-        Severity_Unknown        = 0b000001,
-        Severity_Notification   = 0b000010,
-        Severity_Warning        = 0b000100,
-        Severity_Minor          = 0b001000,
-        Severity_Major          = 0b010000,
-        Severity_Fatal          = 0b100000,
-        Severity_Error          = 0b111000,
+        Severity_Unknown        = 0b0000001,
+        Severity_Notification   = 0b0000010,
+        Severity_Warning        = 0b0000100,
+        Severity_Minor          = 0b0001000,
+        Severity_Major          = 0b0010000,
+        Severity_Fatal          = 0b0100000,
+        Severity_Error          = 0b0111000,
+        Severity_Verbose        = 0b1000000,
     };
     
     enum OutputSourceFlag_
@@ -53,7 +54,7 @@ namespace debug
     {
         int         line;
         Severity    severity;
-        std::string file;
+        std::filesystem::path file;
         std::string message;
     };
     
@@ -156,6 +157,7 @@ namespace debug
             { Severity_Major,          "Major" },
             { Severity_Fatal,          "Fatal" },
             { Severity_Unknown,        "Unknown" },
+            { Severity_Verbose,        "Verbose" }
         };
         
         const std::unordered_map<GLenum, std::string_view> glSourceMap {

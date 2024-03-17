@@ -32,11 +32,13 @@ namespace engine
         bool mShowNotifications { true };
         bool mShowWarnings      { true };
         bool mShowErrors        { true };
-        bool mCollapse          { true };
+        bool mShowVerbose       { false };
+        bool mCollapse          { false };
         
         ImVec4 mNotificationColour  { 1.f, 1.f, 1.f, 1.f };
         ImVec4 mWarningColour       { 1.f, 1.f, 0.f, 1.f };
         ImVec4 mErrorColour         { 1.f, 0.4f, 0.4f, 1.f };
+        ImVec4 mVerboseColour       { 0.26f, 0.53f, 0.96f, 1.f };
         
         std::unordered_set<std::string> mUniqueMessages;
     };
