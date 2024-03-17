@@ -43,9 +43,9 @@ namespace graphics
     {
     public:
         LightShadingPass();
-        void execute(const glm::ivec2 &size, Context &context, const Lut &lut, const std::vector<DirectionalLight> &directionalLightQueue);
-        void execute(const glm::ivec2 &size, Context &context, const Lut &lut, const std::vector<PointLight> &pointLightQueue);
-        void execute(const glm::ivec2 &size, Context &context, const Lut &lut, const std::vector<Spotlight> &spotLightQueue);
+        void execute(Context &context, const Lut &lut, const std::vector<DirectionalLight> &directionalLightQueue);
+        void execute(Context &context, const Lut &lut, const std::vector<PointLight> &pointLightQueue);
+        void execute(Context&context, const Lut&lut, const std::vector<Spotlight>&spotLightQueue);
         void execute(Context &context, const Lut &lut, const Skybox &skybox);
     protected:
         void generateIblShaderVariants(const std::filesystem::path &path);

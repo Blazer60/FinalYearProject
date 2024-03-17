@@ -18,6 +18,9 @@ namespace graphics
         const std::vector<GeometryObject> &singleGeometryQueue,
         std::vector<PointLight> &pointLightQueue)
     {
+        if (pointLightQueue.empty())
+            return;
+
         PROFILE_FUNC();
         pushDebugGroup("Point Light Shadow Mapping");
         mFramebuffer.bind();
@@ -78,6 +81,9 @@ namespace graphics
         const std::vector<GeometryObject> &singleGeometryQueue,
         const std::vector<Spotlight> &spotlightQueue)
     {
+        if (spotlightQueue.empty())
+            return;
+
         PROFILE_FUNC();
         pushDebugGroup("Spotlight Shadow Mapping");
 
@@ -128,6 +134,9 @@ namespace graphics
         const std::vector<GeometryObject> &singleGeometryQueue,
         std::vector<DirectionalLight> &directionalLightQueue)
     {
+        if (directionalLightQueue.empty())
+            return;
+
         PROFILE_FUNC();
         pushDebugGroup("Directional Light Shadow Mapping");
         const auto resize = [](const glm::vec4 &vec) { return vec / vec.w; };
@@ -137,7 +146,6 @@ namespace graphics
 
         for (DirectionalLight &directionalLight : directionalLightQueue)
         {
-            PROFILE_SCOPE_BEGIN(lightTimer, "Directional Light Shadow Mapping");
             directionalLight.cascadeDepths.clear();
             directionalLight.cascadeDepths.reserve(directionalLight.shadowCascadeMultipliers.size());
             for (const auto &multiplier : directionalLight.shadowCascadeMultipliers)
@@ -155,7 +163,6 @@ namespace graphics
 
             for (int j = 0; j < directionalLight.shadowMap->getLayerCount(); ++j)
             {
-                PROFILE_SCOPE_BEGIN(shadowCreation, "Cascade Pass");
                 pushDebugGroup("Cascade Pass");
 
                 mFramebuffer.attachDepthBuffer(*directionalLight.shadowMap, j);
@@ -235,12 +242,10 @@ namespace graphics
                 }
 
                 mFramebuffer.detachDepthBuffer();
-                PROFILE_SCOPE_END(shadowCreation);
                 popDebugGroup();
             }
 
             popDebugGroup();
-            PROFILE_SCOPE_END(lightTimer);
         }
 
         popDebugGroup();

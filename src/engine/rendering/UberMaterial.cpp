@@ -120,8 +120,6 @@ namespace engine
 
     void UberMaterial::onPreRender()
     {
-        PROFILE_FUNC();
-
         if (mData.layers.size() != mLayers.size())
             ERROR("Size missmatch");
 

@@ -41,9 +41,11 @@ namespace graphics
         }
     }
 
-    void LightShadingPass::execute(
-        const glm::ivec2& size, Context& context, const Lut &lut, const std::vector<DirectionalLight>& directionalLightQueue)
+    void LightShadingPass::execute(Context& context, const Lut &lut, const std::vector<DirectionalLight>& directionalLightQueue)
     {
+        if (directionalLightQueue.empty())
+            return;
+
         PROFILE_FUNC();
         pushDebugGroup("Directional Lighting");
 
@@ -84,8 +86,11 @@ namespace graphics
         popDebugGroup();
     }
 
-    void LightShadingPass::execute(const glm::ivec2& size, Context& context, const Lut &lut, const std::vector<PointLight>& pointLightQueue)
+    void LightShadingPass::execute(Context& context, const Lut &lut, const std::vector<PointLight>& pointLightQueue)
     {
+        if (pointLightQueue.empty())
+            return;
+
         PROFILE_FUNC();
         pushDebugGroup("Point Lighting");
 
@@ -126,8 +131,11 @@ namespace graphics
         popDebugGroup();
     }
 
-    void LightShadingPass::execute(const glm::ivec2& size, Context& context, const Lut &lut, const std::vector<Spotlight>& spotLightQueue)
+    void LightShadingPass::execute(Context&context, const Lut&lut, const std::vector<Spotlight>&spotLightQueue)
     {
+        if (spotLightQueue.empty())
+            return;
+
         PROFILE_FUNC();
         pushDebugGroup("Spot lighting");
 
@@ -145,8 +153,6 @@ namespace graphics
             shader.image("storageGBuffer", context.gbuffer.getId(), context.gbuffer.getFormat(), 0, true, GL_READ_ONLY);
             shader.image("lighting", context.lightBuffer.getId(), context.lightBuffer.getFormat(), 1, false, GL_READ_WRITE);
             callback(shader, context, lut);
-
-            const auto threadGroupSize = glm::ivec2(ceil(glm::vec2(size) / glm::vec2(16)));
 
             for (const Spotlight &spotLight : spotLightQueue)
             {

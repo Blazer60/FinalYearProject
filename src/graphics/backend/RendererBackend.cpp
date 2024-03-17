@@ -71,9 +71,9 @@ namespace graphics
             mContext.lightBuffer.resize(window::bufferSize());
             mContext.lightBuffer.clear();
 
-            mLightShading.execute(window::bufferSize(), mContext, mPrecalcs, mDirectionalLightQueue);
-            mLightShading.execute(window::bufferSize(), mContext, mPrecalcs, mPointLightQueue);
-            mLightShading.execute(window::bufferSize(), mContext, mPrecalcs, mSpotlightQueue);
+            mLightShading.execute(mContext, mPrecalcs, mDirectionalLightQueue);
+            mLightShading.execute(mContext, mPrecalcs, mPointLightQueue);
+            mLightShading.execute(mContext, mPrecalcs, mSpotlightQueue);
             mLightShading.execute(mContext, mPrecalcs, mSkybox);
 
             mSkyboxPass.execute(window::bufferSize(), mContext, mSkybox);
