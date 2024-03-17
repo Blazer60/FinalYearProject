@@ -14,8 +14,9 @@
 namespace graphics
 {
     void ShadowMappingPass::execute(
-        const std::vector<RenderQueueObject>& renderQueue,
-        std::vector<PointLight>& pointLightQueue)
+        const std::vector<GeometryObject> &multiGeometryQueue,
+        const std::vector<GeometryObject> &singleGeometryQueue,
+        std::vector<PointLight> &pointLightQueue)
     {
         PROFILE_FUNC();
         pushDebugGroup("Point Light Shadow Mapping");
@@ -39,15 +40,26 @@ namespace graphics
                 mFramebuffer.attachDepthBuffer(shadowMap, viewIndex, 0);
                 mFramebuffer.clearDepthBuffer();
 
-                for (const auto &rqo : renderQueue)
+                for (const auto &geometry : multiGeometryQueue)
                 {
-                    const glm::mat4 &modelMatrix = rqo.matrix;
+                    const glm::mat4 &modelMatrix = geometry.matrix;
                     const glm::mat4 mvp = pointLight.vpMatrices[viewIndex] * modelMatrix;
                     mPointLightShadowShader.set("u_model_matrix", modelMatrix);
                     mPointLightShadowShader.set("u_mvp_matrix", mvp);
 
-                    glBindVertexArray(rqo.vao);
-                    glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
+                    glBindVertexArray(geometry.vao);
+                    glDrawElements(GL_TRIANGLES, geometry.indicesCount, GL_UNSIGNED_INT, nullptr);
+                }
+
+                for (const auto &geometry : singleGeometryQueue)
+                {
+                    const glm::mat4 &modelMatrix = geometry.matrix;
+                    const glm::mat4 mvp = pointLight.vpMatrices[viewIndex] * modelMatrix;
+                    mPointLightShadowShader.set("u_model_matrix", modelMatrix);
+                    mPointLightShadowShader.set("u_mvp_matrix", mvp);
+
+                    glBindVertexArray(geometry.vao);
+                    glDrawElements(GL_TRIANGLES, geometry.indicesCount, GL_UNSIGNED_INT, nullptr);
                 }
 
                 mFramebuffer.detachDepthBuffer();
@@ -62,7 +74,9 @@ namespace graphics
     }
 
     void ShadowMappingPass::execute(
-        const std::vector<RenderQueueObject>& renderQueue, const std::vector<Spotlight>& spotlightQueue)
+        const std::vector<GeometryObject> &multiGeometryQueue,
+        const std::vector<GeometryObject> &singleGeometryQueue,
+        const std::vector<Spotlight> &spotlightQueue)
     {
         PROFILE_FUNC();
         pushDebugGroup("Spotlight Shadow Mapping");
@@ -82,14 +96,24 @@ namespace graphics
             mSpotlightShadowShader.set("u_light_pos", spotlight.position);
             mSpotlightShadowShader.set("u_z_far", spotlight.radius);
 
-            for (const auto &rqo : renderQueue)
+            for (const auto &rqo : multiGeometryQueue)
             {
                 const glm::mat4 mvpMatrix = vpMatrix * rqo.matrix;
                 mSpotlightShadowShader.set("u_mvp_matrix", mvpMatrix);
                 mSpotlightShadowShader.set("u_model_matrix", rqo.matrix);
 
                 glBindVertexArray(rqo.vao);
-                glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
+                glDrawElements(GL_TRIANGLES, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
+            }
+
+            for (const auto &rqo : singleGeometryQueue)
+            {
+                const glm::mat4 mvpMatrix = vpMatrix * rqo.matrix;
+                mSpotlightShadowShader.set("u_mvp_matrix", mvpMatrix);
+                mSpotlightShadowShader.set("u_model_matrix", rqo.matrix);
+
+                glBindVertexArray(rqo.vao);
+                glDrawElements(GL_TRIANGLES, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
             }
 
             mFramebuffer.detachDepthBuffer();
@@ -99,9 +123,10 @@ namespace graphics
     }
 
     void ShadowMappingPass::execute(
-        const CameraSettings& camera,
-        const std::vector<RenderQueueObject> &renderQueue,
-        std::vector<DirectionalLight>& directionalLightQueue)
+        const CameraSettings &camera,
+        const std::vector<GeometryObject> &multiGeometryQueue,
+        const std::vector<GeometryObject> &singleGeometryQueue,
+        std::vector<DirectionalLight> &directionalLightQueue)
     {
         PROFILE_FUNC();
         pushDebugGroup("Directional Light Shadow Mapping");
@@ -189,14 +214,24 @@ namespace graphics
 
                 directionalLight.vpMatrices.emplace_back(lightProjectionMatrix * lightViewMatrix);
 
-                for (const auto &rqo : renderQueue)
+                for (const auto &rqo : multiGeometryQueue)
                 {
                     const glm::mat4 &modelMatrix = rqo.matrix;
                     const glm::mat4 mvp = lightProjectionMatrix * lightViewMatrix * modelMatrix;
                     mDirectionalLightShadowShader.set("u_mvp_matrix", mvp);
 
                     glBindVertexArray(rqo.vao);
-                    glDrawElements(rqo.drawMode, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
+                    glDrawElements(GL_TRIANGLES, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
+                }
+
+                for (const auto &rqo : singleGeometryQueue)
+                {
+                    const glm::mat4 &modelMatrix = rqo.matrix;
+                    const glm::mat4 mvp = lightProjectionMatrix * lightViewMatrix * modelMatrix;
+                    mDirectionalLightShadowShader.set("u_mvp_matrix", mvp);
+
+                    glBindVertexArray(rqo.vao);
+                    glDrawElements(GL_TRIANGLES, rqo.indicesCount, GL_UNSIGNED_INT, nullptr);
                 }
 
                 mFramebuffer.detachDepthBuffer();

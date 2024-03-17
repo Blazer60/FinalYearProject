@@ -32,15 +32,17 @@ namespace graphics
 
     void RendererBackend::copyQueues(Queues &&queues)
     {
-        mRenderQueue = std::move(queues.renderQueue);
         mCameraQueue = std::move(queues.cameraQueue);
         mDirectionalLightQueue = std::move(queues.directionalLightQueue);
         mPointLightQueue = std::move(queues.pointLightQueue);
         mSpotlightQueue = std::move(queues.spotlightQueue);
         mDebugQueue = std::move(queues.debugQueue);
         mLineQueue = std::move(queues.lineQueue);
-        mGeometryQueue = std::move(queues.geometryQueue);
-        mMaterialQueue = std::move(queues.materialQueue);
+        mMultiGeometryQueue = std::move(queues.multiMaterialGeometryQueue);
+        mMultiMaterialQueue = std::move(queues.multiMaterialQueue);
+
+        mSingleGeometryQueue = std::move(queues.singleMaterialGeometryQueue);
+        mSingleMaterialQueue = std::move(queues.singleMaterialQueue);
     }
 
     void RendererBackend::execute()
@@ -48,8 +50,8 @@ namespace graphics
         PROFILE_FUNC();
         pushDebugGroup("Render Pass");
 
-        mShadowMapping.execute(mRenderQueue, mPointLightQueue);
-        mShadowMapping.execute(mRenderQueue, mSpotlightQueue);
+        mShadowMapping.execute(mMultiGeometryQueue, mSingleGeometryQueue, mPointLightQueue);
+        mShadowMapping.execute(mMultiGeometryQueue, mSingleGeometryQueue, mSpotlightQueue);
 
         // Reset the viewport back to the normal size once we've finished rendering all the shadows.
         glViewport(0, 0, window::bufferSize().x, window::bufferSize().y);
@@ -58,10 +60,13 @@ namespace graphics
         {
             setupCurrentCamera(camera);
 
-            // mMaterialRendering.execute(window::bufferSize(), mContext, mRenderQueue);
-            mMaterialRendering.execute(window::bufferSize(), mContext, mGeometryQueue, mMaterialQueue);
+            mMaterialRendering.execute(
+                window::bufferSize(), mContext,
+                mMultiGeometryQueue, mMultiMaterialQueue,
+                mSingleGeometryQueue, mSingleMaterialQueue);
+
             mTileClassification.execute(window::bufferSize(), mContext);
-            mShadowMapping.execute(camera, mRenderQueue, mDirectionalLightQueue);
+            mShadowMapping.execute(camera, mMultiGeometryQueue, mSingleGeometryQueue, mDirectionalLightQueue);
 
             mContext.lightBuffer.resize(window::bufferSize());
             mContext.lightBuffer.clear();

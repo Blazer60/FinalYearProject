@@ -55,54 +55,21 @@ Renderer::~Renderer()
 void Renderer::drawMesh(
     const uint32_t vao, int32_t indiciesCount, const glm::mat4& matrix, const graphics::MaterialData& material)
 {
-    mGeometryQueue.emplace_back(vao, indiciesCount, matrix);
-    mMaterialQueue.push_back(material);
+    if (!material.masks.empty() && material.layers.size() > 1)
+    {
+        mMultiMaterialGeometryQueue.emplace_back(vao, indiciesCount, matrix);
+        mMultiMaterialQueue.push_back(material);
+    }
+    else
+    {
+        mSingleMaterialGeometryQueue.emplace_back(vao, indiciesCount, matrix);
+        mSingleMaterialQueue.push_back(material);
+    }
 }
 
 void Renderer::drawMesh(const SubMesh& surface, const glm::mat4& matrix, const graphics::MaterialData& material)
 {
     drawMesh(surface.vao(), surface.indicesCount(), matrix, material);
-}
-
-void Renderer::drawMesh(
-    const uint32_t vao, const int32_t indicesCount, std::weak_ptr<Shader> shader,
-    graphics::drawMode renderMode, const glm::mat4 &matrix,
-    const graphics::DrawCallback &onDraw)
-{
-    if (shader.expired())
-        WARN("A mesh was submitted with no shader. Was this intentional?");
-    
-    static GLenum drawModeToGLenum[] { GL_TRIANGLES, GL_LINES };
-    const GLenum mode = drawModeToGLenum[static_cast<int>(renderMode)];
-    mRenderQueue.emplace_back(graphics::RenderQueueObject { vao, indicesCount, std::move(shader), mode, matrix, onDraw });
-}
-
-void Renderer::drawMesh(const SubMesh &subMesh, Material &material, const glm::mat4 &matrix)
-{
-    drawMesh(
-        subMesh.vao(), subMesh.indicesCount(), material.shader(), material.drawMode(), matrix,
-        [&]() { material.onDraw(); }
-    );
-}
-
-void Renderer::drawMesh(const SharedMesh &mesh, const SharedMaterials &materials, const glm::mat4 &matrix)
-{
-    if (materials.size() == 1)
-    {
-        Material& material = *materials[0];
-        
-        for (const auto &subMesh : *mesh)
-            drawMesh(*subMesh, material, matrix);
-    }
-    else
-    {
-        for (int i = 0; i < mesh->size(); ++i)
-        {
-            SubMesh& subMesh = *(*mesh)[i];
-            Material& material = *materials[glm::min(i, static_cast<int>((materials.size() - 1)))];
-            drawMesh(subMesh, material, matrix);
-        }
-    }
 }
 
 void Renderer::drawDebugMesh(const uint32_t vao, const int32_t indicesCount, const glm::mat4& matrix, const glm::vec3& colour)
@@ -156,56 +123,34 @@ void Renderer::render() const
         return;
 
     mRendererBackend->copyQueues({
-        mRenderQueue,
         mCameraQueue,
         mDirectionalLightQueue,
         mPointLightQueue,
         mSpotlightQueue,
         mDebugQueue,
         mLineQueue,
-        mGeometryQueue,
-        mMaterialQueue
+        mMultiMaterialGeometryQueue,
+        mMultiMaterialQueue,
+        mSingleMaterialGeometryQueue,
+        mSingleMaterialQueue,
     });
     mRendererBackend->execute();
 }
 
 void Renderer::clear()
 {
-    const uint64_t renderQueueCount = mRenderQueue.size();
-    mRenderQueue.clear();
-    mRenderQueue.reserve(renderQueueCount);
-
-    const uint64_t cameraCount = mCameraQueue.size();
     mCameraQueue.clear();
-    mCameraQueue.reserve(cameraCount);
-
-    const uint64_t directionalLightCount = mDirectionalLightQueue.size();
     mDirectionalLightQueue.clear();
-    mDirectionalLightQueue.reserve(directionalLightCount);
-
-    const uint64_t pointLightCount = mPointLightQueue.size();
     mPointLightQueue.clear();
-    mPointLightQueue.reserve(pointLightCount);
-
-    const uint64_t spotLightCount = mSpotlightQueue.size();
     mSpotlightQueue.clear();
-    mSpotlightQueue.reserve(spotLightCount);
-
-    const uint64_t debugQueueCount = mDebugQueue.size();
     mDebugQueue.clear();
-    mDebugQueue.reserve(debugQueueCount);
-
-    const uint64_t lineQueueCount = mLineQueue.size();
     mLineQueue.clear();
-    mLineQueue.reserve(lineQueueCount);
 
-    const uint64_t geometryCount = mGeometryQueue.size();
-    mGeometryQueue.clear();
-    mGeometryQueue.reserve(geometryCount);
+    mMultiMaterialGeometryQueue.clear();
+    mMultiMaterialQueue.clear();
 
-    const uint64_t materialCount = mMaterialQueue.size();
-    mMaterialQueue.clear();
-    mMaterialQueue.reserve(materialCount);
+    mSingleMaterialGeometryQueue.clear();
+    mSingleMaterialQueue.clear();
 }
 
 void Renderer::generateSkybox(const std::string_view path, const glm::ivec2 desiredSize) const

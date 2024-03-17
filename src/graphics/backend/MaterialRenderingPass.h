@@ -1,5 +1,5 @@
 /**
- * @file MaterialRendering.h
+ * @file MaterialRenderingPass.h
  * @author Ryan Purse
  * @date 09/03/2024
  */
@@ -23,12 +23,32 @@ namespace graphics
     class MaterialRenderingPass
     {
     public:
-        void execute(const glm::ivec2 &size, Context &context, const std::vector<RenderQueueObject> &renderQueue);
-        void execute(const glm::ivec2 &size, Context &context, const std::vector<GeometryObject> &geometryQueue, const std::vector<MaterialData> &materials);
+        void execute(
+            const glm::ivec2 &size, Context &context,
+            const std::vector<GeometryObject>&multiGeometryQueue, const std::vector<MaterialData>&multiMaterialQueue,
+            const std::vector<GeometryObject>&singleGeometryQueue, const std::vector<MaterialData>&singleMaterialQueue);
     protected:
+        void executeMultiMaterial(
+            const Context& context,
+            const std::vector<GeometryObject>& geometryQueue, const std::vector<MaterialData>& materials);
+
+        void executeSingleMaterial(
+            const Context &context,
+            const std::vector<GeometryObject>& geometryQueue, const std::vector<MaterialData>& materials);
+
         FramebufferObject mFramebuffer = FramebufferObject(GL_ONE, GL_ZERO, GL_LESS);
 
-        Shader mMaterialShader {
+        Shader mMultiMaterialShader {
+            {
+                file::shaderPath() / "geometry/standard/Standard.vert",
+                file::shaderPath() / "geometry/standard/MultiMaterial.frag"
+            },
+            {
+                { "FRAGMENT_OUTPUT", 1 }
+            }
+        };
+
+        Shader mSingleMaterialShader {
             {
                 file::shaderPath() / "geometry/standard/Standard.vert",
                 file::shaderPath() / "geometry/standard/Material.frag"

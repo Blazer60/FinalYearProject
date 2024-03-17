@@ -23,7 +23,6 @@ namespace graphics
 {
     struct Queues
     {
-        std::vector<RenderQueueObject> renderQueue;
         std::vector<CameraSettings> cameraQueue;
         std::vector<DirectionalLight> directionalLightQueue;
         std::vector<PointLight> pointLightQueue;
@@ -31,8 +30,11 @@ namespace graphics
         std::vector<DebugQueueObject> debugQueue;
         std::vector<LineQueueObject> lineQueue;
 
-        std::vector<GeometryObject> geometryQueue;
-        std::vector<MaterialData> materialQueue;
+        std::vector<GeometryObject> multiMaterialGeometryQueue;
+        std::vector<MaterialData> multiMaterialQueue;
+
+        std::vector<GeometryObject> singleMaterialGeometryQueue;
+        std::vector<MaterialData> singleMaterialQueue;
     };
 
     /**
@@ -71,7 +73,6 @@ namespace graphics
         SkyboxPass mSkyboxPass;
         DebugPass mDebugPass;
 
-        std::vector<RenderQueueObject> mRenderQueue;
         std::vector<CameraSettings> mCameraQueue;
         std::vector<DirectionalLight> mDirectionalLightQueue;
         std::vector<PointLight> mPointLightQueue;
@@ -79,7 +80,10 @@ namespace graphics
         std::vector<DebugQueueObject> mDebugQueue;
         std::vector<LineQueueObject> mLineQueue;
 
-        std::vector<GeometryObject> mGeometryQueue;
-        std::vector<MaterialData> mMaterialQueue;
+        std::vector<GeometryObject> mMultiGeometryQueue;
+        std::vector<MaterialData> mMultiMaterialQueue;
+
+        std::vector<GeometryObject> mSingleGeometryQueue;
+        std::vector<MaterialData> mSingleMaterialQueue;
     };
 } // graphics

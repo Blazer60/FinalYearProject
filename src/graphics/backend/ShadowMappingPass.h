@@ -23,12 +23,20 @@ namespace graphics
     class ShadowMappingPass
     {
     public:
-        void execute(const std::vector<RenderQueueObject> &renderQueue, std::vector<PointLight> &pointLightQueue);
-        void execute(const std::vector<RenderQueueObject> &renderQueue, const std::vector<Spotlight> &spotlightQueue);
+        void execute(
+            const std::vector<GeometryObject> &multiGeometryQueue,
+            const std::vector<GeometryObject> &singleGeometryQueue,
+            std::vector<PointLight> &pointLightQueue);
+
+        void execute(
+            const std::vector<GeometryObject> &multiGeometryQueue,
+            const std::vector<GeometryObject> &singleGeometryQueue,
+            const std::vector<Spotlight> &spotlightQueue);
 
         void execute(
             const CameraSettings &camera,
-            const std::vector<RenderQueueObject> &renderQueue,
+            const std::vector<GeometryObject> &multiGeometryQueue,
+            const std::vector<GeometryObject> &singleGeometryQueue,
             std::vector<DirectionalLight> &directionalLightQueue);
 
     protected:

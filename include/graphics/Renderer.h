@@ -53,37 +53,6 @@ public:
     void drawMesh(const SubMesh &surface, const glm::mat4 &matrix, const graphics::MaterialData &material);
 
     /**
-     * @brief Draws an element to the geometry buffer.
-     * @param vao - Vertex Array Object.
-     * @param indicesCount - The number of indices that make up the geometry.
-     * @param shader - The shader used to drawUi the element to the geometry buffer.
-     * @param renderMode - What primitive to use when rendering.
-     * @param matrix - The model matrix for this object (used for shadow mapping).
-     * @param onDraw - An event callback that is called just before rendering.
-     */
-    void drawMesh(
-        uint32_t vao, int32_t indicesCount, std::weak_ptr<Shader> shader,
-        graphics::drawMode renderMode, const glm::mat4 &matrix,
-        const graphics::DrawCallback &onDraw);
-
-    /**
-     * @brief Draws an element to the geometry buffer.
-     * @param subMesh - The mesh that you want to be drawn.
-     * @param material - The material (shader) used to drawUi the mesh.
-     * @param matrix - The model's matrix (used for shadow mapping).
-     */
-    void drawMesh(const SubMesh &subMesh, Material &material, const glm::mat4 &matrix);
-
-    /**
-     * @brief Draws a number of meshes to the geometry buffer with the same model matrix.
-     * @param mesh - N sub-meshes that you want to be drawn to the geometry buffer.
-     * @param materials - N materials used to drawUi each mesh. If the material count is one, then only that material
-     * will be used.
-     * @param matrix - the model's matrix (used for shadow mapping).
-     */
-    void drawMesh(const SharedMesh &mesh, const SharedMaterials &materials, const glm::mat4 &matrix);
-
-    /**
      * @brief Draws an element to the debug buffer.
      * @param vao - Vertex Array Object.
      * @param indicesCount - The number of indices that make up the geometry.
@@ -186,7 +155,6 @@ public:
     void setUseUberVariant(bool useUber) const;
 
 protected:
-    std::vector<graphics::RenderQueueObject> mRenderQueue;
     std::vector<CameraSettings>              mCameraQueue;
     std::vector<graphics::DirectionalLight>  mDirectionalLightQueue;
     std::vector<graphics::PointLight>        mPointLightQueue;
@@ -194,8 +162,11 @@ protected:
     std::vector<graphics::DebugQueueObject>  mDebugQueue;
     std::vector<graphics::LineQueueObject>   mLineQueue;
 
-    std::vector<graphics::GeometryObject>    mGeometryQueue;
-    std::vector<graphics::MaterialData>      mMaterialQueue;
+    std::vector<graphics::GeometryObject>    mMultiMaterialGeometryQueue;
+    std::vector<graphics::MaterialData>      mMultiMaterialQueue;
+
+    std::vector<graphics::GeometryObject>    mSingleMaterialGeometryQueue;
+    std::vector<graphics::MaterialData>      mSingleMaterialQueue;
 
     SubMesh mFullscreenTriangle;
 
