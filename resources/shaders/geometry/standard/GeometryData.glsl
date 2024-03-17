@@ -15,10 +15,18 @@ struct LayerData
     int sheenRoughnessTextureIndex;
 };
 
+#define PASSTHROUGH_FLAG_DIFFUSE 1
+#define PASSTHROUGH_FLAG_SPECULAR 2
+#define PASSTHROUGH_FLAG_NORMAL 4
+#define PASSTHROUGH_FLAG_ROUGHNESS 8
+#define PASSTHROUGH_FLAG_SHEEN 16
+#define PASSTHROUGH_FLAG_SHEEN_ROUGHNESS 32
+
 struct MaskData
 {
     float alpha;
     int textureIndex;
+    uint passthroughFlags;
 };
 
 struct TextureData

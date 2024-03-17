@@ -31,7 +31,7 @@ namespace engine
     protected:
         std::shared_ptr<Texture> mMaskTexture = std::make_shared<Texture>("");
         float mAlphaThreshold = 0;
-
+        graphics::PassthroughFlags mPassThroughFlags = graphics::PassthroughFlags::None;
         std::vector<UpdateFunc> mMaskUpdates;
     };
 }

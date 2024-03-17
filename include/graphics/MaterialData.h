@@ -12,6 +12,38 @@
 
 namespace graphics
 {
+    enum class MaskOp : uint8_t
+    {
+        Lerp, HeaveSide,
+    };
+
+    constexpr uint8_t passthroughFlagCount = 6;
+    enum class PassthroughFlags : uint8_t
+    {
+        None = 0,
+        Diffuse = 1 << 0,
+        Specular = 1 << 1,
+        Normal = 1 << 2,
+        Roughness = 1 << 3,
+        SheenColour = 1 << 4,
+        SheenRoughness = 1 << 5,
+    };
+
+    inline std::string to_string(const PassthroughFlags flag)
+    {
+        switch (flag)
+        {
+            case PassthroughFlags::None: return "None";
+            case PassthroughFlags::Diffuse: return "Diffuse";
+            case PassthroughFlags::Specular: return "Specular";
+            case PassthroughFlags::Normal: return "Normal";
+            case PassthroughFlags::Roughness: return "Roughness";
+            case PassthroughFlags::SheenColour: return "Sheen Colour";
+            case PassthroughFlags::SheenRoughness: return "Sheen Roughness";
+            default: return "unknown";
+        }
+    }
+
     struct LayerData
     {
         glm::vec4 diffuseColour = glm::vec4(0.8f, 0.8f, 0.8f, 1.f);
@@ -33,6 +65,7 @@ namespace graphics
     {
         float alpha = 0.5f;
         int32_t maskTextureIndex = -1;
+        uint32_t passthroughFlags = 0;
     };
 
     struct TextureData

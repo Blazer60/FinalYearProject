@@ -103,6 +103,7 @@ namespace engine
                 out << YAML::BeginMap;
                 out << YAML::Key << "Texture" << YAML::Value << file::makeRelativeToResourcePath(mask->mMaskTexture->path()).string();
                 out << YAML::Key << "Alpha" << YAML::Value << mask->mAlphaThreshold;
+                out << YAML::Key << "Passthrough" << YAML::Value << static_cast<unsigned int>(mask->mPassThroughFlags);
                 out << YAML::EndMap;
             }
         }
@@ -182,6 +183,11 @@ namespace engine
                 {
                     const float alpha = alphaNode.as<float>();
                     mask->mAlphaThreshold = alpha;
+                }
+                if (const YAML::Node flagsNode = maskNode["Passthrough"]; flagsNode.IsDefined())
+                {
+                    const auto flags = static_cast<graphics::PassthroughFlags>(flagsNode.as<unsigned int>());
+                    mask->mPassThroughFlags = flags;
                 }
                 addMask(std::move(mask));
             }

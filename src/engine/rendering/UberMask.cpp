@@ -42,6 +42,24 @@ namespace engine
 
             ImGui::EndTable();
         }
+
+        ImGui::SeparatorText("Parameter passthrough");
+        auto flagCheckbox = [](graphics::PassthroughFlags &flags, graphics::PassthroughFlags flag) {
+            const std::string name = graphics::to_string(flag);
+            return ImGui::CheckboxFlags(name.c_str(), reinterpret_cast<unsigned int*>(&flags), static_cast<unsigned int>(flag));
+        };
+
+        bool hasFlagUpdated = false;
+        for (int i = 0; i < graphics::passthroughFlagCount; ++i)
+            hasFlagUpdated |= flagCheckbox(mPassThroughFlags, static_cast<graphics::PassthroughFlags>(1 << i));
+
+        if (hasFlagUpdated)
+        {
+            mMaskUpdates.push_back([this](graphics::TexturePool &, graphics::MaskData &mask) {
+                mask.passthroughFlags = static_cast<uint32_t>(mPassThroughFlags);
+            });
+        }
+
         ImGui::PopID();
     }
 }

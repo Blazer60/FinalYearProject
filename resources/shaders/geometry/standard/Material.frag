@@ -66,6 +66,24 @@ vec3 sampleNormal(vec3 normal, vec2 uv, int index)
     return normalize(v_tbn_matrix * (2.f * textureNormal - vec3(1.f)));
 }
 
+vec3 blend(vec3 a, vec3 b, float alpha, bool passthrough)
+{
+    if (passthrough)
+    {
+        return a;
+    }
+    return mix(a, b, alpha);
+}
+
+float blend(float a, float b, float alpha, bool passthrough)
+{
+    if (passthrough)
+    {
+        return a;
+    }
+    return mix(a, b, alpha);
+}
+
 void main()
 {
     GBuffer gBuffer = gBufferCreate();
@@ -106,12 +124,15 @@ void main()
         }
 
         // Blendables.
-        gBuffer.diffuse         = mix(gBuffer.diffuse, nextGBuffer.diffuse, alpha);
-        gBuffer.specular        = mix(gBuffer.specular, nextGBuffer.specular, alpha);
-        gBuffer.normal          = normalize(mix(gBuffer.normal, nextGBuffer.normal, alpha));
-        gBuffer.roughness       = mix(gBuffer.roughness, nextGBuffer.roughness, alpha);
-        gBuffer.fuzzColour      = mix(gBuffer.fuzzColour, nextGBuffer.fuzzColour, alpha);
-        gBuffer.fuzzRoughness   = mix(gBuffer.fuzzRoughness, nextGBuffer.fuzzRoughness, alpha);
+        gBuffer.diffuse    = blend(gBuffer.diffuse,   nextGBuffer.diffuse,   alpha, (mask.passthroughFlags & PASSTHROUGH_FLAG_DIFFUSE)   > 0);
+        gBuffer.specular   = blend(gBuffer.specular,  nextGBuffer.specular,  alpha, (mask.passthroughFlags & PASSTHROUGH_FLAG_SPECULAR)  > 0);
+        gBuffer.normal     = blend(gBuffer.normal,    nextGBuffer.normal,    alpha, (mask.passthroughFlags & PASSTHROUGH_FLAG_NORMAL)    > 0);
+        gBuffer.roughness  = blend(gBuffer.roughness, nextGBuffer.roughness, alpha, (mask.passthroughFlags & PASSTHROUGH_FLAG_ROUGHNESS) > 0);
+
+        gBuffer.fuzzColour    = blend(gBuffer.fuzzColour,    nextGBuffer.fuzzColour,    alpha, (mask.passthroughFlags & PASSTHROUGH_FLAG_SHEEN)           > 0);
+        gBuffer.fuzzRoughness = blend(gBuffer.fuzzRoughness, nextGBuffer.fuzzRoughness, alpha, (mask.passthroughFlags & PASSTHROUGH_FLAG_SHEEN_ROUGHNESS) > 0);
+
+        gBuffer.normal = normalize(gBuffer.normal);
 
         // Flags.
         const int fuzzFlagBit = gBufferHasFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT) | gBufferHasFlag(nextGBuffer, GBUFFER_FLAG_FUZZ_BIT);
