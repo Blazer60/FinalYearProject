@@ -4,8 +4,8 @@ NormalTexturePath: ""
 RoughnessTexturePath: ""
 SheenTexturePath: ""
 SheenRoughnessTexturePath: ""
-DiffuseColour: [0.308090746, 0.0920344815, 0.0843878984]
-SpecularColour: [0.940566897, 0.100232184, 0.119789295]
-Roughness: 0.35800001
+DiffuseColour: [1, 0.999903977, 0.999899983]
+SpecularColour: [0.0642247796, 0.0642183572, 0.0642185584]
+Roughness: 0.377999991
 SheenColour: [9.99999975e-05, 9.9989993e-05, 9.99906188e-05]
 SheenRoughness: 0

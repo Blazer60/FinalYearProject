@@ -10,6 +10,7 @@
 #include "Drawable.h"
 #include "Texture.h"
 #include "Pch.h"
+#include "TexturePool.h"
 
 namespace engine
 {
@@ -22,6 +23,7 @@ namespace engine
         : public ui::Drawable
     {
         friend class UberMaterial;
+        typedef std::function<void(graphics::TexturePool&, graphics::MaskData&)> UpdateFunc;
     public:
         UberMask() = default;
         void onDrawUi() override;
@@ -29,5 +31,7 @@ namespace engine
     protected:
         std::shared_ptr<Texture> mMaskTexture = std::make_shared<Texture>("");
         float mAlphaThreshold = 0;
+
+        std::vector<UpdateFunc> mMaskUpdates;
     };
 }

@@ -59,6 +59,13 @@ namespace engine
                         layer.specularColour = glm::vec4(mSpecularColour, 1.f);
                     });
                 }
+                if ((flags & ui::EditFlags::Texture) > 0)
+                {
+                    mLayerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                        texturePool.removeTexture(layer.specularTextureIndex);
+                        layer.specularTextureIndex = texturePool.addTexture(*mSpecularTexture);
+                    });
+                }
             }
             if (ui::rowTexture("normal map", mNormalTexture) == ui::EditFlags::Texture)
             {

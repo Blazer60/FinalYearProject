@@ -1,4 +1,6 @@
 MaterialLayers:
   - materials\TestLayer.mlpcy
+  - materials\AnotherLayer.mlpcy
 MaskLayers:
-  []
+  - Texture: ""
+    Alpha: 0

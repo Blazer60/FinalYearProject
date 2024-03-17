@@ -43,8 +43,13 @@ namespace engine
         void drawMaterialLayerElementColumn(const std::string&name, int index);
         bool drawMaterialLayerElement(int index);
         bool drawMaskLayerElement(int index);
-
+        void updateGraphicsData();
+        void addMask(std::unique_ptr<UberMask> mask);
+        void destroyMask(int index);
         void addNewMaterialLayer(std::shared_ptr<UberLayer> layer);
+        void addNewMaterialLayer(std::shared_ptr<UberLayer> layer, int index);
+        void destroyLayer(int index);
+
 
         std::string mName;
         std::filesystem::path mPath;

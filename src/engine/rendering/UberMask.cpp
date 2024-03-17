@@ -13,6 +13,8 @@ namespace engine
 {
     void UberMask::onDrawUi()
     {
+        mMaskUpdates.clear();
+
         ImGui::PushID("Masking Layer");
         if (ImGui::BeginTable("Mask Layer Table", 4))
         {
@@ -21,7 +23,22 @@ namespace engine
             ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthStretch);
             ImGui::TableSetupColumn("Close Button", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed, ui::buttonSize().x);
 
-            ui::rowTextureSliderFloat("Mask Alpha", mMaskTexture, mAlphaThreshold);
+            if (const ui::EditFlags flags = ui::rowTextureSliderFloat("Mask Alpha", mMaskTexture, mAlphaThreshold); flags > 0)
+            {
+                if ((flags & ui::EditFlags::Value) > 0)
+                {
+                    mMaskUpdates.push_back([this](graphics::TexturePool &, graphics::MaskData &mask) {
+                        mask.alpha = mAlphaThreshold;
+                    });
+                }
+                if ((flags & ui::EditFlags::Texture) > 0)
+                {
+                    mMaskUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::MaskData &mask) {
+                        texturePool.removeTexture(mask.maskTextureIndex);
+                        mask.maskTextureIndex = texturePool.addTexture(*mMaskTexture);
+                    });
+                }
+            }
 
             ImGui::EndTable();
         }

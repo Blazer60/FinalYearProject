@@ -28,7 +28,7 @@ namespace engine
     void UberMaterial::drawMaskArray()
     {
         if (ui::seperatorTextButton(format::string("Masks (%/%)", mMasks.size(), glm::max(0, static_cast<int>(mLayers.size() - 1)))))
-            mMasks.emplace_back(std::make_unique<UberMask>());
+            addMask(std::make_unique<UberMask>());
 
         if (ImGui::BeginTable("Mask Table", 3))
         {
@@ -120,7 +120,8 @@ namespace engine
     {
         PROFILE_FUNC();
 
-        mData.layers.resize(mLayers.size());
+        if (mData.layers.size() != mLayers.size())
+            ERROR("Size missmatch");
 
         bool anyChanges = false;
         for (int i = 0; i < mLayers.size(); ++i)
@@ -128,6 +129,12 @@ namespace engine
             anyChanges |= !mLayers[i]->mLayerUpdates.empty();
             for (auto &action : mLayers[i]->mLayerUpdates)
                 action(mTexturePool, mData.layers[i]);
+        }
+        for (int i = 0; i < mMasks.size(); ++i)
+        {
+            anyChanges |= !mMasks[i]->mMaskUpdates.empty();
+            for (auto &action : mMasks[i]->mMaskUpdates)
+                action(mTexturePool, mData.masks[i]);
         }
 
         if (anyChanges)
@@ -162,7 +169,7 @@ namespace engine
         {
             for (const auto &maskNode : maskLayers)
             {
-                auto &mask = mMasks.emplace_back(std::make_unique<UberMask>());
+                auto mask = std::make_unique<UberMask>();
                 if (const YAML::Node textureNode = maskNode["Texture"]; textureNode.IsDefined())
                 {
                     const std::string relativePath = textureNode.as<std::string>();
@@ -174,6 +181,7 @@ namespace engine
                     const float alpha = alphaNode.as<float>();
                     mask->mAlphaThreshold = alpha;
                 }
+                addMask(std::move(mask));
             }
         }
     }
@@ -214,12 +222,15 @@ namespace engine
         if (ImGui::BeginDragDropTarget())
         {
             if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(arrayPayLoadId))
+            {
                 containers::moveInPlace(mLayers, *static_cast<int*>(payload->Data), index);
+                containers::moveInPlace(mData.layers, *static_cast<int*>(payload->Data), index);
+            }
 
             if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(resourceMaterialLayerPayload))
             {
                 const std::filesystem::path path = *static_cast<std::filesystem::path*>(payload->Data);
-                mLayers[index] = load::materialLayer(path);
+                addNewMaterialLayer(load::materialLayer(path), index);
             }
 
             ImGui::EndDragDropTarget();
@@ -254,7 +265,7 @@ namespace engine
         {
             result = ui::closeButton("Close innit");
             if (result)
-                mLayers.erase(mLayers.begin() + index);
+                destroyLayer(index);
         }
         ImGui::PopID();
 
@@ -287,12 +298,43 @@ namespace engine
         {
             result = ui::closeButton("Close");
             if (result)
-                mMasks.erase(mMasks.begin() + index);
+                destroyMask(index);
         }
         ImGui::PopID();
 
         return result;
     }
+
+    void UberMaterial::updateGraphicsData()
+    {
+        mData.textureArrayId = mTexturePool.id();
+        mData.textureArrayData = mTexturePool.data();
+    }
+
+    void UberMaterial::addMask(std::unique_ptr<UberMask> mask)
+    {
+        auto &maskData = mData.masks.emplace_back();
+        if (mask == nullptr)
+            return;
+
+        maskData.alpha = mask->mAlphaThreshold;
+        maskData.maskTextureIndex = mTexturePool.addTexture(*mask->mMaskTexture);
+
+        mMasks.push_back(std::move(mask));
+
+        updateGraphicsData();
+    }
+
+    void UberMaterial::destroyMask(const int index)
+    {
+        const graphics::MaskData &maskData = mData.masks[index];
+
+        mTexturePool.removeTexture(maskData.maskTextureIndex);
+
+        mMasks.erase(mMasks.begin() + index);
+        mData.masks.erase(mData.masks.begin() + index);
+    }
+
 
     void UberMaterial::addNewMaterialLayer(std::shared_ptr<UberLayer> layer)
     {
@@ -315,7 +357,51 @@ namespace engine
 
         mLayers.push_back(std::move(layer));
 
-        mData.textureArrayId = mTexturePool.id();
-        mData.textureArrayData = mTexturePool.data();
+        updateGraphicsData();
     }
+
+    void UberMaterial::addNewMaterialLayer(std::shared_ptr<UberLayer> layer, const int index)
+    {
+        graphics::LayerData &layerData = mData.layers[index];
+
+        mTexturePool.removeTexture(layerData.diffuseTextureIndex);
+        mTexturePool.removeTexture(layerData.specularTextureIndex);
+        mTexturePool.removeTexture(layerData.roughnessTextureIndex);
+        mTexturePool.removeTexture(layerData.normalTextureIndex);
+        mTexturePool.removeTexture(layerData.sheenTextureIndex);
+        mTexturePool.removeTexture(layerData.sheenRoughnessTextureIndex);
+
+        layerData.roughness         = layer->mRoughness;
+        layerData.sheenRoughness    = layer->mSheenRoughness;
+        layerData.diffuseColour     = glm::vec4(layer->mDiffuseColour, 1.f);
+        layerData.specularColour    = glm::vec4(layer->mSpecularColour, 1.f);
+        layerData.sheenColour       = glm::vec4(layer->mSheenColour, 1.f);
+
+        layerData.diffuseTextureIndex           = mTexturePool.addTexture(*layer->mDiffuseTexture);
+        layerData.specularTextureIndex          = mTexturePool.addTexture(*layer->mSpecularTexture);
+        layerData.roughnessTextureIndex         = mTexturePool.addTexture(*layer->mRoughnessTexture);
+        layerData.normalTextureIndex            = mTexturePool.addTexture(*layer->mNormalTexture);
+        layerData.sheenTextureIndex             = mTexturePool.addTexture(*layer->mSheenTexture);
+        layerData.sheenRoughnessTextureIndex    = mTexturePool.addTexture(*layer->mSheenRoughnessTexture);
+
+        mLayers[index] = std::move(layer);
+
+        updateGraphicsData();
+    }
+
+    void UberMaterial::destroyLayer(const int index)
+    {
+        const graphics::LayerData &layer = mData.layers[index];
+
+        mTexturePool.removeTexture(layer.diffuseTextureIndex);
+        mTexturePool.removeTexture(layer.specularTextureIndex);
+        mTexturePool.removeTexture(layer.roughnessTextureIndex);
+        mTexturePool.removeTexture(layer.normalTextureIndex);
+        mTexturePool.removeTexture(layer.sheenTextureIndex);
+        mTexturePool.removeTexture(layer.sheenRoughnessTextureIndex);
+
+        mLayers.erase(mLayers.begin() + index);
+        mData.layers.erase(mData.layers.begin() + index);
+    }
+
 } // engine
