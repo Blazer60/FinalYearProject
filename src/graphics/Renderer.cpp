@@ -55,6 +55,9 @@ Renderer::~Renderer()
 void Renderer::drawMesh(
     const uint32_t vao, int32_t indiciesCount, const glm::mat4& matrix, const graphics::MaterialData& material)
 {
+    if (material.layers.empty())
+        CRASH("No material layers results in undefined behaviour");
+
     if (!material.masks.empty() && material.layers.size() > 1)
     {
         mMultiMaterialGeometryQueue.emplace_back(vao, indiciesCount, matrix);

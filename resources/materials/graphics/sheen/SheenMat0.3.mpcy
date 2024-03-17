@@ -1,0 +1,8 @@
+MaterialLayers:
+  - materials\graphics\sheen\SheenBase.mlpcy
+  - materials\graphics\sheen\SheenLayer0.3.mlpcy
+MaskLayers:
+  - Texture: ""
+    Alpha: 1
+    Passthrough: 31
+    Operation: 0

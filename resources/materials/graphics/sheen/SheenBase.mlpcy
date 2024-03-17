@@ -1,0 +1,11 @@
+DiffuseTexturePath: ""
+SpecularTexturePath: ""
+NormalTexturePath: ""
+RoughnessTexturePath: ""
+SheenTexturePath: ""
+SheenRoughnessTexturePath: ""
+DiffuseColour: [0.0831754208, 0.0831670985, 0.0831670985]
+SpecularColour: [0.0164429247, 0.0164420251, 0.0164436698]
+Roughness: 0.916999996
+SheenColour: [1, 0.999913752, 0.999899983]
+SheenRoughness: 0

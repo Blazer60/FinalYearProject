@@ -97,6 +97,9 @@ namespace graphics
             const GeometryObject &geometry = geometryQueue[i];
             const MaterialData &material = materials[i];
 
+            if (material.layers.empty())
+                CRASH("No layers to read from results in undefined behavour.");
+
             // todo: These two should really be a UBO...
             mSingleMaterialShader.set("u_mvp_matrix", context.cameraViewProjectionMatrix * geometry.matrix);
             mSingleMaterialShader.set("u_model_matrix", geometry.matrix);

@@ -2,241 +2,261 @@ Scene: scenes\BrdfTest.pcy
 Actors:
   - Name: Diffuse 0.1
     UUID: 9235691866103231334
-    position: [-10, 1, 0]
+    position: [-13.5, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\blueSphere\BlueSphere.obj
+        MeshPath: models\MaterialBallUe5.glb
         UMaterials:
+          - materials\graphics\accentMat.mpcy
           - materials\graphics\matDiffuse0.1.mpcy
     Children:
       []
   - Name: Diffuse 0.2
     UUID: 17656332329987435241
-    position: [-7.80000019, 1, 0]
+    position: [-10.5, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\blueSphere\BlueSphere.obj
+        MeshPath: models\MaterialBallUe5.glb
         UMaterials:
+          - materials\graphics\accentMat.mpcy
           - materials\graphics\matDiffuse0.2.mpcy
     Children:
       []
   - Name: Diffuse 0.3
     UUID: 15059010188968840541
-    position: [-5.5999999, 1, 0]
+    position: [-7.5, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\blueSphere\BlueSphere.obj
+        MeshPath: models\MaterialBallUe5.glb
         UMaterials:
+          - materials\graphics\accentMat.mpcy
           - materials\graphics\matDiffuse0.3.mpcy
     Children:
       []
   - Name: Diffuse 0.4
     UUID: 2953179722864376813
-    position: [-3.39999962, 1, 0]
+    position: [-4.5, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\blueSphere\BlueSphere.obj
+        MeshPath: models\MaterialBallUe5.glb
         UMaterials:
+          - materials\graphics\accentMat.mpcy
           - materials\graphics\matDiffuse0.4.mpcy
     Children:
       []
   - Name: Diffuse 0.5
     UUID: 3305436809899311448
-    position: [-1.19999981, 1, 0]
+    position: [-1.5, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\blueSphere\BlueSphere.obj
+        MeshPath: models\MaterialBallUe5.glb
         UMaterials:
+          - materials\graphics\accentMat.mpcy
           - materials\graphics\matDiffuse0.5.mpcy
     Children:
       []
   - Name: Diffuse 0.6
     UUID: 2215952589171259832
-    position: [1, 1, 0]
+    position: [1.5, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\blueSphere\BlueSphere.obj
+        MeshPath: models\MaterialBallUe5.glb
         UMaterials:
+          - materials\graphics\accentMat.mpcy
           - materials\graphics\matDiffuse0.6.mpcy
     Children:
       []
   - Name: Diffuse 0.7
     UUID: 5081476570778048165
-    position: [3.20000076, 1, 0]
+    position: [4.5, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\blueSphere\BlueSphere.obj
+        MeshPath: models\MaterialBallUe5.glb
         UMaterials:
+          - materials\graphics\accentMat.mpcy
           - materials\graphics\matDiffuse0.7.mpcy
     Children:
       []
   - Name: Diffuse 0.8
     UUID: 12622050055582911180
-    position: [5.40000057, 1, 0]
+    position: [7.5, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\blueSphere\BlueSphere.obj
+        MeshPath: models\MaterialBallUe5.glb
         UMaterials:
+          - materials\graphics\accentMat.mpcy
           - materials\graphics\matDiffuse0.8.mpcy
     Children:
       []
   - Name: Diffuse 0.9
     UUID: 16317662475208917601
-    position: [7.60000038, 1, 0]
+    position: [10.5, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\blueSphere\BlueSphere.obj
+        MeshPath: models\MaterialBallUe5.glb
         UMaterials:
+          - materials\graphics\accentMat.mpcy
           - materials\graphics\matDiffuse0.9.mpcy
     Children:
       []
   - Name: Diffuse 1.0
     UUID: 14695945249867301157
-    position: [9.80000114, 1, 0]
+    position: [13.5, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\blueSphere\BlueSphere.obj
+        MeshPath: models\MaterialBallUe5.glb
         UMaterials:
+          - materials\graphics\accentMat.mpcy
           - materials\graphics\matDiffuse1.0.mpcy
     Children:
       []
   - Name: Specular 0.1
     UUID: 512474988472999131
-    position: [-10, 3.20000005, 0]
+    position: [-13.5, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\blueSphere\BlueSphere.obj
+        MeshPath: models\MaterialBallUe5.glb
         UMaterials:
+          - materials\graphics\accentMat.mpcy
           - materials\graphics\matSpecular0.1.mpcy
     Children:
       []
   - Name: Specular 0.2
     UUID: 4443347482756965594
-    position: [-7.80000019, 3.20000005, 0]
+    position: [-10.5, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\blueSphere\BlueSphere.obj
+        MeshPath: models\MaterialBallUe5.glb
         UMaterials:
+          - materials\graphics\accentMat.mpcy
           - materials\graphics\matSpecular0.2.mpcy
     Children:
       []
   - Name: Specular 0.3
     UUID: 10723275850643407265
-    position: [-5.5999999, 3.20000005, 0]
+    position: [-7.5, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\blueSphere\BlueSphere.obj
+        MeshPath: models\MaterialBallUe5.glb
         UMaterials:
+          - materials\graphics\accentMat.mpcy
           - materials\graphics\matSpecular0.3.mpcy
     Children:
       []
   - Name: Specular 0.4
     UUID: 4654122299614092034
-    position: [-3.39999962, 3.20000005, 0]
+    position: [-4.5, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\blueSphere\BlueSphere.obj
+        MeshPath: models\MaterialBallUe5.glb
         UMaterials:
+          - materials\graphics\accentMat.mpcy
           - materials\graphics\matSpecular0.4.mpcy
     Children:
       []
   - Name: Specular 0.5
     UUID: 2850402401034655202
-    position: [-1.19999981, 3.20000005, 0]
+    position: [-1.5, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\blueSphere\BlueSphere.obj
+        MeshPath: models\MaterialBallUe5.glb
         UMaterials:
+          - materials\graphics\accentMat.mpcy
           - materials\graphics\matSpecular0.5.mpcy
     Children:
       []
   - Name: Specular 0.6
     UUID: 16648665379810708591
-    position: [1, 3.20000005, 0]
+    position: [1.5, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\blueSphere\BlueSphere.obj
+        MeshPath: models\MaterialBallUe5.glb
         UMaterials:
+          - materials\graphics\accentMat.mpcy
           - materials\graphics\matSpecular0.6.mpcy
     Children:
       []
   - Name: Specular 0.7
     UUID: 496619730817337587
-    position: [3.20000076, 3.20000005, 0]
+    position: [4.5, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\blueSphere\BlueSphere.obj
+        MeshPath: models\MaterialBallUe5.glb
         UMaterials:
+          - materials\graphics\accentMat.mpcy
           - materials\graphics\matSpecular0.7.mpcy
     Children:
       []
   - Name: Specular 0.8
     UUID: 7582905100511727991
-    position: [5.40000057, 3.20000005, 0]
+    position: [7.5, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\blueSphere\BlueSphere.obj
+        MeshPath: models\MaterialBallUe5.glb
         UMaterials:
+          - materials\graphics\accentMat.mpcy
           - materials\graphics\matSpecular0.8.mpcy
     Children:
       []
   - Name: Specular 0.9
     UUID: 2161961970670733406
-    position: [7.60000038, 3.20000005, 0]
+    position: [10.5, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\blueSphere\BlueSphere.obj
+        MeshPath: models\MaterialBallUe5.glb
         UMaterials:
+          - materials\graphics\accentMat.mpcy
           - materials\graphics\matSpecular0.9.mpcy
     Children:
       []
   - Name: Specular 1.0
     UUID: 8852229717090644714
-    position: [9.80000114, 3.20000005, 0]
+    position: [13.5, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\blueSphere\BlueSphere.obj
+        MeshPath: models\MaterialBallUe5.glb
         UMaterials:
+          - materials\graphics\accentMat.mpcy
           - materials\graphics\matSpecular1.0.mpcy
     Children:
       []
@@ -252,15 +272,187 @@ Actors:
         Path: textures\hdr\unfinished_office_4k.hdr
     Children:
       []
-  - Name: UV Checker
-    UUID: 6213078574435407571
-    position: [-1.20000005, 8.59911251, 1.43051147e-06]
-    rotation: [0.725384295, 0.688344121, 0, 0]
-    scale: [1, 0.99999994, 0.99999994]
+  - Name: Diffuse Row
+    UUID: 15027312380629224023
+    position: [0, 3, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      []
+    Children:
+      - 9235691866103231334
+      - 17656332329987435241
+      - 15059010188968840541
+      - 2953179722864376813
+      - 3305436809899311448
+      - 2215952589171259832
+      - 5081476570778048165
+      - 12622050055582911180
+      - 16317662475208917601
+      - 14695945249867301157
+  - Name: Specular Row
+    UUID: 326661838687982327
+    position: [0, 0, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      []
+    Children:
+      - 512474988472999131
+      - 4443347482756965594
+      - 10723275850643407265
+      - 4654122299614092034
+      - 2850402401034655202
+      - 16648665379810708591
+      - 496619730817337587
+      - 7582905100511727991
+      - 2161961970670733406
+      - 8852229717090644714
+  - Name: Cloth 0.1
+    UUID: 3214681819289529
+    position: [-13.5, 0, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\Plane.glb
+        MeshPath: models\ClothBall.glb
         UMaterials:
-          - materials\Red.mpcy
+          - materials\graphics\accentMat.mpcy
+          - materials\graphics\sheen\SheenMat0.1.mpcy
     Children:
       []
+  - Name: Cloth 0.2
+    UUID: 10709752479091949111
+    position: [-10.4576473, -0.000438690186, 0.129264295]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\ClothBall.glb
+        UMaterials:
+          - materials\graphics\accentMat.mpcy
+          - materials\graphics\sheen\SheenMat0.2.mpcy
+    Children:
+      []
+  - Name: Cloth 0.3
+    UUID: 2806106026937463753
+    position: [-7.5, 0, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\ClothBall.glb
+        UMaterials:
+          - materials\graphics\accentMat.mpcy
+          - materials\graphics\sheen\SheenMat0.3.mpcy
+    Children:
+      []
+  - Name: Cloth 0.4
+    UUID: 13940552987556433140
+    position: [-4.5, 0, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\ClothBall.glb
+        UMaterials:
+          - materials\graphics\accentMat.mpcy
+          - materials\graphics\sheen\SheenMat0.4.mpcy
+    Children:
+      []
+  - Name: Cloth 0.5
+    UUID: 13862813022780328771
+    position: [-1.5, 0, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\ClothBall.glb
+        UMaterials:
+          - materials\graphics\accentMat.mpcy
+          - materials\graphics\sheen\SheenMat0.5.mpcy
+    Children:
+      []
+  - Name: Cloth 0.6
+    UUID: 7340367222081817063
+    position: [1.5, 0, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\ClothBall.glb
+        UMaterials:
+          - materials\graphics\accentMat.mpcy
+          - materials\graphics\sheen\SheenMat0.6.mpcy
+    Children:
+      []
+  - Name: Cloth 0.7
+    UUID: 13534116659935204617
+    position: [4.5, 0, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\ClothBall.glb
+        UMaterials:
+          - materials\graphics\accentMat.mpcy
+          - materials\graphics\sheen\SheenMat0.7.mpcy
+    Children:
+      []
+  - Name: Cloth 0.8
+    UUID: 1884817525270782066
+    position: [7.5, 0, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\ClothBall.glb
+        UMaterials:
+          - materials\graphics\accentMat.mpcy
+          - materials\graphics\sheen\SheenMat0.8.mpcy
+    Children:
+      []
+  - Name: Cloth 0.9
+    UUID: 17002174199409328228
+    position: [10.5, 0, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\ClothBall.glb
+        UMaterials:
+          - materials\graphics\accentMat.mpcy
+          - materials\graphics\sheen\SheenMat0.9.mpcy
+    Children:
+      []
+  - Name: Cloth 1.0
+    UUID: 6960501724692294949
+    position: [13.5, 0, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\ClothBall.glb
+        UMaterials:
+          - materials\graphics\accentMat.mpcy
+          - materials\graphics\sheen\SheenMat1.0.mpcy
+    Children:
+      []
+  - Name: Cloth Row
+    UUID: 10431964507032836423
+    position: [0, -3, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      []
+    Children:
+      - 3214681819289529
+      - 10709752479091949111
+      - 2806106026937463753
+      - 13940552987556433140
+      - 13862813022780328771
+      - 7340367222081817063
+      - 13534116659935204617
+      - 1884817525270782066
+      - 17002174199409328228
+      - 6960501724692294949

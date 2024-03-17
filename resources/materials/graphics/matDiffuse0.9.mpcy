@@ -1,4 +1,4 @@
 MaterialLayers:
-  []
+  - materials\graphics\layerDiffuse0.9.mlpcy
 MaskLayers:
   []

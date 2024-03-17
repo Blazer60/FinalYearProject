@@ -173,7 +173,7 @@ namespace engine
             return;
 
         auto submit = [this](const SubMesh &surface, const std::shared_ptr<UberMaterial> &material) {
-            if (material != nullptr)
+            if (material != nullptr && !material->empty())
             {
                 graphics::renderer->drawMesh(
                     surface,
