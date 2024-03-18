@@ -38,6 +38,7 @@ namespace engine
         float mAlphaThreshold = 0;
         graphics::PassthroughFlags mPassThroughFlags = graphics::PassthroughFlags::None;
         graphics::MaskOp mMaskOperation = graphics::MaskOp::Threshold;
+        graphics::WrapOp mWrapOperation = graphics::WrapOp::Repeat;
         std::vector<UpdateFunc> mMaskUpdates;
     };
 }

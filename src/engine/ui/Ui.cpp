@@ -281,7 +281,7 @@ namespace ui
         return false;
     }
 
-    EditFlags rowTexture(const std::string& name, std::shared_ptr<Texture>& texture)
+    EditFlags rowTexture(const std::string& name, std::shared_ptr<Texture>& texture, graphics::WrapOp &wrapOp)
     {
         EditFlags result = EditFlags::None;
 
@@ -303,6 +303,11 @@ namespace ui
         }
         if (ImGui::TableNextColumn())
         {
+            if (ui::enumCombo("##rowTextureCombo", wrapOp, graphics::wrapOpCount))
+                result = result | EditFlags::Wrap;
+        }
+        if (ImGui::TableNextColumn())
+        {
             if (resetButton(name, texture))
                 result = result | EditFlags::Texture;
         }
@@ -311,7 +316,7 @@ namespace ui
         return result;
     }
 
-    EditFlags rowTextureColourEdit(const std::string& name, std::shared_ptr<Texture>& texture, glm::vec3& colour)
+    EditFlags rowTextureColourEdit(const std::string &name, std::shared_ptr<Texture> &texture, glm::vec3 &colour, graphics::WrapOp &wrapOp)
     {
         EditFlags result = EditFlags::None;
 
@@ -335,6 +340,11 @@ namespace ui
         }
         if (ImGui::TableNextColumn())
         {
+            if (ui::enumCombo("##textureColourCombo", wrapOp, graphics::wrapOpCount))
+                result = result | EditFlags::Wrap;
+        }
+        if (ImGui::TableNextColumn())
+        {
             if (resetButton(name, texture))
                 result = result | EditFlags::Texture;
         }
@@ -344,7 +354,7 @@ namespace ui
         return result;
     }
 
-    EditFlags rowTextureSliderFloat(const std::string& name, std::shared_ptr<Texture>& texture, float& value)
+    EditFlags rowTextureSliderFloat(const std::string& name, std::shared_ptr<Texture>& texture, float& value, graphics::WrapOp &wrapOp)
     {
         EditFlags result = EditFlags::None;
         ImGui::PushID(name.c_str());
@@ -367,6 +377,11 @@ namespace ui
             ImGui::SliderFloat(hidden.c_str(), &value, 0.f, 1.f);
             if (ImGui::IsItemEdited())
                 result = result | EditFlags::Value;
+        }
+        if (ImGui::TableNextColumn())
+        {
+            if (ui::enumCombo("##textureSliderFloatCombo", wrapOp, graphics::wrapOpCount))
+                result = result | EditFlags::Wrap;
         }
         if (ImGui::TableNextColumn())
         {

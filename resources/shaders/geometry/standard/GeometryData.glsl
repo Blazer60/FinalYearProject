@@ -25,6 +25,9 @@ struct LayerData
 #define OPERATION_LERP 0
 #define OPERATION_THRESHOLD 1
 
+#define WRAP_REPEAT 0
+#define WRAP_CLAMP_TO_EDGE 1
+
 struct MaskData
 {
     float alpha;
@@ -37,4 +40,5 @@ struct TextureData
 {
     uint width;
     uint height;
+    uint wrapOp;
 };

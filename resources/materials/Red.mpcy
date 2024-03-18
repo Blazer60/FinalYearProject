@@ -6,3 +6,4 @@ MaskLayers:
     Alpha: 1
     Passthrough: 0
     Operation: 1
+    Wrap: 0

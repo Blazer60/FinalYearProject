@@ -62,14 +62,15 @@ namespace engine
         mMaskUpdates.clear();
 
         ImGui::PushID("Masking Layer");
-        if (ImGui::BeginTable("Mask Layer Table", 4))
+        if (ImGui::BeginTable("Mask Layer Table", 5))
         {
             ImGui::TableSetupColumn("Texture Button", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed);
             ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed);
             ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthStretch);
-            ImGui::TableSetupColumn("Close Button", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed, ui::buttonSize().x);
+            ImGui::TableSetupColumn("Wrap Operation", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed);
+            ImGui::TableSetupColumn("Close Button", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed);
 
-            if (const ui::EditFlags flags = ui::rowTextureSliderFloat("Mask Alpha", mMaskTexture, mAlphaThreshold); flags > 0)
+            if (const ui::EditFlags flags = ui::rowTextureSliderFloat("Mask Alpha", mMaskTexture, mAlphaThreshold, mWrapOperation); flags > 0)
             {
                 if ((flags & ui::EditFlags::Value) > 0)
                 {

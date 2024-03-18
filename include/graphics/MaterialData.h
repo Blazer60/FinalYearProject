@@ -55,6 +55,22 @@ namespace graphics
         }
     }
 
+    constexpr uint8_t wrapOpCount = 2;
+    enum class WrapOp : uint8_t
+    {
+        Repeat, ClampToEdge
+    };
+
+    inline const char* to_string(const WrapOp wrap)
+    {
+        switch (wrap)
+        {
+            case WrapOp::Repeat: return "Repeat";
+            case WrapOp::ClampToEdge: return "Clamp";
+            default: return "unknown";
+        }
+    }
+
     struct LayerData
     {
         glm::vec4 diffuseColour = glm::vec4(0.8f, 0.8f, 0.8f, 1.f);
@@ -84,6 +100,7 @@ namespace graphics
     {
         uint32_t width  = 0;
         uint32_t height = 0;
+        uint32_t wrapOp = 0;  // grapihcs::WrapOp.
     };
 
     /**

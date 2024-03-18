@@ -1,0 +1,17 @@
+DiffuseTexturePath: materials\examples\flooring\WoodAlbedo.png
+SpecularTexturePath: ""
+NormalTexturePath: ""
+RoughnessTexturePath: materials\examples\flooring\WoodRoughness.png
+SheenTexturePath: ""
+SheenRoughnessTexturePath: ""
+DiffuseColour: [1, 0.999899983, 0.999899983]
+SpecularColour: [0.205960929, 0.205940336, 0.205940336]
+Roughness: 1
+SheenColour: [9.99999975e-05, 9.9989993e-05, 9.9989993e-05]
+SheenRoughness: 0
+DiffuseWrapOp: 0
+SpecularWrapOp: 0
+NormalWrapOp: 0
+RoughnessWrapOp: 0
+SheenWrapOp: 0
+SheenRoughnessWrapOp: 0

@@ -11,6 +11,7 @@
 #include "TextureBufferObject.h"
 #include "TextureArrayObject.h"
 #include "imgui.h"
+#include "MaterialData.h"
 #include "Texture.h"
 
 namespace engine
@@ -38,6 +39,7 @@ namespace ui
         None        = 0,
         Value       = 1 << 0,
         Texture     = 1 << 1,
+        Wrap        = 1 << 2,
     };
 
     inline EditFlags operator|(EditFlags lhs, EditFlags rhs)
@@ -58,9 +60,9 @@ namespace ui
 
     float resetButtonWidth();
     bool resetButton(const std::string& name, std::shared_ptr<Texture>& texture);
-    EditFlags rowTexture(const std::string& name, std::shared_ptr<Texture>& texture);
-    EditFlags rowTextureColourEdit(const std::string &name, std::shared_ptr<Texture> &texture, glm::vec3 &colour);
-    EditFlags rowTextureSliderFloat(const std::string &name, std::shared_ptr<Texture> &texture, float &value);
+    EditFlags rowTexture(const std::string& name, std::shared_ptr<Texture>& texture, graphics::WrapOp &wrapOp);
+    EditFlags rowTextureColourEdit(const std::string &name, std::shared_ptr<Texture> &texture, glm::vec3 &colour, graphics::WrapOp &wrapOp);
+    EditFlags rowTextureSliderFloat(const std::string &name, std::shared_ptr<Texture> &texture, float &value, graphics::WrapOp &wrapOp);
     
     glm::ivec2 fitToRegion(const glm::ivec2 &imageSize, const glm::ivec2 &maxSize, const glm::ivec2 &padding=glm::ivec2(50));
 
@@ -70,4 +72,37 @@ namespace ui
     ImVec2 buttonSize();
 
     bool seperatorTextButton(const std::string &name);
+
+    template<typename TEnum>
+    bool enumCombo(const std::string &name, TEnum &value, uint32_t enumCount);
+
+}
+
+namespace ui
+{
+    template<typename TEnum>
+    bool enumCombo(const std::string &name, TEnum& value, const uint32_t enumCount)
+    {
+        bool hasChanged = false;
+        auto &style = ImGui::GetStyle();
+        ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, 12);
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12);
+        ImGui::SetNextItemWidth(ImGui::CalcTextSize(to_string(value)).x + 2.f * style.ItemInnerSpacing.x);
+        if (ImGui::BeginCombo(name.c_str(), to_string(value), ImGuiComboFlags_NoArrowButton))
+        {
+            for (uint32_t i = 0; i < enumCount; ++i)
+            {
+                if (ImGui::Selectable(to_string(static_cast<TEnum>(i))))
+                {
+                    value = static_cast<TEnum>(i);
+                    hasChanged = true;
+                }
+            }
+
+            ImGui::EndCombo();
+        }
+        ImGui::PopStyleVar(2);
+
+        return hasChanged;
+    }
 }

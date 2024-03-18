@@ -30,6 +30,7 @@ namespace graphics
 
         int32_t addTexture(const Texture &texture);
         void removeTexture(int32_t index);
+        void setWrap(int32_t index, WrapOp wrapOp);
 
     protected:
         void reinitialise(glm::ivec2 newSize, int32_t newCount);

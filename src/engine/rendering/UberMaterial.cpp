@@ -105,6 +105,7 @@ namespace engine
                 out << YAML::Key << "Alpha" << YAML::Value << mask->mAlphaThreshold;
                 out << YAML::Key << "Passthrough" << YAML::Value << static_cast<unsigned int>(mask->mPassThroughFlags);
                 out << YAML::Key << "Operation" << YAML::Value << static_cast<unsigned int>(mask->mMaskOperation);
+                out << YAML::Key << "Wrap" << YAML::Value << static_cast<unsigned int>(mask->mWrapOperation);
                 out << YAML::EndMap;
             }
         }
@@ -187,6 +188,8 @@ namespace engine
                     mask->mPassThroughFlags = static_cast<graphics::PassthroughFlags>(flagsNode.as<unsigned int>());
                 if (const YAML::Node operationNode = maskNode["Operation"]; operationNode.IsDefined())
                     mask->mMaskOperation = static_cast<graphics::MaskOp>(operationNode.as<unsigned int>());
+                if (const YAML::Node wrapNode = maskNode["Wrap"]; wrapNode.IsDefined())
+                    mask->mWrapOperation = static_cast<graphics::WrapOp>(wrapNode.as<unsigned int>());
                 addMask(std::move(mask));
             }
         }
@@ -328,6 +331,8 @@ namespace engine
         maskData.passthroughFlags = static_cast<uint32_t>(mask->mPassThroughFlags);
         maskData.maskOp = static_cast<uint32_t>(mask->mMaskOperation);
 
+        mTexturePool.setWrap(maskData.maskTextureIndex, mask->mWrapOperation);
+
         mMasks.push_back(std::move(mask));
 
         updateGraphicsData();
@@ -363,6 +368,13 @@ namespace engine
         layerData.sheenTextureIndex             = mTexturePool.addTexture(*layer->mSheenTexture);
         layerData.sheenRoughnessTextureIndex    = mTexturePool.addTexture(*layer->mSheenRoughnessTexture);
 
+        mTexturePool.setWrap(layerData.diffuseTextureIndex,         layer->mDiffuseWrapOp);
+        mTexturePool.setWrap(layerData.specularTextureIndex,        layer->mSpecularWrapOp);
+        mTexturePool.setWrap(layerData.normalTextureIndex,          layer->mNormalWrapOp);
+        mTexturePool.setWrap(layerData.roughnessTextureIndex,       layer->mRoughnessWrapOp);
+        mTexturePool.setWrap(layerData.sheenTextureIndex,           layer->mSheenWrapOp);
+        mTexturePool.setWrap(layerData.sheenRoughnessTextureIndex,  layer->mSheenRoughnessWrapOp);
+
         mLayers.push_back(std::move(layer));
 
         updateGraphicsData();
@@ -391,6 +403,13 @@ namespace engine
         layerData.normalTextureIndex            = mTexturePool.addTexture(*layer->mNormalTexture);
         layerData.sheenTextureIndex             = mTexturePool.addTexture(*layer->mSheenTexture);
         layerData.sheenRoughnessTextureIndex    = mTexturePool.addTexture(*layer->mSheenRoughnessTexture);
+
+        mTexturePool.setWrap(layerData.diffuseTextureIndex,         layer->mDiffuseWrapOp);
+        mTexturePool.setWrap(layerData.specularTextureIndex,        layer->mSpecularWrapOp);
+        mTexturePool.setWrap(layerData.normalTextureIndex,          layer->mNormalWrapOp);
+        mTexturePool.setWrap(layerData.roughnessTextureIndex,       layer->mRoughnessWrapOp);
+        mTexturePool.setWrap(layerData.sheenTextureIndex,           layer->mSheenWrapOp);
+        mTexturePool.setWrap(layerData.sheenRoughnessTextureIndex,  layer->mSheenRoughnessWrapOp);
 
         mLayers[index] = std::move(layer);
 

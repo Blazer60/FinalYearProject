@@ -1,0 +1,9 @@
+MaterialLayers:
+  - materials\examples\flooring\Flooring.mlpcy
+  - materials\examples\Dust.mlpcy
+MaskLayers:
+  - Texture: materials\examples\SoldNosie01.png
+    Alpha: 1
+    Passthrough: 15
+    Operation: 0
+    Wrap: 0

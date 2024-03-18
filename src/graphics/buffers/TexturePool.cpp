@@ -62,6 +62,14 @@ namespace graphics
         mData[index] = { };
     }
 
+    void TexturePool::setWrap(const int32_t index, const WrapOp wrapOp)
+    {
+        if (index == -1)
+            return;
+
+        mData[index].wrapOp = static_cast<uint32_t>(wrapOp);
+    }
+
     void TexturePool::reinitialise(const glm::ivec2 newSize, const int32_t newCount)
     {
         if (mSize == newSize && mLayerCount == newCount)
@@ -128,7 +136,7 @@ namespace graphics
     glm::ivec2 TexturePool::getMaxTextureSize() const
     {
         glm::ivec2 result = glm::ivec2(0);
-        for (auto &[width, height] : mData)
+        for (auto &[width, height, _] : mData)
             result = glm::max(result, glm::ivec2(width, height));
 
         return result;

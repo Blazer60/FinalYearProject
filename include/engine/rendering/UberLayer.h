@@ -54,6 +54,13 @@ namespace engine
         glm::vec3 mSheenColour = glm::vec3(0.f);
         float     mSheenRoughness = 0.5f;
 
+        graphics::WrapOp mDiffuseWrapOp         = graphics::WrapOp::Repeat;
+        graphics::WrapOp mSpecularWrapOp        = graphics::WrapOp::Repeat;
+        graphics::WrapOp mNormalWrapOp          = graphics::WrapOp::Repeat;
+        graphics::WrapOp mRoughnessWrapOp       = graphics::WrapOp::Repeat;
+        graphics::WrapOp mSheenWrapOp           = graphics::WrapOp::Repeat;
+        graphics::WrapOp mSheenRoughnessWrapOp  = graphics::WrapOp::Repeat;
+
         std::vector<UpdateFunc> mLayerUpdates;
     };
 

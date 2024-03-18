@@ -18,6 +18,12 @@ float sampleMask(vec2 uv, int index)
 
     TextureData data = textureData[index];
     const vec2 maxDimensions = textureSize(textures, 0).xy;
+
+    if (data.wrapOp == WRAP_REPEAT)
+        uv = fract(uv);
+    else if (data.wrapOp == WRAP_CLAMP_TO_EDGE)
+        uv = clamp(uv, vec2(0.f), vec2(1.f));
+
     const vec2 actualUv = uv * vec2(data.width, data.height) / maxDimensions;
     return texture(textures, vec3(actualUv, index)).r;
 }
@@ -28,6 +34,12 @@ vec4 sampleTexture(vec2 uv, int index)
     return vec4(vec3(0.f), 1.f);
 
     TextureData data = textureData[index];
+
+    if (data.wrapOp == WRAP_REPEAT)
+        uv = fract(uv);
+    else if (data.wrapOp == WRAP_CLAMP_TO_EDGE)
+        uv = clamp(uv, vec2(0.f), vec2(1.f));
+
     const vec2 maxDimensions = textureSize(textures, 0).xy;
     const vec2 actualUv = uv * vec2(data.width, data.height) / maxDimensions;
     return texture(textures, vec3(actualUv, index));

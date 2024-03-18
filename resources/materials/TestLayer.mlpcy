@@ -9,3 +9,9 @@ SpecularColour: [0.155319899, 0.943693995, 0.184586689]
 Roughness: 0.377999991
 SheenColour: [9.99999975e-05, 9.9989993e-05, 9.99906188e-05]
 SheenRoughness: 0
+DiffuseWrapOp: 0
+SpecularWrapOp: 0
+NormalWrapOp: 0
+RoughnessWrapOp: 0
+SheenWrapOp: 0
+SheenRoughnessWrapOp: 0

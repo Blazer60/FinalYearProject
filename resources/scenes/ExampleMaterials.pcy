@@ -1,0 +1,55 @@
+Scene: scenes\ExampleMaterials.pcy
+Actors:
+  - Name: Skylight
+    UUID: 1131826340421676061
+    position: [0, 5.13056183, -8.10848045]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: DistantLightProbe
+        Size: [1024, 1024]
+        RadianceMultiplier: 1000
+        Path: textures\hdr\newport\NewportLoft.hdr
+    Children:
+      []
+  - Name: Dusty Wood
+    UUID: 465828850839980343
+    position: [0.0626102984, 2.20214065e-06, -1.80208254]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\MaterialBallUe5.glb
+        UMaterials:
+          - materials\graphics\accentMat.mpcy
+          - materials\examples\flooring\Flooring.mpcy
+    Children:
+      []
+  - Name: Floor
+    UUID: 16809401724350566722
+    position: [-1.1920929e-07, -1.54860377, 4.76837158e-07]
+    rotation: [1, 0, 0, 0]
+    scale: [2, 0.12734656, 2]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\Grid20x20.glb
+        UMaterials:
+          - materials\examples\flooring\Flooring.mpcy
+    Children:
+      []
+  - Name: Directional Light
+    UUID: 12558777012180991899
+    position: [6.67572021e-06, -1.54860115, 1.90734863e-06]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: DirectionalLight
+        Colour: [0.930000007, 0.930000007, 0.949999988]
+        Intensity: 100
+        Yaw: 108
+        Pitch: 45
+        CascadeDepths: [0.0399999991, 0.159999996, 0.360000014, 0.639999986]
+        ZMultiplier: 5
+        Bias: [0.00100000005, 0]
+    Children:
+      []
