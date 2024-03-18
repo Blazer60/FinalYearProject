@@ -31,6 +31,10 @@ namespace graphics
             glm::ivec2(size),
             results.ltcSheenTable);
 
+        results.sheenMissing = generateSheenMissingLut(
+            glm::ivec2(size),
+            results.sheenDirectionalAlbedo);
+
         return results;
     }
 
@@ -116,6 +120,26 @@ namespace graphics
         mIntegrateSheenShader.bind();
         mIntegrateSheenShader.set("sheenTable", sheenTable.getId(), 0);
         mIntegrateSheenShader.image("sheenDirectionalAlbedo", lut.getId(), lut.getFormat(), 0, false);
+
+        dispatchCompute(glm::ceil(static_cast<glm::vec2>(size / 8)));
+
+        return lut;
+    }
+
+    TextureBufferObject generateSheenMissingLut(const glm::ivec2& size, const TextureBufferObject& sheenDA)
+    {
+        Shader mIntegrateSheenMissingShader {
+            { file::shaderPath() / "brdf/SheenMissing.comp" }
+        };
+
+        TextureBufferObject lut(textureFormat::R16f);
+
+        lut.resize(size);
+        lut.setDebugName("Sheen Missing LUT");
+
+        mIntegrateSheenMissingShader.bind();
+        mIntegrateSheenMissingShader.set("sheenAlbedoLut", sheenDA.getId(), 0);
+        mIntegrateSheenMissingShader.image("sheenMissingLut", lut.getId(), lut.getFormat(), 0, false);
 
         dispatchCompute(glm::ceil(static_cast<glm::vec2>(size / 8)));
 

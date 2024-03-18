@@ -82,6 +82,7 @@ namespace graphics
         pushDebugGroup("White Furnace Test");
 
         mDebugTexture.resize(size);
+        mDebugTexture.clear(glm::vec4(glm::vec3(glm::pow(0.5f, 0.45454545f)), 1.f));
 
         mWhiteFurnaceTestShader.bind();
         mWhiteFurnaceTestShader.image("storageGBuffer", context.gbuffer.getId(), context.gbuffer.getFormat(), 0, true, GL_READ_ONLY);
@@ -91,6 +92,9 @@ namespace graphics
         mWhiteFurnaceTestShader.set("directionalAlbedoLut", lut.specularDirectionalAlbedo.getId(), 1);
         mWhiteFurnaceTestShader.set("directionalAlbedoAverageLut", lut.specularDirectionalAlbedoAverage.getId(), 2);
         mWhiteFurnaceTestShader.set("missingSpecularLutTexture", lut.specularMissing.getId(), 3);
+
+        mWhiteFurnaceTestShader.set("sheenLut", lut.sheenDirectionalAlbedo.getId(), 6);
+        mWhiteFurnaceTestShader.set("sheenMissing", lut.sheenMissing.getId(), 7);
 
         dispatchCompute(glm::ceil(glm::vec2(size) / glm::vec2(16)));
 

@@ -44,6 +44,7 @@ uniform float u_luminance_multiplier;
 
 #if COMPUTE_SHEEN > 0
 layout(binding = 6) uniform sampler2D sheenLut;
+layout(binding = 7) uniform sampler2D sheenMissing;
 #endif
 
 layout(binding = 1, rgba16f) uniform image2D lighting;
@@ -104,13 +105,16 @@ void main()
     const vec3 diffuse = evaluateDiffuseBrdf(gBuffer, specular + specMissing);
 
     vec3 sheen = vec3(0.f);
+    float sheenScalar = 1.f;
 #if COMPUTE_SHEEN > 0
     if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT) == 1)
     {
     #if WHITE_FURNACE_TEST > 0
         sheen = texture(sheenLut, vec2(vDotN, gBuffer.fuzzRoughness)).rrr;
+        sheenScalar = texture(sheenMissing, vec2(vDotN, gBuffer.fuzzRoughness)).r;
     #else
         sheen = gBuffer.fuzzColour * texture(sheenLut, vec2(vDotN, gBuffer.fuzzRoughness)).r;
+        sheenScalar = texture(sheenMissing, vec2(vDotN, gBuffer.fuzzRoughness)).r;
     #endif
     }
 #endif
@@ -118,7 +122,7 @@ void main()
     // todo: specular + diffuse needs to be scaled back using the min-scale method. Possibly in the G channel as we need V right?
 
 #if WHITE_FURNACE_TEST > 0
-    const vec3 colour = linearToSRgb(sheen + specular + specMissing + diffuse - vec3(0.5f));
+    const vec3 colour = linearToSRgb(sheen + sheenScalar * (specular + specMissing + diffuse) - vec3(0.5f));
     imageStore(lighting, ivec2(id), vec4(colour, 1.f));
 #else
 
@@ -128,7 +132,7 @@ void main()
 
     const vec3 colour = imageLoad(lighting, ivec2(id)).rgb;
     // todo: Where do we add the sheen lobe.
-    const vec3 outColour = colour + camera.exposure * ((specular + specMissing) * preFilterColour + (diffuse + sheen) * irradiance) * u_luminance_multiplier;
+    const vec3 outColour = colour + camera.exposure * (sheenScalar * (specular + specMissing) * preFilterColour + (sheenScalar * diffuse + sheen) * irradiance) * u_luminance_multiplier;
     imageStore(lighting, ivec2(id), vec4(outColour, 1.f));
 #endif
 }

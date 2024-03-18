@@ -19,6 +19,7 @@ namespace graphics
         TextureBufferObject specularMissing;
         TextureBufferObject ltcSheenTable;
         TextureBufferObject sheenDirectionalAlbedo;
+        TextureBufferObject sheenMissing;
     };
 
     Lut precalculateLuts(uint32_t size);
@@ -28,4 +29,5 @@ namespace graphics
     [[nodiscard]] TextureBufferObject generateSpecularMissingLut(const glm::ivec2& size, const TextureBufferObject &specularDA, const TextureBufferObject &specularDaAverage);
     [[nodiscard]] TextureBufferObject setupLtcSheenTable();
     [[nodiscard]] TextureBufferObject generateSheenLut(const glm::ivec2& size, const TextureBufferObject &sheenTable);
+    [[nodiscard]] TextureBufferObject generateSheenMissingLut(const glm::ivec2 &size, const TextureBufferObject &sheenDA);
 }

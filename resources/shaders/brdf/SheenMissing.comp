@@ -1,0 +1,47 @@
+#version 460 core
+
+#include "Hammersley.glsl"
+#include "../Maths.glsl"
+
+layout(binding = 0) uniform sampler2D sheenAlbedoLut;
+layout(binding = 0, r16f) writeonly uniform image2D sheenMissingLut;
+
+// todo: add a comment here to explain what's going on and why it's so similar to GgxSpecMissing.comp
+float integrateSheenMissing(float nDotV, float roughness)
+{
+    const vec3 n = vec3(0.f, 0.f, 1.f);
+
+    float accumulation = 0.f;
+
+    const uint sampleCount = 1024u;
+    for (uint i = 0u; i < sampleCount; ++i)
+    {
+        const vec2 rand = hammersley(i, sampleCount);
+        const vec3 l = cosImportanceSample(rand, n);
+
+        const float nDotL = saturate(dot(n, l));
+
+        if (nDotL > 0.f)
+        {
+            const float oneMinusRspecL = 1.f - texture(sheenAlbedoLut, vec2(nDotL, roughness)).r;
+            accumulation += oneMinusRspecL;
+        }
+    }
+
+    const float oneMinusRspecL = accumulation / float(sampleCount);
+    const float oneMinusRspecV = 1.f - texture(sheenAlbedoLut, vec2(nDotV, roughness)).r;
+
+    return min(oneMinusRspecL, oneMinusRspecV);
+}
+
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+void main()
+{
+    const vec3 id = gl_GlobalInvocationID;
+    const vec3 dispatchSize = gl_NumWorkGroups * gl_WorkGroupSize;
+    const vec2 uv = vec2(1.f) - ((id.xy + vec2(0.5f)) / dispatchSize.xy);
+
+    const float result = integrateSheenMissing(uv.x, uv.y);
+
+    imageStore(sheenMissingLut, ivec2(dispatchSize) - ivec2(1) - ivec2(id.xy), vec4(result.x, 0.f, 0.f, 0.f));
+}

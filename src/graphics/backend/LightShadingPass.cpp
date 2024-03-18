@@ -218,6 +218,7 @@ namespace graphics
                 shader.set("u_pre_filter_texture", skybox.prefilterMap.getId(), 5);
 
                 shader.set("sheenLut", lut.sheenDirectionalAlbedo.getId(), 6);
+                shader.set("sheenMissing", lut.sheenMissing.getId(), 7);
 
                 shader.set("u_luminance_multiplier", skybox.luminanceMultiplier);
 
@@ -266,7 +267,9 @@ namespace graphics
         results.push_back(LightShaderVariant { Shader( { path }, uberShaderDefinitions),
             [](Shader &shader, Context &context, const Lut &lut)
             {
+                // Todo: Bindings here do not match the shader code.
                 shader.set("sheenTable", lut.ltcSheenTable.getId(), 5);
+                shader.set("sheenAlbedoLut", lut.sheenDirectionalAlbedo.getId(), 6);
             }
         });
 
