@@ -317,7 +317,6 @@ Actors:
       - Component: MeshRenderer
         MeshPath: models\ClothBall.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\sheen\SheenMat0.1.mpcy
     Children:
       []
@@ -330,7 +329,6 @@ Actors:
       - Component: MeshRenderer
         MeshPath: models\ClothBall.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\sheen\SheenMat0.2.mpcy
     Children:
       []
@@ -343,7 +341,6 @@ Actors:
       - Component: MeshRenderer
         MeshPath: models\ClothBall.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\sheen\SheenMat0.3.mpcy
     Children:
       []
@@ -356,7 +353,6 @@ Actors:
       - Component: MeshRenderer
         MeshPath: models\ClothBall.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\sheen\SheenMat0.4.mpcy
     Children:
       []
@@ -369,7 +365,6 @@ Actors:
       - Component: MeshRenderer
         MeshPath: models\ClothBall.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\sheen\SheenMat0.5.mpcy
     Children:
       []
@@ -382,7 +377,6 @@ Actors:
       - Component: MeshRenderer
         MeshPath: models\ClothBall.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\sheen\SheenMat0.6.mpcy
     Children:
       []
@@ -395,7 +389,6 @@ Actors:
       - Component: MeshRenderer
         MeshPath: models\ClothBall.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\sheen\SheenMat0.7.mpcy
     Children:
       []
@@ -408,7 +401,6 @@ Actors:
       - Component: MeshRenderer
         MeshPath: models\ClothBall.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\sheen\SheenMat0.8.mpcy
     Children:
       []
@@ -421,7 +413,6 @@ Actors:
       - Component: MeshRenderer
         MeshPath: models\ClothBall.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\sheen\SheenMat0.9.mpcy
     Children:
       []
@@ -434,7 +425,6 @@ Actors:
       - Component: MeshRenderer
         MeshPath: models\ClothBall.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\sheen\SheenMat1.0.mpcy
     Children:
       []
