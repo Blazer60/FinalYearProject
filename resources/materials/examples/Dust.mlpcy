@@ -7,8 +7,8 @@ SheenRoughnessTexturePath: ""
 DiffuseColour: [9.99999975e-05, 9.9989993e-05, 9.9989993e-05]
 SpecularColour: [9.99999975e-05, 9.9989993e-05, 9.9989993e-05]
 Roughness: 1
-SheenColour: [0.858663082, 0.858577192, 0.858577192]
-SheenRoughness: 1
+SheenColour: [1, 0.999899983, 0.999899983]
+SheenRoughness: 0.224000007
 DiffuseWrapOp: 0
 SpecularWrapOp: 0
 NormalWrapOp: 0

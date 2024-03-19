@@ -1,0 +1,4 @@
+MaterialLayers:
+  - materials\examples\cloth\Cloth.mlpcy
+MaskLayers:
+  []

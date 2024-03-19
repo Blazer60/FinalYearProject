@@ -14,7 +14,7 @@ Actors:
       []
   - Name: Dusty Wood
     UUID: 465828850839980343
-    position: [0.0626102984, 2.20214065e-06, -1.80208254]
+    position: [2.5907464, -0.15730536, -14.5555134]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
@@ -29,7 +29,7 @@ Actors:
     UUID: 16809401724350566722
     position: [-1.1920929e-07, -1.54860377, 4.76837158e-07]
     rotation: [1, 0, 0, 0]
-    scale: [2, 0.12734656, 2]
+    scale: [10, 0.12734656, 10]
     Components:
       - Component: MeshRenderer
         MeshPath: models\Grid20x20.glb
@@ -45,11 +45,87 @@ Actors:
     Components:
       - Component: DirectionalLight
         Colour: [0.930000007, 0.930000007, 0.949999988]
-        Intensity: 100
+        Intensity: 2350
         Yaw: 108
         Pitch: 45
         CascadeDepths: [0.0399999991, 0.159999996, 0.360000014, 0.639999986]
         ZMultiplier: 5
         Bias: [0.00100000005, 0]
+    Children:
+      []
+  - Name: Cloth Ball
+    UUID: 16318839867854417585
+    position: [-1.73517144, 1.94723964, -18.0174713]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\ClothBall.glb
+        UMaterials:
+          - materials\examples\cloth\Cloth.mpcy
+    Children:
+      []
+  - Name: Metal 01
+    UUID: 9468677980174693268
+    position: [-0.166058585, -0.205085307, -12.3015451]
+    rotation: [0.962092042, 0, 0.272724926, 0]
+    scale: [0.99999994, 1, 0.99999994]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\MaterialBallUe5.glb
+        UMaterials:
+          - materials\graphics\accentMat.mpcy
+          - materials\examples\metal\Metal01.mpcy
+    Children:
+      []
+  - Name: Gold
+    UUID: 6902247367769037864
+    position: [-4.27814531, -0.150582626, -15.6447887]
+    rotation: [0.95904398, 0, 0.283257276, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\MaterialBallUe5.glb
+        UMaterials:
+          - materials\graphics\accentMat.mpcy
+          - materials\examples\metal\Gold.mpcy
+    Children:
+      []
+  - Name: Metal 02
+    UUID: 5903336217543708299
+    position: [-1.54940403, -0.205085292, -15.1417284]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\MaterialBallUe5.glb
+        UMaterials:
+          - materials\graphics\accentMat.mpcy
+          - materials\examples\metal\Metal02.mpcy
+    Children:
+      []
+  - Name: Model 2.5
+    UUID: 13611373191630004533
+    position: [1.22949183, -0.205085427, -16.8080177]
+    rotation: [0.912703991, 0, -0.408621401, 0]
+    scale: [0.999999881, 1, 0.999999881]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\MaterialBallUe5.glb
+        UMaterials:
+          - materials\graphics\accentMat.mpcy
+          - materials\examples\metal\Metal02.5.mpcy
+    Children:
+      []
+  - Name: Model
+    UUID: 16643169171267619401
+    position: [-18.183897, -0.205085516, -23.3075771]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\MaterialBallUe5.glb
+        UMaterials:
+          - materials\graphics\accentMat.mpcy
     Children:
       []

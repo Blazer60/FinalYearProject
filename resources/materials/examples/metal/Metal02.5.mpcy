@@ -1,0 +1,4 @@
+MaterialLayers:
+  - materials\examples\metal\Metal02.mlpcy
+MaskLayers:
+  []

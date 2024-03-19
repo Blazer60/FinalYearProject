@@ -1,0 +1,17 @@
+DiffuseTexturePath: ""
+SpecularTexturePath: ""
+NormalTexturePath: ""
+RoughnessTexturePath: materials\examples\textures\T_Imperfections_Stains_Mask.png
+SheenTexturePath: ""
+SheenRoughnessTexturePath: materials\examples\textures\T_WindGust_Mask.png
+DiffuseColour: [0.102562547, 0.102552287, 0.102552287]
+SpecularColour: [0.207125336, 0, 0.484369993]
+Roughness: 1
+SheenColour: [1, 0.999899983, 0.999899983]
+SheenRoughness: 0.231000006
+DiffuseWrapOp: 0
+SpecularWrapOp: 0
+NormalWrapOp: 0
+RoughnessWrapOp: 0
+SheenWrapOp: 0
+SheenRoughnessWrapOp: 0

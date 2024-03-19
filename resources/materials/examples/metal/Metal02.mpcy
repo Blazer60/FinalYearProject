@@ -1,0 +1,9 @@
+MaterialLayers:
+  - materials\examples\metal\Metal02.mlpcy
+  - materials\examples\metal\Gold.mlpcy
+MaskLayers:
+  - Texture: materials\examples\textures\CheckerBoardBlurred.png
+    Alpha: 1
+    Passthrough: 40
+    Operation: 0
+    Wrap: 0
