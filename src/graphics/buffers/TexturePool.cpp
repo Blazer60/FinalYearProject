@@ -11,8 +11,12 @@
 
 namespace graphics
 {
-    TexturePool::TexturePool(const std::string& debugName, const textureFormat format, const filter filter)
-        : mDebugName(debugName), mFormat(format), mFilter(filter)
+    TexturePool::TexturePool(
+        const std::string &debugName, const textureFormat format,
+        const int32_t mipLevels, const filter filter)
+        :
+        mDebugName(debugName), mFormat(format),
+        mFilter(filter), mMipLevels(mipLevels)
     {
     }
 
@@ -46,6 +50,7 @@ namespace graphics
             mId, GL_TEXTURE_2D_ARRAY, mipLevel, x, y, dstIndex,
             textureSize.x, textureSize.y, 1
         );
+        glGenerateTextureMipmap(mId);
 
         mData[dstIndex].width  = textureSize.x;
         mData[dstIndex].height = textureSize.y;
@@ -83,8 +88,7 @@ namespace graphics
         glTextureParameteri(newId, GL_TEXTURE_WRAP_S, toGLint(mWrap));
         glTextureParameteri(newId, GL_TEXTURE_WRAP_T, toGLint(mWrap));
 
-        constexpr int mipMapLevels = 1;
-        glTextureStorage3D(newId, mipMapLevels, toGLenum(mFormat), newSize.x, newSize.y, newCount);
+        glTextureStorage3D(newId, mMipLevels, toGLenum(mFormat), newSize.x, newSize.y, newCount);
 
         if (!mDebugName.empty())
             glObjectLabel(GL_TEXTURE, newId, static_cast<GLsizei>(mDebugName.size()), mDebugName.data());

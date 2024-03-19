@@ -23,7 +23,7 @@ namespace graphics
     class TexturePool 
     {
     public:
-        TexturePool(const std::string &debugName, textureFormat format, filter filter=filter::LinearMipmapLinear);
+        TexturePool(const std::string &debugName, textureFormat format, int32_t mipLevels=1, filter filter=filter::LinearMipmapLinear);
         ~TexturePool();
         uint32_t id() const { return mId; }
         std::vector<TextureData> data() const { return mData; }
@@ -45,6 +45,7 @@ namespace graphics
         wrap            mWrap       = wrap::ClampToEdge;
         glm::ivec2      mSize       = glm::ivec2(0);
         int32_t         mLayerCount = 0;
+        int32_t         mMipLevels  = 1;
         std::vector<TextureData> mData;
     };
 

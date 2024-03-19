@@ -57,7 +57,7 @@ namespace engine
 
         std::vector<std::shared_ptr<UberLayer>> mLayers;
         std::vector<std::unique_ptr<UberMask>> mMasks;
-        graphics::TexturePool mTexturePool = graphics::TexturePool(mPath.string(), graphics::textureFormat::Rgba8);
+        graphics::TexturePool mTexturePool = graphics::TexturePool(mPath.string(), graphics::textureFormat::Rgba8, 8);
         graphics::MaterialData mData;
     };
 } // engine
