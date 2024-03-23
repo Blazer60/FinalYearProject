@@ -1,0 +1,17 @@
+DiffuseTexturePath: textures\EquationUV.jpg
+SpecularTexturePath: ""
+NormalTexturePath: ""
+RoughnessTexturePath: ""
+SheenTexturePath: ""
+SheenRoughnessTexturePath: ""
+DiffuseColour: [1, 0.999899983, 0.999899983]
+SpecularColour: [0.0961001515, 0.0960905403, 0.0960905403]
+Roughness: 1
+SheenColour: [0, 0, 0]
+SheenRoughness: 1
+DiffuseWrapOp: 0
+SpecularWrapOp: 0
+NormalWrapOp: 0
+RoughnessWrapOp: 0
+SheenWrapOp: 0
+SheenRoughnessWrapOp: 0

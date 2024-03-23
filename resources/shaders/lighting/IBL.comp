@@ -131,7 +131,6 @@ void main()
     const vec3 irradiance = texture(u_irradiance_texture, n).rgb;
 
     const vec3 colour = imageLoad(lighting, ivec2(id)).rgb;
-    // todo: Where do we add the sheen lobe.
     const vec3 outColour = colour + camera.exposure * (sheenScalar * (specular + specMissing) * preFilterColour + (sheenScalar * diffuse + sheen) * irradiance) * u_luminance_multiplier;
     imageStore(lighting, ivec2(id), vec4(outColour, 1.f));
 #endif

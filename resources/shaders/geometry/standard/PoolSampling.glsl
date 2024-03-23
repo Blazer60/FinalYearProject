@@ -31,7 +31,7 @@ float sampleMask(vec2 uv, int index)
 vec4 sampleTexture(vec2 uv, int index)
 {
     if (index == -1)
-    return vec4(vec3(0.f), 1.f);
+        return vec4(vec3(0.f), 1.f);
 
     TextureData data = textureData[index];
 

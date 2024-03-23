@@ -1,4 +1,4 @@
-Scene: scenes\BrdfTest.pcy
+Scene: scenes\SphereTest.pcy
 Actors:
   - Name: Diffuse 0.1
     UUID: 9235691866103231334
@@ -7,9 +7,8 @@ Actors:
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\MoriBall.glb
+        MeshPath: models\defaultObjects\DefaultSphere.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\matDiffuse0.1.mpcy
     Children:
       []
@@ -20,9 +19,8 @@ Actors:
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\MoriBall.glb
+        MeshPath: models\defaultObjects\DefaultSphere.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\matDiffuse0.2.mpcy
     Children:
       []
@@ -33,9 +31,8 @@ Actors:
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\MoriBall.glb
+        MeshPath: models\defaultObjects\DefaultSphere.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\matDiffuse0.3.mpcy
     Children:
       []
@@ -46,9 +43,8 @@ Actors:
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\MoriBall.glb
+        MeshPath: models\defaultObjects\DefaultSphere.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\matDiffuse0.4.mpcy
     Children:
       []
@@ -59,9 +55,8 @@ Actors:
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\MoriBall.glb
+        MeshPath: models\defaultObjects\DefaultSphere.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\matDiffuse0.5.mpcy
     Children:
       []
@@ -72,9 +67,8 @@ Actors:
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\MoriBall.glb
+        MeshPath: models\defaultObjects\DefaultSphere.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\matDiffuse0.6.mpcy
     Children:
       []
@@ -85,9 +79,8 @@ Actors:
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\MoriBall.glb
+        MeshPath: models\defaultObjects\DefaultSphere.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\matDiffuse0.7.mpcy
     Children:
       []
@@ -98,9 +91,8 @@ Actors:
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\MoriBall.glb
+        MeshPath: models\defaultObjects\DefaultSphere.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\matDiffuse0.8.mpcy
     Children:
       []
@@ -111,9 +103,8 @@ Actors:
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\MoriBall.glb
+        MeshPath: models\defaultObjects\DefaultSphere.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\matDiffuse0.9.mpcy
     Children:
       []
@@ -124,9 +115,8 @@ Actors:
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\MoriBall.glb
+        MeshPath: models\defaultObjects\DefaultSphere.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\matDiffuse1.0.mpcy
     Children:
       []
@@ -137,9 +127,8 @@ Actors:
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\MoriBall.glb
+        MeshPath: models\defaultObjects\DefaultSphere.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\matSpecular0.1.mpcy
     Children:
       []
@@ -150,9 +139,8 @@ Actors:
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\MoriBall.glb
+        MeshPath: models\defaultObjects\DefaultSphere.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\matSpecular0.2.mpcy
     Children:
       []
@@ -163,9 +151,8 @@ Actors:
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\MoriBall.glb
+        MeshPath: models\defaultObjects\DefaultSphere.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\matSpecular0.3.mpcy
     Children:
       []
@@ -176,9 +163,8 @@ Actors:
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\MoriBall.glb
+        MeshPath: models\defaultObjects\DefaultSphere.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\matSpecular0.4.mpcy
     Children:
       []
@@ -189,9 +175,8 @@ Actors:
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\MoriBall.glb
+        MeshPath: models\defaultObjects\DefaultSphere.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\matSpecular0.5.mpcy
     Children:
       []
@@ -202,9 +187,8 @@ Actors:
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\MoriBall.glb
+        MeshPath: models\defaultObjects\DefaultSphere.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\matSpecular0.6.mpcy
     Children:
       []
@@ -215,9 +199,8 @@ Actors:
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\MoriBall.glb
+        MeshPath: models\defaultObjects\DefaultSphere.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\matSpecular0.7.mpcy
     Children:
       []
@@ -228,9 +211,8 @@ Actors:
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\MoriBall.glb
+        MeshPath: models\defaultObjects\DefaultSphere.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\matSpecular0.8.mpcy
     Children:
       []
@@ -241,9 +223,8 @@ Actors:
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\MoriBall.glb
+        MeshPath: models\defaultObjects\DefaultSphere.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\matSpecular0.9.mpcy
     Children:
       []
@@ -254,9 +235,8 @@ Actors:
     scale: [1, 1, 1]
     Components:
       - Component: MeshRenderer
-        MeshPath: models\MoriBall.glb
+        MeshPath: models\defaultObjects\DefaultSphere.glb
         UMaterials:
-          - materials\graphics\accentMat.mpcy
           - materials\graphics\matSpecular1.0.mpcy
     Children:
       []
@@ -274,7 +254,7 @@ Actors:
       []
   - Name: Diffuse Row
     UUID: 15027312380629224023
-    position: [0, -3.87516427, 0]
+    position: [0, 3, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
@@ -292,7 +272,7 @@ Actors:
       - 14695945249867301157
   - Name: Specular Row
     UUID: 326661838687982327
-    position: [0, -6.81109715, 0]
+    position: [0, 0, 0]
     rotation: [1, 0, 0, 0]
     scale: [1, 1, 1]
     Components:
@@ -308,169 +288,3 @@ Actors:
       - 7582905100511727991
       - 2161961970670733406
       - 8852229717090644714
-  - Name: Cloth 0.1
-    UUID: 3214681819289529
-    position: [-13.5, 0, 0]
-    rotation: [1, 0, 0, 0]
-    scale: [1, 1, 1]
-    Components:
-      - Component: MeshRenderer
-        MeshPath: models\ClothBall.glb
-        UMaterials:
-          - materials\graphics\sheen\SheenMat0.1.mpcy
-    Children:
-      []
-  - Name: Cloth 0.2
-    UUID: 10709752479091949111
-    position: [-10.4576473, -0.000438690186, 0.129264295]
-    rotation: [1, 0, 0, 0]
-    scale: [1, 1, 1]
-    Components:
-      - Component: MeshRenderer
-        MeshPath: models\ClothBall.glb
-        UMaterials:
-          - materials\graphics\sheen\SheenMat0.2.mpcy
-    Children:
-      []
-  - Name: Cloth 0.3
-    UUID: 2806106026937463753
-    position: [-7.5, 0, 0]
-    rotation: [1, 0, 0, 0]
-    scale: [1, 1, 1]
-    Components:
-      - Component: MeshRenderer
-        MeshPath: models\ClothBall.glb
-        UMaterials:
-          - materials\graphics\sheen\SheenMat0.3.mpcy
-    Children:
-      []
-  - Name: Cloth 0.4
-    UUID: 13940552987556433140
-    position: [-4.5, 0, 0]
-    rotation: [1, 0, 0, 0]
-    scale: [1, 1, 1]
-    Components:
-      - Component: MeshRenderer
-        MeshPath: models\ClothBall.glb
-        UMaterials:
-          - materials\graphics\sheen\SheenMat0.4.mpcy
-    Children:
-      []
-  - Name: Cloth 0.5
-    UUID: 13862813022780328771
-    position: [-1.5, 0, 0]
-    rotation: [1, 0, 0, 0]
-    scale: [1, 1, 1]
-    Components:
-      - Component: MeshRenderer
-        MeshPath: models\ClothBall.glb
-        UMaterials:
-          - materials\graphics\sheen\SheenMat0.5.mpcy
-    Children:
-      []
-  - Name: Cloth 0.6
-    UUID: 7340367222081817063
-    position: [1.5, 0, 0]
-    rotation: [1, 0, 0, 0]
-    scale: [1, 1, 1]
-    Components:
-      - Component: MeshRenderer
-        MeshPath: models\ClothBall.glb
-        UMaterials:
-          - materials\graphics\sheen\SheenMat0.6.mpcy
-    Children:
-      []
-  - Name: Cloth 0.7
-    UUID: 13534116659935204617
-    position: [4.5, 0, 0]
-    rotation: [1, 0, 0, 0]
-    scale: [1, 1, 1]
-    Components:
-      - Component: MeshRenderer
-        MeshPath: models\ClothBall.glb
-        UMaterials:
-          - materials\graphics\sheen\SheenMat0.7.mpcy
-    Children:
-      []
-  - Name: Cloth 0.8
-    UUID: 1884817525270782066
-    position: [7.5, 0, 0]
-    rotation: [1, 0, 0, 0]
-    scale: [1, 1, 1]
-    Components:
-      - Component: MeshRenderer
-        MeshPath: models\ClothBall.glb
-        UMaterials:
-          - materials\graphics\sheen\SheenMat0.8.mpcy
-    Children:
-      []
-  - Name: Cloth 0.9
-    UUID: 17002174199409328228
-    position: [10.5, 0, 0]
-    rotation: [1, 0, 0, 0]
-    scale: [1, 1, 1]
-    Components:
-      - Component: MeshRenderer
-        MeshPath: models\ClothBall.glb
-        UMaterials:
-          - materials\graphics\sheen\SheenMat0.9.mpcy
-    Children:
-      []
-  - Name: Cloth 1.0
-    UUID: 6960501724692294949
-    position: [13.5, 0, 0]
-    rotation: [1, 0, 0, 0]
-    scale: [1, 1, 1]
-    Components:
-      - Component: MeshRenderer
-        MeshPath: models\ClothBall.glb
-        UMaterials:
-          - materials\graphics\sheen\SheenMat1.0.mpcy
-    Children:
-      []
-  - Name: Cloth Row
-    UUID: 10431964507032836423
-    position: [0, 0.0655755997, -2.93240237]
-    rotation: [1, 0, 0, 0]
-    scale: [1, 1, 1]
-    Components:
-      []
-    Children:
-      - 3214681819289529
-      - 10709752479091949111
-      - 2806106026937463753
-      - 13940552987556433140
-      - 13862813022780328771
-      - 7340367222081817063
-      - 13534116659935204617
-      - 1884817525270782066
-      - 17002174199409328228
-      - 6960501724692294949
-  - Name: Backdrop
-    UUID: 15967902057453121094
-    position: [1.59288466e-05, -6.75199986, -0.277999997]
-    rotation: [1, 0, 0, 0]
-    scale: [1.5, 1.5, 1.5]
-    Components:
-      - Component: MeshRenderer
-        MeshPath: models\Backdrop.glb
-        UMaterials:
-          - materials\Backdrop.mpcy
-    Children:
-      []
-  - Name: Directional Light
-    UUID: 15943061732170408256
-    position: [0, 0, -10]
-    rotation: [1, 0, 0, 0]
-    scale: [1, 1, 1]
-    Components:
-      - Component: DirectionalLight
-        Colour: [0.930000007, 0.930000007, 0.949999988]
-        Intensity: 1000
-        Yaw: 45
-        Pitch: 45
-        CascadeDepths: [0.0399999991, 0.159999996, 0.360000014, 0.639999986]
-        ZMultiplier: 5
-        Bias: [0.00100000005, 0]
-    Children:
-      []

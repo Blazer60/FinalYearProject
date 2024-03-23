@@ -129,6 +129,5 @@ vec3 evaluateClosure(GBuffer gBuffer, vec3 position, vec3 lightDirection)
     }
 #endif
 
-    // todo: Scale back the rest of the sheen brdf.
     return sheen + sheenScalar * (specular + missingSpecular + diffuse);
 }
