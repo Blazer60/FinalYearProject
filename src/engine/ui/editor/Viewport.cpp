@@ -108,7 +108,7 @@ namespace engine
         if (ImGui::RadioButton("World", mMode == ImGuizmo::MODE::WORLD))
             mMode = ImGuizmo::MODE::WORLD;
         ImGui::SameLine();
-        ImGui::Checkbox("Force 1080p", &mForce1080p);
+        ui::enumCombo("##Res", mCustomResolution, resolutionCount);
         ImGui::SameLine();
         ImGui::Checkbox("Debug Overlay", &mShowDebugOverlay);
         ImGui::SameLine();
@@ -132,12 +132,29 @@ namespace engine
         }
     }
 
+    ImVec2 Viewport::getDesiredViewportSize() const
+    {
+        switch (mCustomResolution)
+        {
+            case Resolution::p720:
+                return ImVec2(1280, 720);
+            case Resolution::p1080:
+                return ImVec2(1920, 1080);
+            case Resolution::p1440:
+                return ImVec2(2560, 1440);
+            case Resolution::p2160:
+                return ImVec2(3840, 2160);
+            default:
+                return ImGui::GetContentRegionAvail();
+        }
+    }
+
     void Viewport::drawEditorView()
     {
         ImGui::BeginChild("ImageWindow");
 
         const ImVec2 cursorPos = ImGui::GetCursorPos();
-        const ImVec2 regionSize = mForce1080p ? ImVec2(1920.f, 1080.f) : ImGui::GetContentRegionAvail();
+        const ImVec2 regionSize = getDesiredViewportSize();
         window::setBufferSize(glm::ivec2(regionSize.x, regionSize.y));
         const TextureBufferObject &texture = mViewportImages[mCurrentSelectedImage].requestTexture();
         ImGui::Image(reinterpret_cast<void *>(static_cast<size_t>(texture.getId())), regionSize, ImVec2(0, 1), ImVec2(1, 0));
@@ -210,7 +227,7 @@ namespace engine
     {
         ImGui::BeginChild("ImageWindow");
 
-        const ImVec2 regionSize = mForce1080p ? ImVec2(1920.f, 1080.f) : ImGui::GetContentRegionAvail();
+        const ImVec2 regionSize = getDesiredViewportSize();
         window::setBufferSize(glm::ivec2(regionSize.x, regionSize.y));
 
         const TextureBufferObject &texture = graphics::renderer->getPrimaryBuffer();

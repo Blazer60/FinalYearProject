@@ -20,6 +20,25 @@
 
 namespace engine
 {
+    constexpr uint8_t resolutionCount = 5;
+    enum class Resolution : uint8_t
+    {
+        p720, p1080, p1440, p2160, FitToRegion
+    };
+
+    inline const char* to_string(const Resolution resolution)
+    {
+        switch (resolution)
+        {
+            case Resolution::p720: return "720p";
+            case Resolution::p1080: return "1080p";
+            case Resolution::p1440: return "1440p";
+            case Resolution::p2160: return "2160p";
+            case Resolution::FitToRegion: return "Fit to Region";
+            default: return "unknown";
+        }
+    }
+
     struct ViewportImage
     {
         std::string name;
@@ -41,6 +60,8 @@ namespace engine
         [[nodiscard]] glm::vec2 getSize() const;
 
         void drawTopBar();
+
+        ImVec2 getDesiredViewportSize() const;
 
         void drawEditorView();
 
@@ -76,7 +97,7 @@ namespace engine
         
         std::vector<ViewportImage> mViewportImages;
         int32_t mCurrentSelectedImage = 0;
-        bool mForce1080p { false };
+        Resolution mCustomResolution = Resolution::FitToRegion;
         bool mShowDebugOverlay { false };
         bool mShowTileClassification { false };
         bool mIsSimulating { false };
