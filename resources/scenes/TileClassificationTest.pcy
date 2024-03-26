@@ -1,0 +1,42 @@
+Scene: scenes\TileClassificationTest.pcy
+Actors:
+  - Name: Skylight
+    UUID: 1131826340421676061
+    position: [0, 5.13056183, -8.10848045]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: DistantLightProbe
+        Size: [1024, 1024]
+        RadianceMultiplier: 1000
+        Path: textures\hdr\unfinished_office_4k.hdr
+    Children:
+      []
+  - Name: Directional Light
+    UUID: 8205809920912437946
+    position: [0, 2, -10]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: DirectionalLight
+        Colour: [0.930000007, 0.930000007, 0.949999988]
+        Intensity: 10000
+        Yaw: 45
+        Pitch: 45
+        CascadeDepths: [0.0399999991, 0.159999996, 0.360000014, 0.639999986]
+        ZMultiplier: 5
+        Bias: [0.00100000005, 0]
+    Children:
+      []
+  - Name: Backdrop
+    UUID: 12804204882915498483
+    position: [0, -1, 5]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\Backdrop.glb
+        UMaterials:
+          - materials\examples\metal\Gold.mpcy
+    Children:
+      []

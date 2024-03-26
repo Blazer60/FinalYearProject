@@ -47,6 +47,7 @@ namespace engine
         std::shared_ptr<Texture> mRoughnessTexture = std::make_shared<Texture>("");
         std::shared_ptr<Texture> mSheenTexture = std::make_shared<Texture>("");
         std::shared_ptr<Texture> mSheenRoughnessTexture = std::make_shared<Texture>("");
+        std::shared_ptr<Texture> mMetallicTexture = std::make_shared<Texture>("");
 
         glm::vec3 mDiffuseColour = glm::vec3(0.8f, 0.8f, 0.8f);
         glm::vec3 mSpecularColour = glm::vec3(0.2f, 0.2f, 0.2f);
@@ -60,6 +61,7 @@ namespace engine
         graphics::WrapOp mRoughnessWrapOp       = graphics::WrapOp::Repeat;
         graphics::WrapOp mSheenWrapOp           = graphics::WrapOp::Repeat;
         graphics::WrapOp mSheenRoughnessWrapOp  = graphics::WrapOp::Repeat;
+        graphics::WrapOp mMetallicWrapOp        = graphics::WrapOp::Repeat;
 
         std::vector<UpdateFunc> mLayerUpdates;
     };

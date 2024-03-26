@@ -53,8 +53,22 @@ void main()
 
     LayerData material = layers[0];
 
-    gBuffer.diffuse         = sampleColour(material.diffuseColour, v_uv, material.diffuseTextureIndex);
-    gBuffer.specular        = sampleColour(material.specularColour, v_uv, material.specularTextureIndex);
+    if (material.metallicTextureIndex == -1)
+    {
+        gBuffer.diffuse         = sampleColour(material.diffuseColour, v_uv, material.diffuseTextureIndex);
+        gBuffer.specular        = sampleColour(material.specularColour, v_uv, material.specularTextureIndex);
+    }
+    else
+    {
+        const vec3 darkColour = vec3(0.04f);
+        const vec3 baseColour = sampleColour(material.diffuseColour, v_uv, material.diffuseTextureIndex);
+        const float metallic = sampleTexture(v_uv, material.metallicTextureIndex).r;
+
+        gBuffer.diffuse  = mix(darkColour, baseColour, 1.f - metallic);
+        gBuffer.specular = mix(darkColour, baseColour, metallic);
+
+    }
+
     gBuffer.normal          = sampleNormal(v_normal_ws, v_uv, material.normalTextureIndex, v_tbn_matrix);
     gBuffer.roughness       = sampleValue(material.roughness, v_uv, material.roughnessTextureIndex);
     gBuffer.fuzzColour      = sampleColour(material.sheenColour, v_uv, material.sheenTextureIndex);
@@ -74,8 +88,22 @@ void main()
 
         GBuffer nextGBuffer = gBufferCreate();
 
-        nextGBuffer.diffuse         = sampleColour(material.diffuseColour, v_uv, material.diffuseTextureIndex);
-        nextGBuffer.specular        = sampleColour(material.specularColour, v_uv, material.specularTextureIndex);
+        if (material.metallicTextureIndex == -1)
+        {
+            nextGBuffer.diffuse         = sampleColour(material.diffuseColour, v_uv, material.diffuseTextureIndex);
+            nextGBuffer.specular        = sampleColour(material.specularColour, v_uv, material.specularTextureIndex);
+        }
+        else
+        {
+            const vec3 darkColour = vec3(0.04f);
+            const vec3 baseColour = sampleColour(material.diffuseColour, v_uv, material.diffuseTextureIndex);
+            const float metallic = sampleTexture(v_uv, material.metallicTextureIndex).r;
+
+            nextGBuffer.diffuse  = mix(darkColour, baseColour, 1.f - metallic);
+            nextGBuffer.specular = mix(darkColour, baseColour, metallic);
+
+        }
+
         nextGBuffer.normal          = sampleNormal(v_normal_ws, v_uv, material.normalTextureIndex, v_tbn_matrix);
         nextGBuffer.roughness       = sampleValue(material.roughness, v_uv, material.roughnessTextureIndex);
         nextGBuffer.fuzzColour      = sampleColour(material.sheenColour, v_uv, material.sheenTextureIndex);

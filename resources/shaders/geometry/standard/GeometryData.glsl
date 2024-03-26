@@ -9,10 +9,16 @@ struct LayerData
     float sheenRoughness;
     int diffuseTextureIndex;
     int specularTextureIndex;
+
     int normalTextureIndex;
     int roughnessTextureIndex;
     int sheenTextureIndex;
     int sheenRoughnessTextureIndex;
+
+    int metallicTextureIndex;
+    int _padding01;
+    int _padding02;
+    int _padding03;
 };
 
 #define PASSTHROUGH_FLAG_DIFFUSE 1

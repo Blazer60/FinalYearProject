@@ -168,6 +168,23 @@ namespace engine
                     });
                 }
             }
+            if (const ui::EditFlags flags = ui::rowTexture("Metallic map", mMetallicTexture, mMetallicWrapOp); flags > 0)
+            {
+                if ((flags & ui::EditFlags::Texture) > 0)
+                {
+                    mLayerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                        texturePool.removeTexture(layer.metallicTextureIndex);
+                        layer.metallicTextureIndex = texturePool.addTexture(*mMetallicTexture);
+                        texturePool.setWrap(layer.metallicTextureIndex, mMetallicWrapOp);
+                    });
+                }
+                if ((flags & ui::EditFlags::Wrap) > 0)
+                {
+                    mLayerUpdates.push_back([this](graphics::TexturePool &texturePool, const graphics::LayerData &layer) {
+                        texturePool.setWrap(layer.metallicTextureIndex, mMetallicWrapOp);
+                    });
+                }
+            }
             ImGui::EndTable();
         }
         const auto name = format::string("%", mPath);
@@ -201,6 +218,7 @@ namespace engine
         out << YAML::Key << "RoughnessTexturePath"      << YAML::Value << file::makeRelativeToResourcePath(mRoughnessTexture->path()).string();
         out << YAML::Key << "SheenTexturePath"          << YAML::Value << file::makeRelativeToResourcePath(mSheenTexture->path()).string();
         out << YAML::Key << "SheenRoughnessTexturePath" << YAML::Value << file::makeRelativeToResourcePath(mSheenRoughnessTexture->path()).string();
+        out << YAML::Key << "MetallicTexturePath"       << YAML::Value << file::makeRelativeToResourcePath(mMetallicTexture->path()).string();
 
         out << YAML::Key << "DiffuseColour"     << YAML::Value << mDiffuseColour;
         out << YAML::Key << "SpecularColour"    << YAML::Value << mSpecularColour;
@@ -214,6 +232,7 @@ namespace engine
         out << YAML::Key << "RoughnessWrapOp"       << YAML::Value << static_cast<unsigned int>(mRoughnessWrapOp);
         out << YAML::Key << "SheenWrapOp"           << YAML::Value << static_cast<unsigned int>(mSheenWrapOp);
         out << YAML::Key << "SheenRoughnessWrapOp"  << YAML::Value << static_cast<unsigned int>(mSheenRoughnessWrapOp);
+        out << YAML::Key << "MetallicWrapOp"        << YAML::Value << static_cast<unsigned int>(mMetallicWrapOp);
         out << YAML::EndMap;
 
         std::ofstream fileOutput(mPath);
@@ -261,6 +280,7 @@ namespace engine
         mRoughnessTexture       = tryLoadAsTexture(data["RoughnessTexturePath"]);
         mSheenTexture           = tryLoadAsTexture(data["SheenTexturePath"]);
         mSheenRoughnessTexture  = tryLoadAsTexture(data["SheenRoughnessTexturePath"]);
+        mMetallicTexture        = tryLoadAsTexture(data["MetallicTexturePath"]);
 
         tryLoadAsVec3(data["DiffuseColour"], mDiffuseColour);
         tryLoadAsVec3(data["SpecularColour"], mSpecularColour);
@@ -274,5 +294,6 @@ namespace engine
         tryLoadAsWrapOp(data["RoughnessWrapOp"], mRoughnessWrapOp);
         tryLoadAsWrapOp(data["SheenWrapOp"], mSheenWrapOp);
         tryLoadAsWrapOp(data["SheenRoughnessWrapOp"], mSheenRoughnessWrapOp);
+        tryLoadAsWrapOp(data["MetallicWrapOp"], mMetallicWrapOp);
     }
 } // engine

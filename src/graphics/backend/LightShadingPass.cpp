@@ -46,7 +46,7 @@ namespace graphics
         if (directionalLightQueue.empty())
             return;
 
-        PROFILE_FUNC();
+        PROFILE_FUNC_NAMED("Directional Lighting");
         pushDebugGroup("Directional Lighting");
 
         context.camera.bindToSlot(0);
@@ -91,7 +91,7 @@ namespace graphics
         if (pointLightQueue.empty())
             return;
 
-        PROFILE_FUNC();
+        PROFILE_FUNC_NAMED("Point Lighting");
         pushDebugGroup("Point Lighting");
 
         context.camera.bindToSlot(0);
@@ -136,7 +136,7 @@ namespace graphics
         if (spotLightQueue.empty())
             return;
 
-        PROFILE_FUNC();
+        PROFILE_FUNC_NAMED("Spot lighting");
         pushDebugGroup("Spot lighting");
 
         context.camera.bindToSlot(0);
@@ -182,10 +182,10 @@ namespace graphics
 
     void LightShadingPass::execute(Context &context, const Lut &lut, const Skybox &skybox)
     {
-        PROFILE_FUNC();
         if (!skybox.isValid)
             return;
 
+        PROFILE_FUNC_NAMED("Distant Light Probe");
         pushDebugGroup("Distant Light Probe");
 
         context.camera.bindToSlot(0);

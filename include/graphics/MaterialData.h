@@ -86,6 +86,10 @@ namespace graphics
         int32_t roughnessTextureIndex = -1;
         int32_t sheenTextureIndex = -1;
         int32_t sheenRoughnessTextureIndex = -1;
+        int32_t metallicTextureIndex = -1;
+        int32_t _padding01 = 100;
+        int32_t _padding02 = 100;
+        int32_t _padding03 = 100;
     };
 
     struct MaskData

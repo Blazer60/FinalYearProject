@@ -39,10 +39,12 @@ namespace debug
 #endif
 
 #ifdef ENABLE_PROFILING
+    #define PROFILE_FUNC_NAMED(name) const debug::ProfileTimer CONCAT(debugProfileTimer, __LINE__)(name)
     #define PROFILE_FUNC() const debug::ProfileTimer CONCAT(debugProfileTimer, __LINE__)(__FUNCTION__)
     #define PROFILE_SCOPE_BEGIN(id, name) debug::ProfileTimer id(name)
     #define PROFILE_SCOPE_END(name) name.stop();
 #else
+    #define PROFILE_FUNC_NAMED(name)
     #define PROFILE_FUNC()
     #define PROFILE_SCOPE_BEGIN(id, name)
     #define PROFILE_SCOPE_END(name)
