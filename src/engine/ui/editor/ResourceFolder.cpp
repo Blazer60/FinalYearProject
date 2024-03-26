@@ -274,7 +274,7 @@ namespace engine
         if (isDirectory)
         {
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - mItemSize) / 2.f);
-            ui::image(mFolderIconTexture.id(), glm::vec2(mItemSize));
+            ui::image(mFolderIconTexture->id(), glm::vec2(mItemSize));
         }
         else if (file::hasImageExtension(item.path()) && mTextureIcons.count(name) > 0)
         {
@@ -290,17 +290,17 @@ namespace engine
         else if (file::hasMaterialExtension(item.path()))
         {
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - mItemSize) / 2.f);
-            ui::image(mMaterialIconTexture.id(), glm::vec2(mItemSize));
+            ui::image(mMaterialIconTexture->id(), glm::vec2(mItemSize));
         }
         else if (file::hasMaterialLayerExtension(item.path()))
         {
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - mItemSize) / 2.f);
-            ui::image(mLayerIconTexture.id(), glm::vec2(mItemSize));
+            ui::image(mLayerIconTexture->id(), glm::vec2(mItemSize));
         }
         else
         {
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - mItemSize) / 2.f);
-            ui::image(mUnknownIconTexture.id(), glm::vec2(mItemSize));
+            ui::image(mUnknownIconTexture->id(), glm::vec2(mItemSize));
         }
 
         ImGui::PopStyleVar(2);

@@ -26,8 +26,8 @@ public:
     [[nodiscard]] uint32_t id() const { return mId; }
     [[nodiscard]] glm::ivec2 size() const { return mSize; }
     [[nodiscard]] std::filesystem::path path() const { return mPath; }
-    
-protected:
+    void setData(const glm::ivec2 &size, const unsigned char *bytes);
+
     std::filesystem::path mPath;
     uint32_t mId { 0 };
     glm::ivec2 mSize { 0 };

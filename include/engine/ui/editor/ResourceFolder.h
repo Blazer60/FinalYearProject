@@ -10,6 +10,7 @@
 #include "Pch.h"
 #include "Drawable.h"
 #include "FileLoader.h"
+#include "Loader.h"
 #include "Texture.h"
 
 namespace engine
@@ -64,10 +65,10 @@ namespace engine
         std::filesystem::path mSelectedFolder = file::resourcePath();
         std::filesystem::path mDragDropPath;
 
-        Texture mFolderIconTexture = Texture(file::texturePath() / "FolderIcon.png");
-        Texture mUnknownIconTexture = Texture(file::texturePath() / "ObjectIcon.png");
-        Texture mLayerIconTexture = Texture(file::texturePath() / "LayerIcon.png");
-        Texture mMaterialIconTexture = Texture(file::texturePath() / "MaterialIcon.png");
+        std::shared_ptr<Texture> mFolderIconTexture     = load::texture(file::texturePath() / "FolderIcon.png");
+        std::shared_ptr<Texture> mUnknownIconTexture    = load::texture(file::texturePath() / "ObjectIcon.png");
+        std::shared_ptr<Texture> mLayerIconTexture      = load::texture(file::texturePath() / "LayerIcon.png");
+        std::shared_ptr<Texture> mMaterialIconTexture   = load::texture(file::texturePath() / "MaterialIcon.png");
 
         float mItemSize = 100.f;
         std::string mNewFileName;

@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <future>
+
 #include "Pch.h"
 #include "Shader.h"
 #include "Mesh.h"
@@ -18,13 +20,30 @@
 #include <assimp/postprocess.h>
 
 #include "AudioSource.h"
+#include "Callback.h"
+#include "Disk.h"
 #include "PhysicsMeshBuffer.h"
 #include "Texture.h"
-#include "UberLayer.h"
-#include "UberMaterial.h"
 
 namespace engine
 {
+    class UberMaterial;
+    class UberLayer;
+
+    class ImageTask
+    {
+    public:
+        ImageTask(
+            std::future<disk::StbiTextureData>&& future,
+            const std::function<void(disk::StbiTextureData &&)>& callback);
+
+        bool checkAndPerform();
+
+    protected:
+        std::future<disk::StbiTextureData> mFutureResult;
+        std::function<void(disk::StbiTextureData&&)> mOnResults;
+    };
+
     /**
      * @author Ryan Purse
      * @date 01/11/2023
@@ -32,6 +51,8 @@ namespace engine
     class ResourcePool
     {
     public:
+        Callback<std::shared_ptr<Texture>> onTextureReady;
+
         void clean();
         void saveAllAssets();
         void updateMaterials();
@@ -39,15 +60,10 @@ namespace engine
         
         template<typename TVertex>
         [[nodiscard]] SharedMesh loadMesh(const std::filesystem::path &path);
-        
         [[nodiscard]] std::shared_ptr<Texture> loadTexture(const std::filesystem::path &path);
-
         [[nodiscard]] std::shared_ptr<AudioBuffer> loadAudioBuffer(const std::filesystem::path &path);
-
         [[nodiscard]] std::shared_ptr<physics::MeshColliderBuffer> loadPhysicsMesh(const std::filesystem::path &path);
-
         [[nodiscard]] std::shared_ptr<UberLayer> loadMaterialLayer(const std::filesystem::path&path);
-
         [[nodiscard]] std::shared_ptr<UberMaterial> loadMaterial(const std::filesystem::path&path);
 
     protected:
@@ -59,9 +75,10 @@ namespace engine
         std::unordered_map<std::string, std::shared_ptr<physics::MeshColliderBuffer>> mMeshColliders;
         std::unordered_map<std::string, std::shared_ptr<UberLayer>> mMaterialLayers;
         std::unordered_map<std::string, std::shared_ptr<UberMaterial>> mMaterials;
+        std::vector<ImageTask> mTasks;
     };
-    
-    
+
+
     template<typename TVertex>
     SharedMesh ResourcePool::loadMesh(const std::filesystem::path &path)
     {

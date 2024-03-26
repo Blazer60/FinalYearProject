@@ -8,6 +8,11 @@
 #include "ResourcePool.h"
 #include <Statistics.h>
 #include <FileLoader.h>
+#include <future>
+
+#include "Disk.h"
+#include "UberLayer.h"
+#include "UberMaterial.h"
 
 namespace engine
 {
@@ -63,6 +68,26 @@ namespace engine
         }
     }
 
+    ImageTask::ImageTask(
+        std::future<disk::StbiTextureData>&& future,
+        const std::function<void(disk::StbiTextureData&&)>& callback)
+            :
+        mFutureResult(std::move(future)),
+        mOnResults(callback)
+    {
+
+    }
+
+    bool ImageTask::checkAndPerform()
+    {
+        if (const auto status = mFutureResult.wait_for(std::chrono::nanoseconds(0)); status == std::future_status::ready)
+        {
+            mOnResults(mFutureResult.get());
+            return true;
+        }
+        return false;
+    }
+
     void ResourcePool::clean()
     {
         internalClean(mShaders);
@@ -85,16 +110,21 @@ namespace engine
 
     void ResourcePool::updateMaterials()
     {
+        PROFILE_FUNC();
+        mTasks.erase(std::remove_if(mTasks.begin(), mTasks.end(), [](ImageTask &task){ return task.checkAndPerform(); }), mTasks.end());
+
         // I have no idea where else to do this since I only want to update every material onece.
         // This is the only container that stores unique instances.
         // All instances here "should" be in use. Otherwise, they get cleaned up.
-        PROFILE_FUNC();
         graphics::pushDebugGroup("Material Packing");
 
         for (auto &[_, material] : mMaterials)
             material->onPreRender();
 
         graphics::popDebugGroup();
+
+        for (auto &[_, materialLayer] : mMaterialLayers)
+            materialLayer->layerUpdates.clear();
     }
 
     std::shared_ptr<Shader> ResourcePool::loadShader(
@@ -118,9 +148,39 @@ namespace engine
         const std::string hashName = path.string();
         if (auto it = mTextures.find(hashName); it != mTextures.end())
             return it->second;
-        
+
+
         auto resource = std::make_shared<Texture>(path);
         mTextures[hashName] = resource;
+
+        if (path.empty())
+            return resource;
+
+        if (!std::filesystem::exists(path))
+        {
+            ERROR("File % does not exist.\nAborting texture generation", path);
+            return resource;
+        }
+
+        if (!file::hasImageExtension(path))
+        {
+            ERROR("Extension not supported for path: %. No texture will be loaded.", path);
+            return resource;
+        }
+
+        mTasks.emplace_back(
+            std::async(std::launch::async, [path]()
+            {
+                return disk::image(path);
+            }),
+            [this, resource](disk::StbiTextureData &&image)
+            {
+                resource->setData(glm::ivec2(image.width, image.height), image.bytes);
+                disk::release(image);
+                onTextureReady.broadcast(resource);
+            }
+        );
+
         return resource;
     }
 

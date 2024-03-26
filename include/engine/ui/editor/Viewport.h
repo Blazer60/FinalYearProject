@@ -16,6 +16,7 @@
 #include "Camera.h"
 #include "EditorCamera.h"
 #include "FileLoader.h"
+#include "Loader.h"
 #include "Texture.h"
 
 namespace engine
@@ -105,8 +106,8 @@ namespace engine
         EditorCamera mEditorCamera;
         Ref<Camera> mPlayModeCamera;
 
-        Texture mPlayButton { file::texturePath() / "PlayButton.png" };
-        Texture mStopButton { file::texturePath() / "PauseButton.png" };
+        std::shared_ptr<Texture> mPlayButton = load::texture(file::texturePath() / "PlayButton.png");
+        std::shared_ptr<Texture> mStopButton = load::texture(file::texturePath() / "PauseButton.png");
     };
     
 } // engine

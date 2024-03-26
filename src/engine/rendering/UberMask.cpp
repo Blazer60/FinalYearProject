@@ -11,6 +11,25 @@
 
 namespace engine
 {
+    UberMask::UberMask()
+    {
+        mCallbackToken = engine::resourcePool->onTextureReady.subscribe([this](const std::shared_ptr<Texture> &texture) {
+            if (mMaskTexture == texture)
+            {
+                mMaskUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::MaskData &mask) {
+                    texturePool.removeTexture(mask.maskTextureIndex);
+                    mask.maskTextureIndex = texturePool.addTexture(*mMaskTexture);
+                    mask.maskOp = static_cast<uint32_t>(mMaskOperation);
+                });
+            }
+        });
+    }
+
+    UberMask::~UberMask()
+    {
+        engine::resourcePool->onTextureReady.unSubscribe(mCallbackToken);
+    }
+
     void UberMask::drawPassthroughOptions()
     {
         ImGui::SeparatorText("Parameter passthrough");
@@ -59,7 +78,7 @@ namespace engine
 
     void UberMask::onDrawUi()
     {
-        mMaskUpdates.clear();
+        mMaskUpdates.clear();  // todo: this could fuck up.
 
         ImGui::PushID("Masking Layer");
         if (ImGui::BeginTable("Mask Layer Table", 5))
@@ -83,6 +102,7 @@ namespace engine
                     mMaskUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::MaskData &mask) {
                         texturePool.removeTexture(mask.maskTextureIndex);
                         mask.maskTextureIndex = texturePool.addTexture(*mMaskTexture);
+                        mask.maskOp = static_cast<uint32_t>(mMaskOperation);
                     });
                 }
             }

@@ -15,6 +15,11 @@
 #include "Texture.h"
 #include "TexturePool.h"
 
+namespace load
+{
+    std::shared_ptr<Texture> texture(const std::filesystem::path&);
+}
+
 namespace engine
 {
     /**
@@ -28,26 +33,29 @@ namespace engine
         typedef std::function<void(graphics::TexturePool&, graphics::LayerData&)> UpdateFunc;
     public:
         explicit UberLayer(const std::filesystem::path &path);
+        ~UberLayer() override;
         std::string name() const { return mName; }
         std::filesystem::path path() const { return mPath; }
         void onDrawUi() override;
         // Saving is handled by the resource pool once the last instance has gone out of scope.
         void saveToDisk() const;
 
+        void lookForTextureChange(const std::shared_ptr<Texture> &texture);
 
+        std::vector<UpdateFunc> layerUpdates;
     protected:
         void loadFromDisk();
 
         std::string mName;
         std::filesystem::path mPath;
 
-        std::shared_ptr<Texture> mDiffuseTexture = std::make_shared<Texture>("");
-        std::shared_ptr<Texture> mSpecularTexture = std::make_shared<Texture>("");
-        std::shared_ptr<Texture> mNormalTexture = std::make_shared<Texture>("");
-        std::shared_ptr<Texture> mRoughnessTexture = std::make_shared<Texture>("");
-        std::shared_ptr<Texture> mSheenTexture = std::make_shared<Texture>("");
-        std::shared_ptr<Texture> mSheenRoughnessTexture = std::make_shared<Texture>("");
-        std::shared_ptr<Texture> mMetallicTexture = std::make_shared<Texture>("");
+        std::shared_ptr<Texture> mDiffuseTexture            = load::texture("");
+        std::shared_ptr<Texture> mSpecularTexture           = load::texture("");
+        std::shared_ptr<Texture> mNormalTexture             = load::texture("");
+        std::shared_ptr<Texture> mRoughnessTexture          = load::texture("");
+        std::shared_ptr<Texture> mSheenTexture              = load::texture("");
+        std::shared_ptr<Texture> mSheenRoughnessTexture     = load::texture("");
+        std::shared_ptr<Texture> mMetallicTexture           = load::texture("");
 
         glm::vec3 mDiffuseColour = glm::vec3(0.8f, 0.8f, 0.8f);
         glm::vec3 mSpecularColour = glm::vec3(0.2f, 0.2f, 0.2f);
@@ -63,7 +71,8 @@ namespace engine
         graphics::WrapOp mSheenRoughnessWrapOp  = graphics::WrapOp::Repeat;
         graphics::WrapOp mMetallicWrapOp        = graphics::WrapOp::Repeat;
 
-        std::vector<UpdateFunc> mLayerUpdates;
+
+        uint32_t mCallbackToken = 0;
     };
 
 } // engine

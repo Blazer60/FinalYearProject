@@ -23,6 +23,8 @@
 #include <assimp/postprocess.h>
 #include <yaml-cpp/node/node.h>
 
+#include "Texture.h"
+
 namespace engine
 {
     namespace physics

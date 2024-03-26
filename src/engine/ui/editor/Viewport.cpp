@@ -74,7 +74,7 @@ namespace engine
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetColumnWidth() / 2) - 12.f);
         if (!core->isInPlayMode())
         {
-            if (ui::imageButton("PlayButton", mPlayButton.id(), glm::ivec2(24)))
+            if (ui::imageButton("PlayButton", mPlayButton->id(), glm::ivec2(24)))
             {
                 core->beginPlay();
                 if (!mIsSimulating)
@@ -83,7 +83,7 @@ namespace engine
         }
         else
         {
-            if (ui::imageButton("StopButton", mStopButton.id(), glm::ivec2(24)))
+            if (ui::imageButton("StopButton", mStopButton->id(), glm::ivec2(24)))
             {
                 core->endPlay();
                 mPlayModeCamera.nullify();

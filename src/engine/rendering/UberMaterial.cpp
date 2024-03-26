@@ -127,8 +127,8 @@ namespace engine
         bool anyChanges = false;
         for (int i = 0; i < mLayers.size(); ++i)
         {
-            anyChanges |= !mLayers[i]->mLayerUpdates.empty();
-            for (auto &action : mLayers[i]->mLayerUpdates)
+            anyChanges |= !mLayers[i]->layerUpdates.empty();
+            for (auto &action : mLayers[i]->layerUpdates)
                 action(mTexturePool, mData.layers[i]);
         }
         for (int i = 0; i < mMasks.size(); ++i)

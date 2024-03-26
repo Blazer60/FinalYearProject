@@ -45,6 +45,10 @@ namespace engine
         eventHandler = &mEventHandler;
         core = this;
 
+        mResourcePool = std::make_unique<ResourcePool>();
+        resourcePool = mResourcePool.get();
+
+
         window::setBufferSize(mResolution);
         
         file::findResourceFolder();
@@ -90,9 +94,6 @@ namespace engine
         if (mWindowIcon.pixels != nullptr)
             glfwSetWindowIcon(mWindow, 1, &mWindowIcon);
         
-        mResourcePool = std::make_unique<ResourcePool>();
-        resourcePool = mResourcePool.get();
-
         mDefaultLitMaterial = load::material(file::modelPath() / "defaultObjects/DefaultWhite.mpcy");
 
         initOpenAL();

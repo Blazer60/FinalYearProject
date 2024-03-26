@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Drawable.h"
+#include "Loader.h"
 #include "Texture.h"
 #include "Pch.h"
 #include "TexturePool.h"
@@ -25,7 +26,8 @@ namespace engine
         friend class UberMaterial;
         typedef std::function<void(graphics::TexturePool&, graphics::MaskData&)> UpdateFunc;
     public:
-        UberMask() = default;
+        UberMask();
+        ~UberMask() override;
 
         void drawPassthroughOptions();
 
@@ -34,11 +36,13 @@ namespace engine
         void onDrawUi() override;
 
     protected:
-        std::shared_ptr<Texture> mMaskTexture = std::make_shared<Texture>("");
+        std::shared_ptr<Texture> mMaskTexture = load::texture("");
         float mAlphaThreshold = 0;
         graphics::PassthroughFlags mPassThroughFlags = graphics::PassthroughFlags::None;
         graphics::MaskOp mMaskOperation = graphics::MaskOp::Threshold;
         graphics::WrapOp mWrapOperation = graphics::WrapOp::Repeat;
         std::vector<UpdateFunc> mMaskUpdates;
+
+        uint32_t mCallbackToken = 0;
     };
 }

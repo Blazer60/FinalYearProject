@@ -18,16 +18,23 @@ namespace engine
     UberLayer::UberLayer(const std::filesystem::path& path)
         : mName(path.filename().string()), mPath(path)
     {
+        mCallbackToken = engine::resourcePool->onTextureReady.subscribe([this](const std::shared_ptr<Texture> &texture) {
+            lookForTextureChange(texture);
+        });
+
         if (std::filesystem::exists(mPath))
             loadFromDisk();
         else  // So that it creates an entry immediately.
             saveToDisk();
     }
 
+    UberLayer::~UberLayer()
+    {
+        engine::resourcePool->onTextureReady.unSubscribe(mCallbackToken);
+    }
+
     void UberLayer::onDrawUi()
     {
-        mLayerUpdates.clear();
-
         if (ImGui::BeginTable("Default Settings Table", 5))
         {
             ImGui::TableSetupColumn("Texture Button", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed);
@@ -40,13 +47,13 @@ namespace engine
             {
                 if ((flags & ui::EditFlags::Value) > 0)
                 {
-                    mLayerUpdates.push_back([this](graphics::TexturePool &, graphics::LayerData &layer) {
+                    layerUpdates.push_back([this](graphics::TexturePool &, graphics::LayerData &layer) {
                         layer.diffuseColour = glm::vec4(mDiffuseColour, 1.f);
                     });
                 }
                 if ((flags & ui::EditFlags::Texture) > 0)
                 {
-                    mLayerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                    layerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
                         texturePool.removeTexture(layer.diffuseTextureIndex);
                         layer.diffuseTextureIndex = texturePool.addTexture(*mDiffuseTexture);
                         texturePool.setWrap(layer.diffuseTextureIndex, mDiffuseWrapOp);
@@ -54,7 +61,7 @@ namespace engine
                 }
                 if ((flags & ui::EditFlags::Wrap) > 0)
                 {
-                    mLayerUpdates.push_back([this](graphics::TexturePool &texturePool, const graphics::LayerData &layer) {
+                    layerUpdates.push_back([this](graphics::TexturePool &texturePool, const graphics::LayerData &layer) {
                         texturePool.setWrap(layer.diffuseTextureIndex, mDiffuseWrapOp);
                     });
                 }
@@ -63,13 +70,13 @@ namespace engine
             {
                 if ((flags & ui::EditFlags::Value) > 0)
                 {
-                    mLayerUpdates.push_back([this](graphics::TexturePool &, graphics::LayerData &layer) {
+                    layerUpdates.push_back([this](graphics::TexturePool &, graphics::LayerData &layer) {
                         layer.specularColour = glm::vec4(mSpecularColour, 1.f);
                     });
                 }
                 if ((flags & ui::EditFlags::Texture) > 0)
                 {
-                    mLayerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                    layerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
                         texturePool.removeTexture(layer.specularTextureIndex);
                         layer.specularTextureIndex = texturePool.addTexture(*mSpecularTexture);
                         texturePool.setWrap(layer.specularTextureIndex, mSpecularWrapOp);
@@ -77,7 +84,7 @@ namespace engine
                 }
                 if ((flags & ui::EditFlags::Wrap) > 0)
                 {
-                    mLayerUpdates.push_back([this](graphics::TexturePool &texturePool, const graphics::LayerData &layer) {
+                    layerUpdates.push_back([this](graphics::TexturePool &texturePool, const graphics::LayerData &layer) {
                         texturePool.setWrap(layer.specularTextureIndex, mSpecularWrapOp);
                     });
                 }
@@ -86,7 +93,7 @@ namespace engine
             {
                 if ((flags & ui::EditFlags::Texture) > 0)
                 {
-                    mLayerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                    layerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
                         texturePool.removeTexture(layer.normalTextureIndex);
                         layer.normalTextureIndex = texturePool.addTexture(*mNormalTexture);
                         texturePool.setWrap(layer.normalTextureIndex, mNormalWrapOp);
@@ -94,7 +101,7 @@ namespace engine
                 }
                 if ((flags & ui::EditFlags::Wrap) > 0)
                 {
-                    mLayerUpdates.push_back([this](graphics::TexturePool &texturePool, const graphics::LayerData &layer) {
+                    layerUpdates.push_back([this](graphics::TexturePool &texturePool, const graphics::LayerData &layer) {
                         texturePool.setWrap(layer.normalTextureIndex, mNormalWrapOp);
                     });
                 }
@@ -103,13 +110,13 @@ namespace engine
             {
                 if ((flags & ui::EditFlags::Value) > 0)
                 {
-                    mLayerUpdates.push_back([this](graphics::TexturePool &, graphics::LayerData &layer) {
+                    layerUpdates.push_back([this](graphics::TexturePool &, graphics::LayerData &layer) {
                         layer.roughness = mRoughness;
                     });
                 }
                 if ((flags & ui::EditFlags::Texture) > 0)
                 {
-                    mLayerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                    layerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
                         texturePool.removeTexture(layer.roughnessTextureIndex);
                         layer.roughnessTextureIndex = texturePool.addTexture(*mRoughnessTexture);
                         texturePool.setWrap(layer.roughnessTextureIndex, mRoughnessWrapOp);
@@ -117,7 +124,7 @@ namespace engine
                 }
                 if ((flags & ui::EditFlags::Wrap) > 0)
                 {
-                    mLayerUpdates.push_back([this](graphics::TexturePool &texturePool, const graphics::LayerData &layer) {
+                    layerUpdates.push_back([this](graphics::TexturePool &texturePool, const graphics::LayerData &layer) {
                         texturePool.setWrap(layer.roughnessTextureIndex, mRoughnessWrapOp);
                     });
                 }
@@ -126,13 +133,13 @@ namespace engine
             {
                 if ((flags & ui::EditFlags::Value) > 0)
                 {
-                    mLayerUpdates.push_back([this](graphics::TexturePool &, graphics::LayerData &layer) {
+                    layerUpdates.push_back([this](graphics::TexturePool &, graphics::LayerData &layer) {
                         layer.sheenColour = glm::vec4(mSheenColour, 1.f);
                     });
                 }
                 if ((flags & ui::EditFlags::Texture) > 0)
                 {
-                    mLayerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                    layerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
                         texturePool.removeTexture(layer.sheenTextureIndex);
                         layer.sheenTextureIndex = texturePool.addTexture(*mSheenTexture);
                         texturePool.setWrap(layer.sheenTextureIndex, mSheenRoughnessWrapOp);
@@ -140,7 +147,7 @@ namespace engine
                 }
                 if ((flags & ui::EditFlags::Wrap) > 0)
                 {
-                    mLayerUpdates.push_back([this](graphics::TexturePool &texturePool, const graphics::LayerData &layer) {
+                    layerUpdates.push_back([this](graphics::TexturePool &texturePool, const graphics::LayerData &layer) {
                         texturePool.setWrap(layer.sheenTextureIndex, mSheenRoughnessWrapOp);
                     });
                 }
@@ -149,13 +156,13 @@ namespace engine
             {
                 if ((flags & ui::EditFlags::Value) > 0)
                 {
-                    mLayerUpdates.push_back([this](graphics::TexturePool &, graphics::LayerData &layer) {
+                    layerUpdates.push_back([this](graphics::TexturePool &, graphics::LayerData &layer) {
                         layer.sheenRoughness = mSheenRoughness;
                     });
                 }
                 if ((flags & ui::EditFlags::Texture) > 0)
                 {
-                    mLayerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                    layerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
                         texturePool.removeTexture(layer.sheenRoughnessTextureIndex);
                         layer.sheenRoughnessTextureIndex = texturePool.addTexture(*mSheenRoughnessTexture);
                         texturePool.setWrap(layer.sheenRoughnessTextureIndex, mSheenRoughnessWrapOp);
@@ -163,7 +170,7 @@ namespace engine
                 }
                 if ((flags & ui::EditFlags::Wrap) > 0)
                 {
-                    mLayerUpdates.push_back([this](graphics::TexturePool &texturePool, const graphics::LayerData &layer) {
+                    layerUpdates.push_back([this](graphics::TexturePool &texturePool, const graphics::LayerData &layer) {
                         texturePool.setWrap(layer.sheenRoughnessTextureIndex, mSheenRoughnessWrapOp);
                     });
                 }
@@ -172,7 +179,7 @@ namespace engine
             {
                 if ((flags & ui::EditFlags::Texture) > 0)
                 {
-                    mLayerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                    layerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
                         texturePool.removeTexture(layer.metallicTextureIndex);
                         layer.metallicTextureIndex = texturePool.addTexture(*mMetallicTexture);
                         texturePool.setWrap(layer.metallicTextureIndex, mMetallicWrapOp);
@@ -180,7 +187,7 @@ namespace engine
                 }
                 if ((flags & ui::EditFlags::Wrap) > 0)
                 {
-                    mLayerUpdates.push_back([this](graphics::TexturePool &texturePool, const graphics::LayerData &layer) {
+                    layerUpdates.push_back([this](graphics::TexturePool &texturePool, const graphics::LayerData &layer) {
                         texturePool.setWrap(layer.metallicTextureIndex, mMetallicWrapOp);
                     });
                 }
@@ -240,6 +247,66 @@ namespace engine
         fileOutput.close();
 
         MESSAGE_VERBOSE("Material Layer save to: %", mPath);
+    }
+
+    void UberLayer::lookForTextureChange(const std::shared_ptr<Texture>& texture)
+    {
+        if (mDiffuseTexture == texture)
+        {
+            layerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                texturePool.removeTexture(layer.diffuseTextureIndex);
+                layer.diffuseTextureIndex = texturePool.addTexture(*mDiffuseTexture);
+                texturePool.setWrap(layer.diffuseTextureIndex, mDiffuseWrapOp);
+            });
+        }
+        else if (mSpecularTexture == texture)
+        {
+            layerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                texturePool.removeTexture(layer.specularTextureIndex);
+                layer.specularTextureIndex = texturePool.addTexture(*mSpecularTexture);
+                texturePool.setWrap(layer.specularTextureIndex, mSpecularWrapOp);
+            });
+        }
+        else if (mNormalTexture == texture)
+        {
+            layerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                texturePool.removeTexture(layer.normalTextureIndex);
+                layer.normalTextureIndex = texturePool.addTexture(*mNormalTexture);
+                texturePool.setWrap(layer.normalTextureIndex, mNormalWrapOp);
+            });
+        }
+        else if (mRoughnessTexture == texture)
+        {
+            layerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                texturePool.removeTexture(layer.roughnessTextureIndex);
+                layer.roughnessTextureIndex = texturePool.addTexture(*mRoughnessTexture);
+                texturePool.setWrap(layer.roughnessTextureIndex, mRoughnessWrapOp);
+            });
+        }
+        else if (mSheenTexture == texture)
+        {
+            layerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                texturePool.removeTexture(layer.sheenTextureIndex);
+                layer.sheenTextureIndex = texturePool.addTexture(*mSheenTexture);
+                texturePool.setWrap(layer.sheenTextureIndex, mSheenWrapOp);
+            });
+        }
+        else if (mSheenRoughnessTexture == texture)
+        {
+            layerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                texturePool.removeTexture(layer.sheenRoughnessTextureIndex);
+                layer.sheenRoughnessTextureIndex = texturePool.addTexture(*mSheenRoughnessTexture);
+                texturePool.setWrap(layer.sheenRoughnessTextureIndex, mSheenRoughnessWrapOp);
+            });
+        }
+        else if (mMetallicTexture == texture)
+        {
+            layerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                texturePool.removeTexture(layer.metallicTextureIndex);
+                layer.metallicTextureIndex = texturePool.addTexture(*mMetallicTexture);
+                texturePool.setWrap(layer.metallicTextureIndex, mMetallicWrapOp);
+            });
+        }
     }
 
     void UberLayer::loadFromDisk()

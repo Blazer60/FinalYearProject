@@ -7,3 +7,4 @@ cmake-build-release/
 /.clang-format
 /cmake-build-debug-visual-studio-clang/
 /cmake-build-release-visual-studio-clang/
+/resources/large/
