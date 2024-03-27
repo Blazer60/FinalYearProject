@@ -4,6 +4,7 @@ NormalTexturePath: materials\examples\textures\T_ShapeNormal.png
 RoughnessTexturePath: ""
 SheenTexturePath: ""
 SheenRoughnessTexturePath: ""
+MetallicTexturePath: ""
 DiffuseColour: [0.294185102, 3.5069597e-08, 0.155327052]
 SpecularColour: [0.200000003, 0.200000003, 0.200000003]
 Roughness: 1
@@ -15,3 +16,4 @@ NormalWrapOp: 0
 RoughnessWrapOp: 0
 SheenWrapOp: 0
 SheenRoughnessWrapOp: 0
+MetallicWrapOp: 0

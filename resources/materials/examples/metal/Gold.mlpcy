@@ -4,6 +4,7 @@ NormalTexturePath: ""
 RoughnessTexturePath: ""
 SheenTexturePath: ""
 SheenRoughnessTexturePath: ""
+MetallicTexturePath: ""
 DiffuseColour: [9.99999975e-05, 9.99990953e-05, 9.9989993e-05]
 SpecularColour: [1, 0.898039222, 0.619607866]
 Roughness: 0.268999994
@@ -15,3 +16,4 @@ NormalWrapOp: 0
 RoughnessWrapOp: 0
 SheenWrapOp: 0
 SheenRoughnessWrapOp: 0
+MetallicWrapOp: 0

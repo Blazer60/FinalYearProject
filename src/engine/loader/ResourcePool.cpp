@@ -68,26 +68,6 @@ namespace engine
         }
     }
 
-    ImageTask::ImageTask(
-        std::future<disk::StbiTextureData>&& future,
-        const std::function<void(disk::StbiTextureData&&)>& callback)
-            :
-        mFutureResult(std::move(future)),
-        mOnResults(callback)
-    {
-
-    }
-
-    bool ImageTask::checkAndPerform()
-    {
-        if (const auto status = mFutureResult.wait_for(std::chrono::nanoseconds(0)); status == std::future_status::ready)
-        {
-            mOnResults(mFutureResult.get());
-            return true;
-        }
-        return false;
-    }
-
     void ResourcePool::clean()
     {
         internalClean(mShaders);
@@ -111,7 +91,9 @@ namespace engine
     void ResourcePool::updateMaterials()
     {
         PROFILE_FUNC();
-        mTasks.erase(std::remove_if(mTasks.begin(), mTasks.end(), [](ImageTask &task){ return task.checkAndPerform(); }), mTasks.end());
+        mTasks.erase(std::remove_if(mTasks.begin(), mTasks.end(), [](std::unique_ptr<load::ITask> &task) {
+            return task->checkAndPerform();
+        }), mTasks.end());
 
         // I have no idea where else to do this since I only want to update every material onece.
         // This is the only container that stores unique instances.
@@ -168,17 +150,17 @@ namespace engine
             return resource;
         }
 
-        mTasks.emplace_back(
+        mTasks.emplace_back(load::makeTask<disk::StbiTextureData>(
             std::async(std::launch::async, [path]()
             {
                 return disk::image(path);
             }),
-            [this, resource](disk::StbiTextureData &&image)
+            [this, resource](disk::StbiTextureData &image)
             {
                 resource->setData(glm::ivec2(image.width, image.height), image.bytes);
                 disk::release(image);
                 onTextureReady.broadcast(resource);
-            }
+            })
         );
 
         return resource;

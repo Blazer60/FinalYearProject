@@ -22,6 +22,7 @@
 #include "AudioSource.h"
 #include "Callback.h"
 #include "Disk.h"
+#include "LoadingTask.h"
 #include "PhysicsMeshBuffer.h"
 #include "Texture.h"
 
@@ -30,19 +31,6 @@ namespace engine
     class UberMaterial;
     class UberLayer;
 
-    class ImageTask
-    {
-    public:
-        ImageTask(
-            std::future<disk::StbiTextureData>&& future,
-            const std::function<void(disk::StbiTextureData &&)>& callback);
-
-        bool checkAndPerform();
-
-    protected:
-        std::future<disk::StbiTextureData> mFutureResult;
-        std::function<void(disk::StbiTextureData&&)> mOnResults;
-    };
 
     /**
      * @author Ryan Purse
@@ -75,7 +63,7 @@ namespace engine
         std::unordered_map<std::string, std::shared_ptr<physics::MeshColliderBuffer>> mMeshColliders;
         std::unordered_map<std::string, std::shared_ptr<UberLayer>> mMaterialLayers;
         std::unordered_map<std::string, std::shared_ptr<UberMaterial>> mMaterials;
-        std::vector<ImageTask> mTasks;
+        std::vector<std::unique_ptr<load::ITask>> mTasks;
     };
 
 
@@ -89,61 +77,76 @@ namespace engine
         if (path.empty())
             return { };
         
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(
-            path.string(),
-            aiProcess_GlobalScale           |
-            aiProcess_CalcTangentSpace      |
-            aiProcess_Triangulate           |
-            aiProcess_JoinIdenticalVertices |
-            aiProcess_SortByPType);
-        
-        if (scene == nullptr)
-        {
-            WARN("Could not load model with path %\n%", path, importer.GetErrorString());
-            return { };
-        }
-        
-        
+
         SharedMesh sharedMesh = std::make_shared<std::vector<std::unique_ptr<SubMesh>>>();
-        sharedMesh->reserve(scene->mNumMeshes);
-        
-        for (int i = 0; i < scene->mNumMeshes; ++i)
-        {
-            const aiMesh *mesh = scene->mMeshes[i];
-            
-            std::vector<uint32_t> indices;
-            indices.reserve(mesh->mNumFaces * 3);
-            for (int j = 0; j < mesh->mNumFaces; ++j)
-            {
-                for (int k = 0; k < mesh->mFaces[j].mNumIndices; ++k)
-                    indices.emplace_back(mesh->mFaces[j].mIndices[k]);
-            }
-            
-            std::vector<TVertex> vertices;
-            vertices.reserve(mesh->mNumVertices);
-            for (int j = 0; j < mesh->mNumVertices; ++j)
-            {
-                const glm::vec3 position = load::toVec3(mesh->mVertices[j]);
-                const glm::vec2 uv = mesh->HasTextureCoords(0) ? load::toVec2(mesh->mTextureCoords[0][j]) : glm::vec2(0.f);
-                const glm::vec3 normal = load::toVec3(mesh->mNormals[j]);
-                const glm::vec3 tangent = mesh->HasTangentsAndBitangents() ? load::toVec3(mesh->mTangents[j]) : glm::vec3(0.f);
-                // User defined conversion happens here.
-                vertices.emplace_back(AssimpVertex { position, uv, normal, tangent });
-            }
-            
-            if (!mesh->HasTextureCoords(0))
-                WARN("Submesh % does not contain texture coordinates. (%)", i, path);
-            else if (!mesh->HasTangentsAndBitangents())  // No uvs = no tangents.
-                WARN("Submesh % does not have bi-/tangents. (%)", i, path);
-            
-            sharedMesh->emplace_back(std::make_unique<SubMesh>(vertices, indices));
-        }
-        
-        // We're using assimp's logger so that the last message when collapsed is this.
-        Assimp::DefaultLogger::get()->info("Load successful.");
-        
         mModels[hashName] = sharedMesh;
+
+        struct ReadyMesh
+        {
+            std::vector<uint32_t> indices;
+            std::vector<TVertex> vertices;
+        };
+
+        mTasks.emplace_back(load::makeTask<std::vector<ReadyMesh>>(
+            std::async(std::launch::async, [path]() {
+                Assimp::Importer importer;
+                const aiScene *scene = importer.ReadFile(
+                    path.string(),
+                    aiProcess_GlobalScale           |
+                    // aiProcess_CalcTangentSpace      |  // Todo: This is really slow to calculate. Needed when parallax mapping is added back in.
+                    aiProcess_Triangulate           |
+                    aiProcess_JoinIdenticalVertices |
+                    aiProcess_SortByPType);
+
+                if (scene == nullptr)
+                {
+                    WARN("Could not load model with path %\n%", path, importer.GetErrorString());
+                    return std::vector<ReadyMesh>();
+                }
+
+                // We're using assimp's logger so that the last message when collapsed is this.
+                Assimp::DefaultLogger::get()->info("Load successful.");
+
+                std::vector<ReadyMesh> meshes;
+                for (int i = 0; i < scene->mNumMeshes; ++i)
+                {
+                    const aiMesh *mesh = scene->mMeshes[i];
+
+                    std::vector<uint32_t> indices;
+                    indices.reserve(mesh->mNumFaces * 3);
+                    for (int j = 0; j < mesh->mNumFaces; ++j)
+                    {
+                        for (int k = 0; k < mesh->mFaces[j].mNumIndices; ++k)
+                            indices.emplace_back(mesh->mFaces[j].mIndices[k]);
+                    }
+
+                    std::vector<TVertex> vertices;
+                    vertices.reserve(mesh->mNumVertices);
+                    for (int j = 0; j < mesh->mNumVertices; ++j)
+                    {
+                        const glm::vec3 position = load::toVec3(mesh->mVertices[j]);
+                        const glm::vec2 uv = mesh->HasTextureCoords(0) ? load::toVec2(mesh->mTextureCoords[0][j]) : glm::vec2(0.f);
+                        const glm::vec3 normal = load::toVec3(mesh->mNormals[j]);
+                        const glm::vec3 tangent = mesh->HasTangentsAndBitangents() ? load::toVec3(mesh->mTangents[j]) : glm::vec3(0.f);
+                        // User defined conversion happens here.
+                        vertices.emplace_back(AssimpVertex { position, uv, normal, tangent });
+                    }
+
+                    if (!mesh->HasTextureCoords(0))
+                        WARN("Submesh % does not contain texture coordinates. (%)", i, path);
+                    // else if (!mesh->HasTangentsAndBitangents())  // No uvs = no tangents.
+                    //     WARN("Submesh % does not have bi-/tangents. (%)", i, path);
+
+                    meshes.emplace_back(ReadyMesh { indices, vertices });
+                }
+                return meshes;
+            }),
+            [sharedMesh](const std::vector<ReadyMesh> &meshes) {
+                for (auto &mesh : meshes)
+                    sharedMesh->emplace_back(std::make_unique<SubMesh>(mesh.vertices, mesh.indices));
+                }
+            ));
+
         return sharedMesh;
     }
 } // engine

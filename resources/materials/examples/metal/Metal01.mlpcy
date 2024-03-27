@@ -4,6 +4,7 @@ NormalTexturePath: ""
 RoughnessTexturePath: materials\examples\textures\T_Imperfections_Stains_Mask.png
 SheenTexturePath: ""
 SheenRoughnessTexturePath: ""
+MetallicTexturePath: ""
 DiffuseColour: [0.0573257804, 0.0573200472, 0.0573200472]
 SpecularColour: [0.73080343, 0.847406924, 0.893642068]
 Roughness: 1
@@ -15,3 +16,4 @@ NormalWrapOp: 0
 RoughnessWrapOp: 0
 SheenWrapOp: 0
 SheenRoughnessWrapOp: 0
+MetallicWrapOp: 0
