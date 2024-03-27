@@ -37,7 +37,7 @@ namespace graphics
 
         const glm::ivec2 newSize = glm::max(getMaxTextureSize(), textureSize);
         const int32_t newCount = glm::max(dstIndex + 1, findLastUsedSlot());
-        MESSAGE_VERBOSE("Adding Texture to index %. Size: % -> %. Count: % -> %", dstIndex, mSize, newSize, mLayerCount, newCount);
+        MESSAGE_VERBOSE("Adding Texture % to index %. Size: % -> %. Count: % -> %", texture.path().filename(), dstIndex, mSize, newSize, mLayerCount, newCount);
         reinitialise(newSize, newCount);
 
         constexpr int x = 0;

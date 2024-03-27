@@ -83,4 +83,43 @@ namespace graphics
         glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, buffer);
         glDispatchComputeIndirect(static_cast<GLintptr>(offset));
     }
+
+    enum class GpuError : uint16_t
+    {
+        NoError = 0x00,
+        InvalidEnum = 0x0500,
+        InvalidValue = 0x0501,
+        InvalidOperation = 0x0502,
+        StackOverflow = 0x503,
+        StackUnderflow = 0x504,
+        OutOfMemory = 0x505,
+        InvalidFramebufferOperation = 0x0506,
+        ContexLost = 0x507,
+        TableTooLarge = 0x8031
+    };
+
+    const char* to_string(GpuError code)
+    {
+        switch (code)
+        {
+            case GpuError::NoError: return "NoError";
+            case GpuError::InvalidEnum: return "InvalidEnum";
+            case GpuError::InvalidValue: return "InvalidValue";
+            case GpuError::InvalidOperation: return "InvalidOperation";
+            case GpuError::StackOverflow: return "StackOverflow";
+            case GpuError::StackUnderflow: return "StackUnderflow";
+            case GpuError::OutOfMemory: return "OutOfMemory";
+            case GpuError::InvalidFramebufferOperation: return "InvalidFramebufferOperation";
+            case GpuError::ContexLost: return "ContexLost";
+            case GpuError::TableTooLarge: return "TableTooLarge";
+            default: return "unknown";
+        }
+    }
+
+    void validateGpuState()
+    {
+        GLenum error;
+        while((error = glGetError()) != GL_NO_ERROR) // To poll out of the queue.
+            CRASH("The GPU is in an invalid state! Reason %", to_string(static_cast<GpuError>(error)));
+    }
 }

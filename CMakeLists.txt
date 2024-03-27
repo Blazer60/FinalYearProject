@@ -170,6 +170,8 @@ add_library(${ENGINE_LIBRARY}
         include/engine/rendering/UberMask.h
         src/engine/loader/Disk.cpp
         include/engine/loader/Disk.h
+        src/engine/loader/ThreadPool.cpp
+        include/engine/loader/ThreadPool.h
 )
 
 target_include_directories(${ENGINE_LIBRARY} PUBLIC

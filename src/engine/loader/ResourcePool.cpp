@@ -88,12 +88,10 @@ namespace engine
             material->saveToDisk();
     }
 
-    void ResourcePool::updateMaterials()
+    void ResourcePool::update()
     {
         PROFILE_FUNC();
-        mTasks.erase(std::remove_if(mTasks.begin(), mTasks.end(), [](std::unique_ptr<load::ITask> &task) {
-            return task->checkAndPerform();
-        }), mTasks.end());
+        mThreadPool.resolveFinishedJobs();
 
         // I have no idea where else to do this since I only want to update every material onece.
         // This is the only container that stores unique instances.
@@ -150,15 +148,16 @@ namespace engine
             return resource;
         }
 
-        mTasks.emplace_back(load::makeTask<disk::StbiTextureData>(
-            std::async(std::launch::async, [path]()
+        mThreadPool.queueJob(load::makeJob<disk::StbiTextureData>(
+            [path]
             {
                 return disk::image(path);
-            }),
-            [this, resource](disk::StbiTextureData &image)
+            },
+            [this, resource, path](disk::StbiTextureData &image)
             {
                 resource->setData(glm::ivec2(image.width, image.height), image.bytes);
                 disk::release(image);
+                MESSAGE_VERBOSE("Texture Ready, broadcasting result: %", path.filename());
                 onTextureReady.broadcast(resource);
             })
         );

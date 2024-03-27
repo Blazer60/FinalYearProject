@@ -41,7 +41,7 @@ namespace engine
         
         mLogger = std::make_unique<debug::Logger>();
         debug::logger = mLogger.get();
-        mLogger->setOutputFlag(debug::OutputSourceFlag_File | debug::OutputSourceFlag_Queue);
+        mLogger->setOutputFlag(debug::OutputSourceFlag_File | debug::OutputSourceFlag_Queue | debug::OutputSourceFlag_IoStream);
         eventHandler = &mEventHandler;
         core = this;
 
@@ -338,7 +338,7 @@ namespace engine
             mScene->update();
             mEditor->update();
 
-            mResourcePool->updateMaterials();  // Calls material onPreRender() function.
+            mResourcePool->update();  // Calls material onPreRender() function.
             mEditor->preRender();
             mScene->preRender();
             mPhysics->renderDebugShapes();
@@ -351,6 +351,7 @@ namespace engine
             PROFILE_SCOPE_END(coreLoopTimer);
             
             PROFILE_SCOPE_BEGIN(awaitVSync, "CPU Idle");
+            graphics::validateGpuState();
             glfwSwapBuffers(mWindow);
             PROFILE_SCOPE_END(awaitVSync);
             

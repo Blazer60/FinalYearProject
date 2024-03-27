@@ -14,51 +14,50 @@
 
 namespace load
 {
-    class ITask
+    class IThreadTask
     {
     public:
-        virtual ~ITask() = default;
-        virtual bool checkAndPerform() = 0;
+        virtual ~IThreadTask() = default;
+
+        virtual void run() = 0;
+        virtual void callback() = 0;
     };
 
     template<typename T>
-    using TTaskFuture = std::future<T>;
+    using TTaskRun = std::function<T()>;
 
     template<typename T>
-    using TTaskCallback = std::function<void(T)>;
+    using TTaskCallback = std::function<void(T&)>;
 
     template<typename T>
-    class Task : public ITask
+    class ThreadTask : public IThreadTask
     {
     public:
-        Task(TTaskFuture<T> future, const TTaskCallback<T> &callback)
-            : mFutureResult(std::move(future)), mCallback(callback)
+        ThreadTask(const TTaskRun<T> &run, const TTaskCallback<T> &callback)
+            : mRun(run), mCallback(callback)
         {
 
         }
 
-        bool checkAndPerform() override
+        void run() override
         {
-            // I don't think there's any other way of doing this. But it means that the main
-            // thread is put to sleep for each item that is loading.
-            if (const auto status = mFutureResult.wait_for(std::chrono::nanoseconds(0)); status == std::future_status::ready)
-            {
-                // Possible bug: There's no memory fence to force the other thread to fetch the new result.
-                // This could result in errors.
-                mCallback(mFutureResult.get());
-                return true;
-            }
-            return false;
+            mResult = mRun();
+        }
+
+        void callback() override
+        {
+            mCallback(mResult);
         }
 
     protected:
-        TTaskFuture<T>   mFutureResult;
+        T mResult;
+        TTaskRun<T>   mRun;
         TTaskCallback<T> mCallback;
     };
 
     template<typename T>
-    std::unique_ptr<ITask> makeTask(TTaskFuture<T> future, const TTaskCallback<T&> &callback)
+    std::unique_ptr<IThreadTask> makeJob(const TTaskRun<T> &run, const TTaskCallback<T> &callback)
     {
-        return std::make_unique<Task<T>>(std::move(future), callback);
+        return std::make_unique<ThreadTask<T>>(run, callback);
     }
 }

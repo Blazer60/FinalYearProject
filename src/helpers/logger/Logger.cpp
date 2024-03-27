@@ -39,7 +39,7 @@ namespace debug
     {
         std::stringstream ss;
         ss << "[" << severityStringMap.at(severity) << "] ";
-        ss << "(" << file << " at line " << line << ")\n";
+        // ss << "(" << file << " at line " << line << ")\n";
         ss << message << "\n";
         
         const std::string output = ss.str();

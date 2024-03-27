@@ -25,6 +25,7 @@
 #include "LoadingTask.h"
 #include "PhysicsMeshBuffer.h"
 #include "Texture.h"
+#include "ThreadPool.h"
 
 namespace engine
 {
@@ -43,7 +44,7 @@ namespace engine
 
         void clean();
         void saveAllAssets();
-        void updateMaterials();
+        void update();
         [[nodiscard]] std::shared_ptr<Shader> loadShader(const std::filesystem::path &vertexPath, const std::filesystem::path &fragmentPath);
         
         template<typename TVertex>
@@ -63,7 +64,7 @@ namespace engine
         std::unordered_map<std::string, std::shared_ptr<physics::MeshColliderBuffer>> mMeshColliders;
         std::unordered_map<std::string, std::shared_ptr<UberLayer>> mMaterialLayers;
         std::unordered_map<std::string, std::shared_ptr<UberMaterial>> mMaterials;
-        std::vector<std::unique_ptr<load::ITask>> mTasks;
+        load::ThreadPool mThreadPool;
     };
 
 
@@ -87,8 +88,8 @@ namespace engine
             std::vector<TVertex> vertices;
         };
 
-        mTasks.emplace_back(load::makeTask<std::vector<ReadyMesh>>(
-            std::async(std::launch::async, [path]() {
+        mThreadPool.queueJob(load::makeJob<std::vector<ReadyMesh>>(
+            [path] {
                 Assimp::Importer importer;
                 const aiScene *scene = importer.ReadFile(
                     path.string(),
@@ -140,7 +141,7 @@ namespace engine
                     meshes.emplace_back(ReadyMesh { indices, vertices });
                 }
                 return meshes;
-            }),
+            },
             [sharedMesh](const std::vector<ReadyMesh> &meshes) {
                 for (auto &mesh : meshes)
                     sharedMesh->emplace_back(std::make_unique<SubMesh>(mesh.vertices, mesh.indices));

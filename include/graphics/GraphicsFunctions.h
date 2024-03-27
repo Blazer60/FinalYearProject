@@ -45,4 +45,6 @@ namespace graphics
      * @param offset The offset into the buffer - typically zero
      */
     void dispatchComputeIndirect(uint32_t buffer, int offset=0);
+
+    void validateGpuState();
 }
