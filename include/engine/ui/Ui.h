@@ -65,6 +65,7 @@ namespace ui
     EditFlags rowTextureSliderFloat(const std::string &name, std::shared_ptr<Texture> &texture, float &value, graphics::WrapOp &wrapOp);
     
     glm::ivec2 fitToRegion(const glm::ivec2 &imageSize, const glm::ivec2 &maxSize, const glm::ivec2 &padding=glm::ivec2(50));
+    glm::ivec2 scaleImage(const glm::ivec2 &imageSize, const glm::ivec2 &maxSize);
 
     bool closeButton(const char *label);
     bool plusButton(const char *label);

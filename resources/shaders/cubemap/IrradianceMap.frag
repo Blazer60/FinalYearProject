@@ -31,7 +31,7 @@ void main()
             // Tangent to world
             const vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * normal;
 
-            irradiance += texture(u_environment_texture, sampleVec).rgb * cos(theta) * sin(theta);
+            irradiance += min(texture(u_environment_texture, sampleVec).rgb, 100.f) * cos(theta) * sin(theta);
             sampleCount++;
         }
     }

@@ -435,7 +435,7 @@ namespace engine
 
     void Editor::createModel(const std::filesystem::path &path)
     {
-        Ref<Actor> actor = core->getScene()->spawnActor<engine::Actor>("Model");
+        Ref<Actor> actor = core->getScene()->spawnActor<engine::Actor>(path.stem().string());
         actor->position = mViewport.getCamera()->getEndOfBoomArmPosition();
         Ref<MeshRenderer> meshRenderer = actor->addComponent(load::meshRenderer<StandardVertex>(path));
 

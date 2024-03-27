@@ -279,7 +279,7 @@ namespace engine
         else if (file::hasImageExtension(item.path()) && mTextureIcons.count(name) > 0)
         {
             const auto &image = mTextureIcons.at(name);
-            const glm::vec2 size = ui::fitToRegion(image->size(), glm::vec2(mItemSize), glm::ivec2(0));
+            const glm::vec2 size = ui::scaleImage(image->size(), glm::vec2(mItemSize));
 
             if (size.y < mItemSize)
                 ImGui::Dummy(ImVec2(0, mItemSize - size.y));

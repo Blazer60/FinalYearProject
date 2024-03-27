@@ -65,7 +65,7 @@ void main()
         const float nDotL = max(dot(N, L), 0.f);
         if (nDotL > 0.f)
         {
-            prefilteredColour += texture(u_environment_texture, L).rgb * nDotL;
+            prefilteredColour += min(texture(u_environment_texture, L).rgb, vec3(100.f)) * nDotL;
             totalWeight += nDotL;
         }
     }

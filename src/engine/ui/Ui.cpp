@@ -443,6 +443,13 @@ namespace ui
         return { regionSize.x, regionSize.y };
     }
 
+    glm::ivec2 scaleImage(const glm::ivec2& imageSize, const glm::ivec2& maxSize)
+    {
+        const float maxSizeAspectRatio = maxSize.y / maxSize.x;
+        const float imageSizeAspectRatio = imageSize.y / maxSize.x;
+        return glm::vec2(imageSize) / imageSizeAspectRatio * maxSizeAspectRatio;
+    }
+
     bool closeButton(const char *label)
     {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
