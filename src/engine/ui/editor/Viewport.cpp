@@ -113,6 +113,9 @@ namespace engine
         ImGui::Checkbox("Debug Overlay", &mShowDebugOverlay);
         ImGui::SameLine();
         ImGui::Checkbox("Tile Overlay", &mShowTileClassification);
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(120.f);
+        ImGui::DragFloat("##CameraSpeed", &mEditorCamera.speed);
 
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - 140.f);

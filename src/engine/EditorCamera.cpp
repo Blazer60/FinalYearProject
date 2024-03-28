@@ -100,12 +100,12 @@ void EditorCamera::moveFirstPerson()
                 * glm::angleAxis(static_cast<float>(mPanAngles.y), glm::vec3(1.f, 0.f, 0.f));
     
     
-    mPosition.y += mSpeed * timeStep * mInputDirection.y;
+    mPosition.y += speed * timeStep * mInputDirection.y;
     mInputDirection.y = 0.f;
     if (glm::length(mInputDirection) > 0.f)
         mInputDirection = glm::normalize(mInputDirection);
     
-    mPosition += mRotation * (mSpeed * timeStep * mInputDirection);
+    mPosition += mRotation * (speed * timeStep * mInputDirection);
 }
 
 const glm::mat4 &EditorCamera::getViewMatrix() const

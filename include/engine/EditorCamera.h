@@ -45,6 +45,7 @@ protected:
 
 public:
     bool showCameraSettings { true };
+    float speed { 30.f };
 
 protected:
     std::vector<std::unique_ptr<PostProcessLayer>> mPostProcessStack;
@@ -68,7 +69,6 @@ protected:
     float       mCameraBoomMin          { 0.5f };
     float       mMouseSpeed             { 0.5f };
     float       mRotationSpeed          { 0.1f };
-    float       mSpeed                  { 30.f };
     glm::dvec2  mPanAngles              { 0.f };
     bool        mUseUberVariant         { false };
 
