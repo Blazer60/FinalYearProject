@@ -1,6 +1,8 @@
 #version 460 core
 
 const float PI = 3.14159265359f;
+// This is to stop brdf values tending towards infinity, resulting in white specals everywhere.
+const float MIN_THRESHOLD = 0.01f;
 
 vec3 fresnelSchlick(vec3 f0, float nDotL)
 {
@@ -66,3 +68,16 @@ vec3 uniformImportanceSample(vec2 rand, vec3 n)
     const vec3 sampleVec = tangent * randomDirection.x + biTangent * randomDirection.y + n * randomDirection.z;
     return normalize(sampleVec);
 }
+
+// [modified] (Neubelt, D., Pettineo, M.) Crafting a Next-Gen Material Pipeline for The Order: 1886.
+// We only care about the roughness remapping part as we do this at run time.
+float computeRoughness(vec3 rawNormal, float roughness)
+{
+    const float r = length(rawNormal);
+    float kappa = 10000.f;
+    if (r < 1.f)
+        kappa = (3.f * r - r * r * r) / (1.f - r * r);
+
+    return sqrt(roughness * roughness + (1.f / kappa));
+}
+// end

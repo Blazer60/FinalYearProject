@@ -61,10 +61,11 @@ float sampleValue(float value, vec2 uv, int index)
     return textureValue * value;
 }
 
+// Value not normalised to perform roughness remapping. @see Maths.glsl::computeRoughness
 vec3 sampleNormal(vec3 normal, vec2 uv, int index, mat3 tbnMatrix)
 {
-    vec3 textureNormal = sampleTexture(uv, index).rgb;
+    const vec3 textureNormal = sampleTexture(uv, index).rgb;
     if (textureNormal == vec3(0.f))
         return normal;
-    return normalize(tbnMatrix * (2.f * textureNormal - vec3(1.f)));
+    return tbnMatrix * (2.f * textureNormal - vec3(1.f));
 }

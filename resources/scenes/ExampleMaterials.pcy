@@ -45,7 +45,7 @@ Actors:
     Components:
       - Component: DirectionalLight
         Colour: [0.930000007, 0.930000007, 0.949999988]
-        Intensity: 2350
+        Intensity: 12000
         Yaw: 108
         Pitch: 45
         CascadeDepths: [0.0399999991, 0.159999996, 0.360000014, 0.639999986]

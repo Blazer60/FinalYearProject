@@ -51,14 +51,14 @@ vec3 evalutateSheenBrdf(GBuffer gBuffer, float nDotL, float nDotV, vec3 v)
     const float matDet = determinant(inverseMatrix);
 
     const vec3 v0 = inverseMatrix * v;
-    const float v0Length = length(v0);
-    const float v0Length3 = v0Length * v0Length * v0Length;
+    const float v0Length = max(length(v0), MIN_THRESHOLD);
+    const float v0Length3 = max(v0Length * v0Length * v0Length, 0.1f * MIN_THRESHOLD);
 
     float d0 = distributionOriginal(v0 / v0Length);
 
     const float sheenValue = directionalReflectance * d0 * matDet / v0Length3;
 
-    return gBuffer.fuzzColour * sheenValue / nDotV;
+    return gBuffer.fuzzColour * sheenValue / max(nDotV, MIN_THRESHOLD);
 }
 
 float evaluateSheenMissingScalar(GBuffer gBuffer, float nDotL, float nDotV)
@@ -91,7 +91,7 @@ vec3 evaluateSpecularBrdf(GBuffer gBuffer, vec3 fresnel, float hDotN, float vDot
     const float distribution = ggxDistribution(hDotN, alpha2);
     const float geometry = ggxGeometry2(vDotN, lDotN, alpha2);
 
-    return fresnel * distribution * geometry / (4.f * vDotN * lDotN + 0.0001f);
+    return fresnel * distribution * geometry / max(4.f * vDotN * lDotN, MIN_THRESHOLD);
 }
 
 vec3 evaluateDiffuseBrdf(GBuffer gBuffer, vec3 specular)

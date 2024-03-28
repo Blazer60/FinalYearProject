@@ -39,6 +39,7 @@ namespace graphics
         const int32_t newCount = glm::max(dstIndex + 1, findLastUsedSlot());
         MESSAGE_VERBOSE("Adding Texture % to index %. Size: % -> %. Count: % -> %", texture.path().filename(), dstIndex, mSize, newSize, mLayerCount, newCount);
         reinitialise(newSize, newCount);
+        // todo: This keep crashing which is really annoying. Remove the normal map from the curtains.
 
         constexpr int x = 0;
         constexpr int y = 0;

@@ -200,6 +200,9 @@ namespace engine
                 ImGui::EndMenu();
             }
 
+            const std::string loadingCount = format::string("(%)", engine::resourcePool->getLoadingCount());
+            ImGui::TextColored(ImVec4(0.3f, 0.3f, 0.3f, 1.f), loadingCount.c_str());
+
             const auto folderName = format::string("%", file::makeRelativeToResourcePath(mSelectedFolder));
             const float width = ImGui::CalcTextSize(folderName.c_str()).x;
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - width - ImGui::GetScrollX() - 2 * ImGui::GetStyle().ItemSpacing.x);

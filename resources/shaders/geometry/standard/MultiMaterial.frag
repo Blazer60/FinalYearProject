@@ -69,8 +69,10 @@ void main()
 
     }
 
-    gBuffer.normal          = sampleNormal(v_normal_ws, v_uv, material.normalTextureIndex, v_tbn_matrix);
-    gBuffer.roughness       = sampleValue(material.roughness, v_uv, material.roughnessTextureIndex);
+    const vec3 rawNormal = sampleNormal(v_normal_ws, v_uv, material.normalTextureIndex, v_tbn_matrix);
+    const float roughness = sampleValue(material.roughness, v_uv, material.roughnessTextureIndex);
+    gBuffer.normal          = normalize(rawNormal);
+    gBuffer.roughness       = computeRoughness(rawNormal, roughness);
     gBuffer.fuzzColour      = sampleColour(material.sheenColour, v_uv, material.sheenTextureIndex);
     gBuffer.fuzzRoughness   = sampleValue(material.sheenRoughness, v_uv, material.sheenRoughnessTextureIndex);
 
@@ -104,8 +106,10 @@ void main()
 
         }
 
-        nextGBuffer.normal          = sampleNormal(v_normal_ws, v_uv, material.normalTextureIndex, v_tbn_matrix);
-        nextGBuffer.roughness       = sampleValue(material.roughness, v_uv, material.roughnessTextureIndex);
+        const vec3 rawNormal = sampleNormal(v_normal_ws, v_uv, material.normalTextureIndex, v_tbn_matrix);
+        const float roughness = sampleValue(material.roughness, v_uv, material.roughnessTextureIndex);
+        nextGBuffer.normal          = normalize(rawNormal);
+        nextGBuffer.roughness       = computeRoughness(rawNormal, roughness);
         nextGBuffer.fuzzColour      = sampleColour(material.sheenColour, v_uv, material.sheenTextureIndex);
         nextGBuffer.fuzzRoughness   = sampleValue(material.sheenRoughness, v_uv, material.sheenRoughnessTextureIndex);
 

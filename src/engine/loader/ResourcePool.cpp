@@ -278,4 +278,9 @@ namespace engine
         mMaterials[hashName] = material;
         return material;
     }
+
+    uint32_t ResourcePool::getLoadingCount() const
+    {
+        return mThreadPool.getJobCount();
+    }
 }

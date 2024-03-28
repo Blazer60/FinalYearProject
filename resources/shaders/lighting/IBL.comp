@@ -126,7 +126,7 @@ void main()
     imageStore(lighting, ivec2(id), vec4(colour, 1.f));
 #else
 
-    const float maxReflectionLod = 4.f;
+    const float maxReflectionLod = textureQueryLevels(u_pre_filter_texture);
     const vec3 preFilterColour = textureLod(u_pre_filter_texture, r, gBuffer.roughness * maxReflectionLod).rgb;
     const vec3 irradiance = texture(u_irradiance_texture, n).rgb;
 

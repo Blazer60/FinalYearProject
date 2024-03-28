@@ -54,6 +54,7 @@ namespace engine
         [[nodiscard]] std::shared_ptr<physics::MeshColliderBuffer> loadPhysicsMesh(const std::filesystem::path &path);
         [[nodiscard]] std::shared_ptr<UberLayer> loadMaterialLayer(const std::filesystem::path&path);
         [[nodiscard]] std::shared_ptr<UberMaterial> loadMaterial(const std::filesystem::path&path);
+        uint32_t getLoadingCount() const;
 
     protected:
         // If we make sharedResource class, we can kill this when it only has a single use (here).
@@ -94,7 +95,7 @@ namespace engine
                 const aiScene *scene = importer.ReadFile(
                     path.string(),
                     aiProcess_GlobalScale           |
-                    // aiProcess_CalcTangentSpace      |  // Todo: This is really slow to calculate. Needed when parallax mapping is added back in.
+                    aiProcess_CalcTangentSpace      |
                     aiProcess_Triangulate           |
                     aiProcess_JoinIdenticalVertices |
                     aiProcess_SortByPType);
@@ -135,8 +136,8 @@ namespace engine
 
                     if (!mesh->HasTextureCoords(0))
                         WARN("Submesh % does not contain texture coordinates. (%)", i, path);
-                    // else if (!mesh->HasTangentsAndBitangents())  // No uvs = no tangents.
-                    //     WARN("Submesh % does not have bi-/tangents. (%)", i, path);
+                    else if (!mesh->HasTangentsAndBitangents())  // No uvs = no tangents.
+                        WARN("Submesh % does not have bi-/tangents. (%)", i, path);
 
                     meshes.emplace_back(ReadyMesh { indices, vertices });
                 }

@@ -351,7 +351,6 @@ namespace engine
             PROFILE_SCOPE_END(coreLoopTimer);
             
             PROFILE_SCOPE_BEGIN(awaitVSync, "CPU Idle");
-            graphics::validateGpuState();
             glfwSwapBuffers(mWindow);
             PROFILE_SCOPE_END(awaitVSync);
             

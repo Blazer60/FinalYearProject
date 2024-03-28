@@ -1,6 +1,6 @@
 DiffuseTexturePath: ""
 SpecularTexturePath: ""
-NormalTexturePath: ""
+NormalTexturePath: materials\examples\textures\T_OpalInterior_N.png
 RoughnessTexturePath: materials\examples\textures\T_Imperfections_Stains_Mask.png
 SheenTexturePath: ""
 SheenRoughnessTexturePath: materials\examples\textures\T_WindGust_Mask.png

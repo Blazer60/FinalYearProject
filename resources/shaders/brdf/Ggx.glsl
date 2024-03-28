@@ -24,7 +24,7 @@ float ggxDistribution(float nDotH, float alpha2)
     const float nDotH2 = nDotH * nDotH;
     const float denominator = 1 + nDotH2 * (alpha2 - 1);
 
-    return alpha2 / (PI * denominator * denominator);
+    return alpha2 / max(PI * denominator * denominator, MIN_THRESHOLD);
 }
 
 // Geometry for an isotropic GGX distribution. s is either v or l.
@@ -32,7 +32,7 @@ float ggxGeometry1(float nDotS, float alpha2)
 {
     const float nDotS2 = nDotS * nDotS;
     const float oneMinusNDotS = 1.f - nDotS;
-    const float innerSqrt = 1.f + (alpha2 * oneMinusNDotS / max(nDotS2, 0.001f));
+    const float innerSqrt = 1.f + (alpha2 * oneMinusNDotS / max(nDotS2, MIN_THRESHOLD));
     const float lambda = (-1.f + sqrt(innerSqrt)) / 2.f;
 
     return 1.f / (1.f + lambda);

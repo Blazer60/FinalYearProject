@@ -78,9 +78,6 @@ namespace engine
 
     void UberMask::onDrawUi()
     {
-        mMaskUpdates.clear();  // todo: Masks should be part of the resource pool so that they can be reused and cleaned.
-        // todo: Make models load async. Should be able to load sponza then.
-
         ImGui::PushID("Masking Layer");
         if (ImGui::BeginTable("Mask Layer Table", 5))
         {

@@ -29,6 +29,7 @@ namespace load
         void stop();
         bool isBusy();
         void resolveFinishedJobs();
+        uint32_t getJobCount() const { return mJobCount; }
 
     protected:
         void threadLoop();
@@ -42,5 +43,7 @@ namespace load
 
         std::queue<std::unique_ptr<IThreadTask>> mFinishedJobs;
         std::mutex mFinishedJobsMutex;
+
+        uint32_t mJobCount = 0;  // Only the main thread can touch this.
     };
 } // load

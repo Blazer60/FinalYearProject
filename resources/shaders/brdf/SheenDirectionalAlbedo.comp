@@ -44,14 +44,14 @@ float integrateSheenDirectionalAlbedo(float nDotV, float roughnees)
         const float matDet = determinant(inverseMatrix);
 
         const vec3 v0 = inverseMatrix * v;
-        const float v0Length = length(v0);
-        const float v0Length3 = v0Length * v0Length * v0Length;
+        const float v0Length = max(length(v0), MIN_THRESHOLD);
+        const float v0Length3 = max(v0Length * v0Length * v0Length, 0.1f * MIN_THRESHOLD);
 
         float d0 = distributionOriginal(v0 / v0Length);
 
         const float sheenValue = directionalReflectance * d0 * matDet / v0Length3;
         // Does sheen value need to be divided by cos(theta_o)?
-        accumulation += sheenValue / nDotV;
+        accumulation += sheenValue / max(nDotV, MIN_THRESHOLD);
     }
 
     return PI * accumulation / float(sampleCount);

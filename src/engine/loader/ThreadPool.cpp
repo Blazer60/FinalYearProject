@@ -33,6 +33,7 @@ namespace load
 
     void ThreadPool::queueJob(std::unique_ptr<IThreadTask> task)
     {
+        ++mJobCount;
         {
             const std::unique_lock lock(mJobsMutex);
             mJobs.push(std::move(task));
@@ -74,6 +75,7 @@ namespace load
                 mFinishedJobs.pop();
 
                 finishedJob->callback();
+                --mJobCount;
             }
         }
     }

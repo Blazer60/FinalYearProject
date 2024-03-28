@@ -136,6 +136,7 @@ namespace engine
             anyChanges |= !mMasks[i]->mMaskUpdates.empty();
             for (auto &action : mMasks[i]->mMaskUpdates)
                 action(mTexturePool, mData.masks[i]);
+            mMasks[i]->mMaskUpdates.clear();
         }
 
         if (anyChanges)
