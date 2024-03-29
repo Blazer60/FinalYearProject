@@ -30,18 +30,18 @@ class Input
 };
 
 /**
- * \brief A keyboard input that has a binary state.
- * Multiple inputs can be registered to the same event.
+ * A keyboard input that has a binary state.
  */
 class Button
     : public Input<>
 {
 public:
-    explicit Button(ImGuiKey key);
+    explicit Button(ImGuiKey key, ImGuiKey modifier=ImGuiMod_None);
     void doAction() override;
     
 protected:
-    std::vector<ImGuiKey> mKeys;
+    ImGuiKey mKey;
+    ImGuiKey mModifier = ImGuiMod_None;
 };
 
 /**

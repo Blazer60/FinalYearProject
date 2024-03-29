@@ -146,6 +146,8 @@ namespace engine
                 }
                 ImGui::EndMenu();
             }
+            if (mSelectedActor.isValid() && ImGui::Button("Deselect"))
+                mSelectedActor = Ref<Actor>();
             ImGui::EndMenuBar();
         }
         
@@ -174,7 +176,7 @@ namespace engine
 
                 ImGui::TreePop();
             }
-            
+
             ImGui::EndListBox();
         }
         ImGui::End();

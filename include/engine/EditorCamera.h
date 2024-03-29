@@ -35,12 +35,17 @@ public:
     [[nodiscard]] CameraSettings toSettings();
     glm::vec3 getEndOfBoomArmPosition() const;
 
+    void resetPanAnglesToRotation();
+
+
 protected:
     void move();
     void onDrawUi() override;
     void moveFirstPerson();
     void rotateThirdPerson();
+    void forcusOnSelectedActor();
     void gotoSelectedActor();
+    void transformSelectedActor() const;
     void zoomCamera(float zoomDistance);
 
 public:
@@ -83,6 +88,8 @@ protected:
     uint32_t    mOrbitEventToken        { 0 };
     uint32_t    mZoomThirdPersonToken   { 0 };
     uint32_t    mZoomViewportToken      { 0 };
+    uint32_t    mGotoActorEventToken    { 0 };
+    uint32_t    mTransformActorToken    { 0 };
 };
 
 

@@ -7,19 +7,29 @@
 
 #include "Input.h"
 
-Button::Button(ImGuiKey key)
+Button::Button(const ImGuiKey key, const ImGuiKey modifier)
+    : mKey(key), mModifier(modifier)
 {
-    mKeys.emplace_back(key);
 }
 
 void Button::doAction()
 {
-    for (const ImGuiKey &key : mKeys)
+    if (mModifier != ImGuiMod_None)
     {
-        if (ImGui::IsKeyPressed(key, false))
+        if (ImGui::IsKeyDown(mModifier) && ImGui::IsKeyPressed(mKey, false))
+            broadcast();
+    }
+    else
+    {
+        if (!( ImGui::IsKeyDown(ImGuiMod_Alt)
+            || ImGui::IsKeyDown(ImGuiMod_Ctrl)
+            || ImGui::IsKeyDown(ImGuiMod_Shift)
+            || ImGui::IsKeyDown(ImGuiMod_Shortcut)
+            || ImGui::IsKeyDown(ImGuiMod_Super)
+            )
+            && ImGui::IsKeyPressed(mKey, false))
         {
             broadcast();
-            return;
         }
     }
 }

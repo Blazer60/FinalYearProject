@@ -53,7 +53,7 @@ namespace engine
             
             ImGuiKey key;
         };
-        
+
         class Viewport
             : public EventHandler
         {
@@ -64,6 +64,8 @@ namespace engine
             Button onGizmoRotate    { ImGuiKey_E };
             Button onGizmoScale     { ImGuiKey_R };
             Button onFocusActor     { ImGuiKey_F };
+            Button onTransformActor = Button(ImGuiKey_F, ImGuiMod_Shift);
+            Button onGotoActor      { ImGuiKey_G };
             ScrollWheel onZoom;
             
             FirstPersonCamera firstPerson { ImGuiKey_MouseRight };

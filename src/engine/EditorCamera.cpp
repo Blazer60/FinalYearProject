@@ -36,7 +36,7 @@ void EditorCamera::init()
     mPostProcessStack.emplace_back(std::make_unique<BloomPass>());
     mPostProcessStack.emplace_back(std::make_unique<ColourGrading>());
     
-    mFocusActorEventToken = engine::eventHandler->editor.viewport.onFocusActor.subscribe([this]() { gotoSelectedActor(); });
+    mFocusActorEventToken = engine::eventHandler->editor.viewport.onFocusActor.subscribe([this]() { forcusOnSelectedActor(); });
     mOrbitEventToken = engine::eventHandler->editor.viewport.thirdPerson.onOrbitCamera.subscribe([this](float value) { rotateThirdPerson(); });
     mDoMoveToken = engine::eventHandler->editor.viewport.firstPerson.onStateChanged.subscribe([this](bool isActive) { mDoMoveAction = isActive; });
     mMoveForwardEventToken = engine::eventHandler->editor.viewport.firstPerson.onMoveForward.subscribe([this](float value) { mInputDirection.z = value; });
@@ -44,6 +44,10 @@ void EditorCamera::init()
     mMoveUpEventToken = engine::eventHandler->editor.viewport.firstPerson.onMoveUp.subscribe([this](float value) { mInputDirection.y = value; });
     mZoomViewportToken = engine::eventHandler->editor.viewport.onZoom.subscribe([this](float zoomValue){ zoomCamera(-zoomValue * mCameraBoomDelta); });
     mZoomThirdPersonToken = engine::eventHandler->editor.viewport.thirdPerson.onZoomCamera.subscribe([this](float zoomValue){ zoomCamera(engine::eventHandler->getMouseDelta().y); });
+    mGotoActorEventToken = engine::eventHandler->editor.viewport.onGotoActor.subscribe([this]() { gotoSelectedActor(); });
+    mTransformActorToken = engine::eventHandler->editor.viewport.onTransformActor.subscribe([this]() { transformSelectedActor(); });
+
+    resetPanAnglesToRotation();
 }
 
 EditorCamera::~EditorCamera()
@@ -56,6 +60,8 @@ EditorCamera::~EditorCamera()
     engine::eventHandler->editor.viewport.firstPerson.onStateChanged.unSubscribe(mDoMoveToken);
     engine::eventHandler->editor.viewport.onZoom.unSubscribe(mZoomViewportToken);
     engine::eventHandler->editor.viewport.thirdPerson.onZoomCamera.unSubscribe(mZoomThirdPersonToken);
+    engine::eventHandler->editor.viewport.onGotoActor.unSubscribe(mGotoActorEventToken);
+    engine::eventHandler->editor.viewport.onTransformActor.unSubscribe(mTransformActorToken);
 }
 
 void EditorCamera::update()
@@ -181,7 +187,7 @@ void EditorCamera::rotateThirdPerson()
     mPosition += mCameraBoomDistance * -(anchorDirection - newAnchorDirection);
 }
 
-void EditorCamera::gotoSelectedActor()
+void EditorCamera::forcusOnSelectedActor()
 {
     Ref<engine::Actor> actor = engine::editor->getSelectedActor();
     if (!actor.isValid())
@@ -195,6 +201,35 @@ void EditorCamera::gotoSelectedActor()
 glm::vec3 EditorCamera::getEndOfBoomArmPosition() const
 {
     return mRotation * glm::vec3(0.f, 0.f, 1.f) * -mCameraBoomDistance + mPosition;
+}
+
+void EditorCamera::resetPanAnglesToRotation()
+{
+    const glm::vec3 eulerAngles = glm::eulerAngles(mRotation);
+    mPanAngles = glm::dvec2(eulerAngles.y, eulerAngles.x);
+}
+
+void EditorCamera::gotoSelectedActor()
+{
+    Ref<engine::Actor> actor = engine::editor->getSelectedActor();
+    if (!actor.isValid())
+        return;
+
+    const glm::vec3 actorPosition = actor->getWorldPosition();
+    const glm::quat actorRotation = actor->getWorldRotation();
+    mPosition = actorPosition;
+    mRotation = actorRotation;
+
+    resetPanAnglesToRotation();
+}
+
+void EditorCamera::transformSelectedActor() const
+{
+    Ref<engine::Actor> actor = engine::editor->getSelectedActor();
+    if (!actor.isValid())
+        return;
+
+    actor->setWorldTransform(glm::inverse(mViewMatrix));
 }
 
 

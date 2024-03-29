@@ -64,7 +64,9 @@ namespace engine
                     onGizmoRotate.doAction();
                     onGizmoScale.doAction();
                     onFocusActor.doAction();
+                    onTransformActor.doAction();
                     onZoom.doAction();
+                    onGotoActor.doAction();
                 }
             }
         }
@@ -99,7 +101,8 @@ namespace engine
             if (isActive)
             {
                 viewport.update();
-                onDeleteActor.doAction();
+                if (editor->isViewportHovered())
+                    onDeleteActor.doAction();
             }
         }
     }
