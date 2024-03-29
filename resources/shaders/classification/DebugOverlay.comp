@@ -26,7 +26,8 @@ void main()
     seed = shaderIndex * 31037 + 1103515245;
 
     const uint tileIndex = gl_WorkGroupID.x;
-    const uvec2 workGroupId = tileBuffers[tileIndex][shaderIndex];
+    const uint tileBufferResult = tileBuffers[tileIndex][shaderIndex];
+    const uvec2 workGroupId = uvec2(tileBufferResult & 0x0000FFFFu, (tileBufferResult & 0xFFFF0000u) >> 16);
 
     const uvec2 pixelCoord = workGroupId * gl_WorkGroupSize.xy + gl_LocalInvocationID.xy;
 

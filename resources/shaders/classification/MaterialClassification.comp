@@ -38,6 +38,6 @@ void main()
     if (groupIndex == 0 && orMask != 0)
     {
         const uint tileIndex = atomicAdd(arguments[shaderIndex].x, 1);
-        tileBuffers[tileIndex][shaderIndex] = gl_WorkGroupID.xy;
+        tileBuffers[tileIndex][shaderIndex] = gl_WorkGroupID.x | (gl_WorkGroupID.y << 16);
     }
 }
