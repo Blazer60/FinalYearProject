@@ -30,9 +30,9 @@ void main()
     const ivec2 id = ivec2(gl_GlobalInvocationID.xy);
     const uint groupIndex = gl_LocalInvocationIndex;
 
-    GBuffer gBuffer = pullFromStorageGBuffer(id);
+    const uint flags = pullFlagsFromStorageGBuffer(id);
 
-    const uint orMask = reduceMaterialMask(gBuffer.flags, groupIndex);
+    const uint orMask = reduceMaterialMask(flags, groupIndex);
     const uint shaderIndex = shaderTable[orMask / 4][orMask % 4];
 
     if (groupIndex == 0 && orMask != 0)

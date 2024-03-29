@@ -41,7 +41,7 @@ namespace engine
         
         mLogger = std::make_unique<debug::Logger>();
         debug::logger = mLogger.get();
-        mLogger->setOutputFlag(debug::OutputSourceFlag_File | debug::OutputSourceFlag_Queue | debug::OutputSourceFlag_IoStream);
+        mLogger->setOutputFlag(debug::OutputSourceFlag_File | debug::OutputSourceFlag_Queue);
         eventHandler = &mEventHandler;
         core = this;
 

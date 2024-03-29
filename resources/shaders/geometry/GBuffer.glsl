@@ -204,6 +204,13 @@ Stream streamPullFromStorageGBuffer(ivec2 coord, out uint uintCount)
     return stream;
 }
 
+// Special case for tile-classification since we only need the first few bytes.
+uint pullFlagsFromStorageGBuffer(ivec2 coord)
+{
+    const uvec4 slice = imageLoad(storageGBuffer, ivec3(coord, 0));
+    return bitfieldExtract(slice.x, STREAM_HEADER_BYTE_COUNT * BYTES, GBUFFER_FLAG_BYTE_COUNT * BYTES);
+}
+
 GBuffer gBufferCreate()
 {
     GBuffer gBuffer;
