@@ -4,7 +4,7 @@
 #include "../Maths.glsl"
 
 layout(binding = 0) uniform sampler2D sheenAlbedoLut;
-layout(binding = 0, r16f) writeonly uniform image2D sheenMissingLut;
+layout(binding = 0, r16) writeonly uniform image2D sheenMissingLut;
 
 // todo: add a comment here to explain what's going on and why it's so similar to GgxSpecMissing.comp
 float integrateSheenMissing(float nDotV, float roughness)

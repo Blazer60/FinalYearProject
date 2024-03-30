@@ -4,7 +4,7 @@
 #include "../Maths.glsl"
 
 layout(binding = 0) uniform sampler2D brdfLut;
-layout(binding = 0, rg16f) writeonly uniform image2D brdfAverageLut;
+layout(binding = 0, rg16) writeonly uniform image2D brdfAverageLut;
 
 vec2 integrateGgxAverage(float roughness)
 {

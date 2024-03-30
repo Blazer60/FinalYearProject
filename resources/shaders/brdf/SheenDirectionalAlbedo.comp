@@ -4,7 +4,7 @@
 #include "../Maths.glsl"
 
 layout(binding = 0) uniform sampler2D sheenTable;
-layout(binding = 0, r16f) writeonly uniform image2D sheenDirectionalAlbedo;
+layout(binding = 0, r16) writeonly uniform image2D sheenDirectionalAlbedo;
 
 float distributionOriginal(vec3 s)
 {

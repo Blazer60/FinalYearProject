@@ -6,7 +6,7 @@
 
 layout(binding = 0) uniform sampler2D directionalAlbedoLut;
 layout(binding = 1) uniform sampler2D directionalAlbedoAverageLut;
-layout(binding = 0, r16f) writeonly uniform image2D specMissing;
+layout(binding = 0, r16) writeonly uniform image2D specMissing;
 
 float directionalAlbedoWhite(vec2 uv)
 {

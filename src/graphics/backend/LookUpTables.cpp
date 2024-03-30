@@ -44,7 +44,7 @@ namespace graphics
             { file::shaderPath() / "brdf/GgxDirectionalAlbedo.comp" }
         };
 
-        TextureBufferObject lut(textureFormat::Rg16f);
+        TextureBufferObject lut(textureFormat::Rg16);
         lut.resize(size);
         lut.setDebugName("Specular BRDF LUT");
 
@@ -62,7 +62,7 @@ namespace graphics
             { file::shaderPath() / "brdf/GgxDirectionalAlbedoAverage.comp" }
         };
 
-        TextureBufferObject lut(textureFormat::Rg16f);
+        TextureBufferObject lut(textureFormat::Rg16);
         lut.resize(glm::ivec2(size, 1));
         lut.setDebugName("BRDF Average LUT");
 
@@ -81,7 +81,7 @@ namespace graphics
             { file::shaderPath() / "brdf/GgxSpecMissing.comp" }
         };
 
-        TextureBufferObject lut(textureFormat::R16f);
+        TextureBufferObject lut(textureFormat::R16);
         lut.resize(size);
         lut.setDebugName("Specular Missing LUT");
 
@@ -132,7 +132,7 @@ namespace graphics
             { file::shaderPath() / "brdf/SheenMissing.comp" }
         };
 
-        TextureBufferObject lut(textureFormat::R16f);
+        TextureBufferObject lut(textureFormat::R16);
 
         lut.resize(size);
         lut.setDebugName("Sheen Missing LUT");
