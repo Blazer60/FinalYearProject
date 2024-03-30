@@ -3,6 +3,10 @@
 #include "../interfaces/GBufferFlags.h"
 #include "../geometry/GBuffer.glsl"
 
+#if !defined(TILE_THREAD_GROUP_SIZE)
+    #define TILE_THREAD_GROUP_SIZE 16
+#endif
+
 layout(binding = 1, std430)
 buffer Classification
 {

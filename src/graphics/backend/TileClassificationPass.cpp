@@ -26,7 +26,7 @@ namespace graphics
         const std::vector pattern = { 0u, 1u, 1u, 0u };
         const std::vector resetData = containers::makePattern<uint32_t>(pattern.begin(), pattern.end(), shaderVariantCount);
 
-        const glm::ivec2 tileCount = glm::ceil(static_cast<glm::vec2>(size) / static_cast<float>(mTileThreadGroupSize));
+        const glm::ivec2 tileCount = glm::ceil(static_cast<glm::vec2>(size) / static_cast<float>(threadGroupSize));
         const uint32_t bufferSize = sizeof(uint32_t) * tileCount.x * tileCount.y;
 
         context.tileClassificationStorage.resize(indirectBufferSize + shaderVariantCount * bufferSize);

@@ -57,7 +57,7 @@ float getDistanceAttenuation(vec3 lightVector, float invSqrAttRadius)
     return attenuation;
 }
 
-layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+layout(local_size_x = TILE_THREAD_GROUP_SIZE, local_size_y = TILE_THREAD_GROUP_SIZE, local_size_z = 1) in;
 void main()
 {
     const uint tileIndex = gl_WorkGroupID.x;

@@ -14,6 +14,7 @@
 #include "Mesh.h"
 #include "Pch.h"
 #include "TextureBufferObject.h"
+#include "TileClassificationPass.h"
 #include "../Primitives.h"
 
 namespace graphics
@@ -45,7 +46,8 @@ namespace graphics
         };
 
         Shader mDebugTileOverlayShader {
-            { file::shaderPath() / "classification/DebugOverlay.comp" }
+            { file::shaderPath() / "classification/DebugOverlay.comp" },
+            { { "TILE_THREAD_GROUP_SIZE", TileClassificationPass::threadGroupSize } }
         };
 
         Shader mDebugShader {

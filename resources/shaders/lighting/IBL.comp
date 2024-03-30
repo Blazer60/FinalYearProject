@@ -22,6 +22,8 @@
 
 #if TILED_RENDERING > 0
     #include "../classification/ClassificationBuffer.glsl"
+#else
+    #define TILE_THREAD_GROUP_SIZE 16
 #endif
 
 #include "../geometry/GBuffer.glsl"
@@ -64,7 +66,7 @@ vec3 reconstructSpecularMissing(vec3 f0, float nDotV, float roughness)
     return f0Average / denominator * thatSummationPartOnTheRight;
 }
 
-layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+layout(local_size_x = TILE_THREAD_GROUP_SIZE, local_size_y = TILE_THREAD_GROUP_SIZE, local_size_z = 1) in;
 void main()
 {
 #if TILED_RENDERING > 0

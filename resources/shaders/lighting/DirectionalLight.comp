@@ -48,7 +48,7 @@ float calculate_shadow_map(vec3 position, vec3 normal)
 }
 
 
-layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+layout(local_size_x = TILE_THREAD_GROUP_SIZE, local_size_y = TILE_THREAD_GROUP_SIZE, local_size_z = 1) in;
 void main()
 {
     const uint tileIndex = gl_WorkGroupID.x;

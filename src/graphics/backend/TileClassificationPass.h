@@ -23,6 +23,8 @@ namespace graphics
     class TileClassificationPass
     {
     public:
+        static constexpr uint32_t threadGroupSize = 16;
+
         TileClassificationPass();
         void execute(const glm::ivec2 &size, Context &context);
 
@@ -32,10 +34,10 @@ namespace graphics
         void generateShaderTable();
         static constexpr uint32_t shaderVariantCount = 2;
         static constexpr uint32_t indirectBufferSize = 4 * sizeof(uint32_t) * shaderVariantCount;
-        static constexpr uint32_t mTileThreadGroupSize = 16;
 
         Shader mTileShader {
-            { file::shaderPath() / "classification/MaterialClassification.comp" }
+            { file::shaderPath() / "classification/MaterialClassification.comp" },
+            { { "TILE_THREAD_GROUP_SIZE", threadGroupSize } }
         };
 
         std::vector<shaderVariant> mShaderTable;

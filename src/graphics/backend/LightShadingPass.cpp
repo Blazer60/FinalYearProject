@@ -10,6 +10,7 @@
 #include "Cubemap.h"
 #include "GraphicsFunctions.h"
 #include "LtcSheenTable.h"
+#include "TileClassificationPass.h"
 
 namespace graphics
 {
@@ -201,6 +202,7 @@ namespace graphics
     {
         const std::vector<Definition> uberShaderDefinitions {
             { "TILED_RENDERING", 1 },
+            { "TILE_THREAD_GROUP_SIZE", TileClassificationPass::threadGroupSize },
             { "SHADER_INDEX", 0 },
             { "COMPUTE_SHEEN", 1 }
         };
@@ -230,6 +232,7 @@ namespace graphics
 
         const std::vector<Definition> baseShaderDefinitions {
             { "TILED_RENDERING", 1 },
+            { "TILE_THREAD_GROUP_SIZE", TileClassificationPass::threadGroupSize },
             { "SHADER_INDEX", 1 },
             { "COMPUTE_SHEEN", 0 }
         };
@@ -260,6 +263,7 @@ namespace graphics
         std::vector<LightShaderVariant> results;
 
         const std::vector<Definition> uberShaderDefinitions {
+            { "TILE_THREAD_GROUP_SIZE", TileClassificationPass::threadGroupSize },
             { "SHADER_INDEX", 0 },
             { "COMPUTE_SHEEN", 1 }
         };
@@ -274,6 +278,7 @@ namespace graphics
         });
 
         const std::vector<Definition> baseShaderDefinitions {
+            { "TILE_THREAD_GROUP_SIZE", TileClassificationPass::threadGroupSize },
             { "SHADER_INDEX", 1 },
             { "COMPUTE_SHEEN", 0 }
         };
