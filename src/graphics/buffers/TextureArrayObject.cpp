@@ -61,7 +61,7 @@ TextureArrayObject::TextureArrayObject(const graphics::textureFormat format, con
 
 void TextureArrayObject::deInit()
 {
-    if (mId == 0)
+    if (mId != 0)
         glDeleteTextures(1, &mId);
     mId = 0;
 }

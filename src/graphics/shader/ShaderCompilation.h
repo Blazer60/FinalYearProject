@@ -19,6 +19,7 @@ namespace graphics
     unsigned int getGlslType(const std::filesystem::path &path);
     unsigned int compileShader(const std::filesystem::path &path, const std::vector<graphics::Definition>& macros);
     unsigned int compileShaderSource(unsigned int shaderType, const std::list<ShaderInformation> &data, const std::vector<Definition> &macros);
+    void outputItermediateGlsl(const std::string &fileName, const std::string &firstSource, const std::vector<std::string> &sources);
 
     class ShaderPreprocessor
     {

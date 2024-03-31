@@ -19,6 +19,12 @@ namespace graphics
         glNamedBufferStorage(mBlockId, mSize, nullptr, GL_DYNAMIC_STORAGE_BIT);
     }
 
+    Ubo::~Ubo()
+    {
+        if (mBlockId != 0)
+            glDeleteBuffers(1, &mBlockId);
+    }
+
     void Ubo::set(const void* data, uint32_t size) const
     {
         if (size == 0)

@@ -16,6 +16,7 @@ namespace graphics
     {
     public:
         UniformBufferObject();
+        ~UniformBufferObject();
         void updateGlsl() const;
         void bindToSlot(unsigned int bindPoint=0);
 
@@ -34,6 +35,13 @@ namespace graphics
     {
         glCreateBuffers(1, &mBlockId);
         glNamedBufferStorage(mBlockId, sizeof(TBlock), nullptr, GL_DYNAMIC_STORAGE_BIT);
+    }
+
+    template<typename TBlock>
+    UniformBufferObject<TBlock>::~UniformBufferObject()
+    {
+        if (mBlockId != 0)
+            glDeleteBuffers(1, &mBlockId);
     }
 
     template<typename TBlock>

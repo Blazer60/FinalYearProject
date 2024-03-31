@@ -20,6 +20,7 @@ namespace graphics
     public:
         explicit ShaderStorageBufferObject(const std::string &debugName="");
         explicit ShaderStorageBufferObject(unsigned int size, const std::string &debugName="");
+        ~ShaderStorageBufferObject();
         void reserve(unsigned int size);
         void resize(unsigned int size);
         void bindToSlot(unsigned int bindPoint);

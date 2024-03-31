@@ -43,8 +43,8 @@ namespace graphics
         mTextureDataShaderStorage.bindToSlot(2);
         mMaskShaderStorage.bindToSlot(3);
 
-        executeMultiMaterial(context, multiGeometryQueue, multiMaterialQueue);
         executeSingleMaterial(context, singleGeometryQueue, singleMaterialQueue);
+        executeMultiMaterial(context, multiGeometryQueue, multiMaterialQueue);
 
         mFramebuffer.detach(0);
         mFramebuffer.detach(1);

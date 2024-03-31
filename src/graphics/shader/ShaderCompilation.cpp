@@ -174,6 +174,10 @@ namespace graphics
             ++shaderIndex;
         }
 
+#if 1
+        outputItermediateGlsl(data.back().path.filename().string(), prependShaderString, sourceStrings);
+#endif
+
         glShaderSource(shaderId, static_cast<int>(dataPtrs.size()), dataPtrs.data(), nullptr);
         glCompileShader(shaderId);
 
@@ -199,5 +203,22 @@ namespace graphics
         const std::string shaderNames = format::value(data.begin(), data.end(), [](const ShaderInformation &shaderData) { return shaderData.path.filename().string(); });
         CRASH("Failed to compile % shader %: \n%", shaderTypes.at(shaderType), shaderNames, message);
         return 0;
+    }
+
+    // So that shader with the same name but different definitions are unique.
+    static uint32_t shaderCount = 0;
+
+    void outputItermediateGlsl(const std::string &fileName, const std::string &firstSource, const std::vector<std::string> &sources)
+    {
+        if (shaderCount == 0)
+            std::filesystem::remove_all("shaderObj");
+
+        std::filesystem::create_directories("shaderObj");
+        const std::string path = format::string("shaderObj\\Shader%%", ++shaderCount, fileName);
+        std::ofstream file(path.c_str());
+        file << firstSource.c_str();
+        for (const auto & source : sources)
+            file << source.c_str();
+        file.close();
     }
 }

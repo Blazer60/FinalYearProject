@@ -6,7 +6,7 @@
 
 #define BYTES 8
 #define UINT_SIZE 4
-#define DATA_STREAM_SIZE 25
+#define DATA_STREAM_SIZE 8
 #define GBUFFER_LAYER_COUNT 3
 #define GBUFFER_UINT_COUNT 12
 #define STREAM_HEADER_BYTE_COUNT 1
@@ -163,7 +163,7 @@ void streamPushToStorageGBuffer(Stream stream, ivec2 coord)
 #if FRAGMENT_OUTPUT > 0
     oGBuffer0.xyzw = uvec4(stream.data[0], stream.data[1], stream.data[2], stream.data[3]);
     oGBuffer1.xyzw = uvec4(stream.data[4], stream.data[5], stream.data[6], stream.data[7]);
-    oGBuffer2.xyzw = uvec4(stream.data[8], stream.data[9], stream.data[10], stream.data[11]);
+//    oGBuffer2.xyzw = uvec4(stream.data[8], stream.data[9], stream.data[10], stream.data[11]);
 #else
     int imageIndex = 0;
     for (int streamIndex = 0; streamIndex < uintCount; streamIndex += 4)

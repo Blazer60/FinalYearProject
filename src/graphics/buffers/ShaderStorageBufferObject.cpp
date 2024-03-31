@@ -26,6 +26,12 @@ namespace graphics
         nameBuffer();
     }
 
+    ShaderStorageBufferObject::~ShaderStorageBufferObject()
+    {
+        if (mBufferId != 0)
+            glDeleteBuffers(1, &mBufferId);
+    }
+
     void ShaderStorageBufferObject::reserve(const unsigned int size)
     {
         if (size < mSize)

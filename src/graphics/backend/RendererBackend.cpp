@@ -63,7 +63,8 @@ namespace graphics
             mMaterialRendering.execute(
                 window::bufferSize(), mContext,
                 mMultiGeometryQueue, mMultiMaterialQueue,
-                mSingleGeometryQueue, mSingleMaterialQueue);
+                mSingleGeometryQueue, mSingleMaterialQueue
+            );
 
             mTileClassification.execute(window::bufferSize(), mContext);
             mShadowMapping.execute(camera, mMultiGeometryQueue, mSingleGeometryQueue, mDirectionalLightQueue);

@@ -20,6 +20,7 @@ namespace graphics
     {
     public:
         explicit Ubo(uint32_t size);
+        ~Ubo();
         void set(const void *data, uint32_t size=0) const;
         void bindToSlot(unsigned int bindPoint=0);
         unsigned int getBindPoint() const { return mBindPoint; }
