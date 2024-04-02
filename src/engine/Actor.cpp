@@ -332,6 +332,14 @@ namespace engine
         return position;
     }
 
+    void Actor::setWorldRotation(const glm::quat& worldRotation)
+    {
+        if (mParent)
+            rotation = glm::inverse(mParent->getWorldRotation()) * worldRotation;
+        else
+            rotation = worldRotation;
+    }
+
     glm::quat Actor::getWorldRotation() const
     {
         if (mParent != nullptr)

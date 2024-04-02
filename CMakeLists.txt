@@ -319,6 +319,8 @@ add_executable(${PROJECT_NAME}
         src/game/Lava.cpp
         src/game/Lava.h
         include/engine/loader/LoadingTask.h
+        src/game/LookAtActor.cpp
+        src/game/LookAtActor.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

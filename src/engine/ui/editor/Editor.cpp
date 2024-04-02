@@ -114,6 +114,7 @@ namespace engine
     
     void Editor::drawActorDetails()
     {
+        ImGui::Checkbox("Lock", &mLockSelection);
         if (mSelectedActor.isValid())
         {
             ui::draw(mSelectedActor.get());
@@ -250,6 +251,9 @@ namespace engine
 
     void Editor::setSelectedActor(Ref<Actor> actor)
     {
+        if (mLockSelection)
+            return;
+
         mSelectedActor = actor;
         mSelectedActorId = actor->getId();
         mSelectedType = selectedType::Actor;
@@ -263,33 +267,33 @@ namespace engine
         if (isSelected)
             flags |= ImGuiTreeNodeFlags_Selected;
         
-        if (ImGui::TreeNodeEx(name.c_str(), flags | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth))
+        const bool isTreeOpen = ImGui::TreeNodeEx(name.c_str(), flags | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth);
+        if (ImGui::BeginDragDropSource())
         {
-            if (ImGui::BeginDragDropSource() && isSelected)
-            {
-                ImGui::SetDragDropPayload("ActorHierarchy", &actor, sizeof(Ref<Actor>));
-                
-                ImGui::Text("%s", actor->getName().data());
-                
-                ImGui::EndDragDropSource();
-            }
-            
-            if (ImGui::BeginDragDropTarget())
-            {
-                if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("ActorHierarchy"))
-                {
-                    Ref<Actor> payloadActor = *reinterpret_cast<Ref<Actor>*>(payload->Data);
-                    
-                    mMoveSourceActor = payloadActor.get();
-                    mMoveDestinationActor = actor.get();
-                }
-                ImGui::EndDragDropTarget();
-            }
+            ImGui::SetDragDropPayload("ActorHierarchy", &actor, sizeof(Ref<Actor>));
 
-            if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
-                setSelectedActor(actor);
+            ImGui::Text("%s", actor->getName().data());
 
-            
+            ImGui::EndDragDropSource();
+        }
+
+        if (ImGui::BeginDragDropTarget())
+        {
+            if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("ActorHierarchy"))
+            {
+                Ref<Actor> payloadActor = *static_cast<Ref<Actor>*>(payload->Data);
+
+                mMoveSourceActor = payloadActor.get();
+                mMoveDestinationActor = actor.get();
+            }
+            ImGui::EndDragDropTarget();
+        }
+
+        if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+            setSelectedActor(actor);
+
+        if (isTreeOpen)
+        {
             for (UUID childId : actor->getChildren())
                 drawSceneHierarchyForActor(actor->getScene()->getActor(childId));
                 

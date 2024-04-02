@@ -12,6 +12,7 @@
 #include "CameraController.h"
 #include "CollisionInfo.h"
 #include "EngineState.h"
+#include "LookAtActor.h"
 #include "MyScene.h"
 #include "MyTestActor.h"
 #include "Rotator.h"
@@ -28,6 +29,10 @@ void initComponentsForEngine()
 
     engine::editor->addComponentOption<CameraController>("Camera Controller", [](Ref<engine::Actor> actor) {
         actor->addComponent(makeResource<CameraController>());
+    });
+
+    engine::editor->addComponentOption<LookAtActor>("Look At Actor", [](Ref<engine::Actor> actor) {
+        actor->addComponent(makeResource<LookAtActor>());
     });
 
     engine::editor->addMenuOption("Rotating Cube", [] {
@@ -66,5 +71,18 @@ void initComponentsForEngine()
             cc->mSpeed = node["Speed"].as<float>();
         if (node["JumpForce"].IsDefined())
             cc->mJumpForce = node["JumpForce"].as<float>();
+    });
+
+    engine::serializer->pushSaveComponent<LookAtActor>();
+    engine::serializer->pushLoadComponent("LookAtActor", [](const engine::serialize::Node &node, Ref<engine::Actor> actor) {
+        Ref<LookAtActor> component = actor->addComponent(makeResource<LookAtActor>());
+        if (node["ActorId"].IsDefined())
+        {
+            component->trackedActorId = node["ActorId"].as<engine::UUID>();
+        }
+        if (node["InvertZ"].IsDefined())
+        {
+            component->invertZ = node["InvertZ"].as<bool>();
+        }
     });
 }

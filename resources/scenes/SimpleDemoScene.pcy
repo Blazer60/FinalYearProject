@@ -1,0 +1,156 @@
+Scene: scenes\SimpleDemoScene.pcy
+Actors:
+  - Name: Cube
+    UUID: 7860336904420553600
+    position: [0, -5, 30]
+    rotation: [1, 0, 0, 0]
+    scale: [10, 1, 10]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\defaultObjects\DefaultCube.glb
+        UMaterials:
+          - materials\SimpleDemoMaterials\Floor.mpcy
+    Children:
+      []
+  - Name: Cube
+    UUID: 831055589374489756
+    position: [0, -5, 20]
+    rotation: [1, 0, 0, 0]
+    scale: [10, 10, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\defaultObjects\DefaultCube.glb
+        UMaterials:
+          []
+    Children:
+      []
+  - Name: Cube
+    UUID: 13785904183229308807
+    position: [2.508986, -3.09798288, 23.4124508]
+    rotation: [0.950794458, 0, -0.309822321, 0]
+    scale: [2.24999976, 2.25, 2.24999976]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\defaultObjects\DefaultCube.glb
+        UMaterials:
+          - materials\SimpleDemoMaterials\Green.mpcy
+    Children:
+      []
+  - Name: Cube
+    UUID: 164949832677679553
+    position: [-0.146232247, -3.81891894, 25.8131828]
+    rotation: [1, 0, 0, 0]
+    scale: [0.540000021, 0.540000021, 0.540000021]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\defaultObjects\DefaultCube.glb
+        UMaterials:
+          - materials\SimpleDemoMaterials\Red.mpcy
+    Children:
+      []
+  - Name: Cube
+    UUID: 7132110074293377846
+    position: [2.42025375, -0.16493988, 23.0033226]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\defaultObjects\DefaultCube.glb
+        UMaterials:
+          - materials\SimpleDemoMaterials\Blue.mpcy
+    Children:
+      []
+  - Name: Sphere
+    UUID: 439091555398899005
+    position: [-4.33664703, -3.04806495, 23.0033245]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\defaultObjects\DefaultSphere.glb
+        UMaterials:
+          - materials\SimpleDemoMaterials\Metallic.mpcy
+    Children:
+      []
+  - Name: Parent
+    UUID: 14322458273316482530
+    position: [0, 5, -39]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      []
+    Children:
+      - 439091555398899005
+      - 7132110074293377846
+      - 164949832677679553
+      - 13785904183229308807
+      - 831055589374489756
+      - 7860336904420553600
+  - Name: Actor
+    UUID: 322906864859523291
+    position: [2.50898409, 1.90201807, -15.5875502]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: DistantLightProbe
+        Size: [512, 512]
+        RadianceMultiplier: 1000
+        Path: textures\hdr\newport\NewportLoft.hdr
+    Children:
+      []
+  - Name: Camera Position
+    UUID: 10995661137933937710
+    position: [-4.17232513e-07, 5, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      []
+    Children:
+      []
+  - Name: Actor
+    UUID: 15815975986748466270
+    position: [0, 4.99999952, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: DirectionalLight
+        Colour: [0.930000007, 0.930000007, 0.949999988]
+        Intensity: 10000
+        Yaw: 50
+        Pitch: 45
+        CascadeDepths: [0.0399999991, 0.159999996, 0.360000014, 0.639999986]
+        ZMultiplier: 5
+        Bias: [0.00100000005, 0]
+    Children:
+      []
+  - Name: Actor
+    UUID: 7084028980855305722
+    position: [5, 4.99999952, -16]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: PointLight
+        Colour: [1, 1, 1]
+        Intensity: 12000
+        Radius: 30
+        Bias: [0.00499999989, 0.150000006]
+        Softness: 0.0199999996
+        Resolution: 1024
+    Children:
+      []
+  - Name: Actor
+    UUID: 7411817273421441255
+    position: [-5, 5, -16]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: Spotlight
+        Colour: [1, 1, 1]
+        Intensity: 120000
+        InnerAngle: 22.5
+        OuterAngle: 45
+        Pitch: -90
+        Yaw: 0
+        UseActorRotation: false
+    Children:
+      []

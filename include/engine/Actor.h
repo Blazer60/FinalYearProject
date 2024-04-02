@@ -151,6 +151,7 @@ namespace engine
 
         void setWorldTransform(const glm::mat4 &worldTransform);
         [[nodiscard]] glm::vec3 getWorldPosition() const;
+        void setWorldRotation(const glm::quat &worldRotation);
         [[nodiscard]] glm::quat getWorldRotation() const;
         [[nodiscard]] Scene *getScene() const;
 

@@ -126,6 +126,7 @@ namespace engine
         selectedType mSelectedType = selectedType::Actor;
         Ref<Actor> mSelectedActor;
         UUID mSelectedActorId { 0 };
+        bool mLockSelection = false;
 
         std::shared_ptr<UberLayer> mUberLayer;
         std::shared_ptr<UberMaterial> mUberMaterial;

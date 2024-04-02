@@ -1,0 +1,4 @@
+MaterialLayers:
+  - materials\SimpleDemoMaterials\Metallic.mlpcy
+MaskLayers:
+  []
