@@ -28,8 +28,8 @@ namespace graphics
         }
     }
 
-    constexpr uint8_t passthroughFlagCount = 6;
-    enum class PassthroughFlags : uint8_t
+    constexpr uint16_t passthroughFlagCount = 8;
+    enum class PassthroughFlags : uint16_t
     {
         None = 0,
         Diffuse = 1 << 0,
@@ -38,6 +38,11 @@ namespace graphics
         Roughness = 1 << 3,
         SheenColour = 1 << 4,
         SheenRoughness = 1 << 5,
+        TopSpecular = 1 << 6,
+        TransmittanceColour = 1 << 7,
+        TopRoughness = 1 << 8,
+        TopThickness = 1 << 9,
+        TopCoverage = 1 << 10,
     };
 
     inline std::string to_string(const PassthroughFlags flag)
@@ -51,6 +56,11 @@ namespace graphics
             case PassthroughFlags::Roughness: return "Roughness";
             case PassthroughFlags::SheenColour: return "Sheen Colour";
             case PassthroughFlags::SheenRoughness: return "Sheen Roughness";
+            case PassthroughFlags::TopSpecular: return "Top Specular";
+            case PassthroughFlags::TransmittanceColour: return "Transmittance";
+            case PassthroughFlags::TopRoughness: return "Top Roughness";
+            case PassthroughFlags::TopThickness: return "Thickness";
+            case PassthroughFlags::TopCoverage: return "Coverage";
             default: return "unknown";
         }
     }
@@ -76,18 +86,27 @@ namespace graphics
         glm::vec4 diffuseColour = glm::vec4(0.8f, 0.8f, 0.8f, 1.f);
         glm::vec4 specularColour = glm::vec4(0.2f, 0.2f, 0.2f, 1.f);
         glm::vec4 sheenColour = glm::vec4(0.f);
+        glm::vec4 topSpecularColour = glm::vec4(0.f, 0.f, 0.f, 1.f);
+        glm::vec4 transmittanceColour = glm::vec4(0.f, 0.f, 0.f, 1.f);
         float roughness = 0.9f;
         float sheenRoughness = 0.5f;
+        float topRoughness = 0.2f;
+        float topThickness = 0.001f;
+        float topCoverage = 0.f;
 
         int32_t diffuseTextureIndex = -1;
         int32_t specularTextureIndex = -1;
-
         int32_t normalTextureIndex = -1;
         int32_t roughnessTextureIndex = -1;
         int32_t sheenTextureIndex = -1;
         int32_t sheenRoughnessTextureIndex = -1;
         int32_t metallicTextureIndex = -1;
-        int32_t _padding01 = 100;
+        int32_t topSpecularColourTextureIndex = -1;
+        int32_t transmittanceColourTextureIndex = -1;
+        int32_t topRoughnessTextureIndex = -1;
+        int32_t topThicknessTextureIndex = -1;
+        int32_t topCoverageTextureIndex = -1;
+        int32_t _padding01 = 100;  // Can't be a vec3 otherwise glsl will auto align to the next 16 byte boundary.
         int32_t _padding02 = 100;
         int32_t _padding03 = 100;
     };

@@ -56,12 +56,24 @@ namespace engine
         std::shared_ptr<Texture> mSheenTexture              = load::texture("");
         std::shared_ptr<Texture> mSheenRoughnessTexture     = load::texture("");
         std::shared_ptr<Texture> mMetallicTexture           = load::texture("");
+        std::shared_ptr<Texture> mTopSpecularTexture        = load::texture("");
+        std::shared_ptr<Texture> mTransmittanceColourTexture = load::texture("");
+        std::shared_ptr<Texture> mTopRoughnessTexture       = load::texture("");
+        std::shared_ptr<Texture> mTopThicknessTexture       = load::texture("");
+        std::shared_ptr<Texture> mTopCoverageTexture        = load::texture("");
 
-        glm::vec3 mDiffuseColour = glm::vec3(0.8f, 0.8f, 0.8f);
-        glm::vec3 mSpecularColour = glm::vec3(0.2f, 0.2f, 0.2f);
-        float     mRoughness = 0.9f;
+        glm::vec3 mDiffuseColour = glm::vec3(1.f);
+        glm::vec3 mSpecularColour = glm::vec3(0.f);
+        float     mRoughness = 1.f;
         glm::vec3 mSheenColour = glm::vec3(0.f);
         float     mSheenRoughness = 0.5f;
+
+        glm::vec3 mTopSpecularColour = glm::vec3(0.f);
+        float     mTopRoughness = 0.2f;
+        glm::vec3 mTransmittanceColour = glm::vec3(0.f);
+        float     mTopThickness = 0.002f;
+        float     mTopCoverage = 1.f;
+
 
         graphics::WrapOp mDiffuseWrapOp         = graphics::WrapOp::Repeat;
         graphics::WrapOp mSpecularWrapOp        = graphics::WrapOp::Repeat;
@@ -70,6 +82,11 @@ namespace engine
         graphics::WrapOp mSheenWrapOp           = graphics::WrapOp::Repeat;
         graphics::WrapOp mSheenRoughnessWrapOp  = graphics::WrapOp::Repeat;
         graphics::WrapOp mMetallicWrapOp        = graphics::WrapOp::Repeat;
+        graphics::WrapOp mTopSpecularWrapOp     = graphics::WrapOp::Repeat;
+        graphics::WrapOp mTransmittanceWrapOp   = graphics::WrapOp::Repeat;
+        graphics::WrapOp mTopRoughnessWrapOp    = graphics::WrapOp::Repeat;
+        graphics::WrapOp mTopThicknessWrapOp    = graphics::WrapOp::Repeat;
+        graphics::WrapOp mTopCoverageWrapOp     = graphics::WrapOp::Repeat;
 
 
         uint32_t mCallbackToken = 0;

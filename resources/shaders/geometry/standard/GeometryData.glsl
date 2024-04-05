@@ -5,17 +5,26 @@ struct LayerData
     vec4 diffuseColour;
     vec4 specularColour;
     vec4 sheenColour;
+    vec4 topSpecularColour;
+    vec4 transmittanceColour;
     float roughness;
     float sheenRoughness;
+    float topRoughness;
+    float topThickness;
+    float topCoverage;
+
     int diffuseTextureIndex;
     int specularTextureIndex;
-
     int normalTextureIndex;
     int roughnessTextureIndex;
     int sheenTextureIndex;
     int sheenRoughnessTextureIndex;
-
     int metallicTextureIndex;
+    int topSpecularColourTextureIndex;
+    int transmittanceColourTextureIndex;
+    int topRoughnessTextureIndex;
+    int topThicknessTextureIndex;
+    int topCoverageTextureIndex;
     int _padding01;
     int _padding02;
     int _padding03;
@@ -27,6 +36,11 @@ struct LayerData
 #define PASSTHROUGH_FLAG_ROUGHNESS 8
 #define PASSTHROUGH_FLAG_SHEEN 16
 #define PASSTHROUGH_FLAG_SHEEN_ROUGHNESS 32
+#define PASSTHROUGH_FLAG_TOP_SPECULAR 64
+#define PASSTHROUGH_FLAG_TRANSMITTANCE 128
+#define PASSTHROUGH_FLAG_TOP_ROUGHNESS 256
+#define PASSTHROUGH_FLAG_TOP_THICKNESS 512
+#define PASSTHROUGH_FLAG_TOP_COVERAGE 1024
 
 #define OPERATION_LERP 0
 #define OPERATION_THRESHOLD 1
