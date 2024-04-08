@@ -1,6 +1,6 @@
 MaterialLayers:
   - materials\graphics\sheen\SheenBase.mlpcy
-  - materials\graphics\sheen\SheenLayer0.5.mlpcy
+  - materials\graphics\sheen\SheenLayer0.6.mlpcy
 MaskLayers:
   - Texture: ""
     Alpha: 1
