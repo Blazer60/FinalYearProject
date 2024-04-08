@@ -216,8 +216,24 @@ namespace engine
                     });
                 }
             }
-
-            if (const ui::EditFlags flags = ui::rowTextureColourEdit("Transmittance", mTransmittanceColourTexture, mTransmittanceColour, mTransmittanceWrapOp); flags > 0)
+            if (const ui::EditFlags flags = ui::rowTexture("Top Normal Map", mTopNormalTexture, mTopNormalWrapOp); flags > 0)
+            {
+                if ((flags & ui::EditFlags::Texture) > 0)
+                {
+                    layerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                        texturePool.removeTexture(layer.topNormalTextureIndex);
+                        layer.topNormalTextureIndex = texturePool.addTexture(*mTopNormalTexture);
+                        texturePool.setWrap(layer.topNormalTextureIndex, mTopNormalWrapOp);
+                    });
+                }
+                if ((flags & ui::EditFlags::Wrap) > 0)
+                {
+                    layerUpdates.push_back([this](graphics::TexturePool &texturePool, const graphics::LayerData &layer) {
+                        texturePool.setWrap(layer.topNormalTextureIndex, mTopNormalWrapOp);
+                    });
+                }
+            }
+            if (const ui::EditFlags flags = ui::rowTextureColourEdit("Transmittance", mTransmittanceTexture, mTransmittanceColour, mTransmittanceWrapOp); flags > 0)
             {
                 if ((flags & ui::EditFlags::Value) > 0)
                 {
@@ -229,7 +245,7 @@ namespace engine
                 {
                     layerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
                         texturePool.removeTexture(layer.transmittanceColourTextureIndex);
-                        layer.transmittanceColourTextureIndex = texturePool.addTexture(*mTransmittanceColourTexture);
+                        layer.transmittanceColourTextureIndex = texturePool.addTexture(*mTransmittanceTexture);
                         texturePool.setWrap(layer.transmittanceColourTextureIndex, mTransmittanceWrapOp);
                     });
                 }
@@ -348,7 +364,7 @@ namespace engine
         out << YAML::Key << "SheenRoughnessTexturePath" << YAML::Value << file::makeRelativeToResourcePath(mSheenRoughnessTexture->path()).string();
         out << YAML::Key << "MetallicTexturePath"       << YAML::Value << file::makeRelativeToResourcePath(mMetallicTexture->path()).string();
         out << YAML::Key << "TopSpecularTexturePath"    << YAML::Value << file::makeRelativeToResourcePath(mTopSpecularTexture->path()).string();
-        out << YAML::Key << "TransmittanceTexturePath"  << YAML::Value << file::makeRelativeToResourcePath(mTransmittanceColourTexture->path()).string();
+        out << YAML::Key << "TransmittanceTexturePath"  << YAML::Value << file::makeRelativeToResourcePath(mTransmittanceTexture->path()).string();
         out << YAML::Key << "TopRoughnessTexturePath"   << YAML::Value << file::makeRelativeToResourcePath(mTopRoughnessTexture->path()).string();
         out << YAML::Key << "TopThicknessTexturePath"   << YAML::Value << file::makeRelativeToResourcePath(mTopThicknessTexture->path()).string();
         out << YAML::Key << "TopCoverageTexturePath"    << YAML::Value << file::makeRelativeToResourcePath(mTopCoverageTexture->path()).string();
@@ -451,11 +467,11 @@ namespace engine
                 texturePool.setWrap(layer.topSpecularColourTextureIndex, mTopSpecularWrapOp);
             });
         }
-        else if (mTransmittanceColourTexture == texture)
+        else if (mTransmittanceTexture == texture)
         {
             layerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
                 texturePool.removeTexture(layer.transmittanceColourTextureIndex);
-                layer.transmittanceColourTextureIndex = texturePool.addTexture(*mTransmittanceColourTexture);
+                layer.transmittanceColourTextureIndex = texturePool.addTexture(*mTransmittanceTexture);
                 texturePool.setWrap(layer.transmittanceColourTextureIndex, mTransmittanceWrapOp);
             });
         }
@@ -525,7 +541,7 @@ namespace engine
         mSheenRoughnessTexture      = tryLoadAsTexture(data["SheenRoughnessTexturePath"]);
         mMetallicTexture            = tryLoadAsTexture(data["MetallicTexturePath"]);
         mTopSpecularTexture         = tryLoadAsTexture(data["TopSpecularTexturePath"]);
-        mTransmittanceColourTexture = tryLoadAsTexture(data["TransmittanceTexturePath"]);
+        mTransmittanceTexture       = tryLoadAsTexture(data["TransmittanceTexturePath"]);
         mTopRoughnessTexture        = tryLoadAsTexture(data["TopRoughnessTexturePath"]);
         mTopThicknessTexture        = tryLoadAsTexture(data["TopThicknessTexturePath"]);
         mTopCoverageTexture         = tryLoadAsTexture(data["TopCoverageTexturePath"]);

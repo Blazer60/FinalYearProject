@@ -113,10 +113,14 @@ void main()
         nextGBuffer.fuzzColour      = sampleColour(material.sheenColour, v_uv, material.sheenTextureIndex);
         nextGBuffer.fuzzRoughness   = sampleValue(material.sheenRoughness, v_uv, material.sheenRoughnessTextureIndex);
 
-        if (dot(nextGBuffer.fuzzColour, nextGBuffer.fuzzColour) >= 0.001f)
-        {
-            gBufferSetFlag(nextGBuffer, GBUFFER_FLAG_FUZZ_BIT, 1);
-        }
+        nextGBuffer.topSpecular = sampleColour(material.topSpecularColour, v_uv, material.topSpecularColourTextureIndex);
+        const vec3 rawTopNormal = sampleNormal(v_normal_ws, v_uv, material.topNormalTextureIndex, v_tbn_matrix);
+        const float topRoughness = sampleValue(material.topRoughness, v_uv, material.topRoughnessTextureIndex);
+        nextGBuffer.topNormal = normalize(rawTopNormal);
+        nextGBuffer.topRoughness = computeRoughness(rawTopNormal, topRoughness);
+        nextGBuffer.transmittance = sampleColour(material.transmittanceColour, v_uv, material.transmittanceColourTextureIndex);
+        nextGBuffer.topThickness = sampleValue(material.topThickness, v_uv, material.topThicknessTextureIndex);
+        nextGBuffer.topCoverage = sampleValue(material.topCoverage, v_uv, material.topCoverageTextureIndex);
 
         // Blendables.
         gBuffer.diffuse    = blend(gBuffer.diffuse,   nextGBuffer.diffuse,   textureValue, mask.alpha, mask.operation, (mask.passthroughFlags & PASSTHROUGH_FLAG_DIFFUSE)   > 0);
@@ -127,12 +131,26 @@ void main()
         gBuffer.fuzzColour    = blend(gBuffer.fuzzColour,    nextGBuffer.fuzzColour,    textureValue, mask.alpha, mask.operation, (mask.passthroughFlags & PASSTHROUGH_FLAG_SHEEN)           > 0);
         gBuffer.fuzzRoughness = blend(gBuffer.fuzzRoughness, nextGBuffer.fuzzRoughness, textureValue, mask.alpha, mask.operation, (mask.passthroughFlags & PASSTHROUGH_FLAG_SHEEN_ROUGHNESS) > 0);
 
+        gBuffer.topSpecular     = blend(gBuffer.topSpecular,   nextGBuffer.topSpecular,   textureValue, mask.alpha, mask.operation, (mask.passthroughFlags & PASSTHROUGH_FLAG_TOP_SPECULAR)  > 0);
+        gBuffer.topNormal       = blend(gBuffer.topNormal,     nextGBuffer.topNormal,     textureValue, mask.alpha, mask.operation, (mask.passthroughFlags & PASSTHROUGH_FLAG_TOP_NORMAL)    > 0);
+        gBuffer.topRoughness    = blend(gBuffer.topRoughness,  nextGBuffer.topRoughness,  textureValue, mask.alpha, mask.operation, (mask.passthroughFlags & PASSTHROUGH_FLAG_TOP_ROUGHNESS) > 0);
+        gBuffer.transmittance   = blend(gBuffer.transmittance, nextGBuffer.transmittance, textureValue, mask.alpha, mask.operation, (mask.passthroughFlags & PASSTHROUGH_FLAG_TRANSMITTANCE) > 0);
+        gBuffer.topThickness    = blend(gBuffer.topThickness,  nextGBuffer.topThickness,  textureValue, mask.alpha, mask.operation, (mask.passthroughFlags & PASSTHROUGH_FLAG_TOP_THICKNESS) > 0);
+        gBuffer.topCoverage     = blend(gBuffer.topCoverage,   nextGBuffer.topCoverage,   textureValue, mask.alpha, mask.operation, (mask.passthroughFlags & PASSTHROUGH_FLAG_TOP_COVERAGE)  > 0);
+
         // The normal is handled in the worst way possible. Should really be using a slerp.
         gBuffer.normal = normalize(gBuffer.normal);
+    }
 
-        // Flags.
-        const int fuzzFlagBit = gBufferHasFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT) | gBufferHasFlag(nextGBuffer, GBUFFER_FLAG_FUZZ_BIT);
-        gBufferSetFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT, fuzzFlagBit);
+
+    if (dot(gBuffer.fuzzColour, gBuffer.fuzzColour) >= 0.001f)
+    {
+        gBufferSetFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT, 1);
+    }
+
+    if (dot(gBuffer.topCoverage, gBuffer.topCoverage) >= 0.001f)
+    {
+        gBufferSetFlag(gBuffer, GBUFFER_FLAG_TRANSMITTANCE_BIT, 1);
     }
 
     pushToStorageGBuffer(gBuffer, ivec2(0));

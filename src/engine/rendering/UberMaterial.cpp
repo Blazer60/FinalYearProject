@@ -356,25 +356,42 @@ namespace engine
         if (layer == nullptr)
             return;
 
-        layerData.roughness         = layer->mRoughness;
-        layerData.sheenRoughness    = layer->mSheenRoughness;
-        layerData.diffuseColour     = glm::vec4(layer->mDiffuseColour, 1.f);
-        layerData.specularColour    = glm::vec4(layer->mSpecularColour, 1.f);
-        layerData.sheenColour       = glm::vec4(layer->mSheenColour, 1.f);
+        layerData.roughness           = layer->mRoughness;
+        layerData.sheenRoughness      = layer->mSheenRoughness;
+        layerData.diffuseColour       = glm::vec4(layer->mDiffuseColour, 1.f);
+        layerData.specularColour      = glm::vec4(layer->mSpecularColour, 1.f);
+        layerData.sheenColour         = glm::vec4(layer->mSheenColour, 1.f);
+        layerData.topSpecularColour   = glm::vec4(layer->mTopSpecularColour, 1.f);
+        layerData.topRoughness        = layer->mTopRoughness;
+        layerData.topCoverage         = layer->mTopCoverage;
+        layerData.topThickness        = layer->mTopThickness;
+        layerData.transmittanceColour = glm::vec4(layer->mTransmittanceColour, 1.f);
 
-        layerData.diffuseTextureIndex           = mTexturePool.addTexture(*layer->mDiffuseTexture);
-        layerData.specularTextureIndex          = mTexturePool.addTexture(*layer->mSpecularTexture);
-        layerData.roughnessTextureIndex         = mTexturePool.addTexture(*layer->mRoughnessTexture);
-        layerData.normalTextureIndex            = mTexturePool.addTexture(*layer->mNormalTexture);
-        layerData.sheenTextureIndex             = mTexturePool.addTexture(*layer->mSheenTexture);
-        layerData.sheenRoughnessTextureIndex    = mTexturePool.addTexture(*layer->mSheenRoughnessTexture);
+        layerData.diffuseTextureIndex             = mTexturePool.addTexture(*layer->mDiffuseTexture);
+        layerData.specularTextureIndex            = mTexturePool.addTexture(*layer->mSpecularTexture);
+        layerData.roughnessTextureIndex           = mTexturePool.addTexture(*layer->mRoughnessTexture);
+        layerData.normalTextureIndex              = mTexturePool.addTexture(*layer->mNormalTexture);
+        layerData.sheenTextureIndex               = mTexturePool.addTexture(*layer->mSheenTexture);
+        layerData.sheenRoughnessTextureIndex      = mTexturePool.addTexture(*layer->mSheenRoughnessTexture);
+        layerData.topSpecularColourTextureIndex   = mTexturePool.addTexture(*layer->mTopSpecularTexture);
+        layerData.topRoughnessTextureIndex        = mTexturePool.addTexture(*layer->mTopRoughnessTexture);
+        layerData.topNormalTextureIndex           = mTexturePool.addTexture(*layer->mTopNormalTexture);
+        layerData.topCoverageTextureIndex         = mTexturePool.addTexture(*layer->mTopCoverageTexture);
+        layerData.topThicknessTextureIndex        = mTexturePool.addTexture(*layer->mTopThicknessTexture);
+        layerData.transmittanceColourTextureIndex = mTexturePool.addTexture(*layer->mTransmittanceTexture);
 
-        mTexturePool.setWrap(layerData.diffuseTextureIndex,         layer->mDiffuseWrapOp);
-        mTexturePool.setWrap(layerData.specularTextureIndex,        layer->mSpecularWrapOp);
-        mTexturePool.setWrap(layerData.normalTextureIndex,          layer->mNormalWrapOp);
-        mTexturePool.setWrap(layerData.roughnessTextureIndex,       layer->mRoughnessWrapOp);
-        mTexturePool.setWrap(layerData.sheenTextureIndex,           layer->mSheenWrapOp);
-        mTexturePool.setWrap(layerData.sheenRoughnessTextureIndex,  layer->mSheenRoughnessWrapOp);
+        mTexturePool.setWrap(layerData.diffuseTextureIndex,             layer->mDiffuseWrapOp);
+        mTexturePool.setWrap(layerData.specularTextureIndex,            layer->mSpecularWrapOp);
+        mTexturePool.setWrap(layerData.normalTextureIndex,              layer->mNormalWrapOp);
+        mTexturePool.setWrap(layerData.roughnessTextureIndex,           layer->mRoughnessWrapOp);
+        mTexturePool.setWrap(layerData.sheenTextureIndex,               layer->mSheenWrapOp);
+        mTexturePool.setWrap(layerData.sheenRoughnessTextureIndex,      layer->mSheenRoughnessWrapOp);
+        mTexturePool.setWrap(layerData.topSpecularColourTextureIndex,   layer->mTopSpecularWrapOp);
+        mTexturePool.setWrap(layerData.topNormalTextureIndex,           layer->mTopNormalWrapOp);
+        mTexturePool.setWrap(layerData.topRoughnessTextureIndex,        layer->mTopRoughnessWrapOp);
+        mTexturePool.setWrap(layerData.topCoverageTextureIndex,         layer->mTopCoverageWrapOp);
+        mTexturePool.setWrap(layerData.topThicknessTextureIndex,        layer->mTopThicknessWrapOp);
+        mTexturePool.setWrap(layerData.transmittanceColourTextureIndex, layer->mTransmittanceWrapOp);
 
         mLayers.push_back(std::move(layer));
 
@@ -391,26 +408,49 @@ namespace engine
         mTexturePool.removeTexture(layerData.normalTextureIndex);
         mTexturePool.removeTexture(layerData.sheenTextureIndex);
         mTexturePool.removeTexture(layerData.sheenRoughnessTextureIndex);
+        mTexturePool.removeTexture(layerData.topSpecularColourTextureIndex);
+        mTexturePool.removeTexture(layerData.topRoughnessTextureIndex);
+        mTexturePool.removeTexture(layerData.topNormalTextureIndex);
+        mTexturePool.removeTexture(layerData.topCoverageTextureIndex);
+        mTexturePool.removeTexture(layerData.topThicknessTextureIndex);
+        mTexturePool.removeTexture(layerData.transmittanceColourTextureIndex);
 
-        layerData.roughness         = layer->mRoughness;
-        layerData.sheenRoughness    = layer->mSheenRoughness;
-        layerData.diffuseColour     = glm::vec4(layer->mDiffuseColour, 1.f);
-        layerData.specularColour    = glm::vec4(layer->mSpecularColour, 1.f);
-        layerData.sheenColour       = glm::vec4(layer->mSheenColour, 1.f);
+        layerData.roughness           = layer->mRoughness;
+        layerData.sheenRoughness      = layer->mSheenRoughness;
+        layerData.diffuseColour       = glm::vec4(layer->mDiffuseColour, 1.f);
+        layerData.specularColour      = glm::vec4(layer->mSpecularColour, 1.f);
+        layerData.sheenColour         = glm::vec4(layer->mSheenColour, 1.f);
+        layerData.topSpecularColour   = glm::vec4(layer->mTopSpecularColour, 1.f);
+        layerData.topRoughness        = layer->mTopRoughness;
+        layerData.topCoverage         = layer->mTopCoverage;
+        layerData.topThickness        = layer->mTopThickness;
+        layerData.transmittanceColour = glm::vec4(layer->mTransmittanceColour, 1.f);
 
-        layerData.diffuseTextureIndex           = mTexturePool.addTexture(*layer->mDiffuseTexture);
-        layerData.specularTextureIndex          = mTexturePool.addTexture(*layer->mSpecularTexture);
-        layerData.roughnessTextureIndex         = mTexturePool.addTexture(*layer->mRoughnessTexture);
-        layerData.normalTextureIndex            = mTexturePool.addTexture(*layer->mNormalTexture);
-        layerData.sheenTextureIndex             = mTexturePool.addTexture(*layer->mSheenTexture);
-        layerData.sheenRoughnessTextureIndex    = mTexturePool.addTexture(*layer->mSheenRoughnessTexture);
+        layerData.diffuseTextureIndex             = mTexturePool.addTexture(*layer->mDiffuseTexture);
+        layerData.specularTextureIndex            = mTexturePool.addTexture(*layer->mSpecularTexture);
+        layerData.roughnessTextureIndex           = mTexturePool.addTexture(*layer->mRoughnessTexture);
+        layerData.normalTextureIndex              = mTexturePool.addTexture(*layer->mNormalTexture);
+        layerData.sheenTextureIndex               = mTexturePool.addTexture(*layer->mSheenTexture);
+        layerData.sheenRoughnessTextureIndex      = mTexturePool.addTexture(*layer->mSheenRoughnessTexture);
+        layerData.topSpecularColourTextureIndex   = mTexturePool.addTexture(*layer->mTopSpecularTexture);
+        layerData.topRoughnessTextureIndex        = mTexturePool.addTexture(*layer->mTopRoughnessTexture);
+        layerData.topNormalTextureIndex           = mTexturePool.addTexture(*layer->mTopNormalTexture);
+        layerData.topCoverageTextureIndex         = mTexturePool.addTexture(*layer->mTopCoverageTexture);
+        layerData.topThicknessTextureIndex        = mTexturePool.addTexture(*layer->mTopThicknessTexture);
+        layerData.transmittanceColourTextureIndex = mTexturePool.addTexture(*layer->mTransmittanceTexture);
 
-        mTexturePool.setWrap(layerData.diffuseTextureIndex,         layer->mDiffuseWrapOp);
-        mTexturePool.setWrap(layerData.specularTextureIndex,        layer->mSpecularWrapOp);
-        mTexturePool.setWrap(layerData.normalTextureIndex,          layer->mNormalWrapOp);
-        mTexturePool.setWrap(layerData.roughnessTextureIndex,       layer->mRoughnessWrapOp);
-        mTexturePool.setWrap(layerData.sheenTextureIndex,           layer->mSheenWrapOp);
-        mTexturePool.setWrap(layerData.sheenRoughnessTextureIndex,  layer->mSheenRoughnessWrapOp);
+        mTexturePool.setWrap(layerData.diffuseTextureIndex,             layer->mDiffuseWrapOp);
+        mTexturePool.setWrap(layerData.specularTextureIndex,            layer->mSpecularWrapOp);
+        mTexturePool.setWrap(layerData.normalTextureIndex,              layer->mNormalWrapOp);
+        mTexturePool.setWrap(layerData.roughnessTextureIndex,           layer->mRoughnessWrapOp);
+        mTexturePool.setWrap(layerData.sheenTextureIndex,               layer->mSheenWrapOp);
+        mTexturePool.setWrap(layerData.sheenRoughnessTextureIndex,      layer->mSheenRoughnessWrapOp);
+        mTexturePool.setWrap(layerData.topSpecularColourTextureIndex,   layer->mTopSpecularWrapOp);
+        mTexturePool.setWrap(layerData.topNormalTextureIndex,           layer->mTopNormalWrapOp);
+        mTexturePool.setWrap(layerData.topRoughnessTextureIndex,        layer->mTopRoughnessWrapOp);
+        mTexturePool.setWrap(layerData.topCoverageTextureIndex,         layer->mTopCoverageWrapOp);
+        mTexturePool.setWrap(layerData.topThicknessTextureIndex,        layer->mTopThicknessWrapOp);
+        mTexturePool.setWrap(layerData.transmittanceColourTextureIndex, layer->mTransmittanceWrapOp);
 
         mLayers[index] = std::move(layer);
 
@@ -427,6 +467,12 @@ namespace engine
         mTexturePool.removeTexture(layer.normalTextureIndex);
         mTexturePool.removeTexture(layer.sheenTextureIndex);
         mTexturePool.removeTexture(layer.sheenRoughnessTextureIndex);
+        mTexturePool.removeTexture(layer.topSpecularColourTextureIndex);
+        mTexturePool.removeTexture(layer.topRoughnessTextureIndex);
+        mTexturePool.removeTexture(layer.topNormalTextureIndex);
+        mTexturePool.removeTexture(layer.topCoverageTextureIndex);
+        mTexturePool.removeTexture(layer.topThicknessTextureIndex);
+        mTexturePool.removeTexture(layer.transmittanceColourTextureIndex);
 
         mLayers.erase(mLayers.begin() + index);
         mData.layers.erase(mData.layers.begin() + index);

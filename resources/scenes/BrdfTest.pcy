@@ -474,3 +474,16 @@ Actors:
         Bias: [0.00100000005, 0]
     Children:
       []
+  - Name: MoriBall
+    UUID: 4188112582399729249
+    position: [0, 1.10555661, -0.582975149]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\MoriBall.glb
+        UMaterials:
+          - materials\graphics\accentMat.mpcy
+          - materials\Red.mpcy
+    Children:
+      []

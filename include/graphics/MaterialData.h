@@ -28,7 +28,7 @@ namespace graphics
         }
     }
 
-    constexpr uint16_t passthroughFlagCount = 8;
+    constexpr uint16_t passthroughFlagCount = 12;
     enum class PassthroughFlags : uint16_t
     {
         None = 0,
@@ -43,6 +43,7 @@ namespace graphics
         TopRoughness = 1 << 8,
         TopThickness = 1 << 9,
         TopCoverage = 1 << 10,
+        TopNormal = 1 << 11,
     };
 
     inline std::string to_string(const PassthroughFlags flag)
@@ -61,6 +62,7 @@ namespace graphics
             case PassthroughFlags::TopRoughness: return "Top Roughness";
             case PassthroughFlags::TopThickness: return "Thickness";
             case PassthroughFlags::TopCoverage: return "Coverage";
+            case PassthroughFlags::TopNormal: return "Top Normal";
             default: return "unknown";
         }
     }
@@ -102,13 +104,13 @@ namespace graphics
         int32_t sheenRoughnessTextureIndex = -1;
         int32_t metallicTextureIndex = -1;
         int32_t topSpecularColourTextureIndex = -1;
+        int32_t topNormalTextureIndex = -1;
         int32_t transmittanceColourTextureIndex = -1;
         int32_t topRoughnessTextureIndex = -1;
         int32_t topThicknessTextureIndex = -1;
         int32_t topCoverageTextureIndex = -1;
-        int32_t _padding01 = 100;  // Can't be a vec3 otherwise glsl will auto align to the next 16 byte boundary.
+        int32_t _padding01 = 100;  // Can't be a vec2 otherwise glsl will auto align to the next 16 byte boundary.
         int32_t _padding02 = 100;
-        int32_t _padding03 = 100;
     };
 
     struct MaskData

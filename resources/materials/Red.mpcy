@@ -1,9 +1,4 @@
 MaterialLayers:
   - materials\TestLayer.mlpcy
-  - materials\AnotherLayer.mlpcy
 MaskLayers:
-  - Texture: textures\CheckerBoard.png
-    Alpha: 1
-    Passthrough: 0
-    Operation: 1
-    Wrap: 0
+  []

@@ -57,7 +57,8 @@ namespace engine
         std::shared_ptr<Texture> mSheenRoughnessTexture     = load::texture("");
         std::shared_ptr<Texture> mMetallicTexture           = load::texture("");
         std::shared_ptr<Texture> mTopSpecularTexture        = load::texture("");
-        std::shared_ptr<Texture> mTransmittanceColourTexture = load::texture("");
+        std::shared_ptr<Texture> mTopNormalTexture          = load::texture("");
+        std::shared_ptr<Texture> mTransmittanceTexture      = load::texture("");
         std::shared_ptr<Texture> mTopRoughnessTexture       = load::texture("");
         std::shared_ptr<Texture> mTopThicknessTexture       = load::texture("");
         std::shared_ptr<Texture> mTopCoverageTexture        = load::texture("");
@@ -72,7 +73,7 @@ namespace engine
         float     mTopRoughness = 0.2f;
         glm::vec3 mTransmittanceColour = glm::vec3(0.f);
         float     mTopThickness = 0.002f;
-        float     mTopCoverage = 1.f;
+        float     mTopCoverage = 0.f;
 
 
         graphics::WrapOp mDiffuseWrapOp         = graphics::WrapOp::Repeat;
@@ -83,6 +84,7 @@ namespace engine
         graphics::WrapOp mSheenRoughnessWrapOp  = graphics::WrapOp::Repeat;
         graphics::WrapOp mMetallicWrapOp        = graphics::WrapOp::Repeat;
         graphics::WrapOp mTopSpecularWrapOp     = graphics::WrapOp::Repeat;
+        graphics::WrapOp mTopNormalWrapOp       = graphics::WrapOp::Repeat;
         graphics::WrapOp mTransmittanceWrapOp   = graphics::WrapOp::Repeat;
         graphics::WrapOp mTopRoughnessWrapOp    = graphics::WrapOp::Repeat;
         graphics::WrapOp mTopThicknessWrapOp    = graphics::WrapOp::Repeat;

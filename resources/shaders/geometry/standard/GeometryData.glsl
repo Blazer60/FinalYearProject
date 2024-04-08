@@ -21,13 +21,13 @@ struct LayerData
     int sheenRoughnessTextureIndex;
     int metallicTextureIndex;
     int topSpecularColourTextureIndex;
+    int topNormalTextureIndex;
     int transmittanceColourTextureIndex;
     int topRoughnessTextureIndex;
     int topThicknessTextureIndex;
     int topCoverageTextureIndex;
     int _padding01;
     int _padding02;
-    int _padding03;
 };
 
 #define PASSTHROUGH_FLAG_DIFFUSE 1
@@ -41,6 +41,7 @@ struct LayerData
 #define PASSTHROUGH_FLAG_TOP_ROUGHNESS 256
 #define PASSTHROUGH_FLAG_TOP_THICKNESS 512
 #define PASSTHROUGH_FLAG_TOP_COVERAGE 1024
+#define PASSTHROUGH_FLAG_TOP_NORMAL 2048
 
 #define OPERATION_LERP 0
 #define OPERATION_THRESHOLD 1

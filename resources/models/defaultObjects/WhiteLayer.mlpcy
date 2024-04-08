@@ -5,15 +5,29 @@ RoughnessTexturePath: ""
 SheenTexturePath: ""
 SheenRoughnessTexturePath: ""
 MetallicTexturePath: ""
+TopSpecularTexturePath: ""
+TransmittanceTexturePath: ""
+TopRoughnessTexturePath: ""
+TopThicknessTexturePath: ""
+TopCoverageTexturePath: ""
 DiffuseColour: [0.800000012, 0.800000012, 0.800000012]
 SpecularColour: [0.200000003, 0.200000003, 0.200000003]
 Roughness: 0.899999976
 SheenColour: [0, 0, 0]
 SheenRoughness: 0.5
+TopSpecularColour: [0, 0, 0]
+TopRoughness: 0.200000003
+TransmittanceColour: [0, 0, 0]
+TopThickness: 0.00200000009
+TopCoverage: 0
 DiffuseWrapOp: 0
 SpecularWrapOp: 0
 NormalWrapOp: 0
 RoughnessWrapOp: 0
 SheenWrapOp: 0
 SheenRoughnessWrapOp: 0
-MetallicWrapOp: 0
+TopSpecularWrapOp: 0
+TransmittanceWrapOp: 0
+TopRoughnessWrapOp: 0
+TopThicknessWrapOp: 0
+TopCoverageWrapOp: 0

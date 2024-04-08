@@ -41,11 +41,22 @@ void main()
     const float roughness = sampleValue(material.roughness, v_uv, material.roughnessTextureIndex);
     gBuffer.normal          = normalize(rawNormal);
     gBuffer.roughness       = computeRoughness(rawNormal, roughness);
+
     gBuffer.fuzzColour      = sampleColour(material.sheenColour, v_uv, material.sheenTextureIndex);
     gBuffer.fuzzRoughness   = sampleValue(material.sheenRoughness, v_uv, material.sheenRoughnessTextureIndex);
-
     if (dot(gBuffer.fuzzColour, gBuffer.fuzzColour) >= 0.001f)
         gBufferSetFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT, 1);
+
+    gBuffer.topSpecular = sampleColour(material.topSpecularColour, v_uv, material.topSpecularColourTextureIndex);
+    const vec3 rawTopNormal = sampleNormal(v_normal_ws, v_uv, material.topNormalTextureIndex, v_tbn_matrix);
+    const float topRoughness = sampleValue(material.topRoughness, v_uv, material.topRoughnessTextureIndex);
+    gBuffer.topNormal = normalize(rawTopNormal);
+    gBuffer.topRoughness = computeRoughness(rawTopNormal, topRoughness);
+    gBuffer.transmittance = sampleColour(material.transmittanceColour, v_uv, material.transmittanceColourTextureIndex);
+    gBuffer.topThickness = sampleValue(material.topThickness, v_uv, material.topThicknessTextureIndex);
+    gBuffer.topCoverage = sampleValue(material.topCoverage, v_uv, material.topCoverageTextureIndex);
+    if (dot(gBuffer.topCoverage, gBuffer.topCoverage) >= 0.001f)
+        gBufferSetFlag(gBuffer, GBUFFER_FLAG_TRANSMITTANCE_BIT, 1);
 
     pushToStorageGBuffer(gBuffer, ivec2(0));
 }

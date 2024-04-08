@@ -40,18 +40,24 @@ namespace engine
         mThirdPersonToken = eventHandler->editor.viewport.thirdPerson.onStateChanged.subscribe([this](bool state) { toggleMouseState(state); });
         
         mViewportImages = {
-            ViewportImage { "Default",      []() -> const TextureBufferObject& { return graphics::renderer->getPrimaryBuffer(); } },
-            ViewportImage { "Depth",        []() -> const TextureBufferObject& { return graphics::renderer->getDepthBuffer(); } },
-            ViewportImage { "Normal",       []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::Normal, false); } },
-            ViewportImage { "Diffuse",      []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::Diffuse, true); } },
-            ViewportImage { "Specular",     []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::Specular, true); } },
-            ViewportImage { "Lighting",     []() -> const TextureBufferObject& { return graphics::renderer->getLightBuffer(); } },
-            ViewportImage { "Roughness",    []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::Roughness, false); } },
-            ViewportImage { "Debug View",   []() -> const TextureBufferObject& { return graphics::renderer->getDebugBuffer(); } },
+            ViewportImage { "Default",          []() -> const TextureBufferObject& { return graphics::renderer->getPrimaryBuffer(); } },
+            ViewportImage { "Depth",            []() -> const TextureBufferObject& { return graphics::renderer->getDepthBuffer(); } },
+            ViewportImage { "Normal",           []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::Normal, false); } },
+            ViewportImage { "Diffuse",          []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::Diffuse, true); } },
+            ViewportImage { "Specular",         []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::Specular, true); } },
+            ViewportImage { "Lighting",         []() -> const TextureBufferObject& { return graphics::renderer->getLightBuffer(); } },
+            ViewportImage { "Roughness",        []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::Roughness, false); } },
+            ViewportImage { "Debug View",       []() -> const TextureBufferObject& { return graphics::renderer->getDebugBuffer(); } },
             ViewportImage { "White Furnace Test", []() -> const TextureBufferObject& { return graphics::renderer->whiteFurnaceTest(); } },
-            ViewportImage { "Buffer Byte Count", []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::ByteCount, true); } },
-            ViewportImage { "Fuzz Colour", []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::FuzzColour, true); } },
-            ViewportImage { "Fuzz Roughness", []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::FuzzRoughness, false); } },
+            ViewportImage { "Buffer Byte Count",[]() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::ByteCount, true); } },
+            ViewportImage { "Fuzz Colour",      []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::FuzzColour, true); } },
+            ViewportImage { "Fuzz Roughness",   []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::FuzzRoughness, false); } },
+            ViewportImage { "Top Specular",     []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::TopSpecular, true); } },
+            ViewportImage { "Top Roughness",    []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::TopRoughness, false); } },
+            ViewportImage { "Top Normal",       []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::TopNormal, false); } },
+            ViewportImage { "Top Coverage",     []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::TopCoverage, false); } },
+            ViewportImage { "Top Thickness",    []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::TopThickness, false); } },
+            ViewportImage { "Transmittance",    []() -> const TextureBufferObject& { return graphics::renderer->getFromGBuffer(graphics::gbuffer::Transmittance, true); } },
         };
     }
 

@@ -11,6 +11,7 @@
 
 #define GBUFFER_FLAG_MATERIAL_BIT 0
 #define GBUFFER_FLAG_FUZZ_BIT 1
+#define GBUFFER_FLAG_TRANSMITTANCE_BIT 2
 
 #define SHADER_VARIANT_COUNT 2
 #define SHADER_TABLE_COUNT 4
@@ -33,6 +34,7 @@ namespace graphics
     {
         MaterialBit = 1 << GBUFFER_FLAG_MATERIAL_BIT,
         SheenBit = 1 << GBUFFER_FLAG_FUZZ_BIT,
+        TransmittanceBit = 1 << GBUFFER_FLAG_TRANSMITTANCE_BIT,
     };
 
     inline int operator&(const uint32_t lhs, ShaderFlagBit rhs)

@@ -31,15 +31,25 @@ layout(location = 2) out uvec4 oGBuffer2;
 
 struct GBuffer
 {
-    uint flags;
-    vec3 emissive;
-    vec3 diffuse;
-    vec3 specular;
-    vec3 normal;
-    float roughness;
-    vec3 fuzzColour;
-    float fuzzRoughness;
-    uint byteCount;
+    uint flags;             // 1 bytes
+    vec3 diffuse;           // 3 bytes
+    vec3 specular;          // 3 bytes
+    vec3 normal;            // 4 bytes
+    float roughness;        // 1 byte
+
+    // Fuzz Information
+    vec3 fuzzColour;        // 3 bytes
+    float fuzzRoughness;    // 1 byte
+
+    // Second Specular & transmittance
+    vec3 topSpecular;       // 3 bytes
+    vec3 topNormal;         // 4 bytes
+    float topRoughness;     // 1 byte
+    vec3 transmittance;     // 3 bytes
+    float topThickness;     // 4 bytes (semi-open range) [0, inf).
+    float topCoverage;      // 1 byte
+
+    uint byteCount;         // 32 bytes total. All data fits in 2x4uints. Standard Size: 12 bytes.
 };
 
 struct Stream
@@ -132,6 +142,16 @@ vec2 streamUnpackSnorm2x16(in out Stream stream)
     return unpackSnorm2x16(streamExtractBytes(stream, UINT_SIZE));
 }
 
+void streamPackUnorm1x32(in out Stream stream, float value)
+{
+    streamInsertBytes(stream, floatBitsToUint(value), UINT_SIZE);
+}
+
+float streamUnpackUnorm1x32(in out Stream stream)
+{
+    return uintBitsToFloat(streamExtractBytes(stream, UINT_SIZE));
+}
+
 // (Cigolle, Z. H, et al., 2014) A Survey of efficient representations for Independent Unit Vectors.
 void streamPackNormal(in out Stream stream, vec3 normal)
 {
@@ -216,13 +236,18 @@ GBuffer gBufferCreate()
     GBuffer gBuffer;
 
     gBuffer.flags = 0;
-    gBuffer.emissive = vec3(0);
     gBuffer.diffuse = vec3(0);
     gBuffer.specular = vec3(0);
     gBuffer.normal = vec3(0);
     gBuffer.roughness = 0;
     gBuffer.fuzzColour = vec3(0);
     gBuffer.fuzzRoughness = 0;
+    gBuffer.topSpecular = vec3(0);
+    gBuffer.topNormal = vec3(0);
+    gBuffer.topRoughness = 0;
+    gBuffer.transmittance = vec3(0);
+    gBuffer.topThickness = 0;
+    gBuffer.topCoverage = 0;
     gBuffer.byteCount = 0;
 
     return gBuffer;
@@ -257,12 +282,22 @@ void pushToStorageGBuffer(GBuffer gBuffer, ivec2 coord)
     streamPackUnorm4x8(stream, vec4(gBuffer.roughness, 0.f, 0.f, 0.f), 1);
     streamPackUnorm4x8(stream, vec4(gBuffer.diffuse, 0.f), 3);
     streamPackUnorm4x8(stream, vec4(gBuffer.specular, 0.f), 3);
-    streamPackUnorm4x8(stream, vec4(gBuffer.emissive, 0.f), 3);
 
     if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT) == 1)
     {
         streamPackUnorm4x8(stream, vec4(gBuffer.fuzzColour, 0.f), 3);
         streamPackUnorm4x8(stream, vec4(gBuffer.fuzzRoughness, 0.f, 0.f, 0.f), 1);
+    }
+
+    // todo: Check vGPR usage here to see if we're shot.
+    if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_TRANSMITTANCE_BIT) == 1)
+    {
+        streamPackUnorm4x8(stream, vec4(gBuffer.topSpecular, 0.f), 3);
+        streamPackUnorm4x8(stream, vec4(gBuffer.topRoughness, 0.f, 0.f, 0.f), 1);
+        streamPackNormal(stream, gBuffer.topNormal);
+        streamPackUnorm4x8(stream, vec4(gBuffer.transmittance, 0.f), 3);
+        streamPackUnorm1x32(stream, gBuffer.topThickness);
+        streamPackUnorm4x8(stream, vec4(gBuffer.topCoverage, 0.f, 0.f, 0.f), 1);
     }
 
     streamPushToStorageGBuffer(stream, coord);
@@ -285,12 +320,21 @@ GBuffer pullFromStorageGBuffer(ivec2 coord)
     gBuffer.roughness     = streamUnpackUnorm4x8(stream, 1).x;
     gBuffer.diffuse       = streamUnpackUnorm4x8(stream, 3).xyz;
     gBuffer.specular      = streamUnpackUnorm4x8(stream, 3).xyz;
-    gBuffer.emissive      = streamUnpackUnorm4x8(stream, 3).xyz;
 
     if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT) == 1)
     {
         gBuffer.fuzzColour    = streamUnpackUnorm4x8(stream, 3).xyz;
         gBuffer.fuzzRoughness = streamUnpackUnorm4x8(stream, 1).x;
+    }
+
+    if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_TRANSMITTANCE_BIT) == 1)
+    {
+        gBuffer.topSpecular     = streamUnpackUnorm4x8(stream, 3).xyz;
+        gBuffer.topRoughness    = streamUnpackUnorm4x8(stream, 1).x;
+        gBuffer.topNormal       = streamUnpackNormal(stream);
+        gBuffer.transmittance   = streamUnpackUnorm4x8(stream, 3).xyz;
+        gBuffer.topThickness    = streamUnpackUnorm1x32(stream);
+        gBuffer.topCoverage     = streamUnpackUnorm4x8(stream, 1).x;
     }
 
     gBuffer.byteCount   = stream.byteOffset;  // This is the amount of bytes read. Not the actual amount submitted to the buffer.

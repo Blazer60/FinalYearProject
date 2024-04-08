@@ -28,14 +28,24 @@ void main()
         result.xyz = gBuffer.diffuse;
     if (cDebug.id == DEBUG_GBUFFER_SPECULAR)
         result.xyz = gBuffer.specular;
-    if (cDebug.id == DEBUG_GBUFFER_EMISSIVE)
-        result.xyz = gBuffer.emissive;
     if (cDebug.id == DEBUG_GBUFFER_BYTE_COUNT)
         result = byteCountToColour(gBuffer.byteCount);
     if (cDebug.id == DEBUG_GBUFFER_FUZZ_COLOUR && gBufferHasFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT) == 1)
         result.xyz = gBuffer.fuzzColour;
     if (cDebug.id == DEBUG_GBUFFER_FUZZ_ROUGHNESS && gBufferHasFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT) == 1)
         result.xyz = gBuffer.fuzzRoughness.xxx;
+    if (cDebug.id == DEBUG_GBUFFER_TOP_NORMAL && gBufferHasFlag(gBuffer, GBUFFER_FLAG_TRANSMITTANCE_BIT) == 1)
+        result.xyz = gBuffer.topNormal;
+    if (cDebug.id == DEBUG_GBUFFER_TOP_SPECULAR && gBufferHasFlag(gBuffer, GBUFFER_FLAG_TRANSMITTANCE_BIT) == 1)
+        result.xyz = gBuffer.topSpecular;
+    if (cDebug.id == DEBUG_GBUFFER_TOP_ROUGHNESS && gBufferHasFlag(gBuffer, GBUFFER_FLAG_TRANSMITTANCE_BIT) == 1)
+        result.xyz = gBuffer.topRoughness.xxx;
+    if (cDebug.id == DEBUG_GBUFFER_TOP_COVERAGE && gBufferHasFlag(gBuffer, GBUFFER_FLAG_TRANSMITTANCE_BIT) == 1)
+        result.xyz = gBuffer.topCoverage.xxx;
+    if (cDebug.id == DEBUG_GBUFFER_TOP_THICKNESS && gBufferHasFlag(gBuffer, GBUFFER_FLAG_TRANSMITTANCE_BIT) == 1)
+        result.xyz = gBuffer.topThickness.xxx;
+    if (cDebug.id == DEBUG_GBUFFER_TRANSMITTANCE && gBufferHasFlag(gBuffer, GBUFFER_FLAG_TRANSMITTANCE_BIT) == 1)
+        result.xyz = gBuffer.transmittance;
 
     if (cDebug.gammaCorrect != 0)
         result.xyz = linearToSRgb(result.xyz);
