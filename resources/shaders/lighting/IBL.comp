@@ -120,7 +120,7 @@ void evaluateIblTopClosure(in out vec3 colour, GBuffer gBuffer, vec3 fresnel, ve
     const vec3 colourSpecular = evaluateIblTopSpecularClosure(gBuffer, fresnel, v);
 
     const vec3 extinctionCoefficient = -log(gBuffer.transmittance + vec3(0.0001f)) / max(gBuffer.topThickness, 0.00001f);
-    const float distance = gBuffer.topThickness / dot(gBuffer.topNormal, v);
+    const float distance = gBuffer.topThickness / max(dot(gBuffer.topNormal, v), MIN_THRESHOLD);
     const vec3 transmittance = exp(-extinctionCoefficient * distance);
 
     const float alpha = gBuffer.topCoverage;
