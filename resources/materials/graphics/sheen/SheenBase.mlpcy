@@ -10,6 +10,7 @@ TransmittanceTexturePath: ""
 TopRoughnessTexturePath: ""
 TopThicknessTexturePath: ""
 TopCoverageTexturePath: ""
+TopNormalTexturePath: ""
 DiffuseColour: [0.0379385948, 0.0379347987, 0.0379347987]
 SpecularColour: [0.117779195, 0.117767416, 0.117768146]
 Roughness: 0.948000014

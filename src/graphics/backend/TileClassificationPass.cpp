@@ -59,7 +59,8 @@ namespace graphics
         mShaderTable.reserve(shaderFlagPermutations);
         for (uint32_t flag = 0; flag < shaderFlagPermutations; ++flag)
         {
-            if ((flag & ShaderFlagBit::SheenBit) > 0)
+            // For now, there is no specific shader for each. Only the base shader.
+            if ((flag & ShaderFlagBit::TransmittanceBit) > 0 || (flag & ShaderFlagBit::SheenBit) > 0)
                 mShaderTable.push_back(shaderVariant::UberShader);
             else if ((flag & ShaderFlagBit::MaterialBit) > 0)
                 mShaderTable.push_back(shaderVariant::BaseShader);

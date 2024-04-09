@@ -368,6 +368,7 @@ namespace engine
         out << YAML::Key << "TopRoughnessTexturePath"   << YAML::Value << file::makeRelativeToResourcePath(mTopRoughnessTexture->path()).string();
         out << YAML::Key << "TopThicknessTexturePath"   << YAML::Value << file::makeRelativeToResourcePath(mTopThicknessTexture->path()).string();
         out << YAML::Key << "TopCoverageTexturePath"    << YAML::Value << file::makeRelativeToResourcePath(mTopCoverageTexture->path()).string();
+        out << YAML::Key << "TopNormalTexturePath"      << YAML::Value << file::makeRelativeToResourcePath(mTopNormalTexture->path()).string();
 
         out << YAML::Key << "DiffuseColour"         << YAML::Value << mDiffuseColour;
         out << YAML::Key << "SpecularColour"        << YAML::Value << mSpecularColour;
@@ -499,6 +500,14 @@ namespace engine
                 texturePool.setWrap(layer.topCoverageTextureIndex, mTopCoverageWrapOp);
             });
         }
+        else if (mTopNormalTexture == texture)
+        {
+            layerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                texturePool.removeTexture(layer.topNormalTextureIndex);
+                layer.topNormalTextureIndex = texturePool.addTexture(*mTopNormalTexture);
+                texturePool.setWrap(layer.topNormalTextureIndex, mTopNormalWrapOp);
+            });
+        }
     }
 
     void UberLayer::loadFromDisk()
@@ -545,6 +554,7 @@ namespace engine
         mTopRoughnessTexture        = tryLoadAsTexture(data["TopRoughnessTexturePath"]);
         mTopThicknessTexture        = tryLoadAsTexture(data["TopThicknessTexturePath"]);
         mTopCoverageTexture         = tryLoadAsTexture(data["TopCoverageTexturePath"]);
+        mTopNormalTexture           = tryLoadAsTexture(data["TopNormalTexturePath"]);
 
         tryLoadAsVec3( data["DiffuseColour"],       mDiffuseColour);
         tryLoadAsVec3( data["SpecularColour"],      mSpecularColour);

@@ -4,6 +4,11 @@ const float PI = 3.14159265359f;
 // This is to stop brdf values tending towards infinity, resulting in white specals everywhere.
 const float MIN_THRESHOLD = 0.01f;
 
+float saturate(float p)
+{
+    return clamp(p, 0.f, 1.f);
+}
+
 vec3 fresnelSchlick(vec3 f0, float nDotL)
 {
     return f0 + (1.f - f0) * pow(1 - nDotL, 5);
@@ -29,11 +34,6 @@ vec2 uvToNdc(vec2 uv)
 vec3 uvToNdc(vec3 uv)
 {
     return 2.f * uv - vec3(1.f);
-}
-
-float saturate(float p)
-{
-    return clamp(p, 0.f, 1.f);
 }
 
 // Typically used for returning a vector in the light's direction.

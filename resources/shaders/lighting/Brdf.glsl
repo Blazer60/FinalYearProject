@@ -99,35 +99,107 @@ vec3 evaluateDiffuseBrdf(GBuffer gBuffer, vec3 specular)
     return (vec3(1.f) - specular) * gBuffer.diffuse;
 }
 
-vec3 evaluateClosure(GBuffer gBuffer, vec3 position, vec3 lightDirection)
+vec3 evaluateBaseClosure(GBuffer gBuffer, vec3 fresnel, vec3 l, vec3 v, vec3 lightIntensity)
 {
-    if (gBufferIsValid(gBuffer) == 0)
-        return vec3(0.f);
-
-    const vec3 l = lightDirection;
     const vec3 n = gBuffer.normal;
-    const vec3 v = normalize(camera.position - position);
     const vec3 h = normalize(l + v);
 
     const float vDotN = saturate(dot(v, n));
     const float lDotN = saturate(dot(l, n));
     const float hDotN = saturate(dot(h, n));
-    const float vDotH = saturate(dot(v, h));
 
-    const vec3 fresnel = fresnelSchlick(gBuffer.specular, lDotN);
     const vec3 specular = evaluateSpecularBrdf(gBuffer, fresnel, hDotN, vDotN, lDotN);
     const vec3 missingSpecular = evaluateMissingSpecularBrdf(gBuffer, fresnel, lDotN, vDotN);
-    const vec3 diffuse = evaluateDiffuseBrdf(gBuffer, specular + missingSpecular);
+    const vec3 fullSpecular = specular + missingSpecular;
 
+    const vec3 diffuse = evaluateDiffuseBrdf(gBuffer, fullSpecular);
+
+    return (fullSpecular + diffuse) * lightIntensity * lDotN;
+}
+
+vec3 evaluateTopSpecularClosure(GBuffer gBuffer, vec3 fresnel, vec3 l, vec3 v, vec3 lightIntensity)
+{
+    const vec3 n = gBuffer.normal;
+    const vec3 h = normalize(l + v);
+
+    const float vDotN = saturate(dot(v, n));
+    const float lDotN = saturate(dot(l, n));
+    const float hDotN = saturate(dot(h, n));
+
+    const vec3 specular = evaluateSpecularBrdf(gBuffer, fresnel, hDotN, vDotN, lDotN);
+    const vec3 missingSpecular = evaluateMissingSpecularBrdf(gBuffer, fresnel, lDotN, vDotN);
+    const vec3 fullSpecular = specular + missingSpecular;
+
+    return fullSpecular * lightIntensity * lDotN;
+}
+
+void evaluateTopClosure(in out vec3 colour, GBuffer gBuffer, vec3 fresnel, vec3 l, vec3 v, vec3 lightIntensity)
+{
+    const vec3 colourSpecular = evaluateTopSpecularClosure(gBuffer, fresnel, l, v, lightIntensity);
+
+    const vec3 extinctionCoefficient = -log(gBuffer.transmittance + vec3(0.0001f)) / gBuffer.topThickness;
+    const float distance = gBuffer.topThickness / max(0.001f, dot(gBuffer.normal, v));
+    const vec3 transmittance = exp(-extinctionCoefficient * distance);
+
+    const float alpha = gBuffer.topCoverage;
+
+    colour = alpha * (colourSpecular + transmittance * colour) + (1.f - alpha) * colour;
+}
+
+void evaluateSheenCoating(in out vec3 colour, GBuffer gBuffer, vec3 l, vec3 v, vec3 lightIntensity)
+{
+#if COMPUTE_SHEEN > 0
     vec3 sheen = vec3(0.f);
     float sheenScalar = 1.f;
-#if COMPUTE_SHEEN > 0
+
+    const vec3 n = gBuffer.normal;
+    const float vDotN = saturate(dot(v, n));
+    const float lDotN = saturate(dot(l, n));
+
     if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT) == 1)
     {
         sheen = evalutateSheenBrdf(gBuffer, lDotN, vDotN, v);
         sheenScalar = evaluateSheenMissingScalar(gBuffer, lDotN, vDotN);
     }
-#endif
 
-    return sheen + sheenScalar * (specular + missingSpecular + diffuse);
+    colour = sheen * lightIntensity * lDotN + sheenScalar * colour;
+#endif
+}
+
+vec3 evaluateBxDF(GBuffer gBuffer, vec3 position, vec3 lightDirection, vec3 lightIntensity)
+{
+    if (gBufferIsValid(gBuffer) == 0)
+        return vec3(0.f);
+
+    const float nDotL = saturate(dot(gBuffer.normal, lightDirection));
+    const vec3 viewDirection = normalize(camera.position - position);
+
+    vec3 colour = vec3(0.f);
+    if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_TRANSMITTANCE_BIT) == 1)
+    {
+//        const vec3 topIoR = indexOfRefraction(gBuffer.topSpecular);
+//        const vec3 bottomIoR = indexOfRefraction(gBuffer.specular);
+//        const vec3 topIoR2 = topIoR * topIoR;
+//        const vec3 bottomIoR2 = bottomIoR * bottomIoR;
+//
+//        const vec3 reflectedFresnel = fresnelSchlick(gBuffer.topSpecular, nDotL);
+//        const vec3 reflectedLightIntensity = reflectedFresnel * lightIntensity;
+//
+//        const vec3 refractedLightIntensity = (1.f - reflectedFresnel) * (bottomIoR2 / topIoR2) * lightIntensity;
+//        const vec3 refractedLightDirection = -refractEta(lightDirection, gBuffer.normal, bottomIoR / topIoR);
+//        const vec3 refractedViewDirection  = -refractEta(viewDirection, gBuffer.normal, bottomIoR / topIoR);
+//        const vec3 refractedFresnel = etaToColour(topIoR, bottomIoR);
+//
+//        colour = evaluateBaseClosure(gBuffer, refractedFresnel, refractedLightDirection, refractedViewDirection, refractedLightIntensity);
+//        evaluateTopClosure(colour, gBuffer, reflectedFresnel, lightDirection, viewDirection, reflectedLightIntensity);
+    }
+    else
+    {
+        const vec3 fresnel = fresnelSchlick(gBuffer.specular, nDotL);
+        colour = evaluateBaseClosure(gBuffer, fresnel, lightDirection, viewDirection, lightIntensity);
+    }
+
+    evaluateSheenCoating(colour, gBuffer, lightDirection, viewDirection, lightIntensity);
+
+    return colour;
 }

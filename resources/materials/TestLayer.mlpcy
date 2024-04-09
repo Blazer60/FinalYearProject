@@ -1,25 +1,26 @@
 DiffuseTexturePath: ""
 SpecularTexturePath: ""
 NormalTexturePath: ""
-RoughnessTexturePath: ""
+RoughnessTexturePath: materials\examples\textures\T_Imperfections_FingerPrints_Mask.png
 SheenTexturePath: ""
 SheenRoughnessTexturePath: ""
 MetallicTexturePath: ""
-TopSpecularTexturePath: textures\UvChecker.jpg
+TopSpecularTexturePath: ""
 TransmittanceTexturePath: ""
 TopRoughnessTexturePath: ""
 TopThicknessTexturePath: ""
 TopCoverageTexturePath: ""
-DiffuseColour: [0.167073488, 0.167057469, 0.167056784]
-SpecularColour: [0.155319899, 0.943693995, 0.184586689]
-Roughness: 0.377999991
-SheenColour: [9.99999975e-05, 9.9989993e-05, 9.99907497e-05]
+TopNormalTexturePath: materials\examples\textures\T_WaterNormal01_N.png
+DiffuseColour: [9.99999975e-05, 9.99996191e-05, 9.9989993e-05]
+SpecularColour: [0.908833265, 0.903924763, 0.848573625]
+Roughness: 1
+SheenColour: [9.99999975e-05, 9.9989993e-05, 9.99907934e-05]
 SheenRoughness: 0
 TopSpecularColour: [1, 0.999899983, 0.999899983]
-TopRoughness: 1
-TransmittanceColour: [0.446334392, 0.242895648, 0.479221284]
-TopThickness: 0.256000012
-TopCoverage: 0.208000004
+TopRoughness: 0
+TransmittanceColour: [1, 0.999899983, 0.999903321]
+TopThickness: 0.00600000005
+TopCoverage: 1
 DiffuseWrapOp: 0
 SpecularWrapOp: 0
 NormalWrapOp: 0

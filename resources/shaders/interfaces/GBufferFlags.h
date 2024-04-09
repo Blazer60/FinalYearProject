@@ -14,7 +14,7 @@
 #define GBUFFER_FLAG_TRANSMITTANCE_BIT 2
 
 #define SHADER_VARIANT_COUNT 2
-#define SHADER_TABLE_COUNT 4
+#define SHADER_TABLE_COUNT 8
 
 #if defined(GRAPHICS_INTERFACE)
 
@@ -28,7 +28,7 @@ namespace graphics
         UberShader, BaseShader
     };
 
-    constexpr uint32_t shaderFlagCount = 2;
+    constexpr uint32_t shaderFlagCount = 3;
     constexpr uint32_t shaderFlagPermutations = 1 << shaderFlagCount;
     enum class ShaderFlagBit : uint8_t
     {

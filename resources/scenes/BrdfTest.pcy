@@ -269,7 +269,7 @@ Actors:
       - Component: DistantLightProbe
         Size: [1024, 1024]
         RadianceMultiplier: 1000
-        Path: textures\hdr\unfinished_office_4k.hdr
+        Path: textures\hdr\newport\NewportLoft.hdr
     Children:
       []
   - Name: Diffuse Row
@@ -458,22 +458,6 @@ Actors:
           - materials\Backdrop.mpcy
     Children:
       []
-  - Name: Directional Light
-    UUID: 15943061732170408256
-    position: [0, 0, -10]
-    rotation: [1, 0, 0, 0]
-    scale: [1, 1, 1]
-    Components:
-      - Component: DirectionalLight
-        Colour: [0.930000007, 0.930000007, 0.949999988]
-        Intensity: 1000
-        Yaw: 45
-        Pitch: 45
-        CascadeDepths: [0.0399999991, 0.159999996, 0.360000014, 0.639999986]
-        ZMultiplier: 5
-        Bias: [0.00100000005, 0]
-    Children:
-      []
   - Name: MoriBall
     UUID: 4188112582399729249
     position: [0, 1.10555661, -0.582975149]
@@ -484,6 +468,30 @@ Actors:
         MeshPath: models\MoriBall.glb
         UMaterials:
           - materials\graphics\accentMat.mpcy
+          - materials\Red.mpcy
+    Children:
+      []
+  - Name: DefaultSphere
+    UUID: 4574616684536729482
+    position: [-3.09923887, 2.29485393, -1.04382861]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\defaultObjects\DefaultSphere.glb
+        UMaterials:
+          - materials\Red.mpcy
+    Children:
+      []
+  - Name: DefaultCube
+    UUID: 13301458102961685174
+    position: [-6.23986912, 2.35127974, -1.25387096]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\defaultObjects\DefaultCube.glb
+        UMaterials:
           - materials\Red.mpcy
     Children:
       []

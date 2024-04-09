@@ -4,8 +4,8 @@
     #define WHITE_FURNACE_TEST 0
 #endif
 
+#include "../Colour.glsl"
 #if WHITE_FURNACE_TEST > 0
-    #include "../Colour.glsl"
     #define COMPUTE_SHEEN 1
 #endif
 
@@ -66,6 +66,125 @@ vec3 reconstructSpecularMissing(vec3 f0, float nDotV, float roughness)
     return f0Average / denominator * thatSummationPartOnTheRight;
 }
 
+vec3 evaluateIblBaseClosure(GBuffer gBuffer, vec3 fresnel, vec3 v)
+{
+    const vec3 n = gBuffer.normal;
+    const float vDotN = saturate(dot(v, n));
+
+    const vec2 lut = texture(directionalAlbedoLut, vec2(vDotN, gBuffer.roughness)).rg;
+    const vec3 specular = (fresnel * lut.x + lut.y);
+    const vec3 specMissing = reconstructSpecularMissing(fresnel, vDotN, gBuffer.roughness);
+    const vec3 fullSpecular = specular + specMissing;
+
+    // todo: remove dependancy to Brdf.glsl => uniforms are getting too complicated to track.
+    const vec3 diffuse = evaluateDiffuseBrdf(gBuffer, fullSpecular);
+
+    const vec3 r = reflect(-v, n);
+#if WHITE_FURNACE_TEST > 0
+    const vec3 preFilterColour = vec3(1.f);
+
+    const vec3 irradiance = vec3(1.f);
+#else
+    const float maxReflectionLod = textureQueryLevels(u_pre_filter_texture);
+    const vec3 preFilterColour = textureLod(u_pre_filter_texture, r, gBuffer.roughness * maxReflectionLod).rgb * u_luminance_multiplier;
+
+    const vec3 irradiance = texture(u_irradiance_texture, n).rgb * u_luminance_multiplier;
+#endif
+
+    return fullSpecular * preFilterColour + diffuse * irradiance;
+}
+
+vec3 evaluateIblTopSpecularClosure(GBuffer gBuffer, vec3 fresnel, vec3 v)
+{
+    const vec3 n = gBuffer.topNormal;
+    const float vDotN = saturate(dot(v, n));
+
+    const vec2 lut = texture(directionalAlbedoLut, vec2(vDotN, gBuffer.topRoughness)).rg;
+    const vec3 specular = (fresnel * lut.x + lut.y);
+    const vec3 specMissing = reconstructSpecularMissing(fresnel, vDotN, gBuffer.topRoughness);
+    const vec3 fullSpecular = specular + specMissing;
+
+#if WHITE_FURNACE_TEST > 0
+    const vec3 preFilterColour = vec3(1.f);
+#else
+    const vec3 r = reflect(-v, n);
+    const float maxReflectionLod = textureQueryLevels(u_pre_filter_texture);
+    const vec3 preFilterColour = textureLod(u_pre_filter_texture, r, gBuffer.topRoughness * maxReflectionLod).rgb * u_luminance_multiplier;
+#endif
+
+    return fullSpecular * preFilterColour;
+}
+
+void evaluateIblTopClosure(in out vec3 colour, GBuffer gBuffer, vec3 fresnel, vec3 v)
+{
+    const vec3 colourSpecular = evaluateIblTopSpecularClosure(gBuffer, fresnel, v);
+
+    const vec3 extinctionCoefficient = -log(gBuffer.transmittance + vec3(0.0001f)) / max(gBuffer.topThickness, 0.00001f);
+    const float distance = gBuffer.topThickness / dot(gBuffer.topNormal, v);
+    const vec3 transmittance = exp(-extinctionCoefficient * distance);
+
+    const float alpha = gBuffer.topCoverage;
+
+    colour = alpha * (colourSpecular + transmittance * colour) + (1.f - alpha) * colour;
+}
+
+void evaluateIblSheenCoating(in out vec3 colour, GBuffer gBuffer, vec3 v)
+{
+#if COMPUTE_SHEEN > 0
+    vec3 sheen = vec3(0.f);
+    float sheenScalar = 1.f;
+
+    const vec3 n = gBuffer.normal;
+    const float vDotN = saturate(dot(v, n));
+
+    if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT) == 1)
+    {
+    #if WHITE_FURNACE_TEST > 0
+        sheen = texture(sheenLut, vec2(vDotN, gBuffer.fuzzRoughness)).rrr;
+        sheenScalar = texture(sheenMissing, vec2(vDotN, gBuffer.fuzzRoughness)).r;
+    #else
+        sheen = gBuffer.fuzzColour * texture(sheenLut, vec2(vDotN, gBuffer.fuzzRoughness)).r;
+        sheenScalar = texture(sheenMissing, vec2(vDotN, gBuffer.fuzzRoughness)).r;
+    #endif
+    }
+
+    #if WHITE_FURNACE_TEST > 0
+    const vec3 irradiance = vec3(1.f);
+    #else
+    const vec3 irradiance = texture(u_irradiance_texture, n).rgb * u_luminance_multiplier;
+    #endif
+    colour = sheen * irradiance + sheenScalar * colour;
+#endif
+}
+
+vec3 evaluateBxDF(GBuffer gBuffer, vec3 position)
+{
+    const vec3 viewDirection = normalize(camera.position - position);
+
+    vec3 colour = vec3(0.f);
+    if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_TRANSMITTANCE_BIT) == 1)
+    {
+        const float topNDotV = saturate(dot(gBuffer.topNormal, viewDirection));
+        const float bottomNDotV = saturate(dot(gBuffer.normal, viewDirection));
+
+        const vec3 bottomFresnel = fresnelSchlick(gBuffer.specular, bottomNDotV);
+        const vec3 topFresnel = fresnelSchlick(gBuffer.topSpecular, topNDotV);
+
+        colour = evaluateIblBaseClosure(gBuffer, bottomFresnel, viewDirection);
+        evaluateIblTopClosure(colour, gBuffer, topFresnel, viewDirection);
+    }
+    else
+    {
+        const float nDotV = saturate(dot(gBuffer.normal, viewDirection));
+        const vec3 fresnel = fresnelSchlick(gBuffer.specular, nDotV);
+        colour = evaluateIblBaseClosure(gBuffer, fresnel, viewDirection);
+    }
+
+//    evaluateIblSheenCoating(colour, gBuffer, viewDirection);
+
+    return colour;
+}
+
 layout(local_size_x = TILE_THREAD_GROUP_SIZE, local_size_y = TILE_THREAD_GROUP_SIZE, local_size_z = 1) in;
 void main()
 {
@@ -78,6 +197,7 @@ void main()
 #else
     const vec2 id = gl_GlobalInvocationID.xy;
 #endif
+
     const vec2 uv = (id - vec2(0.5f)) / textureSize(depthBufferTexture, 0);
     const float depth = texture(depthBufferTexture, uv).r;
     const vec3 position = positionFromDepth(uv, depth);
@@ -87,53 +207,12 @@ void main()
     if (gBufferIsValid(gBuffer) == 0)
         return;
 
-    const vec3 n = gBuffer.normal;
-    const vec3 v = normalize(camera.position - position);
-    const vec3 r = reflect(-v, n);
-
-    const float vDotN = max(dot(v, n), 0.f);
-
-#if WHITE_FURNACE_TEST > 0
-    const vec3 fresnel = vec3(1.f);
-#else
-    const vec3 fresnel = fresnelSchlick(gBuffer.specular, vDotN);
-#endif
-
-    const vec2 lut = texture(directionalAlbedoLut, vec2(vDotN, gBuffer.roughness)).rg;
-    const vec3 specular = (fresnel * lut.x + lut.y);
-    const vec3 specMissing = reconstructSpecularMissing(fresnel, vDotN, gBuffer.roughness);
-
-    // todo: remove dependancy to Brdf.glsl => uniforms are getting too complicated to track.
-    const vec3 diffuse = evaluateDiffuseBrdf(gBuffer, specular + specMissing);
-
-    vec3 sheen = vec3(0.f);
-    float sheenScalar = 1.f;
-#if COMPUTE_SHEEN > 0
-    if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT) == 1)
-    {
-    #if WHITE_FURNACE_TEST > 0
-        sheen = texture(sheenLut, vec2(vDotN, gBuffer.fuzzRoughness)).rrr;
-        sheenScalar = texture(sheenMissing, vec2(vDotN, gBuffer.fuzzRoughness)).r;
-    #else
-        sheen = gBuffer.fuzzColour * texture(sheenLut, vec2(vDotN, gBuffer.fuzzRoughness)).r;
-        sheenScalar = texture(sheenMissing, vec2(vDotN, gBuffer.fuzzRoughness)).r;
-    #endif
-    }
-#endif
-
-    // todo: specular + diffuse needs to be scaled back using the min-scale method. Possibly in the G channel as we need V right?
-
-#if WHITE_FURNACE_TEST > 0
-    const vec3 colour = linearToSRgb(sheen + sheenScalar * (specular + specMissing + diffuse) - vec3(0.5f));
-    imageStore(lighting, ivec2(id), vec4(colour, 1.f));
-#else
-
-    const float maxReflectionLod = textureQueryLevels(u_pre_filter_texture);
-    const vec3 preFilterColour = textureLod(u_pre_filter_texture, r, gBuffer.roughness * maxReflectionLod).rgb;
-    const vec3 irradiance = texture(u_irradiance_texture, n).rgb;
-
     const vec3 colour = imageLoad(lighting, ivec2(id)).rgb;
-    const vec3 outColour = colour + camera.exposure * (sheenScalar * (specular + specMissing) * preFilterColour + (sheenScalar * diffuse + sheen) * irradiance) * u_luminance_multiplier;
+    const vec3 outColour = colour + camera.exposure * evaluateBxDF(gBuffer, position);
     imageStore(lighting, ivec2(id), vec4(outColour, 1.f));
+
+#if WHITE_FURNACE_TEST > 0
+    imageStore(lighting, ivec2(id), vec4(1.f, 0.f, 1.f, 1.f));
+    return;
 #endif
 }
