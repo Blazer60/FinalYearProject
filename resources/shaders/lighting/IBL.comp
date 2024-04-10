@@ -124,15 +124,15 @@ void evaluateIblTopClosure(in out vec3 colour, in out Ray viewRay, GBuffer gBuff
 {
     colour = evaluateIblTopSpecularClosure(viewRay, gBuffer);
 
-    const vec3 extinctionCoefficient = -log(gBuffer.transmittance + vec3(0.0001f)) / max(gBuffer.topThickness, 0.00001f);
-    const float distance = 0.01f / max(dot(gBuffer.topNormal, viewRay.direction), MIN_THRESHOLD);
+    const vec3 extinctionCoefficient = -log(gBuffer.transmittance + vec3(0.0001f)) / max(gBuffer.topThickness, MIN_THRESHOLD);
+    const float distance = 0.01f / max(dot(gBuffer.topNormal, viewRay.direction), 0.0001f);
     // The actual thickness is a constant of 1cm.
 
     viewRay.transmittance = exp(-extinctionCoefficient * distance);
     viewRay.coverage = gBuffer.topCoverage;
 
     // Refract the view ray, change position and direction.
-    const float glassRefractiveIndex = 1.5f;  // Todo: Make this a gBuffer parameter.
+    const float glassRefractiveIndex = mix(1.f, 1.5f, viewRay.coverage);  // Todo: Make this a gBuffer parameter.
     viewRay.direction = -refract(-viewRay.direction, gBuffer.topNormal, 1.f / glassRefractiveIndex);
     viewRay.position = viewRay.position - viewRay.direction * distance;
     viewRay.refractiveIndex = glassRefractiveIndex;
