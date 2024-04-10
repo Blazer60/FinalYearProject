@@ -64,31 +64,30 @@ vec3 evalutateSheenBrdf(GBuffer gBuffer, float nDotL, float nDotV, vec3 v)
 
 float evaluateSheenMissingScalar(GBuffer gBuffer, float nDotL, float nDotV)
 {
-    const float oneMinusRspecL = 1.f - texture(sheenAlbedoLut, vec2(nDotL, gBuffer.roughness)).r;
-    const float oneMinusRspecV = 1.f - texture(sheenAlbedoLut, vec2(nDotV, gBuffer.roughness)).r;
+    const float oneMinusRspecL = 1.f - texture(sheenAlbedoLut, vec2(nDotL, gBuffer.fuzzRoughness)).r;
+    const float oneMinusRspecV = 1.f - texture(sheenAlbedoLut, vec2(nDotV, gBuffer.fuzzRoughness)).r;
     return min(oneMinusRspecL, oneMinusRspecV);
 }
 
 #endif
 
-vec3 evaluateMissingSpecularBrdf(GBuffer gBuffer, vec3 fresnel, float lDotN, float vDotN)
+vec3 evaluateMissingSpecularBrdf(float roughness, vec3 fresnel, float lDotN, float vDotN)
 {
     const vec3 averageFresnel = (20.f / 21.f) * fresnel + (1.f / 21.f);
 
-    const float averageRspec = directionalAlbedoAverageWhite(vec2(gBuffer.roughness, 0.5f));
+    const float averageRspec = directionalAlbedoAverageWhite(vec2(roughness, 0.5f));
     const float oneMinusAverageRspec = 1.f - averageRspec;
 
-    const float oneMinusRspecL = 1.f - directionalAlbedoWhite(vec2(lDotN, gBuffer.roughness));
-    const float oneMinusRspecV = 1.f - directionalAlbedoWhite(vec2(vDotN, gBuffer.roughness));
+    const float oneMinusRspecL = 1.f - directionalAlbedoWhite(vec2(lDotN, roughness));
+    const float oneMinusRspecV = 1.f - directionalAlbedoWhite(vec2(vDotN, roughness));
 
     const vec3 denominator = PI * oneMinusAverageRspec * (vec3(1.f) - averageFresnel * oneMinusAverageRspec) + vec3(0.001f);
 
     return averageFresnel * averageRspec / denominator * oneMinusRspecL * oneMinusRspecV;
 }
 
-vec3 evaluateSpecularBrdf(GBuffer gBuffer, vec3 fresnel, float hDotN, float vDotN, float lDotN)
+vec3 evaluateSpecularBrdf(float alpha2, vec3 fresnel, float hDotN, float vDotN, float lDotN)
 {
-    const float alpha2 = gBuffer.roughness * gBuffer.roughness * gBuffer.roughness * gBuffer.roughness + 0.001f;
     const float distribution = ggxDistribution(hDotN, alpha2);
     const float geometry = ggxGeometry2(vDotN, lDotN, alpha2);
 
@@ -111,8 +110,9 @@ void evaluateBaseClosure(in out vec3 colour, Ray viewRay, vec3 lightDirection, G
     const float hDotL = saturate(dot(h, lightDirection));
 
     const vec3 fresnel = fresnelSchlick(gBuffer.specular, hDotL);
-    const vec3 specular = evaluateSpecularBrdf(gBuffer, fresnel, hDotN, vDotN, lDotN);
-    const vec3 missingSpecular = evaluateMissingSpecularBrdf(gBuffer, fresnel, lDotN, vDotN);
+    const float alpha2 = gBuffer.roughness * gBuffer.roughness * gBuffer.roughness * gBuffer.roughness + 0.001f;
+    const vec3 specular = evaluateSpecularBrdf(alpha2, fresnel, hDotN, vDotN, lDotN);
+    const vec3 missingSpecular = evaluateMissingSpecularBrdf(gBuffer.roughness, fresnel, lDotN, vDotN);
     const vec3 fullSpecular = specular + missingSpecular;
 
     const vec3 diffuse = evaluateDiffuseBrdf(gBuffer, fullSpecular);
@@ -124,7 +124,7 @@ void evaluateBaseClosure(in out vec3 colour, Ray viewRay, vec3 lightDirection, G
 
 vec3 evaluateTopSpecularClosure(Ray viewRay, GBuffer gBuffer, vec3 lightDirection, vec3 lightIntensity)
 {
-    const vec3 n = gBuffer.normal;
+    const vec3 n = gBuffer.topNormal;
     const vec3 h = normalize(lightDirection + viewRay.direction);
 
     const float vDotN = saturate(dot(viewRay.direction, n));
@@ -133,8 +133,9 @@ vec3 evaluateTopSpecularClosure(Ray viewRay, GBuffer gBuffer, vec3 lightDirectio
     const float hDotL = saturate(dot(h, lightDirection));
 
     const vec3 fresnel = fresnelSchlick(gBuffer.topSpecular, hDotL);
-    const vec3 specular = evaluateSpecularBrdf(gBuffer, fresnel, hDotN, vDotN, lDotN);
-    const vec3 missingSpecular = evaluateMissingSpecularBrdf(gBuffer, fresnel, lDotN, vDotN);
+    const float alpha2 = gBuffer.topRoughness * gBuffer.topRoughness * gBuffer.topRoughness * gBuffer.topRoughness + 0.001f;
+    const vec3 specular = evaluateSpecularBrdf(alpha2, fresnel, hDotN, vDotN, lDotN);
+    const vec3 missingSpecular = evaluateMissingSpecularBrdf(gBuffer.topRoughness, fresnel, lDotN, vDotN);
     const vec3 fullSpecular = specular + missingSpecular;
 
     return fullSpecular * lightIntensity * lDotN;

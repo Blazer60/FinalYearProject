@@ -495,3 +495,19 @@ Actors:
           - materials\Red.mpcy
     Children:
       []
+  - Name: Directional Light
+    UUID: 10007118603310271867
+    position: [0, 0, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: DirectionalLight
+        Colour: [0.930000007, 0.930000007, 0.949999988]
+        Intensity: 1000
+        Yaw: 45
+        Pitch: 45
+        CascadeDepths: [0.0399999991, 0.159999996, 0.360000014, 0.639999986]
+        ZMultiplier: 5
+        Bias: [0.00100000005, 0]
+    Children:
+      []
