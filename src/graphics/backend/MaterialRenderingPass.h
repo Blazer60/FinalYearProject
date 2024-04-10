@@ -44,7 +44,9 @@ namespace graphics
                 file::shaderPath() / "geometry/standard/MultiMaterial.frag"
             },
             {
-                { "FRAGMENT_OUTPUT", 1 }
+                { "FRAGMENT_OUTPUT", 1 },
+                { "COMPUTE_SHEEN", 1 },
+                { "COMPUTE_TRANSMITTANCE", 1 }
             }
         };
 
@@ -54,7 +56,9 @@ namespace graphics
                 file::shaderPath() / "geometry/standard/Material.frag"
             },
             {
-                { "FRAGMENT_OUTPUT", 1 }
+                { "FRAGMENT_OUTPUT", 1 },
+                { "COMPUTE_SHEEN", 1 },
+                { "COMPUTE_TRANSMITTANCE", 1 }
             }
         };
 

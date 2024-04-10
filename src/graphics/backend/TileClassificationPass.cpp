@@ -24,12 +24,12 @@ namespace graphics
         pushDebugGroup("Tile Classification");
 
         const std::vector pattern = { 0u, 1u, 1u, 0u };
-        const std::vector resetData = containers::makePattern<uint32_t>(pattern.begin(), pattern.end(), shaderVariantCount);
+        const std::vector resetData = containers::makePattern<uint32_t>(pattern.begin(), pattern.end(), shaderVariationCount);
 
         const glm::ivec2 tileCount = glm::ceil(static_cast<glm::vec2>(size) / static_cast<float>(threadGroupSize));
         const uint32_t bufferSize = sizeof(uint32_t) * tileCount.x * tileCount.y;
 
-        context.tileClassificationStorage.resize(indirectBufferSize + shaderVariantCount * bufferSize);
+        context.tileClassificationStorage.resize(indirectBufferSize + shaderVariationCount * bufferSize);
         context.tileClassificationStorage.zeroOut();  // Technically don't have to do this. But it gets confusing when debugging.
         context.tileClassificationStorage.write(resetData.data(), sizeof(uint32_t) * resetData.size());
 
@@ -59,13 +59,29 @@ namespace graphics
         mShaderTable.reserve(shaderFlagPermutations);
         for (uint32_t flag = 0; flag < shaderFlagPermutations; ++flag)
         {
-            // For now, there is no specific shader for each. Only the base shader.
-            if ((flag & ShaderFlagBit::TransmittanceBit) > 0 || (flag & ShaderFlagBit::SheenBit) > 0)
-                mShaderTable.push_back(shaderVariant::UberShader);
-            else if ((flag & ShaderFlagBit::MaterialBit) > 0)
-                mShaderTable.push_back(shaderVariant::BaseShader);
+            if ((flag & ShaderFlagBit::MaterialBit) > 0)
+            {
+                if ((flag & ShaderFlagBit::TransmittanceBit) > 0 && (flag & ShaderFlagBit::SheenBit) > 0)
+                {
+                    mShaderTable.push_back(shaderVariant::UberShader);
+                }
+                else if ((flag & ShaderFlagBit::TransmittanceBit) > 0)
+                {
+                    mShaderTable.push_back(shaderVariant::TransmittanceShader);
+                }
+                else if ((flag & ShaderFlagBit::SheenBit) > 0)
+                {
+                    mShaderTable.push_back(shaderVariant::SheenShader);
+                }
+                else
+                {
+                    mShaderTable.push_back(shaderVariant::BaseShader);
+                }
+            }
             else
+            {
                 mShaderTable.push_back(shaderVariant::UberShader);
+            }
         }
 
         {

@@ -37,17 +37,29 @@ namespace graphics
 
     protected:
         Shader mDebugGBufferShader {
-            { file::shaderPath() / "geometry/DebugGBuffer.comp" }
+            { file::shaderPath() / "geometry/DebugGBuffer.comp" },
+            {
+                { "COMPUTE_SHEEN", 1 },
+                { "COMPUTE_TRANSMITTANCE", 1 }
+            }
         };
 
         Shader mWhiteFurnaceTestShader {
             { file::shaderPath() / "lighting/IBL.comp" },
-            { { "WHITE_FURNACE_TEST" } }
+            {
+                { "WHITE_FURNACE_TEST" },
+                { "COMPUTE_SHEEN", 1 },
+                { "COMPUTE_TRANSMITTANCE", 1 }
+            }
         };
 
         Shader mDebugTileOverlayShader {
             { file::shaderPath() / "classification/DebugOverlay.comp" },
-            { { "TILE_THREAD_GROUP_SIZE", TileClassificationPass::threadGroupSize } }
+            {
+                { "TILE_THREAD_GROUP_SIZE", TileClassificationPass::threadGroupSize },
+                { "COMPUTE_SHEEN", 0 },
+                { "COMPUTE_TRANSMITTANCE", 0 }
+            }
         };
 
         Shader mDebugShader {

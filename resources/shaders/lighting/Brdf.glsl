@@ -122,6 +122,7 @@ void evaluateBaseClosure(in out vec3 colour, Ray viewRay, vec3 lightDirection, G
     colour = viewRay.coverage * (colour * viewRay.transmittance * backColour) + (1.f - viewRay.coverage) * backColour;
 }
 
+#if COMPUTE_TRANSMITTANCE > 0
 vec3 evaluateTopSpecularClosure(Ray viewRay, GBuffer gBuffer, vec3 lightDirection, vec3 lightIntensity)
 {
     const vec3 n = gBuffer.topNormal;
@@ -140,9 +141,11 @@ vec3 evaluateTopSpecularClosure(Ray viewRay, GBuffer gBuffer, vec3 lightDirectio
 
     return fullSpecular * lightIntensity * lDotN;
 }
+#endif
 
 void evaluateTopClosure(in out vec3 colour, in out Ray viewRay, in out vec3 lightDirection, GBuffer gBuffer, vec3 lightIntensity)
 {
+#if COMPUTE_TRANSMITTANCE > 0
     if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_TRANSMITTANCE_BIT) == 1)
     {
         const vec3 colourSpecular = evaluateTopSpecularClosure(viewRay, gBuffer, lightDirection, lightIntensity);
@@ -165,6 +168,7 @@ void evaluateTopClosure(in out vec3 colour, in out Ray viewRay, in out vec3 ligh
 
         lightDirection = -refract(-lightDirection, gBuffer.topNormal, 1.f / refractiveIndex);
     }
+#endif
 }
 
 void evaluateSheenCoating(in out vec3 colour, GBuffer gBuffer, vec3 l, vec3 v, vec3 lightIntensity)

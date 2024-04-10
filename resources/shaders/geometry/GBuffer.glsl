@@ -38,10 +38,13 @@ struct GBuffer
     float roughness;        // 1 byte
 
     // Fuzz Information
+#if COMPUTE_SHEEN > 0
     vec3 fuzzColour;        // 3 bytes
     float fuzzRoughness;    // 1 byte
+#endif
 
     // Second Specular & transmittance
+#if COMPUTE_TRANSMITTANCE > 0
     vec3 topSpecular;       // 3 bytes
     vec3 topNormal;         // 4 bytes
     float topRoughness;     // 1 byte
@@ -49,6 +52,7 @@ struct GBuffer
     float topThickness;     // 1 bytes (0 -> 0m, 1 -> 0.2m)
     float topCoverage;      // 1 byte
     float refractiveIndex;  // 1 byte (0 -> 1, 1 -> 3)
+#endif
 
     uint byteCount;         // 30 bytes total. All data fits in 2x4uints. Standard Size: 12 bytes.
 };
@@ -241,8 +245,13 @@ GBuffer gBufferCreate()
     gBuffer.specular = vec3(0);
     gBuffer.normal = vec3(0);
     gBuffer.roughness = 0;
+
+#if COMPUTE_SHEEN > 0
     gBuffer.fuzzColour = vec3(0);
     gBuffer.fuzzRoughness = 0;
+#endif
+
+#if COMPUTE_TRANSMITTANCE > 0
     gBuffer.topSpecular = vec3(0);
     gBuffer.topNormal = vec3(0);
     gBuffer.topRoughness = 0;
@@ -250,6 +259,8 @@ GBuffer gBufferCreate()
     gBuffer.topThickness = 0;
     gBuffer.topCoverage = 0;
     gBuffer.refractiveIndex = 0.f;
+#endif
+
     gBuffer.byteCount = 0;
 
     return gBuffer;
@@ -285,13 +296,15 @@ void pushToStorageGBuffer(GBuffer gBuffer, ivec2 coord)
     streamPackUnorm4x8(stream, vec4(gBuffer.diffuse, 0.f), 3);
     streamPackUnorm4x8(stream, vec4(gBuffer.specular, 0.f), 3);
 
+#if COMPUTE_SHEEN > 0
     if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT) == 1)
     {
         streamPackUnorm4x8(stream, vec4(gBuffer.fuzzColour, 0.f), 3);
         streamPackUnorm4x8(stream, vec4(gBuffer.fuzzRoughness, 0.f, 0.f, 0.f), 1);
     }
+#endif
 
-    // todo: Check vGPR usage here to see if we're shot.
+#if COMPUTE_TRANSMITTANCE
     if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_TRANSMITTANCE_BIT) == 1)
     {
         streamPackUnorm4x8(stream, vec4(gBuffer.topSpecular, 0.f), 3);
@@ -302,6 +315,7 @@ void pushToStorageGBuffer(GBuffer gBuffer, ivec2 coord)
         streamPackUnorm4x8(stream, vec4(gBuffer.topCoverage, 0.f, 0.f, 0.f), 1);
         streamPackUnorm4x8(stream, vec4(gBuffer.refractiveIndex, 0.f, 0.f, 0.f), 1);
     }
+#endif
 
     streamPushToStorageGBuffer(stream, coord);
 }
@@ -324,12 +338,15 @@ GBuffer pullFromStorageGBuffer(ivec2 coord)
     gBuffer.diffuse       = streamUnpackUnorm4x8(stream, 3).xyz;
     gBuffer.specular      = streamUnpackUnorm4x8(stream, 3).xyz;
 
+#if COMPUTE_SHEEN
     if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT) == 1)
     {
         gBuffer.fuzzColour    = streamUnpackUnorm4x8(stream, 3).xyz;
         gBuffer.fuzzRoughness = streamUnpackUnorm4x8(stream, 1).x;
     }
+#endif
 
+#if COMPUTE_TRANSMITTANCE
     if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_TRANSMITTANCE_BIT) == 1)
     {
         gBuffer.topSpecular     = streamUnpackUnorm4x8(stream, 3).xyz;
@@ -340,6 +357,7 @@ GBuffer pullFromStorageGBuffer(ivec2 coord)
         gBuffer.topCoverage     = streamUnpackUnorm4x8(stream, 1).x;
         gBuffer.refractiveIndex = streamUnpackUnorm4x8(stream, 1).x;
     }
+#endif
 
     gBuffer.byteCount   = stream.byteOffset;  // This is the amount of bytes read. Not the actual amount submitted to the buffer.
 

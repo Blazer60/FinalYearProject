@@ -18,11 +18,11 @@ Roughness: 1
 SheenColour: [0, 0, 0]
 SheenRoughness: 1
 TopSpecularColour: [0, 0, 0]
-TopRoughness: 0.200000003
+TopRoughness: 0.0549999997
 TransmittanceColour: [0, 0, 0]
-TopThickness: 0.00200000009
+TopThickness: 0
 TopCoverage: 0
-RefractiveIndex: 1.5
+RefractiveIndex: 1.12600005
 DiffuseWrapOp: 0
 SpecularWrapOp: 0
 NormalWrapOp: 0

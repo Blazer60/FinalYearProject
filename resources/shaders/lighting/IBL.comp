@@ -98,6 +98,7 @@ void evaluateIblBaseClosure(in out vec3 colour, Ray viewRay, GBuffer gBuffer)
     colour = viewRay.coverage * (colour + viewRay.transmittance * backColour) + (1.f - viewRay.coverage) * backColour;
 }
 
+#if COMPUTE_TRANSMITTANCE > 0
 vec3 evaluateIblTopSpecularClosure(Ray viewRay, GBuffer gBuffer)
 {
     const vec3 n = gBuffer.topNormal;
@@ -109,19 +110,21 @@ vec3 evaluateIblTopSpecularClosure(Ray viewRay, GBuffer gBuffer)
     const vec3 specMissing = reconstructSpecularMissing(fresnel, vDotN, gBuffer.topRoughness);
     const vec3 fullSpecular = specular + specMissing;
 
-#if WHITE_FURNACE_TEST > 0
+    #if WHITE_FURNACE_TEST > 0
     const vec3 preFilterColour = vec3(1.f);
-#else
+    #else
     const vec3 r = reflect(-viewRay.direction, n);
     const float maxReflectionLod = textureQueryLevels(u_pre_filter_texture);
     const vec3 preFilterColour = textureLod(u_pre_filter_texture, r, gBuffer.topRoughness * maxReflectionLod).rgb * u_luminance_multiplier;
-#endif
+    #endif
 
     return fullSpecular * preFilterColour;
 }
+#endif
 
 void evaluateIblTopClosure(in out vec3 colour, in out Ray viewRay, GBuffer gBuffer)
 {
+#if COMPUTE_TRANSMITTANCE > 0
     if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_TRANSMITTANCE_BIT) == 1)
     {
         colour = evaluateIblTopSpecularClosure(viewRay, gBuffer);
@@ -140,6 +143,7 @@ void evaluateIblTopClosure(in out vec3 colour, in out Ray viewRay, GBuffer gBuff
         viewRay.position = viewRay.position - viewRay.direction * distance;
         viewRay.refractiveIndex = refractiveIndex;
     }
+#endif
 }
 
 void evaluateIblSheenCoating(in out vec3 colour, GBuffer gBuffer, vec3 v)

@@ -15,7 +15,7 @@ RefractiveIndexTexturePath: ""
 DiffuseColour: [0.999899983, 1, 0.999916613]
 SpecularColour: [0.0726813897, 0.0775038004, 0.0727251396]
 Roughness: 1
-SheenColour: [9.99999975e-05, 9.9989993e-05, 9.99916083e-05]
+SheenColour: [9.99999975e-05, 9.9989993e-05, 9.99917102e-05]
 SheenRoughness: 0
 TopSpecularColour: [0.0718404055, 0.0718332231, 0.0718353614]
 TopRoughness: 0.225999996

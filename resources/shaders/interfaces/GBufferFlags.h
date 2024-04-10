@@ -13,7 +13,7 @@
 #define GBUFFER_FLAG_FUZZ_BIT 1
 #define GBUFFER_FLAG_TRANSMITTANCE_BIT 2
 
-#define SHADER_VARIANT_COUNT 2
+#define SHADER_VARIANT_COUNT 4
 #define SHADER_TABLE_COUNT 8
 
 #if defined(GRAPHICS_INTERFACE)
@@ -22,10 +22,10 @@
 
 namespace graphics
 {
-    constexpr uint32_t shaderVariationCount = 2;
+    constexpr uint32_t shaderVariationCount = 4;
     enum class shaderVariant : uint8_t
     {
-        UberShader, BaseShader
+        UberShader, SheenShader, TransmittanceShader, BaseShader
     };
 
     constexpr uint32_t shaderFlagCount = 3;

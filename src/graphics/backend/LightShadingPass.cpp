@@ -203,8 +203,9 @@ namespace graphics
         const std::vector<Definition> uberShaderDefinitions {
             { "TILED_RENDERING", 1 },
             { "TILE_THREAD_GROUP_SIZE", TileClassificationPass::threadGroupSize },
-            { "SHADER_INDEX", 0 },
-            { "COMPUTE_SHEEN", 1 }
+            { "SHADER_INDEX", static_cast<int>(shaderVariant::UberShader) },
+            { "COMPUTE_SHEEN", 1 },
+            { "COMPUTE_TRANSMITTANCE", 1 }
         };
 
         mIblShaderVariants.push_back( IblShaderVariant { Shader({ path }, uberShaderDefinitions),
@@ -230,11 +231,71 @@ namespace graphics
             }
         });
 
+        const std::vector<Definition> sheenShaderDefinitions {
+            { "TILED_RENDERING", 1 },
+            { "TILE_THREAD_GROUP_SIZE", TileClassificationPass::threadGroupSize },
+            { "SHADER_INDEX", static_cast<int>(shaderVariant::SheenShader) },
+            { "COMPUTE_SHEEN", 1 },
+            { "COMPUTE_TRANSMITTANCE", 0 }
+        };
+
+        mIblShaderVariants.push_back( IblShaderVariant { Shader({ path }, sheenShaderDefinitions),
+            [](Shader &shader, const Context &context, const Lut &lut, const Skybox &skybox)
+            {
+                shader.image("storageGBuffer", context.gbuffer.getId(), context.gbuffer.getFormat(), 0, true, GL_READ_ONLY);
+                shader.image("lighting", context.lightBuffer.getId(), context.lightBuffer.getFormat(), 1, false, GL_READ_WRITE);
+                shader.set("depthBufferTexture", context.depthBuffer.getId(), 0);
+                shader.set("missingSpecularLutTexture", lut.specularMissing.getId(), 1);
+                shader.set("directionalAlbedoLut", lut.specularDirectionalAlbedo.getId(), 2);
+                shader.set("directionalAlbedoAverageLut", lut.specularDirectionalAlbedoAverage.getId(), 3);
+                shader.set("u_irradiance_texture", skybox.irradianceMap.getId(), 4);
+                shader.set("u_pre_filter_texture", skybox.prefilterMap.getId(), 5);
+
+                shader.set("sheenLut", lut.sheenDirectionalAlbedo.getId(), 6);
+                shader.set("sheenMissing", lut.sheenMissing.getId(), 7);
+
+                shader.set("u_luminance_multiplier", skybox.luminanceMultiplier);
+
+                shader.bind();
+
+                dispatchComputeIndirect(context.tileClassificationStorage.getId(), 4 * sizeof(uint32_t) * 1);
+            }
+        });
+
+        const std::vector<Definition> transmittanceShaderDefinitions {
+            { "TILED_RENDERING", 1 },
+            { "TILE_THREAD_GROUP_SIZE", TileClassificationPass::threadGroupSize },
+            { "SHADER_INDEX", static_cast<int>(shaderVariant::TransmittanceShader) },
+            { "COMPUTE_SHEEN", 0 },
+            { "COMPUTE_TRANSMITTANCE", 1 }
+        };
+
+        mIblShaderVariants.push_back(IblShaderVariant { Shader({ path }, transmittanceShaderDefinitions),
+        [](Shader &shader, const Context &context, const Lut &lut, const Skybox &skybox)
+            {
+                shader.image("storageGBuffer", context.gbuffer.getId(), context.gbuffer.getFormat(), 0, true, GL_READ_ONLY);
+                shader.image("lighting", context.lightBuffer.getId(), context.lightBuffer.getFormat(), 1, false, GL_READ_WRITE);
+                shader.set("depthBufferTexture", context.depthBuffer.getId(), 0);
+                shader.set("missingSpecularLutTexture", lut.specularMissing.getId(), 1);
+                shader.set("directionalAlbedoLut", lut.specularDirectionalAlbedo.getId(), 2);
+                shader.set("directionalAlbedoAverageLut", lut.specularDirectionalAlbedoAverage.getId(), 3);
+                shader.set("u_irradiance_texture", skybox.irradianceMap.getId(), 4);
+                shader.set("u_pre_filter_texture", skybox.prefilterMap.getId(), 5);
+
+                shader.set("u_luminance_multiplier", skybox.luminanceMultiplier);
+
+                shader.bind();
+
+                dispatchComputeIndirect(context.tileClassificationStorage.getId(), 4 * sizeof(uint32_t) * 2);
+            }
+        });
+
         const std::vector<Definition> baseShaderDefinitions {
             { "TILED_RENDERING", 1 },
             { "TILE_THREAD_GROUP_SIZE", TileClassificationPass::threadGroupSize },
-            { "SHADER_INDEX", 1 },
-            { "COMPUTE_SHEEN", 0 }
+            { "SHADER_INDEX", static_cast<int>(shaderVariant::BaseShader) },
+            { "COMPUTE_SHEEN", 0 },
+            { "COMPUTE_TRANSMITTANCE", 0 }
         };
 
         mIblShaderVariants.push_back(IblShaderVariant { Shader({ path }, baseShaderDefinitions),
@@ -253,7 +314,7 @@ namespace graphics
 
                 shader.bind();
 
-                dispatchComputeIndirect(context.tileClassificationStorage.getId(), 4 * sizeof(uint32_t) * 1);
+                dispatchComputeIndirect(context.tileClassificationStorage.getId(), 4 * sizeof(uint32_t) * 3);
             }
         });
     }
@@ -264,8 +325,9 @@ namespace graphics
 
         const std::vector<Definition> uberShaderDefinitions {
             { "TILE_THREAD_GROUP_SIZE", TileClassificationPass::threadGroupSize },
-            { "SHADER_INDEX", 0 },
-            { "COMPUTE_SHEEN", 1 }
+            { "SHADER_INDEX", static_cast<int>(shaderVariant::UberShader) },
+            { "COMPUTE_SHEEN", 1 },
+            { "COMPUTE_TRANSMITTANCE", 1 }
         };
 
         results.push_back(LightShaderVariant { Shader( { path }, uberShaderDefinitions),
@@ -277,10 +339,41 @@ namespace graphics
             }
         });
 
+        const std::vector<Definition> sheenShaderDefinitions {
+            { "TILE_THREAD_GROUP_SIZE", TileClassificationPass::threadGroupSize },
+            { "SHADER_INDEX", static_cast<int>(shaderVariant::SheenShader) },
+            { "COMPUTE_SHEEN", 1 },
+            { "COMPUTE_TRANSMITTANCE", 0 }
+        };
+
+        results.push_back(LightShaderVariant { Shader( { path }, sheenShaderDefinitions),
+            [](Shader &shader, Context &context, const Lut &lut)
+            {
+                // Todo: Bindings here do not match the shader code.
+                shader.set("sheenTable", lut.ltcSheenTable.getId(), 5);
+                shader.set("sheenAlbedoLut", lut.sheenDirectionalAlbedo.getId(), 6);
+            }
+        });
+
+        const std::vector<Definition> transmittanceShaderDefinitions {
+            { "TILE_THREAD_GROUP_SIZE", TileClassificationPass::threadGroupSize },
+            { "SHADER_INDEX", static_cast<int>(shaderVariant::TransmittanceShader) },
+            { "COMPUTE_SHEEN", 0 },
+            { "COMPUTE_TRANSMITTANCE", 1 }
+        };
+
+        results.push_back(LightShaderVariant { Shader( { path }, transmittanceShaderDefinitions),
+            [](Shader &shader, Context &context, const Lut &lut)
+            {
+
+            }
+        });
+
         const std::vector<Definition> baseShaderDefinitions {
             { "TILE_THREAD_GROUP_SIZE", TileClassificationPass::threadGroupSize },
-            { "SHADER_INDEX", 1 },
-            { "COMPUTE_SHEEN", 0 }
+            { "SHADER_INDEX", static_cast<int>(shaderVariant::BaseShader) },
+            { "COMPUTE_SHEEN", 0 },
+            { "COMPUTE_TRANSMITTANCE", 0 }
         };
 
         results.push_back(LightShaderVariant { Shader( { path }, baseShaderDefinitions),
