@@ -366,6 +366,7 @@ namespace engine
         layerData.topCoverage         = layer->mTopCoverage;
         layerData.topThickness        = UberLayer::remapThickness(layer->mTopThickness);
         layerData.transmittanceColour = glm::vec4(layer->mTransmittanceColour, 1.f);
+        layerData.refractiveIndex     = UberLayer::remapRefractiveIndex(layer->mRefracetiveIndex);
 
         layerData.diffuseTextureIndex             = mTexturePool.addTexture(*layer->mDiffuseTexture);
         layerData.specularTextureIndex            = mTexturePool.addTexture(*layer->mSpecularTexture);
@@ -379,6 +380,7 @@ namespace engine
         layerData.topCoverageTextureIndex         = mTexturePool.addTexture(*layer->mTopCoverageTexture);
         layerData.topThicknessTextureIndex        = mTexturePool.addTexture(*layer->mTopThicknessTexture);
         layerData.transmittanceColourTextureIndex = mTexturePool.addTexture(*layer->mTransmittanceTexture);
+        layerData.refractiveTextureIndex          = mTexturePool.addTexture(*layer->mRefractiveIndexTexture);
 
         mTexturePool.setWrap(layerData.diffuseTextureIndex,             layer->mDiffuseWrapOp);
         mTexturePool.setWrap(layerData.specularTextureIndex,            layer->mSpecularWrapOp);
@@ -392,6 +394,7 @@ namespace engine
         mTexturePool.setWrap(layerData.topCoverageTextureIndex,         layer->mTopCoverageWrapOp);
         mTexturePool.setWrap(layerData.topThicknessTextureIndex,        layer->mTopThicknessWrapOp);
         mTexturePool.setWrap(layerData.transmittanceColourTextureIndex, layer->mTransmittanceWrapOp);
+        mTexturePool.setWrap(layerData.refractiveTextureIndex,          layer->mRefractiveIndexWrapOp);
 
         mLayers.push_back(std::move(layer));
 
@@ -414,6 +417,7 @@ namespace engine
         mTexturePool.removeTexture(layerData.topCoverageTextureIndex);
         mTexturePool.removeTexture(layerData.topThicknessTextureIndex);
         mTexturePool.removeTexture(layerData.transmittanceColourTextureIndex);
+        mTexturePool.removeTexture(layerData.refractiveTextureIndex);
 
         layerData.roughness           = layer->mRoughness;
         layerData.sheenRoughness      = layer->mSheenRoughness;
@@ -425,6 +429,7 @@ namespace engine
         layerData.topCoverage         = layer->mTopCoverage;
         layerData.topThickness        = UberLayer::remapThickness(layer->mTopThickness);
         layerData.transmittanceColour = glm::vec4(layer->mTransmittanceColour, 1.f);
+        layerData.refractiveIndex     = UberLayer::remapRefractiveIndex(layer->mRefracetiveIndex);
 
         layerData.diffuseTextureIndex             = mTexturePool.addTexture(*layer->mDiffuseTexture);
         layerData.specularTextureIndex            = mTexturePool.addTexture(*layer->mSpecularTexture);
@@ -438,6 +443,7 @@ namespace engine
         layerData.topCoverageTextureIndex         = mTexturePool.addTexture(*layer->mTopCoverageTexture);
         layerData.topThicknessTextureIndex        = mTexturePool.addTexture(*layer->mTopThicknessTexture);
         layerData.transmittanceColourTextureIndex = mTexturePool.addTexture(*layer->mTransmittanceTexture);
+        layerData.refractiveTextureIndex          = mTexturePool.addTexture(*layer->mRefractiveIndexTexture);
 
         mTexturePool.setWrap(layerData.diffuseTextureIndex,             layer->mDiffuseWrapOp);
         mTexturePool.setWrap(layerData.specularTextureIndex,            layer->mSpecularWrapOp);
@@ -451,6 +457,7 @@ namespace engine
         mTexturePool.setWrap(layerData.topCoverageTextureIndex,         layer->mTopCoverageWrapOp);
         mTexturePool.setWrap(layerData.topThicknessTextureIndex,        layer->mTopThicknessWrapOp);
         mTexturePool.setWrap(layerData.transmittanceColourTextureIndex, layer->mTransmittanceWrapOp);
+        mTexturePool.setWrap(layerData.refractiveTextureIndex,          layer->mRefractiveIndexWrapOp);
 
         mLayers[index] = std::move(layer);
 

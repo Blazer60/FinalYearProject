@@ -46,10 +46,11 @@ struct GBuffer
     vec3 topNormal;         // 4 bytes
     float topRoughness;     // 1 byte
     vec3 transmittance;     // 3 bytes
-    float topThickness;     // 4 bytes (semi-open range) [0, inf).
+    float topThickness;     // 1 bytes (0 -> 0m, 1 -> 0.2m)
     float topCoverage;      // 1 byte
+    float refractiveIndex;  // 1 byte (0 -> 1, 1 -> 3)
 
-    uint byteCount;         // 32 bytes total. All data fits in 2x4uints. Standard Size: 12 bytes.
+    uint byteCount;         // 30 bytes total. All data fits in 2x4uints. Standard Size: 12 bytes.
 };
 
 struct Stream
@@ -248,6 +249,7 @@ GBuffer gBufferCreate()
     gBuffer.transmittance = vec3(0);
     gBuffer.topThickness = 0;
     gBuffer.topCoverage = 0;
+    gBuffer.refractiveIndex = 0.f;
     gBuffer.byteCount = 0;
 
     return gBuffer;
@@ -298,6 +300,7 @@ void pushToStorageGBuffer(GBuffer gBuffer, ivec2 coord)
         streamPackUnorm4x8(stream, vec4(gBuffer.transmittance, 0.f), 3);
         streamPackUnorm4x8(stream, vec4(gBuffer.topThickness, 0.f, 0.f, 0.f), 1);
         streamPackUnorm4x8(stream, vec4(gBuffer.topCoverage, 0.f, 0.f, 0.f), 1);
+        streamPackUnorm4x8(stream, vec4(gBuffer.refractiveIndex, 0.f, 0.f, 0.f), 1);
     }
 
     streamPushToStorageGBuffer(stream, coord);
@@ -335,6 +338,7 @@ GBuffer pullFromStorageGBuffer(ivec2 coord)
         gBuffer.transmittance   = streamUnpackUnorm4x8(stream, 3).xyz;
         gBuffer.topThickness    = streamUnpackUnorm4x8(stream, 1).x;
         gBuffer.topCoverage     = streamUnpackUnorm4x8(stream, 1).x;
+        gBuffer.refractiveIndex = streamUnpackUnorm4x8(stream, 1).x;
     }
 
     gBuffer.byteCount   = stream.byteOffset;  // This is the amount of bytes read. Not the actual amount submitted to the buffer.

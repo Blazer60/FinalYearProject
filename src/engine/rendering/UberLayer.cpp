@@ -328,6 +328,29 @@ namespace engine
                     });
                 }
             }
+            if (const ui::EditFlags flags = ui::rowTextureSliderFloat("Refractive Index", mRefractiveIndexTexture, mRefracetiveIndex, mRefractiveIndexWrapOp, minIoR, maxIoR); flags > 0)
+            {
+                if ((flags & ui::EditFlags::Value) > 0)
+                {
+                    layerUpdates.push_back([this](graphics::TexturePool &, graphics::LayerData &layer) {
+                        layer.refractiveIndex = remapRefractiveIndex(mRefracetiveIndex);
+                    });
+                }
+                if ((flags & ui::EditFlags::Texture) > 0)
+                {
+                    layerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                        texturePool.removeTexture(layer.refractiveTextureIndex);
+                        layer.refractiveTextureIndex = texturePool.addTexture(*mRefractiveIndexTexture);
+                        texturePool.setWrap(layer.refractiveTextureIndex, mRefractiveIndexWrapOp);
+                    });
+                }
+                if ((flags & ui::EditFlags::Wrap) > 0)
+                {
+                    layerUpdates.push_back([this](graphics::TexturePool &texturePool, const graphics::LayerData &layer) {
+                        texturePool.setWrap(layer.refractiveTextureIndex, mRefractiveIndexWrapOp);
+                    });
+                }
+            }
 
             ImGui::EndTable();
         }
@@ -369,6 +392,7 @@ namespace engine
         out << YAML::Key << "TopThicknessTexturePath"   << YAML::Value << file::makeRelativeToResourcePath(mTopThicknessTexture->path()).string();
         out << YAML::Key << "TopCoverageTexturePath"    << YAML::Value << file::makeRelativeToResourcePath(mTopCoverageTexture->path()).string();
         out << YAML::Key << "TopNormalTexturePath"      << YAML::Value << file::makeRelativeToResourcePath(mTopNormalTexture->path()).string();
+        out << YAML::Key << "RefractiveIndexTexturePath"<< YAML::Value << file::makeRelativeToResourcePath(mRefractiveIndexTexture->path()).string();
 
         out << YAML::Key << "DiffuseColour"         << YAML::Value << mDiffuseColour;
         out << YAML::Key << "SpecularColour"        << YAML::Value << mSpecularColour;
@@ -380,6 +404,7 @@ namespace engine
         out << YAML::Key << "TransmittanceColour"   << YAML::Value << mTransmittanceColour;
         out << YAML::Key << "TopThickness"          << YAML::Value << mTopThickness;
         out << YAML::Key << "TopCoverage"           << YAML::Value << mTopCoverage;
+        out << YAML::Key << "RefractiveIndex"       << YAML::Value << mRefracetiveIndex;
 
         out << YAML::Key << "DiffuseWrapOp"         << YAML::Value << static_cast<unsigned int>(mDiffuseWrapOp);
         out << YAML::Key << "SpecularWrapOp"        << YAML::Value << static_cast<unsigned int>(mSpecularWrapOp);
@@ -392,6 +417,7 @@ namespace engine
         out << YAML::Key << "TopRoughnessWrapOp"    << YAML::Value << static_cast<unsigned int>(mTopRoughnessWrapOp);
         out << YAML::Key << "TopThicknessWrapOp"    << YAML::Value << static_cast<unsigned int>(mTopThicknessWrapOp);
         out << YAML::Key << "TopCoverageWrapOp"     << YAML::Value << static_cast<unsigned int>(mTopCoverageWrapOp);
+        out << YAML::Key << "RefractiveIndexWrapOp" << YAML::Value << static_cast<unsigned int>(mRefractiveIndexWrapOp);
         out << YAML::EndMap;
 
         std::ofstream fileOutput(mPath);
@@ -508,11 +534,24 @@ namespace engine
                 texturePool.setWrap(layer.topNormalTextureIndex, mTopNormalWrapOp);
             });
         }
+        else if (mRefractiveIndexTexture == texture)
+        {
+            layerUpdates.push_back([this](graphics::TexturePool &texturePool, graphics::LayerData &layer) {
+                texturePool.removeTexture(layer.refractiveTextureIndex);
+                layer.refractiveTextureIndex = texturePool.addTexture(*mRefractiveIndexTexture);
+                texturePool.setWrap(layer.refractiveTextureIndex, mRefractiveIndexWrapOp);
+            });
+        }
     }
 
     float UberLayer::remapThickness(const float topThickness)
     {
         return math::inverseLerp(minThickness, maxThickness, topThickness);
+    }
+
+    float UberLayer::remapRefractiveIndex(const float refractiveIndex)
+    {
+        return math::inverseLerp(minIoR, maxIoR, refractiveIndex);
     }
 
     void UberLayer::loadFromDisk()
@@ -560,6 +599,7 @@ namespace engine
         mTopThicknessTexture        = tryLoadAsTexture(data["TopThicknessTexturePath"]);
         mTopCoverageTexture         = tryLoadAsTexture(data["TopCoverageTexturePath"]);
         mTopNormalTexture           = tryLoadAsTexture(data["TopNormalTexturePath"]);
+        mRefractiveIndexTexture     = tryLoadAsTexture(data["RefractiveIndexTexturePath"]);
 
         tryLoadAsVec3( data["DiffuseColour"],       mDiffuseColour);
         tryLoadAsVec3( data["SpecularColour"],      mSpecularColour);
@@ -571,6 +611,7 @@ namespace engine
         tryLoadAsVec3( data["TransmittanceColour"], mTransmittanceColour);
         tryLoadAsFloat(data["TopThickness"],        mTopThickness);
         tryLoadAsFloat(data["TopCoverage"],         mTopCoverage);
+        tryLoadAsFloat(data["RefractiveIndex"],     mRefracetiveIndex);
 
         tryLoadAsWrapOp(data["DiffuseWrapOp"],          mDiffuseWrapOp);
         tryLoadAsWrapOp(data["SpecularWrapOp"],         mSpecularWrapOp);
@@ -584,5 +625,6 @@ namespace engine
         tryLoadAsWrapOp(data["TopRoughnessWrapOp"],     mTopRoughnessWrapOp);
         tryLoadAsWrapOp(data["TopThicknessWrapOp"],     mTopThicknessWrapOp);
         tryLoadAsWrapOp(data["TopCoverageWrapOp"],      mTopCoverageWrapOp);
+        tryLoadAsWrapOp(data["RefractiveIndexWrapOp"],  mRefractiveIndexWrapOp);
     }
 } // engine

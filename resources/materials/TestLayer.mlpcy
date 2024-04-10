@@ -10,17 +10,19 @@ TransmittanceTexturePath: ""
 TopRoughnessTexturePath: ""
 TopThicknessTexturePath: ""
 TopCoverageTexturePath: ""
-TopNormalTexturePath: ""
+TopNormalTexturePath: materials\examples\textures\T_OpalSurface_N.png
+RefractiveIndexTexturePath: ""
 DiffuseColour: [0.999899983, 1, 0.999916613]
-SpecularColour: [0.138446316, 0.138460159, 0.138446361]
+SpecularColour: [0.0726813897, 0.0775038004, 0.0727251396]
 Roughness: 1
 SheenColour: [9.99999975e-05, 9.9989993e-05, 9.99914773e-05]
 SheenRoughness: 0
-TopSpecularColour: [0.0733113289, 0.0733039975, 0.0733059868]
-TopRoughness: 0
-TransmittanceColour: [0.561725438, 0.112650871, 0.966045737]
-TopThickness: 0.200000003
+TopSpecularColour: [0.0718404055, 0.0718332231, 0.0718353614]
+TopRoughness: 0.225999996
+TransmittanceColour: [1, 0.999899983, 0.999915779]
+TopThickness: 0.0379999988
 TopCoverage: 1
+RefractiveIndex: 1.81700003
 DiffuseWrapOp: 0
 SpecularWrapOp: 0
 NormalWrapOp: 0
@@ -32,3 +34,4 @@ TransmittanceWrapOp: 0
 TopRoughnessWrapOp: 0
 TopThicknessWrapOp: 0
 TopCoverageWrapOp: 0
+RefractiveIndexWrapOp: 0

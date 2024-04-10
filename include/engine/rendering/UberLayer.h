@@ -47,6 +47,10 @@ namespace engine
         static constexpr float minThickness = 0.f;
         static constexpr float maxThickness = 0.2f;
         static float remapThickness(float topThickness);
+
+        static constexpr float minIoR = 1.f;
+        static constexpr float maxIoR = 3.f;
+        static float remapRefractiveIndex(float refractiveIndex);
     protected:
         void loadFromDisk();
 
@@ -66,6 +70,7 @@ namespace engine
         std::shared_ptr<Texture> mTopRoughnessTexture       = load::texture("");
         std::shared_ptr<Texture> mTopThicknessTexture       = load::texture("");
         std::shared_ptr<Texture> mTopCoverageTexture        = load::texture("");
+        std::shared_ptr<Texture> mRefractiveIndexTexture    = load::texture("");
 
         glm::vec3 mDiffuseColour = glm::vec3(1.f);
         glm::vec3 mSpecularColour = glm::vec3(0.f);
@@ -78,6 +83,7 @@ namespace engine
         glm::vec3 mTransmittanceColour = glm::vec3(0.f);
         float     mTopThickness = 0.002f;
         float     mTopCoverage = 0.f;
+        float     mRefracetiveIndex = 1.5f;
 
 
         graphics::WrapOp mDiffuseWrapOp         = graphics::WrapOp::Repeat;
@@ -93,6 +99,7 @@ namespace engine
         graphics::WrapOp mTopRoughnessWrapOp    = graphics::WrapOp::Repeat;
         graphics::WrapOp mTopThicknessWrapOp    = graphics::WrapOp::Repeat;
         graphics::WrapOp mTopCoverageWrapOp     = graphics::WrapOp::Repeat;
+        graphics::WrapOp mRefractiveIndexWrapOp = graphics::WrapOp::Repeat;
 
 
         uint32_t mCallbackToken = 0;

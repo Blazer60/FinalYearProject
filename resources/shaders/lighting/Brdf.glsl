@@ -158,12 +158,12 @@ void evaluateTopClosure(in out vec3 colour, in out Ray viewRay, in out vec3 ligh
         const float alpha = gBuffer.topCoverage;
 
         // Refract the view ray, change position and direction.
-        const float glassRefractiveIndex = mix(1.f, 1.5f, viewRay.coverage);// Todo: Make this a gBuffer parameter.
-        viewRay.direction = -refract(-viewRay.direction, gBuffer.topNormal, 1.f / glassRefractiveIndex);
+        const float refractiveIndex = mix(1.f, mix(1.f, 3.f, gBuffer.refractiveIndex), viewRay.coverage);
+        viewRay.direction = -refract(-viewRay.direction, gBuffer.topNormal, 1.f / refractiveIndex);
         viewRay.position = viewRay.position - viewRay.direction * distance;
-        viewRay.refractiveIndex = glassRefractiveIndex;
+        viewRay.refractiveIndex = refractiveIndex;
 
-        lightDirection = -refract(-lightDirection, gBuffer.topNormal, 1.f / glassRefractiveIndex);
+        lightDirection = -refract(-lightDirection, gBuffer.topNormal, 1.f / refractiveIndex);
     }
 }
 

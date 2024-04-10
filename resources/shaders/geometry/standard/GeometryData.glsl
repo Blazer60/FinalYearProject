@@ -12,6 +12,7 @@ struct LayerData
     float topRoughness;
     float topThickness;
     float topCoverage;
+    float refractiveIndex;
 
     int diffuseTextureIndex;
     int specularTextureIndex;
@@ -26,8 +27,7 @@ struct LayerData
     int topRoughnessTextureIndex;
     int topThicknessTextureIndex;
     int topCoverageTextureIndex;
-    int _padding01;
-    int _padding02;
+    int refractiveIndexTextureIndex;
 };
 
 #define PASSTHROUGH_FLAG_DIFFUSE 1
@@ -42,6 +42,7 @@ struct LayerData
 #define PASSTHROUGH_FLAG_TOP_THICKNESS 512
 #define PASSTHROUGH_FLAG_TOP_COVERAGE 1024
 #define PASSTHROUGH_FLAG_TOP_NORMAL 2048
+#define PASSTHROUGH_FLAG_IOR 4096
 
 #define OPERATION_LERP 0
 #define OPERATION_THRESHOLD 1

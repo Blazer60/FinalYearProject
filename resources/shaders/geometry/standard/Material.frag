@@ -55,6 +55,7 @@ void main()
     gBuffer.transmittance = sampleColour(material.transmittanceColour, v_uv, material.transmittanceColourTextureIndex);
     gBuffer.topThickness = sampleValue(material.topThickness, v_uv, material.topThicknessTextureIndex);
     gBuffer.topCoverage = sampleValue(material.topCoverage, v_uv, material.topCoverageTextureIndex);
+    gBuffer.refractiveIndex = sampleValue(material.refractiveIndex, v_uv, material.refractiveIndexTextureIndex);
     if (dot(gBuffer.topCoverage, gBuffer.topCoverage) >= 0.001f)
         gBufferSetFlag(gBuffer, GBUFFER_FLAG_TRANSMITTANCE_BIT, 1);
 

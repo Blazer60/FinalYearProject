@@ -76,10 +76,15 @@ void main()
     gBuffer.fuzzColour      = sampleColour(material.sheenColour, v_uv, material.sheenTextureIndex);
     gBuffer.fuzzRoughness   = sampleValue(material.sheenRoughness, v_uv, material.sheenRoughnessTextureIndex);
 
-    if (dot(gBuffer.fuzzColour, gBuffer.fuzzColour) >= 0.001f)
-    {
-        gBufferSetFlag(gBuffer, GBUFFER_FLAG_FUZZ_BIT, 1);
-    }
+    gBuffer.topSpecular = sampleColour(material.topSpecularColour, v_uv, material.topSpecularColourTextureIndex);
+    const vec3 rawTopNormal = sampleNormal(v_normal_ws, v_uv, material.topNormalTextureIndex, v_tbn_matrix);
+    const float topRoughness = sampleValue(material.topRoughness, v_uv, material.topRoughnessTextureIndex);
+    gBuffer.topNormal = normalize(rawTopNormal);
+    gBuffer.topRoughness = computeRoughness(rawTopNormal, topRoughness);
+    gBuffer.transmittance = sampleColour(material.transmittanceColour, v_uv, material.transmittanceColourTextureIndex);
+    gBuffer.topThickness = sampleValue(material.topThickness, v_uv, material.topThicknessTextureIndex);
+    gBuffer.topCoverage = sampleValue(material.topCoverage, v_uv, material.topCoverageTextureIndex);
+    gBuffer.refractiveIndex = sampleValue(material.refractiveIndex, v_uv, material.refractiveIndexTextureIndex);
 
     // There should be one less mask that there are layers. If not, we can just skip them.
     for (int i = 0; i < min(layers.length() - 1, masks.length()); ++i)
@@ -121,6 +126,7 @@ void main()
         nextGBuffer.transmittance = sampleColour(material.transmittanceColour, v_uv, material.transmittanceColourTextureIndex);
         nextGBuffer.topThickness = sampleValue(material.topThickness, v_uv, material.topThicknessTextureIndex);
         nextGBuffer.topCoverage = sampleValue(material.topCoverage, v_uv, material.topCoverageTextureIndex);
+        nextGBuffer.refractiveIndex = sampleValue(material.refractiveIndex, v_uv, material.refractiveIndexTextureIndex);
 
         // Blendables.
         gBuffer.diffuse    = blend(gBuffer.diffuse,   nextGBuffer.diffuse,   textureValue, mask.alpha, mask.operation, (mask.passthroughFlags & PASSTHROUGH_FLAG_DIFFUSE)   > 0);
@@ -137,6 +143,7 @@ void main()
         gBuffer.transmittance   = blend(gBuffer.transmittance, nextGBuffer.transmittance, textureValue, mask.alpha, mask.operation, (mask.passthroughFlags & PASSTHROUGH_FLAG_TRANSMITTANCE) > 0);
         gBuffer.topThickness    = blend(gBuffer.topThickness,  nextGBuffer.topThickness,  textureValue, mask.alpha, mask.operation, (mask.passthroughFlags & PASSTHROUGH_FLAG_TOP_THICKNESS) > 0);
         gBuffer.topCoverage     = blend(gBuffer.topCoverage,   nextGBuffer.topCoverage,   textureValue, mask.alpha, mask.operation, (mask.passthroughFlags & PASSTHROUGH_FLAG_TOP_COVERAGE)  > 0);
+        gBuffer.refractiveIndex = blend(gBuffer.refractiveIndex, nextGBuffer.refractiveIndex, textureValue, mask.alpha, mask.operation, (mask.passthroughFlags & PASSTHROUGH_FLAG_IOR) > 0);
 
         // The normal is handled in the worst way possible. Should really be using a slerp.
         gBuffer.normal = normalize(gBuffer.normal);
