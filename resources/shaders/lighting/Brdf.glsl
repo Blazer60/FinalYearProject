@@ -142,24 +142,27 @@ vec3 evaluateTopSpecularClosure(Ray viewRay, GBuffer gBuffer, vec3 lightDirectio
 
 void evaluateTopClosure(in out vec3 colour, in out Ray viewRay, in out vec3 lightDirection, GBuffer gBuffer, vec3 lightIntensity)
 {
-    const vec3 colourSpecular = evaluateTopSpecularClosure(viewRay, gBuffer, lightDirection, lightIntensity);
+    if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_TRANSMITTANCE_BIT) == 1)
+    {
+        const vec3 colourSpecular = evaluateTopSpecularClosure(viewRay, gBuffer, lightDirection, lightIntensity);
 
-    const vec3 extinctionCoefficient = -log(gBuffer.transmittance + vec3(0.0001f)) / max(gBuffer.topThickness, MIN_THRESHOLD);
-    const float distance = 0.01f / max(dot(gBuffer.topNormal, viewRay.direction), 0.0001f);
-    // The actual thickness is a constant of 1cm.
+        const vec3 extinctionCoefficient = -log(gBuffer.transmittance + vec3(0.0001f)) / max(gBuffer.topThickness, MIN_THRESHOLD);
+        const float distance = 0.01f / max(dot(gBuffer.topNormal, viewRay.direction), 0.0001f);
+        // The actual thickness is a constant of 1cm.
 
-    viewRay.transmittance = exp(-extinctionCoefficient * distance);
-    viewRay.coverage = gBuffer.topCoverage;
+        viewRay.transmittance = exp(-extinctionCoefficient * distance);
+        viewRay.coverage = gBuffer.topCoverage;
 
-    const float alpha = gBuffer.topCoverage;
+        const float alpha = gBuffer.topCoverage;
 
-    // Refract the view ray, change position and direction.
-    const float glassRefractiveIndex = mix(1.f, 1.5f, viewRay.coverage);  // Todo: Make this a gBuffer parameter.
-    viewRay.direction = -refract(-viewRay.direction, gBuffer.topNormal, 1.f / glassRefractiveIndex);
-    viewRay.position = viewRay.position - viewRay.direction * distance;
-    viewRay.refractiveIndex = glassRefractiveIndex;
+        // Refract the view ray, change position and direction.
+        const float glassRefractiveIndex = mix(1.f, 1.5f, viewRay.coverage);// Todo: Make this a gBuffer parameter.
+        viewRay.direction = -refract(-viewRay.direction, gBuffer.topNormal, 1.f / glassRefractiveIndex);
+        viewRay.position = viewRay.position - viewRay.direction * distance;
+        viewRay.refractiveIndex = glassRefractiveIndex;
 
-    lightDirection = -refract(-lightDirection, gBuffer.topNormal, 1.f / glassRefractiveIndex);
+        lightDirection = -refract(-lightDirection, gBuffer.topNormal, 1.f / glassRefractiveIndex);
+    }
 }
 
 void evaluateSheenCoating(in out vec3 colour, GBuffer gBuffer, vec3 l, vec3 v, vec3 lightIntensity)
@@ -187,7 +190,6 @@ vec3 evaluateBxDF(GBuffer gBuffer, vec3 position, vec3 lightDirection, vec3 ligh
     if (gBufferIsValid(gBuffer) == 0)
         return vec3(0.f);
 
-    const float nDotL = saturate(dot(gBuffer.normal, lightDirection));
     const vec3 viewDirection = normalize(camera.position - position);
 
     vec3 colour = vec3(0.f);
@@ -198,10 +200,7 @@ vec3 evaluateBxDF(GBuffer gBuffer, vec3 position, vec3 lightDirection, vec3 ligh
     viewRay.transmittance = vec3(1.f);
     viewRay.coverage = 0.f;
 
-    if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_TRANSMITTANCE_BIT) == 1)
-    {
-        evaluateTopClosure(colour, viewRay, lightDirection, gBuffer, lightIntensity);
-    }
+    evaluateTopClosure(colour, viewRay, lightDirection, gBuffer, lightIntensity);
     evaluateBaseClosure(colour, viewRay, lightDirection, gBuffer, lightIntensity);
     evaluateSheenCoating(colour, gBuffer, lightDirection, viewDirection, lightIntensity);
 
