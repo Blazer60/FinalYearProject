@@ -281,12 +281,12 @@ namespace engine
                 }
             }
 
-            if (const ui::EditFlags flags = ui::rowTextureSliderFloat("Thickness", mTopThicknessTexture, mTopThickness, mTopThicknessWrapOp); flags > 0)
+            if (const ui::EditFlags flags = ui::rowTextureSliderFloat("Thickness", mTopThicknessTexture, mTopThickness, mTopThicknessWrapOp, minThickness, maxThickness); flags > 0)
             {
                 if ((flags & ui::EditFlags::Value) > 0)
                 {
                     layerUpdates.push_back([this](graphics::TexturePool &, graphics::LayerData &layer) {
-                        layer.topThickness = mTopThickness;
+                        layer.topThickness = remapThickness(mTopThickness);
                     });
                 }
                 if ((flags & ui::EditFlags::Texture) > 0)
@@ -508,6 +508,11 @@ namespace engine
                 texturePool.setWrap(layer.topNormalTextureIndex, mTopNormalWrapOp);
             });
         }
+    }
+
+    float UberLayer::remapThickness(const float topThickness)
+    {
+        return math::inverseLerp(minThickness, maxThickness, topThickness);
     }
 
     void UberLayer::loadFromDisk()

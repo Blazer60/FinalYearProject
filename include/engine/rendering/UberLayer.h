@@ -43,6 +43,10 @@ namespace engine
         void lookForTextureChange(const std::shared_ptr<Texture> &texture);
 
         std::vector<UpdateFunc> layerUpdates;
+
+        static constexpr float minThickness = 0.f;
+        static constexpr float maxThickness = 0.2f;
+        static float remapThickness(float topThickness);
     protected:
         void loadFromDisk();
 

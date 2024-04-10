@@ -19,4 +19,7 @@ namespace math
      * \param scale The scale that will be set.
      */
     void decompose(const glm::mat4 &transform, glm::vec3 &position, glm::quat &rotation, glm::vec3 &scale);
+
+    float inverseLerp(float from, float to, float value);
+    glm::vec3 inverseLerp(const glm::vec3 &from, const glm::vec3 &to, const glm::vec3 &value);
 }

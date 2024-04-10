@@ -354,7 +354,7 @@ namespace ui
         return result;
     }
 
-    EditFlags rowTextureSliderFloat(const std::string& name, std::shared_ptr<Texture>& texture, float& value, graphics::WrapOp &wrapOp)
+    EditFlags rowTextureSliderFloat(const std::string& name, std::shared_ptr<Texture>& texture, float& value, graphics::WrapOp &wrapOp, const float min, const float max)
     {
         EditFlags result = EditFlags::None;
         ImGui::PushID(name.c_str());
@@ -374,7 +374,7 @@ namespace ui
         {
             const auto hidden = format::string("##Slider%", name);
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-            ImGui::SliderFloat(hidden.c_str(), &value, 0.f, 1.f);
+            ImGui::SliderFloat(hidden.c_str(), &value, min, max);
             if (ImGui::IsItemEdited())
                 result = result | EditFlags::Value;
         }

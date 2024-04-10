@@ -18,4 +18,14 @@ namespace math
         ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transform), glm::value_ptr(position), glm::value_ptr(rot), glm::value_ptr(scale));
         rotation = glm::quat(glm::radians(rot));
     }
+
+    float inverseLerp(const float from, const float to, const float value)
+    {
+        return (value - from) / (to - from);
+    }
+
+    glm::vec3 inverseLerp(const glm::vec3& from, const glm::vec3& to, const glm::vec3& value)
+    {
+        return (value - from) / (to - from);
+    }
 }

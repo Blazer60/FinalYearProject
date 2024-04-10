@@ -62,7 +62,7 @@ namespace ui
     bool resetButton(const std::string& name, std::shared_ptr<Texture>& texture);
     EditFlags rowTexture(const std::string& name, std::shared_ptr<Texture>& texture, graphics::WrapOp &wrapOp);
     EditFlags rowTextureColourEdit(const std::string &name, std::shared_ptr<Texture> &texture, glm::vec3 &colour, graphics::WrapOp &wrapOp);
-    EditFlags rowTextureSliderFloat(const std::string &name, std::shared_ptr<Texture> &texture, float &value, graphics::WrapOp &wrapOp);
+    EditFlags rowTextureSliderFloat(const std::string &name, std::shared_ptr<Texture> &texture, float &value, graphics::WrapOp &wrapOp, float min=0.f, float max=1.f);
     
     glm::ivec2 fitToRegion(const glm::ivec2 &imageSize, const glm::ivec2 &maxSize, const glm::ivec2 &padding=glm::ivec2(50));
     glm::ivec2 scaleImage(const glm::ivec2 &imageSize, const glm::ivec2 &maxSize);

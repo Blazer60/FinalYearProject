@@ -147,7 +147,8 @@ void evaluateTopClosure(in out vec3 colour, in out Ray viewRay, in out vec3 ligh
     {
         const vec3 colourSpecular = evaluateTopSpecularClosure(viewRay, gBuffer, lightDirection, lightIntensity);
 
-        const vec3 extinctionCoefficient = -log(gBuffer.transmittance + vec3(0.0001f)) / max(gBuffer.topThickness, MIN_THRESHOLD);
+        const float topThickness = mix(0.f, 0.2f, gBuffer.topThickness);
+        const vec3 extinctionCoefficient = -log(gBuffer.transmittance + vec3(0.0001f)) / max(topThickness, MIN_THRESHOLD);
         const float distance = 0.01f / max(dot(gBuffer.topNormal, viewRay.direction), 0.0001f);
         // The actual thickness is a constant of 1cm.
 

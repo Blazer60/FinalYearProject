@@ -364,7 +364,7 @@ namespace engine
         layerData.topSpecularColour   = glm::vec4(layer->mTopSpecularColour, 1.f);
         layerData.topRoughness        = layer->mTopRoughness;
         layerData.topCoverage         = layer->mTopCoverage;
-        layerData.topThickness        = layer->mTopThickness;
+        layerData.topThickness        = UberLayer::remapThickness(layer->mTopThickness);
         layerData.transmittanceColour = glm::vec4(layer->mTransmittanceColour, 1.f);
 
         layerData.diffuseTextureIndex             = mTexturePool.addTexture(*layer->mDiffuseTexture);
@@ -423,7 +423,7 @@ namespace engine
         layerData.topSpecularColour   = glm::vec4(layer->mTopSpecularColour, 1.f);
         layerData.topRoughness        = layer->mTopRoughness;
         layerData.topCoverage         = layer->mTopCoverage;
-        layerData.topThickness        = layer->mTopThickness;
+        layerData.topThickness        = UberLayer::remapThickness(layer->mTopThickness);
         layerData.transmittanceColour = glm::vec4(layer->mTransmittanceColour, 1.f);
 
         layerData.diffuseTextureIndex             = mTexturePool.addTexture(*layer->mDiffuseTexture);

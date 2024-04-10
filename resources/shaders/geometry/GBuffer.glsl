@@ -296,7 +296,7 @@ void pushToStorageGBuffer(GBuffer gBuffer, ivec2 coord)
         streamPackUnorm4x8(stream, vec4(gBuffer.topRoughness, 0.f, 0.f, 0.f), 1);
         streamPackNormal(stream, gBuffer.topNormal);
         streamPackUnorm4x8(stream, vec4(gBuffer.transmittance, 0.f), 3);
-        streamPackUnorm1x32(stream, gBuffer.topThickness);
+        streamPackUnorm4x8(stream, vec4(gBuffer.topThickness, 0.f, 0.f, 0.f), 1);
         streamPackUnorm4x8(stream, vec4(gBuffer.topCoverage, 0.f, 0.f, 0.f), 1);
     }
 
@@ -333,7 +333,7 @@ GBuffer pullFromStorageGBuffer(ivec2 coord)
         gBuffer.topRoughness    = streamUnpackUnorm4x8(stream, 1).x;
         gBuffer.topNormal       = streamUnpackNormal(stream);
         gBuffer.transmittance   = streamUnpackUnorm4x8(stream, 3).xyz;
-        gBuffer.topThickness    = streamUnpackUnorm1x32(stream);
+        gBuffer.topThickness    = streamUnpackUnorm4x8(stream, 1).x;
         gBuffer.topCoverage     = streamUnpackUnorm4x8(stream, 1).x;
     }
 
