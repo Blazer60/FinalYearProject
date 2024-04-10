@@ -36,6 +36,12 @@ vec3 uvToNdc(vec3 uv)
     return 2.f * uv - vec3(1.f);
 }
 
+vec3 indexOfRefraction(vec3 f0)
+{
+    const vec3 rootF0 = sqrt(f0);
+    return (1.f - rootF0) / (1.f + rootF0);
+}
+
 // Typically used for returning a vector in the light's direction.
 vec3 cosImportanceSample(vec2 rand, vec3 n)
 {

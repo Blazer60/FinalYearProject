@@ -30,6 +30,7 @@
 #include "../Camera.glsl"
 #include "Brdf.glsl"
 #include "../Maths.glsl"
+#include "Ray.glsl"
 
 
 layout(binding = 0) uniform sampler2D depthBufferTexture;
@@ -66,11 +67,12 @@ vec3 reconstructSpecularMissing(vec3 f0, float nDotV, float roughness)
     return f0Average / denominator * thatSummationPartOnTheRight;
 }
 
-vec3 evaluateIblBaseClosure(GBuffer gBuffer, vec3 fresnel, vec3 v)
+void evaluateIblBaseClosure(in out vec3 colour, Ray viewRay, GBuffer gBuffer)
 {
     const vec3 n = gBuffer.normal;
-    const float vDotN = saturate(dot(v, n));
+    const float vDotN = saturate(dot(viewRay.direction, n));
 
+    const vec3 fresnel = fresnelSchlick(gBuffer.specular, vDotN);
     const vec2 lut = texture(directionalAlbedoLut, vec2(vDotN, gBuffer.roughness)).rg;
     const vec3 specular = (fresnel * lut.x + lut.y);
     const vec3 specMissing = reconstructSpecularMissing(fresnel, vDotN, gBuffer.roughness);
@@ -79,26 +81,29 @@ vec3 evaluateIblBaseClosure(GBuffer gBuffer, vec3 fresnel, vec3 v)
     // todo: remove dependancy to Brdf.glsl => uniforms are getting too complicated to track.
     const vec3 diffuse = evaluateDiffuseBrdf(gBuffer, fullSpecular);
 
-    const vec3 r = reflect(-v, n);
 #if WHITE_FURNACE_TEST > 0
     const vec3 preFilterColour = vec3(1.f);
 
     const vec3 irradiance = vec3(1.f);
 #else
+    const vec3 r = reflect(-viewRay.direction, n);
     const float maxReflectionLod = textureQueryLevels(u_pre_filter_texture);
     const vec3 preFilterColour = textureLod(u_pre_filter_texture, r, gBuffer.roughness * maxReflectionLod).rgb * u_luminance_multiplier;
 
     const vec3 irradiance = texture(u_irradiance_texture, n).rgb * u_luminance_multiplier;
 #endif
 
-    return fullSpecular * preFilterColour + diffuse * irradiance;
+    const vec3 backColour = fullSpecular * preFilterColour + diffuse * irradiance;
+
+    colour = viewRay.coverage * (colour + viewRay.transmittance * backColour) + (1.f - viewRay.coverage) * backColour;
 }
 
-vec3 evaluateIblTopSpecularClosure(GBuffer gBuffer, vec3 fresnel, vec3 v)
+vec3 evaluateIblTopSpecularClosure(Ray viewRay, GBuffer gBuffer)
 {
     const vec3 n = gBuffer.topNormal;
-    const float vDotN = saturate(dot(v, n));
+    const float vDotN = saturate(dot(viewRay.direction, n));
 
+    const vec3 fresnel = fresnelSchlick(gBuffer.topSpecular, vDotN);
     const vec2 lut = texture(directionalAlbedoLut, vec2(vDotN, gBuffer.topRoughness)).rg;
     const vec3 specular = (fresnel * lut.x + lut.y);
     const vec3 specMissing = reconstructSpecularMissing(fresnel, vDotN, gBuffer.topRoughness);
@@ -107,7 +112,7 @@ vec3 evaluateIblTopSpecularClosure(GBuffer gBuffer, vec3 fresnel, vec3 v)
 #if WHITE_FURNACE_TEST > 0
     const vec3 preFilterColour = vec3(1.f);
 #else
-    const vec3 r = reflect(-v, n);
+    const vec3 r = reflect(-viewRay.direction, n);
     const float maxReflectionLod = textureQueryLevels(u_pre_filter_texture);
     const vec3 preFilterColour = textureLod(u_pre_filter_texture, r, gBuffer.topRoughness * maxReflectionLod).rgb * u_luminance_multiplier;
 #endif
@@ -115,17 +120,22 @@ vec3 evaluateIblTopSpecularClosure(GBuffer gBuffer, vec3 fresnel, vec3 v)
     return fullSpecular * preFilterColour;
 }
 
-void evaluateIblTopClosure(in out vec3 colour, GBuffer gBuffer, vec3 fresnel, vec3 v)
+void evaluateIblTopClosure(in out vec3 colour, in out Ray viewRay, GBuffer gBuffer)
 {
-    const vec3 colourSpecular = evaluateIblTopSpecularClosure(gBuffer, fresnel, v);
+    colour = evaluateIblTopSpecularClosure(viewRay, gBuffer);
 
     const vec3 extinctionCoefficient = -log(gBuffer.transmittance + vec3(0.0001f)) / max(gBuffer.topThickness, 0.00001f);
-    const float distance = gBuffer.topThickness / max(dot(gBuffer.topNormal, v), MIN_THRESHOLD);
-    const vec3 transmittance = exp(-extinctionCoefficient * distance);
+    const float distance = 0.01f / max(dot(gBuffer.topNormal, viewRay.direction), MIN_THRESHOLD);
+    // The actual thickness is a constant of 1cm.
 
-    const float alpha = gBuffer.topCoverage;
+    viewRay.transmittance = exp(-extinctionCoefficient * distance);
+    viewRay.coverage = gBuffer.topCoverage;
 
-    colour = alpha * (colourSpecular + transmittance * colour) + (1.f - alpha) * colour;
+    // Refract the view ray, change position and direction.
+    const float glassRefractiveIndex = 1.5f;  // Todo: Make this a gBuffer parameter.
+    viewRay.direction = -refract(-viewRay.direction, gBuffer.topNormal, 1.f / glassRefractiveIndex);
+    viewRay.position = viewRay.position - viewRay.direction * distance;
+    viewRay.refractiveIndex = glassRefractiveIndex;
 }
 
 void evaluateIblSheenCoating(in out vec3 colour, GBuffer gBuffer, vec3 v)
@@ -162,25 +172,19 @@ vec3 evaluateBxDF(GBuffer gBuffer, vec3 position)
     const vec3 viewDirection = normalize(camera.position - position);
 
     vec3 colour = vec3(0.f);
+    Ray viewRay;
+    viewRay.direction = viewDirection;
+    viewRay.position = position;
+    viewRay.refractiveIndex = 1.f;  // Air.
+    viewRay.transmittance = vec3(1.f);
+    viewRay.coverage = 0.f;
+
     if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_TRANSMITTANCE_BIT) == 1)
     {
-        const float topNDotV = saturate(dot(gBuffer.topNormal, viewDirection));
-        const float bottomNDotV = saturate(dot(gBuffer.normal, viewDirection));
-
-        const vec3 bottomFresnel = fresnelSchlick(gBuffer.specular, bottomNDotV);
-        const vec3 topFresnel = fresnelSchlick(gBuffer.topSpecular, topNDotV);
-
-        colour = evaluateIblBaseClosure(gBuffer, bottomFresnel, viewDirection);
-        evaluateIblTopClosure(colour, gBuffer, topFresnel, viewDirection);
+        evaluateIblTopClosure(colour, viewRay, gBuffer);
     }
-    else
-    {
-        const float nDotV = saturate(dot(gBuffer.normal, viewDirection));
-        const vec3 fresnel = fresnelSchlick(gBuffer.specular, nDotV);
-        colour = evaluateIblBaseClosure(gBuffer, fresnel, viewDirection);
-    }
-
-//    evaluateIblSheenCoating(colour, gBuffer, viewDirection);
+    evaluateIblBaseClosure(colour, viewRay, gBuffer);
+    evaluateIblSheenCoating(colour, gBuffer, viewDirection);
 
     return colour;
 }

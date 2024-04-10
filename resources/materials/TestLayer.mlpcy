@@ -1,7 +1,7 @@
-DiffuseTexturePath: ""
+DiffuseTexturePath: materials\examples\flooring\WoodAlbedo.png
 SpecularTexturePath: ""
-NormalTexturePath: materials\examples\textures\T_ShapeNormal.png
-RoughnessTexturePath: ""
+NormalTexturePath: ""
+RoughnessTexturePath: materials\examples\flooring\WoodRoughness.png
 SheenTexturePath: ""
 SheenRoughnessTexturePath: ""
 MetallicTexturePath: ""
@@ -11,15 +11,15 @@ TopRoughnessTexturePath: ""
 TopThicknessTexturePath: ""
 TopCoverageTexturePath: ""
 TopNormalTexturePath: ""
-DiffuseColour: [0, 1, 0.166231394]
+DiffuseColour: [0.999899983, 1, 0.999916613]
 SpecularColour: [0.138446316, 0.138460159, 0.138446361]
 Roughness: 1
-SheenColour: [9.99999975e-05, 9.9989993e-05, 9.99907934e-05]
+SheenColour: [9.99999975e-05, 9.9989993e-05, 9.99914773e-05]
 SheenRoughness: 0
-TopSpecularColour: [1, 0, 0.0837836266]
-TopRoughness: 0
-TransmittanceColour: [0.688003898, 0.687935114, 0.687963903]
-TopThickness: 0.0120000001
+TopSpecularColour: [0.252464712, 0.252439469, 0.252444357]
+TopRoughness: 0.432999998
+TransmittanceColour: [0.0481214896, 0, 0.710080624]
+TopThickness: 0.0909999982
 TopCoverage: 1
 DiffuseWrapOp: 0
 SpecularWrapOp: 0
