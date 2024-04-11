@@ -12,7 +12,6 @@
 #include "FileExplorer.h"
 #include "GraphicsState.h"
 #include "ResourceFolder.h"
-#include "FileLoader.h"
 
 #include <utility>
 
@@ -71,9 +70,8 @@ namespace engine
     {
         if (ImGui::Button("Change Mesh"))
         {
-            std::string meshPath = openFileDialog();
-            SharedMesh mesh = load::model<StandardVertex>(meshPath);
-            if (!mesh->empty())
+            const std::string meshPath = openFileDialog();
+            if (const SharedMesh mesh = load::model<StandardVertex>(meshPath); !mesh->empty())
             {
                 mMeshes = mesh;
                 mMeshPath = meshPath;
@@ -83,9 +81,8 @@ namespace engine
         {
             if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(resourceModelPayload))
             {
-                std::filesystem::path path = *reinterpret_cast<std::filesystem::path*>(payload->Data);
-                SharedMesh mesh = load::model<StandardVertex>(path);
-                if (!mesh->empty())
+                const std::filesystem::path path = *static_cast<std::filesystem::path*>(payload->Data);
+                if (const SharedMesh mesh = load::model<StandardVertex>(path); !mesh->empty())
                 {
                     mMeshes = mesh;
                     mMeshPath = path.string();
@@ -96,39 +93,35 @@ namespace engine
 
     void MeshRenderer::drawMaterialArray()
     {
-        const auto name = format::string("Materials %/%", mUberMaterials.size(),  mMeshes->size());
-        const auto originalCursorPos = ImGui::GetCursorPos();
-        const auto PlusMarkposition = ImVec2(ImGui::GetContentRegionAvail().x - ui::resetButtonWidth(), originalCursorPos.y);
-
-        ImGui::Text(name.c_str());
-        ImGui::SetCursorPos(PlusMarkposition);
-
-        const auto plusId = format::string(" + ##%", name);
-        if (ImGui::Button(plusId.c_str()))
-            mUberMaterials.push_back(nullptr);
-
-        for (int i = 0; i < mUberMaterials.size();)
+        if (ui::seperatorTextButton(format::string("Materials (%)", mUberMaterials.size())))
         {
-            if (!drawMaterialElement(i))
-                ++i;
+            addUMaterial(nullptr);
+        }
+
+        if (ImGui::BeginTable("Materials Table", 3))
+        {
+            const float textSizing = ImGui::CalcTextSize("00").x;
+            ImGui::TableSetupColumn("Index", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed, textSizing);
+            ImGui::TableSetupColumn("Contents", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableSetupColumn("Delete Button", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthFixed, ui::buttonSize().x);
+
+            for (int i = 0; i < mUberMaterials.size();)
+            {
+                if (!drawMaterialElement(i))
+                {
+                    ++i;
+                }
+            }
+
+            ImGui::EndTable();
         }
     }
 
-    bool MeshRenderer::drawMaterialElement(int index)
+    void MeshRenderer::drawMaterialElementColumn(const std::string& name, int index)
     {
-        const std::string name = mUberMaterials[index] != nullptr ? mUberMaterials[index]->name() : format::string("Empty##%", index);
+        const bool selected = ImGui::TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth);
 
-        auto &style = ImGui::GetStyle();
-        ImGui::BeginGroup();
-        const auto originalCursorPos = ImGui::GetCursorPos();
-        const auto xMarkposition = ImVec2(ImGui::GetContentRegionAvail().x - ui::resetButtonWidth(), originalCursorPos.y);
-
-        ImGui::SetCursorPosY(originalCursorPos.y + style.FramePadding.y);
-        ImGui::TextColored(ImVec4(0.3f, 0.3f, 0.3f, 1.f), "%2i", index);
-        ImGui::SameLine();
-        ImGui::SetCursorPosY(originalCursorPos.y + style.FramePadding.y);
-        ImGui::Selectable(name.c_str(), false, 0, ImVec2(ImGui::GetContentRegionAvail().x - ui::resetButtonWidth() - 3.f * style.FramePadding.x - 3.f * style.ItemSpacing.x, 0));
-
+        // todo: this most likely needs a different name.
         constexpr auto arrayPayLoadId = "ARRAY_PAYLOAD_MATERIALS";
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
         {
@@ -139,32 +132,63 @@ namespace engine
         if (ImGui::BeginDragDropTarget())
         {
             if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(arrayPayLoadId))
+            {
                 containers::moveInPlace(mUberMaterials, *static_cast<int*>(payload->Data), index);
+            }
 
             if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(resourceMaterialPayload))
             {
                 const std::filesystem::path path = *static_cast<std::filesystem::path*>(payload->Data);
-                mUberMaterials[index] = load::material(path);
+                addUMaterial(load::material(path), index);
             }
 
             ImGui::EndDragDropTarget();
         }
 
-        const auto xMark = format::string(" X ##%", index);
-        ImGui::SetCursorPos(xMarkposition);
-        const bool result = ImGui::Button(xMark.c_str());
-        if (result)
+        if (selected)
         {
-            mUberMaterials.erase(mUberMaterials.begin() + index);
+            ui::draw(mUberMaterials[index]);
+            ImGui::TreePop();
         }
-        ImGui::EndGroup();
-        return result;
+    }
 
+    bool MeshRenderer::drawMaterialElement(const int index)
+    {
+        const std::string name = mUberMaterials[index] != nullptr ? mUberMaterials[index]->name() : format::string("Empty##%", index);
+
+        bool result = false;
+        ImGui::PushID(name.c_str());
+        if (ImGui::TableNextColumn())
+        {
+            const auto &style = ImGui::GetStyle();
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + style.FramePadding.y);
+            ImGui::TextColored(ImVec4(0.3f, 0.3f, 0.3f, 1.f), "%2i", index);
+        }
+        if (ImGui::TableNextColumn())
+        {
+            const auto &style = ImGui::GetStyle();
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + style.FramePadding.y);
+            drawMaterialElementColumn(name, index);
+        }
+        if (ImGui::TableNextColumn())
+        {
+            result = ui::closeButton("Close innit");
+            if (result)
+                mUberMaterials.erase(mUberMaterials.begin() + index);
+        }
+        ImGui::PopID();
+
+        return result;
     }
 
     void MeshRenderer::addUMaterial(std::shared_ptr<UberMaterial> material)
     {
         mUberMaterials.push_back(std::move(material));
+    }
+
+    void MeshRenderer::addUMaterial(const std::shared_ptr<UberMaterial> &material, const int index)
+    {
+        mUberMaterials[index] = material;
     }
 
     void MeshRenderer::onPreRender()

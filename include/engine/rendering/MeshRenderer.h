@@ -31,12 +31,16 @@ namespace engine
         ~MeshRenderer() override = default;
 
         void addUMaterial(std::shared_ptr<UberMaterial> material);
+        void addUMaterial(const std::shared_ptr<UberMaterial>&material, int index);
 
     protected:
         void onDrawUi() override;
         void onPreRender() override;
         void drawMeshOptions();
         void drawMaterialArray();
+
+        void drawMaterialElementColumn(const std::string& name, int index);
+
         bool drawMaterialElement(int index);
 
         // An ideal world with have all of these with an equal length. Some mesh renderers can have multiple meshes
