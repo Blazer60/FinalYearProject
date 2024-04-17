@@ -77,8 +77,7 @@ namespace engine
         
         if (mEnableDebugging)
         {
-            bool success = Renderer::debugMessageCallback(forwardOpenGlCallback);
-            if (!success)
+            if (const bool success = Renderer::debugMessageCallback(forwardOpenGlCallback); !success)
                 WARN("Unable to enable debugging. Check if the openGl version is greater than 4.3.");
             MESSAGE_VERBOSE(Renderer::getVersion());
         }
@@ -128,7 +127,7 @@ namespace engine
         glfwMakeContextCurrent(mWindow);
         
         // Enable/disable V-sync. 1 = on, else off. NVIDIA honours multiple numbers whereas AMD ignores them.
-        glfwSwapInterval(0);
+        glfwSwapInterval(1);
         
         glfwSetCursorPosCallback(mWindow, [](GLFWwindow *window, double xPos, double yPos) {
             eventHandler->updateMouseDelta(xPos, yPos);

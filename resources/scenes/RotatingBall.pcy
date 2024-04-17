@@ -1,0 +1,74 @@
+Scene: scenes\RotatingBall.pcy
+Actors:
+  - Name: Skylight
+    UUID: 1131826340421676061
+    position: [0, 5.13056183, -8.10848045]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: DistantLightProbe
+        Size: [1024, 1024]
+        RadianceMultiplier: 1000
+        Path: textures\hdr\norway\Norway.hdr
+    Children:
+      []
+  - Name: DefaultSphere
+    UUID: 4574616684536729482
+    position: [0, 0, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: MeshRenderer
+        MeshPath: models\defaultObjects\DefaultSphere.glb
+        UMaterials:
+          - materials\Red.mpcy
+      - Component: Rotator
+        Rotation: [0, 0.25, 0]
+    Children:
+      []
+  - Name: Directional Light
+    UUID: 10007118603310271867
+    position: [0, 0, 0]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: DirectionalLight
+        Colour: [0.609433174, 0.609437048, 0.853180647]
+        Intensity: 1000
+        Yaw: -143.300003
+        Pitch: 45
+        CascadeDepths: [0.0399999991, 0.159999996, 0.360000014, 0.639999986]
+        ZMultiplier: 5
+        Bias: [0.00100000005, 0]
+    Children:
+      []
+  - Name: Camera
+    UUID: 7546973194752929570
+    position: [9.53674316e-07, 0, 3]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: Camera
+        IsMainCamera: false
+        Fov: 0.785398185
+        Ev100: 10
+        NearClip: 0.100000001
+        FarClip: 10
+    Children:
+      []
+  - Name: Side Light
+    UUID: 12137764881088754031
+    position: [-2.38418579e-07, -2.38418579e-07, 9.53674316e-07]
+    rotation: [1, 0, 0, 0]
+    scale: [1, 1, 1]
+    Components:
+      - Component: DirectionalLight
+        Colour: [0.90030694, 0.831104696, 0.486668199]
+        Intensity: 1000
+        Yaw: 146.399994
+        Pitch: 33.2000008
+        CascadeDepths: [0.0399999991, 0.159999996, 0.360000014, 0.639999986]
+        ZMultiplier: 5
+        Bias: [0.00100000005, 0]
+    Children:
+      []

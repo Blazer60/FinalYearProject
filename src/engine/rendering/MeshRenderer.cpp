@@ -117,11 +117,10 @@ namespace engine
         }
     }
 
-    void MeshRenderer::drawMaterialElementColumn(const std::string& name, int index)
+    void MeshRenderer::drawMaterialElementColumn(const std::string& name, const int index)
     {
         const bool selected = ImGui::TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth);
 
-        // todo: this most likely needs a different name.
         constexpr auto arrayPayLoadId = "ARRAY_PAYLOAD_MATERIALS";
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
         {

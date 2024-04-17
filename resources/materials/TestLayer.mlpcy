@@ -19,7 +19,7 @@ SheenColour: [9.99999975e-05, 9.9989993e-05, 9.99917102e-05]
 SheenRoughness: 0
 TopSpecularColour: [0.0718404055, 0.0718332231, 0.0718353614]
 TopRoughness: 0.225999996
-TransmittanceColour: [1, 0.999899983, 0.999915779]
+TransmittanceColour: [0.631725788, 0.631704688, 0.631662607]
 TopThickness: 0.0379999988
 TopCoverage: 1
 RefractiveIndex: 1.81700003
