@@ -12,7 +12,6 @@
 #include "Cubemap.h"
 #include "FramebufferObject.h"
 #include "HdrTexture.h"
-#include "RenderBufferObject.h"
 #include "Texture.h"
 #include "TextureArrayObject.h"
 #include "TextureBufferObject.h"

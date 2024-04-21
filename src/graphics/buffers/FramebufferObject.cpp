@@ -10,7 +10,6 @@
 #include "TextureArrayObject.h"
 #include "TextureBufferObject.h"
 #include "Cubemap.h"
-#include "RenderBufferObject.h"
 #include "GraphicsFunctions.h"
 
 FramebufferObject::FramebufferObject()
@@ -18,7 +17,7 @@ FramebufferObject::FramebufferObject()
     glCreateFramebuffers(1, &mFboId);
 }
 
-FramebufferObject::FramebufferObject(GLenum sourceBlendFunction, GLenum destinationBlendFunction, GLenum depthFunction) :
+FramebufferObject::FramebufferObject(const GLenum sourceBlendFunction, const GLenum destinationBlendFunction, const GLenum depthFunction) :
     mSourceBlend(sourceBlendFunction), mDestinationBlend(destinationBlendFunction), mDepthFunction(depthFunction)
 {
     glCreateFramebuffers(1, &mFboId);
@@ -36,14 +35,6 @@ void FramebufferObject::attach(const TextureBufferObject *textureBufferObject, c
     
     mAttachments.emplace_back(GL_COLOR_ATTACHMENT0 + bindPoint);
     glNamedFramebufferDrawBuffers(mFboId, static_cast<int>(mAttachments.size()), &mAttachments[0]);
-    validate();
-}
-
-void FramebufferObject::attach(const RenderBufferObject *const renderBufferObject) const
-{
-    glNamedFramebufferRenderbuffer(mFboId, renderBufferObject->getAttachment(), GL_RENDERBUFFER,
-                                   renderBufferObject->getName());
-    
     validate();
 }
 
@@ -65,7 +56,7 @@ void FramebufferObject::attach(const TextureArrayObject* textureArrayObject, con
     validate();
 }
 
-void FramebufferObject::attachDepthBuffer(const TextureBufferObject *textureBufferObject, int mipLevel)
+void FramebufferObject::attachDepthBuffer(const TextureBufferObject *textureBufferObject, const int mipLevel)
 {
     if (!(textureBufferObject->getFormat()  == GL_DEPTH_COMPONENT
         || textureBufferObject->getFormat() == GL_DEPTH_COMPONENT16
@@ -176,9 +167,9 @@ void FramebufferObject::validate() const
 void FramebufferObject::clear(const glm::vec4 &clearColour)
 {
     graphics::pushDebugGroup("Clear Pass");
-    for (unsigned int attachment : mAttachments)
+    for (const unsigned int attachment : mAttachments)
     {
-        int drawBuffer = static_cast<int>(attachment) - GL_COLOR_ATTACHMENT0;
+        const int drawBuffer = static_cast<int>(attachment) - GL_COLOR_ATTACHMENT0;
         glClearNamedFramebufferfv(mFboId, GL_COLOR, drawBuffer, glm::value_ptr(clearColour));
     }
     glClearNamedFramebufferfv(mFboId, GL_DEPTH, 0, &mDepthClearValue);

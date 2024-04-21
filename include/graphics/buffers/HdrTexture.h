@@ -21,7 +21,7 @@ public:
     ~HdrTexture();
     
     [[nodiscard]] uint32_t getId() const { return mId; }
-    void setDebugName(std::string_view name);
+    void setDebugName(std::string_view name) const;
     
 protected:
     uint32_t mId;

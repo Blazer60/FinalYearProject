@@ -12,17 +12,16 @@
 
 Cubemap::Cubemap(const std::vector<std::string> &paths)
 {
-    stbi_set_flip_vertically_on_load(false);
+    stbi_set_flip_vertically_on_load(0);
     if (paths.size() != 6)
     {
         WARN("You're trying to create a cubemap with an incorrect amount of faces. No cubemap will be generated.");
         return;
     }
     
-    for (std::string_view path : paths)
+    for (const std::string_view path : paths)
     {
-        std::filesystem::path systemPath(path);
-        if (!std::filesystem::exists(systemPath))
+        if (const std::filesystem::path systemPath(path); !exists(systemPath))
         {
             WARN("File % does not exist.\nNo cubemap will be generated.", systemPath);
             return;
@@ -36,26 +35,26 @@ Cubemap::Cubemap(const std::vector<std::string> &paths)
     
     for (int i = 0; i < paths.size(); ++i)
     {
-        std::string_view path = paths[i];
+        const std::string_view path = paths[i];
         
-        std::filesystem::path systemPath(path);
+        const std::filesystem::path systemPath(path);
         
-        int width;
-        int height;
-        int colourChannels;
+        int width = 0;
+        int height = 0;
+        int colourChannels = 0;
         // Forcing 4 components so that is always aligns with opengl's internal format.
         unsigned char *bytes = stbi_load(systemPath.string().c_str(), &width, &height, &colourChannels, 4);
-        
-        
-        const unsigned int levels = 1;
-        const int lod = 0;
-        const int xOffSet = 0;
-        const int yOffSet = 0;
+
+
+        constexpr int lod = 0;
+        constexpr int xOffSet = 0;
+        constexpr int yOffSet = 0;
         const int zOffSet = i;
-        const int depth = 1;
+        constexpr int depth = 1;
         
         if (i == 0)
         {
+            constexpr unsigned int levels = 1;
             initialWidth = width;
             initialHeight = height;
             glTextureStorage2D(mId, levels, GL_RGBA8, width, height);
@@ -85,9 +84,7 @@ Cubemap::Cubemap(const std::vector<std::string> &paths)
         
         stbi_image_free(bytes);
     }
-    
-    // glGenerateTextureMipmap(mId);
-    
+
     glTextureParameteri(mId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTextureParameteri(mId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTextureParameteri(mId, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -156,7 +153,7 @@ void Cubemap::resize(const glm::ivec2 newSize)
     init();
 }
 
-void Cubemap::setDebugName(std::string_view name) const
+void Cubemap::setDebugName(const std::string_view name) const
 {
     glObjectLabel(GL_TEXTURE, mId, -1, name.data());
 }

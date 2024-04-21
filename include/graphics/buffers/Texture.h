@@ -13,6 +13,8 @@
 
 
 /**
+ * A texture from disk, created by an artist. Engine side code can use this as a more friendly interface.
+ * Texture buffer objects are used instead when more control is needed.
  * @author Ryan Purse
  * @date 22/06/2023
  */

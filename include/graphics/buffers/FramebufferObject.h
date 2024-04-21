@@ -16,7 +16,8 @@ class Cubemap;
 class TextureArrayObject;
 
 /**
- * A set of details on where to render to for OpenGL.
+ * A render target for OpenGL to render too. Texture can also be cleared here but using the texture's clear
+ * function is preferred.
  * @author Ryan Purse
  * @date 14/03/2022
  */
@@ -37,7 +38,7 @@ public:
     ~FramebufferObject();
     
     void attach(const TextureBufferObject *textureBufferObject, int bindPoint, int mipLevel = 0);
-    void attach(const RenderBufferObject *renderBufferObject) const;
+
     void attach(const Cubemap *cubemap, int bindPoint, int layer, int mipLevel = 0);
     void attach(const TextureArrayObject *textureArrayObject, int bindPoint, int layer, int mipLevel = 0);
     void attachDepthBuffer(const TextureBufferObject *textureBufferObject, int mipLevel = 0);

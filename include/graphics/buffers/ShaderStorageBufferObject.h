@@ -12,6 +12,7 @@
 namespace graphics
 {
     /**
+     * Abitrary data that can be pushed to the GPU. Data is handled in bytes with no alignment checks.
      * @author Ryan Purse
      * @date 24/02/2024
      */

@@ -12,6 +12,7 @@
 
 
 /**
+ * An OpenGL cubemap texture.
  * @author Ryan Purse
  * @date 26/06/2023
  */
@@ -31,8 +32,9 @@ public:
 
     /**
      * @brief Creates an empty cubemap that can be rendered to.
-     * @param size - The size of each face in the cubemap.
-     * @param format - The format of the texture.
+     * @param size The size of each face in the cubemap.
+     * @param format The format of the texture.
+     * @param mipLevels The number of mip levels that the cubemap has (there's no error checking for invalid values).
      */
     Cubemap(const glm::ivec2 &size, GLenum format, int mipLevels=1);
 

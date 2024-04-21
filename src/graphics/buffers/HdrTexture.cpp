@@ -10,13 +10,13 @@
 #include "stb_image.h"
 #include <Statistics.h>
 
-HdrTexture::HdrTexture(std::string_view path)
+HdrTexture::HdrTexture(const std::string_view path)
 {
-    stbi_set_flip_vertically_on_load(true);
+    stbi_set_flip_vertically_on_load(1);
     if (path.empty())
         return;
     
-    std::filesystem::path systemPath(path);
+    const std::filesystem::path systemPath(path);
     if (!std::filesystem::exists(systemPath))
     {
         WARN("File % does not exist.\nAborting texture generation", systemPath);
@@ -25,9 +25,9 @@ HdrTexture::HdrTexture(std::string_view path)
     
     glCreateTextures(GL_TEXTURE_2D, 1, &mId);
     
-    int width;
-    int height;
-    int colourChannels;
+    int width = 0;
+    int height = 0;
+    int colourChannels = 0;
     float *data = stbi_loadf(systemPath.string().c_str(), &width, &height, &colourChannels, 0);
     
     glTextureParameteri(mId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -53,7 +53,7 @@ HdrTexture::~HdrTexture()
         glDeleteTextures(1, &mId);
 }
 
-void HdrTexture::setDebugName(std::string_view name)
+void HdrTexture::setDebugName(const std::string_view name) const
 {
     glObjectLabel(GL_TEXTURE, mId, -1, name.data());
 }

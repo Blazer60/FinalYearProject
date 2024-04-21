@@ -16,12 +16,11 @@ add_library(${HELPER_LIBRARY} STATIC
         include/helpers/logger/LoggerMacros.h
 
         src/helpers/FileLoader.cpp include/helpers/FileLoader.h
+        src/helpers/StringManipulation.cpp include/helpers/StringManipulation.h
         src/helpers/Timers.cpp include/helpers/Timers.h
         src/helpers/logger/Logger.cpp include/helpers/logger/Logger.h
         src/helpers/profiler/ProfileTimer.cpp include/helpers/profiler/ProfileTimer.h
         src/helpers/profiler/Profiler.cpp include/helpers/profiler/Profiler.h
-        src/helpers/StringManipulation.cpp
-        include/helpers/StringManipulation.h
 )
 
 target_include_directories(${HELPER_LIBRARY} PUBLIC
@@ -39,51 +38,53 @@ add_library(${GRAPHICS_LIBRARY} STATIC
         include/graphics/CameraSettings.h
         include/graphics/GraphicsLighting.h
         include/graphics/buffers/Buffers.h
+        include/graphics/buffers/UniformBufferObject.h
+
+        resources/shaders/interfaces/CameraBlock.h
+        resources/shaders/interfaces/DebugGBufferBlock.h
+        resources/shaders/interfaces/DirectionalLightBlock.h
+        resources/shaders/interfaces/GBufferFlags.h
+        resources/shaders/interfaces/PointLightBlock.h
+        resources/shaders/interfaces/ScreenSpaceReflectionsBlock.h
+        resources/shaders/interfaces/SpotlightBlock.h
 
         src/graphics/GraphicsDefinitions.cpp include/graphics/GraphicsDefinitions.h
         src/graphics/GraphicsFunctions.cpp include/graphics/GraphicsFunctions.h
         src/graphics/GraphicsState.cpp include/graphics/GraphicsState.h
+        src/graphics/LtcSheenTable.cpp include/graphics/LtcSheenTable.h
+        src/graphics/MaterialData.cpp include/graphics/MaterialData.h
         src/graphics/Materials.cpp include/graphics/Materials.h
         src/graphics/Mesh.cpp include/graphics/Mesh.h
         src/graphics/Primitives.cpp src/graphics/Primitives.h
         src/graphics/Renderer.cpp include/graphics/Renderer.h
         src/graphics/Shader.cpp include/graphics/Shader.h
+        src/graphics/Skybox.cpp src/graphics/Skybox.h
         src/graphics/Vertices.cpp include/graphics/Vertices.h
         src/graphics/WindowHelpers.cpp include/graphics/WindowHelpers.h
+
+        src/graphics/backend/Context.h
+        src/graphics/backend/DebugPass.cpp src/graphics/backend/DebugPass.h
+        src/graphics/backend/LightShadingPass.cpp src/graphics/backend/LightShadingPass.h
+        src/graphics/backend/LookUpTables.cpp src/graphics/backend/LookUpTables.h
+        src/graphics/backend/MaterialRenderingPass.cpp src/graphics/backend/MaterialRenderingPass.h
+        src/graphics/backend/RendererBackend.cpp src/graphics/backend/RendererBackend.h
+        src/graphics/backend/ShadowMappingPass.cpp src/graphics/backend/ShadowMappingPass.h
+        src/graphics/backend/SkyboxPass.cpp src/graphics/backend/SkyboxPass.h
+        src/graphics/backend/TileClassificationPass.cpp src/graphics/backend/TileClassificationPass.h
+
         src/graphics/buffers/Cubemap.cpp include/graphics/buffers/Cubemap.h
         src/graphics/buffers/FramebufferObject.cpp include/graphics/buffers/FramebufferObject.h
         src/graphics/buffers/HdrTexture.cpp include/graphics/buffers/HdrTexture.h
-        src/graphics/buffers/RenderBufferObject.cpp include/graphics/buffers/RenderBufferObject.h
+        src/graphics/buffers/ShaderStorageBufferObject.cpp include/graphics/buffers/ShaderStorageBufferObject.h
         src/graphics/buffers/Texture.cpp include/graphics/buffers/Texture.h
+        src/graphics/buffers/Texture3DObject.cpp include/graphics/buffers/Texture3DObject.h
         src/graphics/buffers/TextureArrayObject.cpp include/graphics/buffers/TextureArrayObject.h
         src/graphics/buffers/TextureBufferObject.cpp include/graphics/buffers/TextureBufferObject.h
+        src/graphics/buffers/TexturePool.cpp include/graphics/buffers/TexturePool.h
+        src/graphics/buffers/Ubo.cpp include/graphics/buffers/Ubo.h
         src/graphics/postProcessing/PostProcessLayer.cpp include/graphics/postProcessing/PostProcessLayer.h
         src/graphics/shader/ShaderCompilation.cpp src/graphics/shader/ShaderCompilation.h
-        include/graphics/buffers/UniformBufferObject.h
-        resources/shaders/interfaces/CameraBlock.h
         src/graphics/shader/ShaderInformation.cpp src/graphics/shader/ShaderInformation.h
-        resources/shaders/interfaces/DirectionalLightBlock.h
-        resources/shaders/interfaces/PointLightBlock.h
-        resources/shaders/interfaces/SpotlightBlock.h
-        resources/shaders/interfaces/ScreenSpaceReflectionsBlock.h
-        resources/shaders/interfaces/DebugGBufferBlock.h
-        src/graphics/buffers/ShaderStorageBufferObject.cpp include/graphics/buffers/ShaderStorageBufferObject.h
-        src/graphics/buffers/Texture3DObject.cpp include/graphics/buffers/Texture3DObject.h
-        src/graphics/LtcSheenTable.cpp include/graphics/LtcSheenTable.h
-        resources/shaders/interfaces/GBufferFlags.h
-        src/graphics/buffers/Ubo.cpp include/graphics/buffers/Ubo.h
-        src/graphics/backend/Context.h
-        src/graphics/backend/RendererBackend.cpp src/graphics/backend/RendererBackend.h
-        src/graphics/backend/MaterialRenderingPass.cpp src/graphics/backend/MaterialRenderingPass.h
-        src/graphics/backend/TileClassificationPass.cpp src/graphics/backend/TileClassificationPass.h
-        src/graphics/backend/ShadowMappingPass.cpp src/graphics/backend/ShadowMappingPass.h
-        src/graphics/backend/LightShadingPass.cpp src/graphics/backend/LightShadingPass.h
-        src/graphics/backend/SkyboxPass.cpp src/graphics/backend/SkyboxPass.h
-        src/graphics/Skybox.cpp src/graphics/Skybox.h
-        src/graphics/backend/DebugPass.cpp src/graphics/backend/DebugPass.h
-        src/graphics/backend/LookUpTables.cpp src/graphics/backend/LookUpTables.h
-        src/graphics/MaterialData.cpp include/graphics/MaterialData.h
-        src/graphics/buffers/TexturePool.cpp include/graphics/buffers/TexturePool.h
 )
 
 target_include_directories(${GRAPHICS_LIBRARY} PUBLIC
@@ -118,6 +119,7 @@ add_library(${ENGINE_LIBRARY}
         include/engine/rendering/MeshRenderer.h
         include/engine/serialize/ComponentSerializer.h
         include/engine/serialize/Serializer.h
+        include/engine/loader/LoadingTask.h
 
         src/engine/Actor.cpp include/engine/Actor.h
         src/engine/Camera.cpp include/engine/Camera.h
@@ -134,9 +136,12 @@ add_library(${ENGINE_LIBRARY}
         src/engine/event/EventHandler.cpp include/engine/event/EventHandler.h
         src/engine/event/Input.cpp include/engine/event/Input.h
         src/engine/loader/CommonLoader.cpp include/engine/loader/CommonLoader.h
+        src/engine/loader/Disk.cpp include/engine/loader/Disk.h
         src/engine/loader/FileExplorer.cpp include/engine/loader/FileExplorer.h
+        src/engine/loader/Loader.cpp include/engine/loader/Loader.h
         src/engine/loader/ModelDestroyer.cpp include/engine/loader/ModelDestroyer.h
         src/engine/loader/ResourcePool.cpp include/engine/loader/ResourcePool.h
+        src/engine/loader/ThreadPool.cpp include/engine/loader/ThreadPool.h
         src/engine/physics/Colliders.cpp include/engine/physics/Colliders.h
         src/engine/physics/PhysicsCore.cpp include/engine/physics/PhysicsCore.h
         src/engine/physics/PhysicsDebugDrawer.cpp include/engine/physics/PhysicsDebugDrawer.h
@@ -146,6 +151,9 @@ add_library(${ENGINE_LIBRARY}
         src/engine/rendering/Lighting.cpp include/engine/rendering/Lighting.h
         src/engine/rendering/MaterialSubComponent.cpp
         src/engine/rendering/MeshRenderer.cpp
+        src/engine/rendering/UberLayer.cpp include/engine/rendering/UberLayer.h
+        src/engine/rendering/UberMask.cpp include/engine/rendering/UberMask.h
+        src/engine/rendering/UberMaterial.cpp include/engine/rendering/UberMaterial.h
         src/engine/serialize/ComponentSerializer.cpp
         src/engine/serialize/Serializer.cpp
         src/engine/ui/Drawable.cpp include/engine/ui/Drawable.h
@@ -157,21 +165,8 @@ add_library(${ENGINE_LIBRARY}
         src/engine/ui/editor/ResourceFolder.cpp include/engine/ui/editor/ResourceFolder.h
         src/engine/ui/editor/Viewport.cpp include/engine/ui/editor/Viewport.h
 
-
         vendor/imguizmo/ImGuizmo.cpp vendor/imguizmo/ImGuizmo.h
         include/engine/Engine.h
-        src/engine/loader/Loader.cpp
-        include/engine/loader/Loader.h
-        src/engine/rendering/UberMaterial.cpp
-        include/engine/rendering/UberMaterial.h
-        src/engine/rendering/UberLayer.cpp
-        include/engine/rendering/UberLayer.h
-        src/engine/rendering/UberMask.cpp
-        include/engine/rendering/UberMask.h
-        src/engine/loader/Disk.cpp
-        include/engine/loader/Disk.h
-        src/engine/loader/ThreadPool.cpp
-        include/engine/loader/ThreadPool.h
 )
 
 target_include_directories(${ENGINE_LIBRARY} PUBLIC
@@ -314,13 +309,9 @@ add_executable(${PROJECT_NAME}
         src/game/MyTestActor.cpp src/game/MyTestActor.h
         src/game/Rotator.cpp include/game/Rotator.h
         src/game/Spammer.cpp src/game/Spammer.h
-        src/game/ExampleScene.cpp
-        src/game/ExampleScene.h
-        src/game/Lava.cpp
-        src/game/Lava.h
-        include/engine/loader/LoadingTask.h
-        src/game/LookAtActor.cpp
-        src/game/LookAtActor.h
+        src/game/ExampleScene.cpp src/game/ExampleScene.h
+        src/game/Lava.cpp src/game/Lava.h
+        src/game/LookAtActor.cpp src/game/LookAtActor.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
