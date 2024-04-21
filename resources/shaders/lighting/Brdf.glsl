@@ -89,7 +89,7 @@ vec3 evaluateMissingSpecularBrdf(float roughness, vec3 fresnel, float lDotN, flo
 vec3 evaluateSpecularBrdf(float alpha2, vec3 fresnel, float hDotN, float vDotN, float lDotN)
 {
     const float distribution = ggxDistribution(hDotN, alpha2);
-    const float geometry = ggxGeometry2(vDotN, lDotN, alpha2);
+    const float geometry = ggxGeometry2Smith(vDotN, lDotN, alpha2);
 
     return fresnel * distribution * geometry / max(4.f * vDotN * lDotN, MIN_THRESHOLD);
 }
