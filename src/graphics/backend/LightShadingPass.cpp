@@ -333,7 +333,7 @@ namespace graphics
         results.push_back(LightShaderVariant { Shader( { path }, uberShaderDefinitions),
             [](Shader &shader, Context &context, const Lut &lut)
             {
-                // Todo: Bindings here do not match the shader code.
+                // Note: Bindings here do not match the shader code because there are multiple definitions.
                 shader.set("sheenTable", lut.ltcSheenTable.getId(), 5);
                 shader.set("sheenAlbedoLut", lut.sheenDirectionalAlbedo.getId(), 6);
             }

@@ -6,7 +6,9 @@
 layout(binding = 0) uniform sampler2D sheenAlbedoLut;
 layout(binding = 0, r16) writeonly uniform image2D sheenMissingLut;
 
-// todo: add a comment here to explain what's going on and why it's so similar to GgxSpecMissing.comp
+// Sheen missing is used to scale the brdf behind it to make sure that the out going energy isn't greater than the
+// incoming energy.
+// This is in a similar way to GGX Specular missing and uses the way Disney propose.
 float integrateSheenMissing(float nDotV, float roughness)
 {
     const vec3 n = vec3(0.f, 0.f, 1.f);

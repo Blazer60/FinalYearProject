@@ -285,7 +285,6 @@ namespace engine
         mSpotlight.colourIntensity = mColour * mIntensity;
         mSpotlight.position = mActor->getWorldPosition();
         mSpotlight.cosInnerAngle = glm::cos(glm::radians(mInnerAngleDegrees));
-        // todo: Should this just be passed in as a single variable?
         mSpotlight.outerAngle = glm::radians(mOuterAngleDegrees);
         mSpotlight.cosOuterAngle = glm::cos(mSpotlight.outerAngle);
         graphics::renderer->submit(mSpotlight);
