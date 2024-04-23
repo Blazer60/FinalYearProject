@@ -124,8 +124,8 @@ namespace engine
         ImGui::DragFloat("##CameraSpeed", &mEditorCamera.speed);
 
         ImGui::SameLine();
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - 140.f);
-        ImGui::SetNextItemWidth(140.f);
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - 150.f);
+        ImGui::SetNextItemWidth(150.f);
         if (ImGui::BeginCombo("##ViewImage", mViewportImages[mCurrentSelectedImage].name.c_str()))
         {
             for (int i = 0; i < mViewportImages.size(); ++i)

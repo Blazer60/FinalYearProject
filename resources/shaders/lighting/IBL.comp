@@ -72,13 +72,16 @@ void evaluateIblBaseClosure(in out vec3 colour, Ray viewRay, GBuffer gBuffer)
     const vec3 n = gBuffer.normal;
     const float vDotN = saturate(dot(viewRay.direction, n));
 
+#if WHITE_FURNACE_TEST > 0
+    const vec3 fresnel = vec3(1.f);
+#else
     const vec3 fresnel = fresnelSchlick(gBuffer.specular, vDotN);
+#endif
     const vec2 lut = texture(directionalAlbedoLut, vec2(vDotN, gBuffer.roughness)).rg;
     const vec3 specular = (fresnel * lut.x + lut.y);
     const vec3 specMissing = reconstructSpecularMissing(fresnel, vDotN, gBuffer.roughness);
     const vec3 fullSpecular = specular + specMissing;
 
-    // todo: remove dependancy to Brdf.glsl => uniforms are getting too complicated to track.
     const vec3 diffuse = evaluateDiffuseBrdf(gBuffer, fullSpecular);
 
 #if WHITE_FURNACE_TEST > 0
@@ -104,7 +107,11 @@ vec3 evaluateIblTopSpecularClosure(Ray viewRay, GBuffer gBuffer)
     const vec3 n = gBuffer.topNormal;
     const float vDotN = saturate(dot(viewRay.direction, n));
 
+    #if WHITE_FURNACE_TEST > 0
+    const vec3 fresnel = vec3(1.f);
+    #else
     const vec3 fresnel = fresnelSchlick(gBuffer.topSpecular, vDotN);
+    #endif
     const vec2 lut = texture(directionalAlbedoLut, vec2(vDotN, gBuffer.topRoughness)).rg;
     const vec3 specular = (fresnel * lut.x + lut.y);
     const vec3 specMissing = reconstructSpecularMissing(fresnel, vDotN, gBuffer.topRoughness);
@@ -216,12 +223,20 @@ void main()
     if (gBufferIsValid(gBuffer) == 0)
         return;
 
+#if WHITE_FURNACE_TEST > 0
+    const vec3 colour = linearToSRgb(evaluateBxDF(gBuffer, position) - vec3(0.5f));
+
+    if (gBufferHasFlag(gBuffer, GBUFFER_FLAG_TRANSMITTANCE_BIT) == 1)
+    {
+        imageStore(lighting, ivec2(id), vec4(1.f, 0.f, 1.f, 1.f));
+    }
+    else
+    {
+        imageStore(lighting, ivec2(id), vec4(colour, 1.f));
+    }
+#else
     const vec3 colour = imageLoad(lighting, ivec2(id)).rgb;
     const vec3 outColour = colour + camera.exposure * evaluateBxDF(gBuffer, position);
     imageStore(lighting, ivec2(id), vec4(outColour, 1.f));
-
-#if WHITE_FURNACE_TEST > 0
-    imageStore(lighting, ivec2(id), vec4(1.f, 0.f, 1.f, 1.f));
-    return;
 #endif
 }
