@@ -7,6 +7,7 @@ struct LayerData
     vec4 sheenColour;
     vec4 topSpecularColour;
     vec4 transmittanceColour;
+    vec2 uvScaling;
     float roughness;
     float sheenRoughness;
     float topRoughness;
@@ -28,6 +29,9 @@ struct LayerData
     int topThicknessTextureIndex;
     int topCoverageTextureIndex;
     int refractiveIndexTextureIndex;
+
+    float _padding01;
+    float _padding02;
 };
 
 #define PASSTHROUGH_FLAG_DIFFUSE 1

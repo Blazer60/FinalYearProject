@@ -53,38 +53,39 @@ void main()
 
     LayerData material = layers[0];
 
+    const vec2 coordinates = v_uv * material.uvScaling;
     if (material.metallicTextureIndex == -1)
     {
-        gBuffer.diffuse         = sampleColour(material.diffuseColour, v_uv, material.diffuseTextureIndex);
-        gBuffer.specular        = sampleColour(material.specularColour, v_uv, material.specularTextureIndex);
+        gBuffer.diffuse         = sampleColour(material.diffuseColour, coordinates, material.diffuseTextureIndex);
+        gBuffer.specular        = sampleColour(material.specularColour, coordinates, material.specularTextureIndex);
     }
     else
     {
         const vec3 darkColour = vec3(0.04f);
-        const vec3 baseColour = sampleColour(material.diffuseColour, v_uv, material.diffuseTextureIndex);
-        const float metallic = sampleTexture(v_uv, material.metallicTextureIndex).r;
+        const vec3 baseColour = sampleColour(material.diffuseColour, coordinates, material.diffuseTextureIndex);
+        const float metallic = sampleTexture(coordinates, material.metallicTextureIndex).r;
 
         gBuffer.diffuse  = mix(darkColour, baseColour, 1.f - metallic);
         gBuffer.specular = mix(darkColour, baseColour, metallic);
 
     }
 
-    const vec3 rawNormal = sampleNormal(v_normal_ws, v_uv, material.normalTextureIndex, v_tbn_matrix);
-    const float roughness = sampleValue(material.roughness, v_uv, material.roughnessTextureIndex);
+    const vec3 rawNormal = sampleNormal(v_normal_ws, coordinates, material.normalTextureIndex, v_tbn_matrix);
+    const float roughness = sampleValue(material.roughness, coordinates, material.roughnessTextureIndex);
     gBuffer.normal          = normalize(rawNormal);
     gBuffer.roughness       = computeRoughness(rawNormal, roughness);
-    gBuffer.fuzzColour      = sampleColour(material.sheenColour, v_uv, material.sheenTextureIndex);
-    gBuffer.fuzzRoughness   = sampleValue(material.sheenRoughness, v_uv, material.sheenRoughnessTextureIndex);
+    gBuffer.fuzzColour      = sampleColour(material.sheenColour, coordinates, material.sheenTextureIndex);
+    gBuffer.fuzzRoughness   = sampleValue(material.sheenRoughness, coordinates, material.sheenRoughnessTextureIndex);
 
-    gBuffer.topSpecular = sampleColour(material.topSpecularColour, v_uv, material.topSpecularColourTextureIndex);
-    const vec3 rawTopNormal = sampleNormal(v_normal_ws, v_uv, material.topNormalTextureIndex, v_tbn_matrix);
-    const float topRoughness = sampleValue(material.topRoughness, v_uv, material.topRoughnessTextureIndex);
+    gBuffer.topSpecular = sampleColour(material.topSpecularColour, coordinates, material.topSpecularColourTextureIndex);
+    const vec3 rawTopNormal = sampleNormal(v_normal_ws, coordinates, material.topNormalTextureIndex, v_tbn_matrix);
+    const float topRoughness = sampleValue(material.topRoughness, coordinates, material.topRoughnessTextureIndex);
     gBuffer.topNormal = normalize(rawTopNormal);
     gBuffer.topRoughness = computeRoughness(rawTopNormal, topRoughness);
-    gBuffer.transmittance = sampleColour(material.transmittanceColour, v_uv, material.transmittanceColourTextureIndex);
-    gBuffer.topThickness = sampleValue(material.topThickness, v_uv, material.topThicknessTextureIndex);
-    gBuffer.topCoverage = sampleValue(material.topCoverage, v_uv, material.topCoverageTextureIndex);
-    gBuffer.refractiveIndex = sampleValue(material.refractiveIndex, v_uv, material.refractiveIndexTextureIndex);
+    gBuffer.transmittance = sampleColour(material.transmittanceColour, coordinates, material.transmittanceColourTextureIndex);
+    gBuffer.topThickness = sampleValue(material.topThickness, coordinates, material.topThicknessTextureIndex);
+    gBuffer.topCoverage = sampleValue(material.topCoverage, coordinates, material.topCoverageTextureIndex);
+    gBuffer.refractiveIndex = sampleValue(material.refractiveIndex, coordinates, material.refractiveIndexTextureIndex);
 
     // There should be one less mask that there are layers. If not, we can just skip them.
     for (int i = 0; i < min(layers.length() - 1, masks.length()); ++i)
@@ -92,41 +93,42 @@ void main()
         const LayerData material = layers[i + 1];
         const MaskData mask = masks[i];
         const float textureValue = sampleMask(v_uv, mask.textureIndex).r;
+        const vec2 coordinates = v_uv * material.uvScaling;
 
         GBuffer nextGBuffer = gBufferCreate();
 
         if (material.metallicTextureIndex == -1)
         {
-            nextGBuffer.diffuse         = sampleColour(material.diffuseColour, v_uv, material.diffuseTextureIndex);
-            nextGBuffer.specular        = sampleColour(material.specularColour, v_uv, material.specularTextureIndex);
+            nextGBuffer.diffuse         = sampleColour(material.diffuseColour, coordinates, material.diffuseTextureIndex);
+            nextGBuffer.specular        = sampleColour(material.specularColour, coordinates, material.specularTextureIndex);
         }
         else
         {
             const vec3 darkColour = vec3(0.04f);
-            const vec3 baseColour = sampleColour(material.diffuseColour, v_uv, material.diffuseTextureIndex);
-            const float metallic = sampleTexture(v_uv, material.metallicTextureIndex).r;
+            const vec3 baseColour = sampleColour(material.diffuseColour, coordinates, material.diffuseTextureIndex);
+            const float metallic = sampleTexture(coordinates, material.metallicTextureIndex).r;
 
             nextGBuffer.diffuse  = mix(darkColour, baseColour, 1.f - metallic);
             nextGBuffer.specular = mix(darkColour, baseColour, metallic);
 
         }
 
-        const vec3 rawNormal = sampleNormal(v_normal_ws, v_uv, material.normalTextureIndex, v_tbn_matrix);
-        const float roughness = sampleValue(material.roughness, v_uv, material.roughnessTextureIndex);
+        const vec3 rawNormal = sampleNormal(v_normal_ws, coordinates, material.normalTextureIndex, v_tbn_matrix);
+        const float roughness = sampleValue(material.roughness, coordinates, material.roughnessTextureIndex);
         nextGBuffer.normal          = normalize(rawNormal);
         nextGBuffer.roughness       = computeRoughness(rawNormal, roughness);
-        nextGBuffer.fuzzColour      = sampleColour(material.sheenColour, v_uv, material.sheenTextureIndex);
-        nextGBuffer.fuzzRoughness   = sampleValue(material.sheenRoughness, v_uv, material.sheenRoughnessTextureIndex);
+        nextGBuffer.fuzzColour      = sampleColour(material.sheenColour, coordinates, material.sheenTextureIndex);
+        nextGBuffer.fuzzRoughness   = sampleValue(material.sheenRoughness, coordinates, material.sheenRoughnessTextureIndex);
 
-        nextGBuffer.topSpecular = sampleColour(material.topSpecularColour, v_uv, material.topSpecularColourTextureIndex);
-        const vec3 rawTopNormal = sampleNormal(v_normal_ws, v_uv, material.topNormalTextureIndex, v_tbn_matrix);
-        const float topRoughness = sampleValue(material.topRoughness, v_uv, material.topRoughnessTextureIndex);
+        nextGBuffer.topSpecular = sampleColour(material.topSpecularColour, coordinates, material.topSpecularColourTextureIndex);
+        const vec3 rawTopNormal = sampleNormal(v_normal_ws, coordinates, material.topNormalTextureIndex, v_tbn_matrix);
+        const float topRoughness = sampleValue(material.topRoughness, coordinates, material.topRoughnessTextureIndex);
         nextGBuffer.topNormal = normalize(rawTopNormal);
         nextGBuffer.topRoughness = computeRoughness(rawTopNormal, topRoughness);
-        nextGBuffer.transmittance = sampleColour(material.transmittanceColour, v_uv, material.transmittanceColourTextureIndex);
-        nextGBuffer.topThickness = sampleValue(material.topThickness, v_uv, material.topThicknessTextureIndex);
-        nextGBuffer.topCoverage = sampleValue(material.topCoverage, v_uv, material.topCoverageTextureIndex);
-        nextGBuffer.refractiveIndex = sampleValue(material.refractiveIndex, v_uv, material.refractiveIndexTextureIndex);
+        nextGBuffer.transmittance = sampleColour(material.transmittanceColour, coordinates, material.transmittanceColourTextureIndex);
+        nextGBuffer.topThickness = sampleValue(material.topThickness, coordinates, material.topThicknessTextureIndex);
+        nextGBuffer.topCoverage = sampleValue(material.topCoverage, coordinates, material.topCoverageTextureIndex);
+        nextGBuffer.refractiveIndex = sampleValue(material.refractiveIndex, coordinates, material.refractiveIndexTextureIndex);
 
         // Blendables.
         gBuffer.diffuse    = blend(gBuffer.diffuse,   nextGBuffer.diffuse,   textureValue, mask.alpha, mask.operation, (mask.passthroughFlags & PASSTHROUGH_FLAG_DIFFUSE)   > 0);

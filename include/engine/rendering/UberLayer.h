@@ -85,6 +85,8 @@ namespace engine
         float     mTopCoverage = 0.f;
         float     mRefracetiveIndex = 1.5f;
 
+        glm::vec2 mUvScaling = glm::vec2(1.f);
+
 
         graphics::WrapOp mDiffuseWrapOp         = graphics::WrapOp::Repeat;
         graphics::WrapOp mSpecularWrapOp        = graphics::WrapOp::Repeat;

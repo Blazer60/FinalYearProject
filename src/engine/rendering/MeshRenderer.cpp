@@ -71,23 +71,21 @@ namespace engine
         if (ImGui::Button("Change Mesh"))
         {
             const std::string meshPath = openFileDialog();
-            if (const SharedMesh mesh = load::model<StandardVertex>(meshPath); !mesh->empty())
-            {
-                mMeshes = mesh;
-                mMeshPath = meshPath;
-            }
+            const SharedMesh mesh = load::model<StandardVertex>(meshPath);
+            mMeshes = mesh;
+            mMeshPath = meshPath;
         }
         if (ImGui::BeginDragDropTarget())
         {
             if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(resourceModelPayload))
             {
                 const std::filesystem::path path = *static_cast<std::filesystem::path*>(payload->Data);
-                if (const SharedMesh mesh = load::model<StandardVertex>(path); !mesh->empty())
-                {
-                    mMeshes = mesh;
-                    mMeshPath = path.string();
-                }
+                const SharedMesh mesh = load::model<StandardVertex>(path);
+                mMeshes = mesh;
+                mMeshPath = path.string();
             }
+
+            ImGui::EndDragDropTarget();
         }
     }
 

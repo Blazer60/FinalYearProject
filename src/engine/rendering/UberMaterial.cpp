@@ -382,6 +382,8 @@ namespace engine
         layerData.transmittanceColourTextureIndex = mTexturePool.addTexture(*layer->mTransmittanceTexture);
         layerData.refractiveTextureIndex          = mTexturePool.addTexture(*layer->mRefractiveIndexTexture);
 
+        layerData.uvScale = layer->mUvScaling;
+
         mTexturePool.setWrap(layerData.diffuseTextureIndex,             layer->mDiffuseWrapOp);
         mTexturePool.setWrap(layerData.specularTextureIndex,            layer->mSpecularWrapOp);
         mTexturePool.setWrap(layerData.normalTextureIndex,              layer->mNormalWrapOp);
@@ -444,6 +446,8 @@ namespace engine
         layerData.topThicknessTextureIndex        = mTexturePool.addTexture(*layer->mTopThicknessTexture);
         layerData.transmittanceColourTextureIndex = mTexturePool.addTexture(*layer->mTransmittanceTexture);
         layerData.refractiveTextureIndex          = mTexturePool.addTexture(*layer->mRefractiveIndexTexture);
+
+        layerData.uvScale = layer->mUvScaling;
 
         mTexturePool.setWrap(layerData.diffuseTextureIndex,             layer->mDiffuseWrapOp);
         mTexturePool.setWrap(layerData.specularTextureIndex,            layer->mSpecularWrapOp);

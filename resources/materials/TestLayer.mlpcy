@@ -17,12 +17,12 @@ SpecularColour: [0.0726813897, 0.0775038004, 0.0727251396]
 Roughness: 1
 SheenColour: [9.99999975e-05, 9.9989993e-05, 9.99917102e-05]
 SheenRoughness: 0
-TopSpecularColour: [0.0718404055, 0.0718332231, 0.0718353614]
-TopRoughness: 0.225999996
-TransmittanceColour: [0.631725788, 0.631704688, 0.631662607]
+TopSpecularColour: [0.0934838653, 0.0934745148, 0.0934773013]
+TopRoughness: 0.0790000036
+TransmittanceColour: [0.830979526, 0.830914497, 0.830997586]
 TopThickness: 0.0379999988
 TopCoverage: 1
-RefractiveIndex: 1.81700003
+RefractiveIndex: 1.70200002
 DiffuseWrapOp: 0
 SpecularWrapOp: 0
 NormalWrapOp: 0
@@ -35,3 +35,4 @@ TopRoughnessWrapOp: 0
 TopThicknessWrapOp: 0
 TopCoverageWrapOp: 0
 RefractiveIndexWrapOp: 0
+UvScaling: [1, 1]

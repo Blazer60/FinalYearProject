@@ -354,6 +354,14 @@ namespace engine
 
             ImGui::EndTable();
         }
+
+        if (ImGui::DragFloat2("UV Scaling", glm::value_ptr(mUvScaling)))
+        {
+            layerUpdates.push_back([this](graphics::TexturePool &, graphics::LayerData &layer) {
+                layer.uvScale = mUvScaling;
+            });
+        }
+
         const auto name = format::string("%", mPath);
         ImGui::PushTextWrapPos(ImGui::GetContentRegionAvail().x);
         ImGui::TextColored(ImVec4(0.3f, 0.3f, 0.3f, 1.f), name.c_str());
@@ -418,6 +426,8 @@ namespace engine
         out << YAML::Key << "TopThicknessWrapOp"    << YAML::Value << static_cast<unsigned int>(mTopThicknessWrapOp);
         out << YAML::Key << "TopCoverageWrapOp"     << YAML::Value << static_cast<unsigned int>(mTopCoverageWrapOp);
         out << YAML::Key << "RefractiveIndexWrapOp" << YAML::Value << static_cast<unsigned int>(mRefractiveIndexWrapOp);
+
+        out << YAML::Key << "UvScaling"             << YAML::Value << mUvScaling;
         out << YAML::EndMap;
 
         std::ofstream fileOutput(mPath);
@@ -575,6 +585,11 @@ namespace engine
                 v = node.as<glm::vec3>();
         };
 
+        auto tryLoadAsVec2 = [](const YAML::Node &node, glm::vec2 &v) {
+            if (node.IsDefined())
+                v = node.as<glm::vec2>();
+        };
+
         auto tryLoadAsFloat = [](const YAML::Node &node, float &f) {
             if (node.IsDefined())
                 f = node.as<float>();
@@ -626,5 +641,7 @@ namespace engine
         tryLoadAsWrapOp(data["TopThicknessWrapOp"],     mTopThicknessWrapOp);
         tryLoadAsWrapOp(data["TopCoverageWrapOp"],      mTopCoverageWrapOp);
         tryLoadAsWrapOp(data["RefractiveIndexWrapOp"],  mRefractiveIndexWrapOp);
+
+        tryLoadAsVec2(data["UvScaling"], mUvScaling);
     }
 } // engine

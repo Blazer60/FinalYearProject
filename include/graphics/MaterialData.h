@@ -92,6 +92,7 @@ namespace graphics
         glm::vec4 sheenColour = glm::vec4(0.f);
         glm::vec4 topSpecularColour = glm::vec4(0.f, 0.f, 0.f, 1.f);
         glm::vec4 transmittanceColour = glm::vec4(0.f, 0.f, 0.f, 1.f);
+        glm::vec2 uvScale = glm::vec2(1.f);
         float roughness = 0.9f;
         float sheenRoughness = 0.5f;
         float topRoughness = 0.2f;
@@ -114,6 +115,8 @@ namespace graphics
         int32_t topCoverageTextureIndex = -1;
         int32_t refractiveTextureIndex = -1;
 
+        float _padding01 = 0;
+        float _padding02 = 0;
         // A reminder that padding must be multiple floats
         // otherwise glsl will try and align a vector to the first 4 byte boundary.
     };

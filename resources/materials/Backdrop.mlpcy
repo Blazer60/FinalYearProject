@@ -35,3 +35,4 @@ TopRoughnessWrapOp: 0
 TopThicknessWrapOp: 0
 TopCoverageWrapOp: 0
 RefractiveIndexWrapOp: 0
+UvScaling: [1, 1]
