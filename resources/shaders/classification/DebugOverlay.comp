@@ -7,30 +7,22 @@
 uniform int shaderIndex = 0;
 layout(binding = 1, rgba16) writeonly uniform image2D tileOverlay;
 
-int seed = shaderIndex;
-
-int rand()
-{
-    seed = seed * 0x343fd + 0x269ec3;
-    return (seed >> 16) & 32767;
-}
-
-float frand()
-{
-    return float(rand() / 32767.f);
-}
-
 layout(local_size_x = TILE_THREAD_GROUP_SIZE, local_size_y = TILE_THREAD_GROUP_SIZE, local_size_z = 1) in;
 void main()
 {
-    seed = shaderIndex * 31037 + 1103515245;
-
     const uint tileIndex = gl_WorkGroupID.x;
     const uint tileBufferResult = tileBuffers[tileIndex][shaderIndex];
     const uvec2 workGroupId = uvec2(tileBufferResult & 0x0000FFFFu, (tileBufferResult & 0xFFFF0000u) >> 16);
 
     const uvec2 pixelCoord = workGroupId * gl_WorkGroupSize.xy + gl_LocalInvocationID.xy;
 
-    vec4 colour = vec4(frand(), frand(), frand(), 0.2f);
+    const vec3 colours[] = {
+        vec3(0.f, 0.25f, 0.75f), // blue ish
+        vec3(1.f, 1.f, 0.f),     // Yellow
+        vec3(1.f, 0.25f, 0.f),   // Orange
+        vec3(0.f, 1.f, 0.f),     // Bright green
+    };
+
+    const vec4 colour = vec4(colours[shaderIndex % 4], 0.2f);
     imageStore(tileOverlay, ivec2(pixelCoord), colour);
 }
