@@ -16,10 +16,12 @@ uint reduceMaterialMask(uint flags, uint groupIndex)
         orMaterialMask = 0;
 
     groupMemoryBarrier();
+    barrier();
 
     atomicOr(orMaterialMask, flags);
 
     groupMemoryBarrier();
+    barrier();
 
     return orMaterialMask;
 }
