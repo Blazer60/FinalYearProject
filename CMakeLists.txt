@@ -284,6 +284,7 @@ else ()
     set(YAML_BUILD_SHARED_LIBS OFF)
     add_subdirectory(vendor/yaml-cpp)
     set(LIBTYPE "STATIC")
+    set(ALSOFT_UPDATE_BUILD_VERSION OFF)
     add_subdirectory(vendor/openal-soft)
     add_subdirectory(vendor/pellet)
 
