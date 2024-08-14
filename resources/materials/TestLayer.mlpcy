@@ -21,7 +21,7 @@ TopSpecularColour: [0.0934838653, 0.0934745148, 0.0934773013]
 TopRoughness: 0.0790000036
 TransmittanceColour: [0.830979526, 0.830914497, 0.830997586]
 TopThickness: 0.0379999988
-TopCoverage: 1
+TopCoverage: 0
 RefractiveIndex: 1.70200002
 DiffuseWrapOp: 0
 SpecularWrapOp: 0
